@@ -22,3 +22,40 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.ipr
+*.iws
+out/             # 추가: 인텔리제이 빌드 결과물
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+
+### Spring Environment ###
+.env
+application-local.yml
+application-dev.yml
+application-test.yml
+# 중요: 실제 운영용 설정파일도 로컬에서 관리한다면 추가
+application-prod.yml 
+
+### Build Tools (필수 추가) ###
+build/           # Gradle 빌드 결과물
+target/          # Maven 빌드 결과물
+.gradle/         # Gradle 설정 캐시
+bin/             # 컴파일된 바이너리
+
+### Frontend (Thymeleaf/JS 관련) ###
+node_modules/    # JS 라이브러리 사용 시
+.pnp/
+.pnp.js
+
+### Others ###
+*.zip
+*.tar.gz
