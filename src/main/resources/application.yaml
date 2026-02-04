@@ -15,7 +15,7 @@ spring:
     # 본인의 DB 명칭으로 수정하세요 (localhost:3306/DB명)
     url: jdbc:mysql://localhost:3306/encore_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
-    password: root # 본인 MySQL 비밀번호
+    password: Hjoker158!
 
   jpa:
     hibernate:
