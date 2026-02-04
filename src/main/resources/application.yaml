@@ -1,3 +1,58 @@
+server:
+  port: 8080 # 기본 포트지만 명시해주는 것이 정석
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 spring:
   application:
     name: encore
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 본인의 DB 명칭으로 수정하세요 (localhost:3306/DB명)
+    url: jdbc:mysql://localhost:3306/encore_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: root # 본인 MySQL 비밀번호
+
+  jpa:
+    hibernate:
+      ddl-auto: update # 엔티티 수정 시 테이블 자동 반영
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+    display-request-duration: true
+  api-docs:
+    path: /api-docs
+
+# ... 기존 설정들 (server, spring, springdoc 등) 하단에 추가
+
+logging:
+  level:
+    root: info # 기본은 info 레벨로 깔끔하게
+    com.encore.encore: debug # 우리 팀이 짠 코드는 상세하게 기록 (버그 추적용)
+    org.hibernate.SQL: debug # 실행되는 SQL문을 콘솔에 출력
+    org.hibernate.type.descriptor.sql.BasicBinder: trace # 쿼리의 '?'에 들어가는 실제 값을 로그로 확인
+    org.springframework.web: info # 스프링 웹 관련 로그
+
+  pattern:
+    # 일본 현업 스타일: [시간] [로그레벨] [스레드] [클래스명] - 메시지 형식
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+  file:
+    # 프로젝트 루트 폴더의 logs 폴더 안에 'encore_project.log'로 자동 저장
+    name: logs/encore_project.log
+
+  logback:
+    rollingpolicy:
+      # 로그 파일이 너무 커지지 않게 관리 (10MB 넘으면 새로 만들고, 7일치만 보관)
+      max-file-size: 10MB
+      max-history: 7
