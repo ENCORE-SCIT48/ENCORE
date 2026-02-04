@@ -1,101 +1,69 @@
-<<<<<<< HEAD
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-=======
-# Compiled class file
+### Java & Spring Boot ###
 *.class
-
-# Log file
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# 빌드 결과물
+build/
+out/
+target/
+bin/
+.gradle/
 
 ### IntelliJ IDEA ###
 .idea/
 *.iml
-*.ipr
 *.iws
-out/             # 추가: 인텔리제이 빌드 결과물
+*.ipr
+atlassian-ide-plugin.xml
+com_zeroturnaround_jrebel_remoting_xml_state
 
-### OS ###
-.DS_Store
-Thumbs.db
+### VS Code ###
+.vscode/
+.history/
+*.code-workspace
 
-### Logs ###
-*.log
-
-### Spring Environment ###
-.env
-application-local.yml
-application-dev.yml
-application-test.yml
-# 중요: 실제 운영용 설정파일도 로컬에서 관리한다면 추가
-application-prod.yml 
-
-### Build Tools (필수 추가) ###
-build/           # Gradle 빌드 결과물
-target/          # Maven 빌드 결과물
-.gradle/         # Gradle 설정 캐시
-bin/             # 컴파일된 바이너리
-
-### Frontend (Thymeleaf/JS 관련) ###
-node_modules/    # JS 라이브러리 사용 시
+### Frontend & Tools ###
+node_modules/
 .pnp/
 .pnp.js
+.prettierignore   # Prettier 제외 설정파일 (필요시)
 
-### Others ###
-*.zip
-*.tar.gz
->>>>>>> fa90e4f03654d5501b205cbce57fd048c73d69a4
+### OS (System files) ###
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Environment & Secret (보안 중요) ###
+.env
+.env.local
+application.yaml
+
+### 추가 권장 사항 ###
+.classpath
+.project
+.settings/
+*.log
+logs/
+temp/
+# 팀원마다 다른 롬복 설정이나 인텔리제이 내부 캐시 방지
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+
+### VS Code ###
+.vscode/                 # VS Code 설정 폴더 전체 (가장 중요)
+.history/                # 로컬 수정 이력
+*.code-workspace         # 워크스페이스 설정 파일
+.vscode-test/            # VS Code 테스트 결과물
+.factorypath             # VS Code 관련 설정 파일
