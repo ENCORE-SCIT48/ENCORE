@@ -12,16 +12,29 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class User extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
-    @Column(nullable = false, unique = true)
+
+    // 이메일은 보통 50자 내외지만 넉넉하게 100자 설정
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
-    @Column(name = "password_hash", nullable = false)
+
+    // BCrypt 암호화 값(60자)을 저장하기 위해 최소 60자 이상 필요 (100자 권장)
+    @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
-    @Column(nullable = false)
+
+    // 닉네임은 한글 기준 20자 내외로 제한하는 경우가 많음 (50자 설정)
+    @Column(nullable = false, length = 50)
     private String nickname;
-    @Column(nullable = false)
-    private String role;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20) // Enum 이름 길이 고려
+    private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20) // Enum 이름 길이 고려
+    private UserStatus status;
 }
