@@ -1,0 +1,44 @@
+<div th:fragment="profile">
+
+
+  <style>
+    .profile-circle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      background-color: #e5e5e5;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 머리 */
+    .profile-circle::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      width: 14px;
+      height: 14px;
+      background-color: #bdbdbd;
+      border-radius: 50%;
+    }
+
+    /* 몸통 */
+    .profile-circle::after {
+      content: "";
+      position: absolute;
+      bottom: 8px;
+      width: 22px;
+      height: 14px;
+      background-color: #bdbdbd;
+      border-radius: 10px 10px 6px 6px;
+    }
+  </style>
+
+  <div th:fragment="profile">
+    <div class="profile-circle"></div>
+  </div>
+</div>
