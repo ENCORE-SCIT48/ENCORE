@@ -34,5 +34,14 @@ public class ChatPost extends BaseEntity {
     private String title;
     private String content;
     private Integer maxMember;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status;
+
+    public enum Status {
+        OPEN,
+        CLOSED
+    }
+
 }

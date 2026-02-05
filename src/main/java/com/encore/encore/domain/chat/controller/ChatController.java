@@ -1,14 +1,13 @@
 package com.encore.encore.domain.chat.controller;
 
+import com.encore.encore.domain.chat.dto.ChatPostCreateRequestDTO;
 import com.encore.encore.domain.chat.service.ChatService;
-import com.encore.encore.domain.performance.entity.Performance;
+import com.encore.encore.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @Controller
@@ -28,10 +27,20 @@ public class ChatController {
     public String post(
         @RequestParam Long performanceId,
         Model model) {
-        Performance performance = chatService.getPerformanceForChatPost(performanceId);
+        // 공연 조회는 공연상세페이지 구현 후 연결
+        // Performance performance = chatService.getPerformanceForChatPost(performanceId);
 
         model.addAttribute("performanceId", performanceId);
         return "/chat/chatPostForm";
     }
+
+    @PostMapping("/chat/post")
+    public CommonResponse<Void> createChatPost(
+        @RequestBody ChatPostCreateRequestDTO dto
+    ) {
+        chatService.createChatPost(dto);
+        return CommonResponse.ok(null, "성공");
+    }
+
 
 }

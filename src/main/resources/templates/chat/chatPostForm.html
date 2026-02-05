@@ -2,16 +2,20 @@
 <html xmlns:th="thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>채팅방 생성</title>
+  <title>chatPostForm.html</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
 <form th:action="@{/chat/post}" method="post">
-  <input type="text" name="performanceId" th:value="${performanceId}" readonly>
+  <input type="hidden" name="performanceId" th:value="${performanceId}">
+  <label for="performance">공연</label>
+  <input type="text" th:value="${performance.title}" id="performance" readonly>
   <input type="text" name="title" placeholder="제목" required>
   <textarea name="content" placeholder="내용" required></textarea>
-  <input type="number" name="maxMember">
+  <label for="maxMember">모집 인원
+    <input type="number" name="maxMember" id="maxMember"></label>
   <button type="submit">작성하기</button>
 </form>
-
+<script src="/chat/js/chatPostForm.js"></script>
 </body>
 </html>
