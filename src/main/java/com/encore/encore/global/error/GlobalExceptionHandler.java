@@ -18,6 +18,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
+        e.printStackTrace();
         return ResponseEntity
                 .status(ErrorCode.INTERNAL_ERROR.getStatus())
                 .body(ErrorResponse.of(ErrorCode.INTERNAL_ERROR, request.getRequestURI(), "서버 내부 오류가 발생했습니다."));
