@@ -21,5 +21,5 @@ public class HostProfile extends BaseEntity {
     private User user;
     private String organizationName;
     private String businessNumber;
-    private Boolean verified;
+
 }

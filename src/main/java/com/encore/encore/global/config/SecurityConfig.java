@@ -23,21 +23,28 @@ public class SecurityConfig {
             // 1. CSRF 보호 비활성화 (개발 단계나 API 위주일 때 주로 끕니다. 운영 시에는 고려 필요)
             .csrf(csrf -> csrf.disable())
 
-            // 2. 접근 권한 설정 (누가 어디에 들어올 수 있는지)
+            // 3. 개발용 임시로 모든 요청에 대해 인증 없이 접근 허용
             .authorizeHttpRequests(auth -> auth
-                // 회원가입, 메인 페이지, 정적 리소스(CSS/JS)는 누구나 접근 가능
-                .requestMatchers("/", "/join", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-                // 아까 언급한 Swagger 관련 경로도 열어줘야 합니다.
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // 그 외 모든 요청은 로그인한 사용자만 접근 가능
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
+//            // 2. 접근 권한 설정 (누가 어디에 들어올 수 있는지)
+//            .authorizeHttpRequests(auth -> auth
+//                // 회원가입, 메인 페이지, 정적 리소스(CSS/JS)는 누구나 접근 가능
+//                .requestMatchers("/", "/join", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+//                // 아까 언급한 Swagger 관련 경로도 열어줘야 합니다.
+//                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//                // 그 외 모든 요청은 로그인한 사용자만 접근 가능
+//                .anyRequest().authenticated()
+//            )
 
-            // 3. 로그인 설정
             .formLogin(form -> form
-                .loginPage("/login")           // 커스텀 로그인 페이지 경로
-                .defaultSuccessUrl("/")        // 로그인 성공 시 이동할 페이지
-                .usernameParameter("email")    // 엔티티에 email로 되어 있으므로 설정
+                .loginPage("/auth/login")
+                .loginProcessingUrl("/login")
+                .usernameParameter("email")
+                .defaultSuccessUrl("/", true)
+                .failureHandler((request, response, exception) -> {
+                    response.sendRedirect("/login?error=true");
+                })
                 .permitAll()
             )
 
