@@ -1,5 +1,5 @@
+<!-- profile fragment -->
 <div th:fragment="profile">
-
 
   <style>
     .profile-circle {
@@ -10,27 +10,26 @@
       height: 48px;
       background-color: #e5e5e5;
       border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    /* 머리 */
     .profile-circle::before {
       content: "";
       position: absolute;
       top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
       width: 14px;
       height: 14px;
       background-color: #bdbdbd;
       border-radius: 50%;
     }
 
-    /* 몸통 */
     .profile-circle::after {
       content: "";
       position: absolute;
       bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
       width: 22px;
       height: 14px;
       background-color: #bdbdbd;
@@ -38,7 +37,5 @@
     }
   </style>
 
-  <div th:fragment="profile">
-    <div class="profile-circle"></div>
-  </div>
+  <div class="profile-circle"></div>
 </div>
