@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공연 리스트</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        th:href="@{/css/performance/list.css}"
+    >
+</head>
+<body>
+<div class="app-wrapper">
+    <div class="top-slot"></div>
+
+    <main class="app-main">
+        <!-- 검색창(부트스트랩 navbar에서 form만 가져옴) -->
+        <form
+            class="d-flex mb-3"
+            role="search"
+            onsubmit="return false;"
+        >
+            <input
+                id="keyword"
+                class="form-control me-2"
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+            >
+            <button
+                id="searchBtn"
+                class="btn btn-secondary"
+                type="button"
+            >
+                Search
+            </button>
+        </form>
+
+        <!-- 핫한 공연 캐러셀(박스) + 공연등록(공연자만) -->
+        <section class="hot-carousel mb-3">
+            <div class="hot-carousel-inner">
+                <span class="hot-title">핫한 공연들 캐러셀</span>
+            </div>
+
+            <div class="text-end mt-2">
+                <a
+                    class="btn btn-sm btn-secondary"
+                    th:if="${#authorization.expression('hasRole(''PERFORMER'')')}"
+                    th:href="@{/performances/new}"
+                >
+                    공연등록
+                </a>
+            </div>
+        </section>
+
+        <!-- 탭 -->
+        <nav class="category-tabs mb-3">
+            <button
+                class="tab-btn active"
+                data-category=""
+                type="button"
+            >
+                전체
+            </button>
+            <button
+                class="tab-btn"
+                data-category="BAND"
+                type="button"
+            >
+                밴드
+            </button>
+            <button
+                class="tab-btn"
+                data-category="MUSICAL"
+                type="button"
+            >
+                뮤지컬
+            </button>
+            <button
+                class="tab-btn"
+                data-category="PLAY"
+                type="button"
+            >
+                연극
+            </button>
+            <button
+                class="tab-btn"
+                data-filter="BOOKMARK"
+                type="button"
+            >
+                북마크리스트
+            </button>
+            <button
+                class="tab-btn"
+                data-filter="VIEWED"
+                type="button"
+            >
+                본공연리스트
+            </button>
+        </nav>
+
+        <!-- 그리드 자리(초기 더미 렌더링) -->
+        <div
+            id="gridWrap"
+            th:replace="~{performance/grid :: grid}"
+        ></div>
+    </main>
+
+    <div class="bottom-slot"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script th:src="@{/js/performance/list.js}"></script>
+</body>
+</html>
