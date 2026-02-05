@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatPostCreateRequestDto {
+
     private Long performanceId;
     @NotBlank(message = "제목은 필수 입니다.")
     @Size(min = 3, max = 100, message = "제목은 3자 이상 100자 이하로 입력해야 합니다.")
@@ -24,6 +25,7 @@ public class ChatPostCreateRequestDto {
     private Long hostId;
     private Long profileId;
     private Long performerId;
+
 }
 
 

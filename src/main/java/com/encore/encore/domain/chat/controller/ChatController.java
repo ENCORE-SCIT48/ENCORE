@@ -1,14 +1,15 @@
 package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.dto.ChatPostCreateRequestDto;
+import com.encore.encore.domain.chat.dto.ChatPostResponseDto;
 import com.encore.encore.domain.chat.dto.ChatPostUpdateRequestDto;
 import com.encore.encore.domain.chat.service.ChatService;
+import com.encore.encore.global.common.CommonResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,32 +25,58 @@ public class ChatController {
      * @param dto
      * @return
      */
+    /**
+     * @PostMapping("/performance/{performanceId}/chat/post") public String createChatPost(
+     * @PathVariable Long performanceId,
+     * @Valid ChatPostCreateRequestDto dto,
+     * BindingResult bindingResult,
+     * Model model
+     * /*TODO:프로필 생성 기능 완성 후 구현
+     * @AuthenticationPrincipal CustomUserDetails userDetails
+     * ) {
+     * log.debug("[받은 데이터 확인]");
+     * model.addAttribute("performanceId", performanceId);
+     * log.info("채팅방 생성 요청 시작 - performanceId: {}, dto: {}", performanceId, dto);
+     * <p>
+     * if (bindingResult.hasErrors()) {
+     * log.error("검증 에러 발생 - 필드 에러 개수: {}", bindingResult.getErrorCount());
+     * return "chat/chatPostForm";
+     * }
+     * try {
+     * chatService.createChatPostAndRoom(dto);
+     * log.info("채팅방 생성 성공 - title: {}", dto.getTitle());
+     * return "redirect:/performance/" + performanceId + "/chat/list";
+     * } catch (Exception e) {
+     * log.error("채팅방 생성 중 서버 에러 발생: ", e);
+     * return "error/500";
+     * }
+     * }
+     */
     @PostMapping("/performance/{performanceId}/chat/post")
-    public String createChatPost(
+    @ResponseBody
+    public CommonResponse<ChatPostResponseDto> createChatPost(
         @PathVariable Long performanceId,
-        @Valid ChatPostCreateRequestDto dto,
-        BindingResult bindingResult,
-        Model model
-        /*TODO:프로필 생성 기능 완성 후 구현
-        @AuthenticationPrincipal CustomUserDetails userDetails*/
-    ) {
-        log.debug("[받은 데이터 확인]");
-        model.addAttribute("performanceId", performanceId);
-        log.info("채팅방 생성 요청 시작 - performanceId: {}, dto: {}", performanceId, dto);
+        @Valid @RequestBody ChatPostCreateRequestDto dto,
+        BindingResult bindingResult
+        /* TODO: @AuthenticationPrincipal CustomUserDetails userDetails */) {
 
         if (bindingResult.hasErrors()) {
-            log.error("검증 에러 발생 - 필드 에러 개수: {}", bindingResult.getErrorCount());
-            return "chat/chatPostForm";
+            String errorMsg = bindingResult.getAllErrors().stream()
+                .map(e -> e.getDefaultMessage())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("유효성 검사 실패");
+            return CommonResponse.ok(null, errorMsg); // fail 없이 ok만 쓰는 구조
         }
+
         try {
-            chatService.createChatPostAndRoom(dto);
-            log.info("채팅방 생성 성공 - title: {}", dto.getTitle());
-            return "redirect:/performance/" + performanceId + "/chat/list";
+            // 여기서 타입 변경!
+            ChatPostResponseDto result = chatService.createChatPostAndRoom(dto);
+            return CommonResponse.ok(result, "채팅방 생성 완료");
         } catch (Exception e) {
-            log.error("채팅방 생성 중 서버 에러 발생: ", e);
-            return "error/500";
+            return CommonResponse.ok(null, "채팅방 생성 중 서버 에러: " + e.getMessage());
         }
     }
+
 
     /**
      * 글 논리삭제

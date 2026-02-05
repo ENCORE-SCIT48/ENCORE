@@ -1,9 +1,6 @@
 package com.encore.encore.domain.chat.service;
 
-import com.encore.encore.domain.chat.dto.ChatPostCreateRequestDto;
-import com.encore.encore.domain.chat.dto.ChatPostDetailResponseDto;
-import com.encore.encore.domain.chat.dto.ChatPostListResponseDto;
-import com.encore.encore.domain.chat.dto.ChatPostUpdateRequestDto;
+import com.encore.encore.domain.chat.dto.*;
 import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
@@ -67,53 +64,92 @@ public class ChatService {
      *
      * @param dto
      */
-    public void createChatPostAndRoom(ChatPostCreateRequestDto dto) {
-        log.info("채팅 게시글 및 방 생성 프로세스 시작 - 제목: {}", dto.getTitle());
+    /**
+     * public void createChatPostAndRoom(ChatPostCreateRequestDto dto) {
+     * log.info("채팅 게시글 및 방 생성 프로세스 시작 - 제목: {}", dto.getTitle());
+     * <p>
+     * try {
+     * ChatPost.ChatPostBuilder builder = ChatPost.builder()
+     * .title(dto.getTitle())
+     * .content(dto.getContent())
+     * .maxMember(dto.getMaxMember())
+     * .currentMember(0)
+     * .status(ChatPost.Status.OPEN);
+     * <p>
+     * // 프로필 세팅 및 로그 기록
+     * if (dto.getHostId() != null) {
+     * log.info("작성자 타입: Host (ID: {})", dto.getHostId());
+     * builder.host(hostProfileRepository.findById(dto.getHostId())
+     * .orElseThrow(() -> new EntityNotFoundException("HostProfile 없음: " + dto.getHostId())));
+     * } else if (dto.getProfileId() != null) {
+     * log.info("작성자 타입: User (ID: {})", dto.getProfileId());
+     * builder.profile(userProfileRepository.findById(dto.getProfileId())
+     * .orElseThrow(() -> new EntityNotFoundException("UserProfile 없음: " + dto.getProfileId())));
+     * } else if (dto.getPerformerId() != null) {
+     * log.info("작성자 타입: Performer (ID: {})", dto.getPerformerId());
+     * builder.performer(performerProfileRepository.findById(dto.getPerformerId())
+     * .orElseThrow(() -> new EntityNotFoundException("PerformerProfile 없음: " + dto.getPerformerId())));
+     * } else {
+     * log.error("채팅방 생성 실패: 작성자 프로필 정보가 모두 비어있음");
+     * throw new IllegalArgumentException("Host, User, Performer 중 하나는 반드시 필요합니다.");
+     * }
+     * <p>
+     * ChatPost chatPost = builder.build();
+     * chatPost.addParticipant(); // 인원수 0 -> 1 증가
+     * chatPostRepository.save(chatPost);
+     * log.info("ChatPost 저장 성공 - 생성된 PostID: {}", chatPost.getId());
+     * <p>
+     * ChatRoom chatRoom = ChatRoom.builder()
+     * .chatPost(chatPost)
+     * .roomType(ChatRoom.RoomType.CHAT)
+     * .build();
+     * <p>
+     * chatRoomRepository.save(chatRoom);
+     * log.info("ChatRoom 생성 성공 - 생성된 RoomID: {}", chatRoom.getRoomId());
+     * <p>
+     * } catch (Exception e) {
+     * log.error("채팅방 생성 중 서버 오류 발생", e);
+     * throw e;
+     * }
+     * }
+     */
 
-        try {
-            ChatPost.ChatPostBuilder builder = ChatPost.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .maxMember(dto.getMaxMember())
-                .currentMember(0)
-                .status(ChatPost.Status.OPEN);
+    public ChatPostResponseDto createChatPostAndRoom(ChatPostCreateRequestDto dto) {
 
-            // 프로필 세팅 및 로그 기록
-            if (dto.getHostId() != null) {
-                log.info("작성자 타입: Host (ID: {})", dto.getHostId());
-                builder.host(hostProfileRepository.findById(dto.getHostId())
-                    .orElseThrow(() -> new EntityNotFoundException("HostProfile 없음: " + dto.getHostId())));
-            } else if (dto.getProfileId() != null) {
-                log.info("작성자 타입: User (ID: {})", dto.getProfileId());
-                builder.profile(userProfileRepository.findById(dto.getProfileId())
-                    .orElseThrow(() -> new EntityNotFoundException("UserProfile 없음: " + dto.getProfileId())));
-            } else if (dto.getPerformerId() != null) {
-                log.info("작성자 타입: Performer (ID: {})", dto.getPerformerId());
-                builder.performer(performerProfileRepository.findById(dto.getPerformerId())
-                    .orElseThrow(() -> new EntityNotFoundException("PerformerProfile 없음: " + dto.getPerformerId())));
-            } else {
-                log.error("채팅방 생성 실패: 작성자 프로필 정보가 모두 비어있음");
-                throw new IllegalArgumentException("Host, User, Performer 중 하나는 반드시 필요합니다.");
-            }
+        ChatPost.ChatPostBuilder builder = ChatPost.builder()
+            .title(dto.getTitle())
+            .content(dto.getContent())
+            .maxMember(dto.getMaxMember())
+            .currentMember(0)
+            .status(ChatPost.Status.OPEN);
 
-            ChatPost chatPost = builder.build();
-            chatPost.addParticipant(); // 인원수 0 -> 1 증가
-            chatPostRepository.save(chatPost);
-            log.info("ChatPost 저장 성공 - 생성된 PostID: {}", chatPost.getId());
-
-            ChatRoom chatRoom = ChatRoom.builder()
-                .chatPost(chatPost)
-                .roomType(ChatRoom.RoomType.CHAT)
-                .build();
-
-            chatRoomRepository.save(chatRoom);
-            log.info("ChatRoom 생성 성공 - 생성된 RoomID: {}", chatRoom.getRoomId());
-
-        } catch (Exception e) {
-            log.error("채팅방 생성 중 서버 오류 발생", e);
-            throw e;
+        if (dto.getHostId() != null) {
+            builder.host(hostProfileRepository.findById(dto.getHostId())
+                .orElseThrow(() -> new EntityNotFoundException("HostProfile 없음: " + dto.getHostId())));
+        } else if (dto.getProfileId() != null) {
+            builder.profile(userProfileRepository.findById(dto.getProfileId())
+                .orElseThrow(() -> new EntityNotFoundException("UserProfile 없음: " + dto.getProfileId())));
+        } else if (dto.getPerformerId() != null) {
+            builder.performer(performerProfileRepository.findById(dto.getPerformerId())
+                .orElseThrow(() -> new EntityNotFoundException("PerformerProfile 없음: " + dto.getPerformerId())));
+        } else {
+            throw new IllegalArgumentException("Host, User, Performer 중 하나는 반드시 필요합니다.");
         }
+
+        ChatPost chatPost = builder.build();
+        chatPost.addParticipant(); // 인원수 0 -> 1 증가
+        chatPostRepository.save(chatPost);
+
+        ChatRoom chatRoom = ChatRoom.builder()
+            .chatPost(chatPost)
+            .roomType(ChatRoom.RoomType.CHAT)
+            .build();
+        chatRoomRepository.save(chatRoom);
+
+        // ChatPostResponseDto 변환 후 반환
+        return ChatPostResponseDto.from(chatPost);
     }
+
 
     /**
      * 공연별 채팅방 리스트 출력
@@ -160,7 +196,6 @@ public class ChatService {
                 .maxMember(chatPost.getMaxMember())
                 .status(chatPost.getStatus());
 
-        // 🔥 작성자 정보 세팅
         if (chatPost.getHost() != null) {
             builder
                 .writeProfileId(chatPost.getHost().getHostId())
