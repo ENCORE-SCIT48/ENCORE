@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>chatPostForm.html</title>
+  <title>chatPostUpdateForm.html</title>
 </head>
 
 <body>
@@ -11,14 +11,15 @@
 <nav class="navbar navbar-dark bg-primary fixed-top">
   <div class="container-fluid">
     <button id="backBtn" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
-    <span class="navbar-brand mb-0 h1">CHAT_CREATE</span>
     <div></div>
   </div>
 </nav>
 
-<!-- 채팅방 수정ㄴ 폼 -->
+<!-- 채팅방 생성 폼 -->
 <div class="content-wrapper">
-  <form th:action="@{/performance/{performanceId}/chat/post(performanceId=${performanceId})}" method="post">
+  <form
+    th:action="@{/performance/{performanceId}/chat/{chatId}/update(performanceId=${performanceId},
+     chatId=${chatPost.id})}" method="post">
     <input type="hidden" name="performanceId" th:value="${performanceId}">
 
     <div class="mb-3">
@@ -28,21 +29,16 @@
 
     <div class="mb-3">
       <label for="title">제목</label>
-      <input type="text" name="title" id="title" class="form-control"
+      <input type="text" name="title" id="title" th:value="${chatPost.title}" class="form-control"
              placeholder="제목을 입력하세요" required>
     </div>
 
     <div class="mb-3">
       <label for="content">내용</label>
-      <textarea name="content" id="content" class="form-control" rows="5"
+      <textarea name="content" id="content" class="form-control" th:text="${chatPost.content}" rows="5"
                 placeholder="내용을 입력하세요" required></textarea>
     </div>
 
-    <div class="mb-3">
-      <label for="maxMember">모집 인원</label>
-      <input type="number" name="maxMember" id="maxMember" class="form-control"
-             min="1">
-    </div>
 
     <button type="submit" class="btn btn-primary btn-create">작성하기</button>
   </form>

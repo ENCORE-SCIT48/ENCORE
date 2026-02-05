@@ -7,6 +7,7 @@ import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "chat_post")
@@ -15,6 +16,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Where(clause = "is_deleted = false")
 public class ChatPost extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +36,10 @@ public class ChatPost extends BaseEntity {
     private String title;
     private String content;
     private Integer maxMember;
-
+    @Column(nullable = false)
+    private Integer currentMember;
+    @Column(nullable = false)
+    private boolean isDeleted = false;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
@@ -42,6 +47,17 @@ public class ChatPost extends BaseEntity {
     public enum Status {
         OPEN,
         CLOSED
+    }
+
+    public void addParticipant() {
+        if (this.currentMember >= this.maxMember) {
+            throw new IllegalStateException("정원이 꽉 찼습니다.");
+        }
+        currentMember++;
+    }
+
+    public void removeParticipant() {
+        if (currentMember > 0) currentMember--;
     }
 
 }

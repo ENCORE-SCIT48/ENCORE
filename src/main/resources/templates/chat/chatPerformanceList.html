@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script th:src="@{/chat/js/chatPerformanceList.js}"></script>
+</head>
+<body>
+<!-- 공연 상세페이지에서 글쓰기 버튼 -->
+
+<!-- 상단 헤더 -->
+<nav class="navbar navbar-dark bg-primary fixed-top">
+  <div class="container-fluid">
+    <button id="backBtn" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
+    <span class="navbar-brand mb-0 h1">공연별 채팅방</span>
+    <button id="writeBtn" th:data-performance-id="${performanceId}">글쓰기</button>
+    <div></div>
+  </div>
+</nav>
+
+<!-- 채팅방 리스트 -->
+<div class="chat-list-wrapper" style="margin-top: 70px;">
+  <div th:if="${#lists.isEmpty(chatPostList)}">
+    채팅방이 존재하지 않습니다.
+  </div>
+  <div th:each="chatPost : ${chatPostList}"
+       class="chat-card"
+       th:data-id="${chatPost.id}"
+       th:data-performance-id="${performanceId}">
+    <div class="chat-title" th:text="${chatPost.title}">채팅방 제목</div>
+  </div>
+
+  <div class="chat-meta">
+      상태: <span th:text="${chatPost?.status ?: 'CLOSED'}">OPEN</span>
+      모집 인원: <span th:text="${chatPost?.maxMember ?: 0}">0</span>명
+    </div>
+  </div>
+</div>
+
+
+<!-- 하단 네비게이션 -->
+<div class="bottom-nav">
+  <button type="button" class="btn btn-link" id="btnParty">파티모집</button>
+  <button type="button" class="btn btn-link" id="btnEmergency">긴급모집</button>
+  <button type="button" class="btn btn-link active" id="btnHome">홈</button>
+  <button type="button" class="btn btn-link" id="btnDM">DM</button>
+  <button type="button" class="btn btn-link" id="btnChatRoom">채팅방</button>
+</div>
+
+</body>
+</html>

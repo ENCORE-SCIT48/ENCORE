@@ -1,5 +1,6 @@
 package com.encore.encore.domain.chat.dto;
 
+import com.encore.encore.domain.chat.entity.ChatPost;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatPostCreateRequestDTO {
-    private Long performanceId;
+public class ChatPostUpdateRequestDto {
     private String title;
     private String content;
-    private Integer maxMember;
+    private ChatPost.Status status;
 }
-
-
