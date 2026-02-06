@@ -6,6 +6,9 @@ import com.encore.encore.global.common.CommonResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -83,4 +86,34 @@ public class ChatController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.ok(result, "수정이 완료되었습니다."));
     }
+
+    /**
+     * [설명] 특정 공연에 종속된 채팅방 목록을 페이징하여 조회합니다.
+     *
+     * @param performanceId 공연 ID
+     * @param searchType    검색 타입 (title, titleContent)
+     * @param keyword       검색어
+     * @param onlyOpen      모집 중인 방만 보기 여부
+     * @param pageable      페이징 정보
+     * @return 페이징 처리된 채팅방 목록
+     */
+    @ResponseBody
+    @GetMapping("/api/performance/{performanceId}/list")
+    public CommonResponse<Slice<ResponseListChatPostDto>> getChatList(
+        @PathVariable Long performanceId,
+        @RequestParam(defaultValue = "title") String searchType,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(defaultValue = "true") boolean onlyOpen,
+        @PageableDefault(size = 10) Pageable pageable) {
+
+        log.info("채팅방 목록 조회 시작 - performanceId: {}, keyword: {}, onlyOpen: {}", performanceId, keyword, onlyOpen);
+
+        Slice<ResponseListChatPostDto> result = chatService.getChatPostList(
+            performanceId, searchType, keyword, onlyOpen, pageable
+        );
+
+        log.info("채팅방 목록 조회 완료 - 반환 데이터 수: {}", result.getContent().size());
+        return CommonResponse.ok(result, "채팅방 목록 조회가 완료되었습니다.");
+    }
+
 }

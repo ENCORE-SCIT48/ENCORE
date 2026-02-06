@@ -1,52 +1,80 @@
 <!DOCTYPE html>
-<html xmlns:th="thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>공연 채팅 리스트</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/chat.css}">
+
+  <!-- JS -->
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script th:src="@{/chat/js/chatPerformanceList.js}"></script>
 </head>
+
 <body>
-<!-- 공연 상세페이지에서 글쓰기 버튼 -->
+<div class="app-container">
 
-<!-- 상단 헤더 -->
-<nav class="navbar navbar-dark bg-primary fixed-top">
-  <div class="container-fluid">
-    <button id="backBtn" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
-    <span class="navbar-brand mb-0 h1">공연별 채팅방</span>
-    <button id="writeBtn" th:data-performance-id="${performanceId}">글쓰기</button>
-    <div></div>
-  </div>
-</nav>
-
-<!-- 채팅방 리스트 -->
-<div class="chat-list-wrapper" style="margin-top: 70px;">
-  <div th:if="${#lists.isEmpty(chatPostList)}">
-    채팅방이 존재하지 않습니다.
-  </div>
-  <div th:each="chatPost : ${chatPostList}"
-       class="chat-card"
-       th:data-id="${chatPost.id}"
-       th:data-performance-id="${performanceId}">
-    <div class="chat-title" th:text="${chatPost.title}">채팅방 제목</div>
-  </div>
-
-  <div class="chat-meta">
-      상태: <span th:text="${chatPost?.status ?: 'CLOSED'}">OPEN</span>
-      모집 인원: <span th:text="${chatPost?.maxMember ?: 0}">0</span>명
+  <!-- 🔹 헤더 (고정) -->
+  <header class="app-header">
+    <div class="d-flex align-items-center gap-2">
+      <button class="back-btn" onclick="history.back()">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h3 class="app-title" th:text="${performanceTitle}">공연 제목</h3>
     </div>
-  </div>
+
+    <a th:href="@{/performance/{id}/chat/post(id=${performanceId})}"
+       class="write-btn">
+      <i class="fa-solid fa-plus"></i>
+    </a>
+  </header>
+
+  <!-- 🔹 콘텐츠 (스크롤 영역) -->
+  <main class="app-content">
+
+    <!-- 검색 영역 -->
+    <div class="search-container">
+      <div class="input-group">
+        <select class="form-select" id="searchType">
+          <option value="title">제목</option>
+          <option value="titleContent">제목+내용</option>
+        </select>
+        <input type="text" id="keyword" class="form-control" placeholder="검색어 입력">
+        <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+
+      <div class="form-check form-switch mt-2">
+        <input class="form-check-input" type="checkbox" id="excludeClosed" checked>
+        <label class="form-check-label" for="excludeClosed">
+          모집 중인 방만 보기
+        </label>
+      </div>
+    </div>
+
+    <!-- 글로벌 채팅방 -->
+
+    <div th:if="${performanceAllChatPost != null}" class="chat-global-section"
+         th:onclick="|location.href='/performance/${performanceId}/chat/${performanceAllChatPost.id}'|">
+      <span th:text="${performanceTitle} + ' 전체 채팅방'">전체 채팅방</span>
+    </div>
+
+
+    <p class="section-label">커뮤니티 채팅방</p>
+
+    <!-- 채팅 리스트 -->
+    <div id="chat-list-container"
+         th:attr="data-performance-id=${performanceId}">
+      <!-- JS로 append -->
+    </div>
+
+  </main>
+
 </div>
 
-
-<!-- 하단 네비게이션 -->
-<div class="bottom-nav">
-  <button type="button" class="btn btn-link" id="btnParty">파티모집</button>
-  <button type="button" class="btn btn-link" id="btnEmergency">긴급모집</button>
-  <button type="button" class="btn btn-link active" id="btnHome">홈</button>
-  <button type="button" class="btn btn-link" id="btnDM">DM</button>
-  <button type="button" class="btn btn-link" id="btnChatRoom">채팅방</button>
-</div>
-
+<script th:src="@{/js/chat/chatPerformanceList.js}"></script>
 </body>
 </html>

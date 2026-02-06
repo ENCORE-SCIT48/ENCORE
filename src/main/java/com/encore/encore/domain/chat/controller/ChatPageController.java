@@ -1,17 +1,18 @@
 package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.dto.ResponseDetailChatPostDto;
-import com.encore.encore.domain.chat.dto.ResponseLisChatPosttDto;
+import com.encore.encore.domain.chat.dto.ResponseListChatPostDto;
+import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -43,30 +44,55 @@ public class ChatPageController {
      * @param performanceId
      * @param model         목록 리스트 저장
      * @return chat/chatPerformanceList.html 이동
+     * @GetMapping("/performance/{performanceId}/chat/list") public String chatList(
+     * @PathVariable Long performanceId,
+     * Model model
+     * ) {
+     * log.info("공연별 채팅방 목록 조회 시작 - performanceId: {}", performanceId);
+     * <p>
+     * try {
+     * List<ResponseListChatPostDto> chatPostList = chatService.getChatPostsByPerformance(performanceId);
+     * if (chatPostList == null) {
+     * chatPostList = new ArrayList<>();
+     * }
+     * <p>
+     * log.info("채팅방 목록 조회 완료 - 조회된 개수: {}", chatPostList.size());
+     * model.addAttribute("chatPostList", chatPostList);
+     * model.addAttribute("performanceId", performanceId);
+     * return "chat/chatPerformanceList";
+     * <p>
+     * } catch (Exception e) {
+     * log.error("채팅방 목록 조회 중 예외 발생! performanceId: {}", performanceId, e);
+     * return "redirect:/";
+     * }
+     * }
+     */
+
+    /**
+     * 공연 별 채팅방 목록 화면 진입
+     *
+     * @param performanceId
+     * @param model
+     * @param pageable
+     * @return
      */
     @GetMapping("/performance/{performanceId}/chat/list")
-    public String chatList(
-        @PathVariable Long performanceId,
-        Model model
-    ) {
-        log.info("공연별 채팅방 목록 조회 시작 - performanceId: {}", performanceId);
+    public String chatListPage(@PathVariable Long performanceId, Model model,
+                               @PageableDefault(size = 10) Pageable pageable) {
+        log.info("채팅 목록 페이지 진입 - performanceId: {}", performanceId);
 
-        try {
-            List<ResponseLisChatPosttDto> chatPostList = chatService.getChatPostsByPerformance(performanceId);
-            if (chatPostList == null) {
-                chatPostList = new ArrayList<>();
-            }
+        ChatPost performanceAllChatPost = chatService.findPerformanceAllChatPost(performanceId);
 
-            log.info("채팅방 목록 조회 완료 - 조회된 개수: {}", chatPostList.size());
-            model.addAttribute("chatPostList", chatPostList);
-            model.addAttribute("performanceId", performanceId);
-            return "chat/chatPerformanceList";
+        model.addAttribute("performanceAllChatPost", performanceAllChatPost);
+        model.addAttribute("performanceId", performanceId);
+        model.addAttribute("performanceTitle", chatService.getPerformanceTitle(performanceId));
 
-        } catch (Exception e) {
-            log.error("채팅방 목록 조회 중 예외 발생! performanceId: {}", performanceId, e);
-            return "redirect:/";
-        }
+        Slice<ResponseListChatPostDto> chatList = chatService.getChatPostList(performanceId, "title", null, false, pageable);
+        model.addAttribute("chatList", chatList.getContent());
+
+        return "chat/chatPerformanceList";
     }
+
 
     /**
      * 채팅방 글 상세사항 조회

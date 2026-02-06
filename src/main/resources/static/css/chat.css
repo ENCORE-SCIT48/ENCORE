@@ -1,0 +1,119 @@
+/* =========================
+   Web App Fixed Layout
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #f5f5f5;
+  overflow: hidden; /* 전체 스크롤 차단 */
+}
+
+/* 웹앱 컨테이너 */
+.app-container {
+  max-width: 430px;           /* 모바일 기준 고정 */
+  height: 100vh;
+  margin: 0 auto;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* 상단 헤더 */
+.app-header {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  z-index: 10;
+}
+
+/* 스크롤 영역 */
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+}
+
+
+:root {
+    --main-red: #e74c3c;
+    --sub-dark: #333333;
+}
+
+.search-container { padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
+.form-check-label { font-size: 0.85rem; color: var(--sub-dark); cursor: pointer; }
+
+/* 전체 채팅방 */
+.chat-global-section {
+    background-color: #f1f3f5;
+    padding: 18px;
+    text-align: center;
+    font-weight: bold;
+    color: var(--sub-dark);
+    cursor: pointer;
+    border-bottom: 4px solid #e9ecef;
+}
+
+.section-label { padding: 15px 15px 5px; font-weight: bold; color: var(--sub-dark); margin: 0; }
+
+/* 채팅 아이템 카드 */
+.chat-item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #fff;
+    border-bottom: 1px solid #f1f1f1;
+    cursor: pointer;
+}
+
+.performance-tag { color: #888; font-size: 0.75rem; margin-right: 8px; }
+
+.status-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+.status-badge.open { background: #fff0f0; color: var(--main-red); border: 1px solid var(--main-red); }
+.status-badge.closed { background: #eee; color: #888; }
+
+.chat-title { font-size: 1rem; font-weight: 700; color: var(--sub-dark); margin: 4px 0; }
+
+.chat-meta { font-size: 0.8rem; color: #999; }
+.chat-meta .nickname { color: #666; font-weight: 500; }
+.chat-meta .divider { margin: 0 4px; }
+
+.member-count { font-size: 1.1rem; font-weight: 800; color: var(--main-red); }
+
+.chat-list-page {
+  padding-bottom: 80px;
+}
+
+.chat-item-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.chat-title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.member-count {
+  font-weight: 600;
+}

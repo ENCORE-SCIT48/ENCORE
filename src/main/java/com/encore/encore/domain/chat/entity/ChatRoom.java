@@ -25,6 +25,7 @@ public class ChatRoom extends BaseEntity {
 
     public enum RoomType {
         CHAT,
-        DM
+        DM,
+        PERFORMANCE_ALL
     }
 }

@@ -9,10 +9,14 @@ import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repsitory.PerformanceRepository;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -85,22 +89,22 @@ public class ChatService {
 
 
     /**
-     * 공연별 채팅방 리스트 출력
+     * 공연별 채팅방 목록 조회 출력
      *
      * @param performanceId 채팅방을 불러올 공연 정보
      * @return 채팅방 리스트 전달
      */
-    public List<ResponseLisChatPosttDto> getChatPostsByPerformance(Long performanceId) {
+    public List<ResponseListChatPostDto> getChatPostsByPerformance(Long performanceId) {
         List<ChatPost> chatPostList = chatPostRepository.findByPerformance_PerformanceId(performanceId);
-        List<ResponseLisChatPosttDto> dtoList = new ArrayList<>();
+        List<ResponseListChatPostDto> dtoList = new ArrayList<>();
 
         for (ChatPost chatPost : chatPostList) {
-            ResponseLisChatPosttDto dto = ResponseLisChatPosttDto.builder()
+            ResponseListChatPostDto dto = ResponseListChatPostDto.builder()
                 .id(chatPost.getId())
                 .currentMember(chatPost.getCurrentMember())
                 .maxMember(chatPost.getMaxMember())
                 .title(chatPost.getTitle())
-                .status(chatPost.getStatus())
+                .status(chatPost.getStatus().name())
                 .build();
             dtoList.add(dto);
         }
@@ -247,4 +251,43 @@ public class ChatService {
         log.info("권한 확인 완료");
     }
 
+    /**
+     * [설명] 특정 공연에 종속된 채팅방 목록을 페이징하여 조회합니다.
+     *
+     * @param performanceId 공연 ID
+     * @param searchType    검색 타입 (현재 JPQL에서는 통합 검색으로 처리)
+     * @param keyword       검색어 (제목 또는 내용에 포함 여부)
+     * @param onlyOpen      모집 중인 방만 보기 필터 여부
+     * @param pageable      페이징 정보 (Slice 처리를 위함)
+     * @return 페이징 처리된 채팅방 목록 응답 DTO 슬라이스
+     */
+    public Slice<ResponseListChatPostDto> getChatPostList(Long performanceId, String searchType, String keyword, boolean onlyOpen, Pageable pageable) {
+        log.info("채팅방 목록 비즈니스 로직 시작 - performanceId: {}, keyword: {}", performanceId, keyword);
+
+        try {
+            // 빈 문자열이면 null로 변환
+            if (keyword != null && keyword.isBlank()) {
+                keyword = null;
+            }
+
+            return chatPostRepository.findChatPostList(performanceId, keyword, searchType, onlyOpen, pageable);
+
+        } catch (Exception e) {
+            log.error("채팅방 목록 조회 중 데이터베이스 오류 발생 - performanceId: {}, error: {}", performanceId, e.getMessage(), e);
+            throw new ApiException(ErrorCode.INTERNAL_ERROR);
+        }
+    }
+
+    /**
+     * 공연의 전체 채팅방을 조회
+     *
+     * @param performanceId
+     * @return
+     */
+    public ChatPost findPerformanceAllChatPost(Long performanceId) {
+        return chatPostRepository.findPerformanceAllPost(performanceId)
+            .orElse(null);
+    }
+
 }
+
