@@ -18,7 +18,7 @@ public class ChatRoom extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "post_id")
     private ChatPost chatPost;
     @Enumerated(EnumType.STRING)
     private RoomType roomType;
