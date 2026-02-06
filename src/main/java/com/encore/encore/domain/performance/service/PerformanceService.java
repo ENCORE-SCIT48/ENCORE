@@ -78,7 +78,7 @@ public class PerformanceService {
     public PerformanceDetailDto getPerformance(Long performanceId) {
         log.info("[Performance] detail request - performanceId={}", performanceId);
 
-        Performance performance = performanceRepository.findById(performanceId)
+        Performance performance = performanceRepository.findDetailById(performanceId)
             .orElseThrow(() -> new ApiException(
                 ErrorCode.NOT_FOUND,
                 "공연을 찾을 수 없습니다. performanceId=" + performanceId

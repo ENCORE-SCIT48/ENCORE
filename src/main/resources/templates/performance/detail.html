@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>공연 상세</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/performance/detail.css}"/>
+</head>
+
+<body>
+<div class="app-wrapper">
+    <main class="app-main">
+        <!-- 상단 큰 포스터 영역 -->
+        <section class="poster-area">
+            <div class="poster-placeholder">
+                <span>공연 대표 이미지 (포스터 같은?)</span>
+            </div>
+        </section>
+
+        <!-- 본문 -->
+        <section class="detail-body">
+            <!-- 상단 라인: 카테고리 / 버튼들 -->
+            <div class="top-row">
+                <div class="category-text" id="categoryText">-</div>
+
+                <div class="action-buttons">
+                    <button type="button" class="wish-btn" id="wishBtn" aria-label="볼 공연 찜">
+                        <img
+                            id="wishIcon"
+                            th:src="@{/image/wish_off.png}"
+                            src="/image/wish_off.png"
+                            alt="볼 공연 찜"
+                        />
+                    </button>
+                    <button type="button" class="watched-btn" id="watchedBtn" aria-label="본 공연">
+                        <img
+                            id="watchedIcon"
+                            th:src="@{/image/watched_off.png}"
+                            src="/image/watched_off.png"
+                            alt="본 공연"
+                        />
+                    </button>
+                    <button type="button" class="reported-btn" id="reportedBtn" aria-label="신고">
+                        <img
+                            id="reportedIcon"
+                            th:src="@{/image/reported_off.png}"
+                            src="/image/reported_off.png"
+                            alt="신고"
+                        />
+                    </button>
+                </div>
+            </div>
+
+            <h1 class="perf-title" id="perfTitle">공연 제목</h1>
+
+            <!-- 지역/공연장 + 지도 버튼 -->
+            <div class="meta-row">
+                <div class="meta-text" id="metaText">지역 · 공연장이름</div>
+                <button type="button" class="map-pill" id="mapBtn">지도</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 탭 -->
+            <div class="tab-row">
+                <button type="button" class="tab-btn active" data-tab="desc">공연상세설명</button>
+                <button type="button" class="tab-btn" data-tab="chat">공연채팅이동</button>
+                <button type="button" class="tab-btn" data-tab="review">
+                    공연후기 <span class="rating" id="ratingText">-</span>
+                </button>
+            </div>
+
+            <!-- 탭 콘텐츠 -->
+            <div class="tab-content-wrap">
+                <div id="tab-desc" class="tab-content active">
+                    <div class="desc-text" id="descText">공연상세설명</div>
+                </div>
+
+                <div id="tab-chat" class="tab-content">
+                    <div class="placeholder-center">
+                        <div class="placeholder-title">공연채팅이동</div>
+                        <div class="placeholder-sub">여기서 채팅방으로 이동하는 버튼/링크를 붙이면 됨</div>
+                    </div>
+                </div>
+
+                <div id="tab-review" class="tab-content">
+                    <div class="placeholder-center">
+                        <div class="placeholder-title">공연후기</div>
+                        <div class="placeholder-sub">후기 리스트/작성 UI 붙일 자리</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- performanceId 전달 -->
+        <input type="hidden" id="performanceId" th:value="${performanceId}"/>
+    </main>
+
+    <!-- 하단 푸터 자리: 지금은 공백으로 확보만 -->
+    <div class="footer-space"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script th:src="@{/js/performance/detail.js}"></script>
+</body>
+</html>
