@@ -6,8 +6,6 @@ import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.UserProfile;
-import com.encore.encore.domain.member.repository.HostProfileRepository;
-import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repsitory.PerformanceRepository;
@@ -30,8 +28,6 @@ public class ChatService {
     private final ChatPostRepository chatPostRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final PerformanceRepository performanceRepository;
-    private final HostProfileRepository hostProfileRepository;
-    private final PerformerProfileRepository performerProfileRepository;
     private final UserProfileRepository userProfileRepository;
 
 
