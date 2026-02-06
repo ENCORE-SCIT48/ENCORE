@@ -14,7 +14,6 @@ import com.encore.encore.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -164,6 +163,7 @@ public class PostService {
                         .postId(post.getPostId())
                         .postType(post.getPostType())
                         .title(post.getTitle())
+                        .content(post.getContent())
                         .viewCount(post.getViewCount())
                         .createdAt(post.getCreatedAt())
                         .build());
@@ -189,6 +189,7 @@ public class PostService {
                         .postId(post.getPostId())
                         .postType(post.getPostType())
                         .title(post.getTitle())
+                        .content(post.getContent())
                         .viewCount(post.getViewCount())
                         .createdAt(post.getCreatedAt())
                         .build());

@@ -17,6 +17,8 @@ public class ResponseListPostDto {
 
     private String title;
 
+    private String content;
+
     private Integer viewCount;
 
     private LocalDateTime createdAt;

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>공연자 파티 모집 상세</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background: #e5e5e5;
+      margin: 0;
+      padding-bottom: 80px;
+    }
+
+    .app-container {
+      max-width: 420px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      padding: 16px;
+      position: relative;
+    }
+
+    /* 프로필 */
+    .profile {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      background: #ddd;
+      border-radius: 50%;
+    }
+
+    /* 메인 카드 */
+    .main-card {
+      background: #d9d9d9;
+      margin: 80px 0 24px;
+      padding: 20px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 280px;
+    }
+
+    .main-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .main-content {
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+
+    /* 서브 정보 카드 */
+    .info-card {
+      background: #d9d9d9;
+      padding: 16px;
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    /* 신청 버튼 */
+    .apply-wrapper {
+      text-align: right;
+      margin-top: 16px;
+    }
+
+    .apply-btn {
+      background: #d9d9d9;
+      border: none;
+      padding: 6px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* 하단 네비 */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #d9d9d9;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+
+    .bottom-nav div {
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- 프로필 -->
+    <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
+
+    <!-- 메인 모집 상세 -->
+    <div class="main-card">
+
+      <div class="main-title" th:text="${post.title}">
+        공연자 파티 모집글 제목
+      </div>
+
+      <div class="main-content" th:text="${post.content}">
+        공연자 파티 모집글 상세 내용
+      </div>
+
+    </div>
+
+    <!-- 공연 정보 -->
+    <div class="info-card">
+      공연 정보
+    </div>
+
+    <!-- 공연장 정보 -->
+    <div class="info-card">
+      공연장 정보
+    </div>
+
+    <!-- 신청 버튼 -->
+    <div class="apply-wrapper">
+      <button class="apply-btn">신청</button>
+    </div>
+
+    <!-- 하단 네비 -->
+    <div th:replace="~{fragments/footer :: footer(
+      ${ {
+          {label:'홈', href:'/'},
+          {label:'검색', href:'/search'},
+          {label:'작성', href:'/post/write'},
+          {label:'알림', href:'/notifications'},
+          {label:'마이', href:'/mypage'}
+      } }
+    )}"></div>
+
+  </div>
+
+</body>
+</html>
