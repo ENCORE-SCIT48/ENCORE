@@ -9,4 +9,4 @@ insert_final_newline = true
 end_of_line = lf
 
 [*.{js,html,css,yml,yaml}]
-indent_size = 2
+indent_size = 4
