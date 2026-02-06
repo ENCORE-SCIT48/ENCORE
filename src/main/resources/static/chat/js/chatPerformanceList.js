@@ -1,27 +1,32 @@
-  $(function(){
-        // 뒤로가기
-        $('#backBtn').click(function(){
-            window.history.back();
-        });
+/**
+ * 채팅방 목록 페이지의 이벤트 핸들러를 관리합니다.
+ * - 뒤로 가기, 상세 페이지 이동, 글쓰기 페이지 이동 기능을 포함합니다.
+ */
+$(function() {
 
-        // 카드 클릭 시 상세 페이지 이동
-        $('.chat-card').click(function(){
-            // data-performance-id -> performanceId로 읽음
-            const performanceId = $(this).attr('data-performance-id');
-            const chatId = $(this).data('id');
-            window.location.href = '/performance/' + performanceId + '/chat/' + chatId;
-        });
-
-        // 글쓰기 버튼 클릭
-           $('#writeBtn').click(function(){
-               const performanceId = $(this).data('performanceId');
-               window.location.href = '/performance/' + performanceId + '/chat/post';
-           });
-
-        // 하단 네비 버튼 예시
-        $('#btnParty').click(()=>alert('파티모집 클릭'));
-        $('#btnEmergency').click(()=>alert('긴급모집 클릭'));
-        $('#btnHome').click(()=>alert('홈 클릭'));
-        $('#btnDM').click(()=>alert('DM 클릭'));
-        $('#btnChatRoom').click(()=>alert('채팅방 클릭'));
+    /** 이전 페이지 이동 */
+    $('#backBtn').click(function() {
+        window.history.back();
     });
+
+    /** 채팅방 카드 클릭 시 상세 정보 페이지로 이동 */
+    $('.chat-card').click(function() {
+        // data-속성에서 공연 ID와 채팅방 ID 추출
+        const performanceId = $(this).attr('data-performance-id');
+        const chatId = $(this).data('id');
+
+        if (performanceId && chatId) {
+            window.location.href = `/performance/${performanceId}/chat/${chatId}`;
+        }
+    });
+
+    /** 새 채팅방 작성 페이지로 이동 */
+    $('#writeBtn').click(function() {
+        const performanceId = $(this).data('performanceId');
+
+        if (performanceId) {
+            window.location.href = `/performance/${performanceId}/chat/post`;
+        }
+    });
+
+});

@@ -2,63 +2,46 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>chatPostForm.html</title>
+  <title>채팅방 생성</title>
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script th:src="@{/chat/js/chatPostForm.js}"></script>
 </head>
 
 <body>
-
-<!-- 헤더 -->
 <nav class="navbar navbar-dark bg-primary fixed-top">
   <div class="container-fluid">
-    <button id="backBtn" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
-    <span class="navbar-brand mb-0 h1">CHAT_CREATE</span>
-    <div></div>
+    <button id="backBtn" onclick="history.back()" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
+    <span class="navbar-brand mb-0 h1">채팅방 생성</span>
   </div>
 </nav>
 
-<!-- 채팅방 수정ㄴ 폼 -->
-<div class="content-wrapper">
-  <form th:action="@{/performance/{performanceId}/chat/post(performanceId=${performanceId})}" method="post">
-    <input type="hidden" name="performanceId" th:value="${performanceId}">
+<div class="content-wrapper" style="margin-top: 60px;">
+  <form id="chatPostForm">
+    <input type="hidden" id="performanceId" th:value="${performanceId}">
 
     <div class="mb-3">
-      <label for="performance">공연</label>
-      <input type="text" th:value="${performanceId}" id="performance" class="form-control" readonly>
+      <label>공연 ID</label>
+      <input type="text" th:value="${performanceId}" class="form-control" readonly>
     </div>
 
     <div class="mb-3">
       <label for="title">제목</label>
-      <input type="text" name="title" id="title" class="form-control"
-             placeholder="제목을 입력하세요" required>
+      <input type="text" id="title" class="form-control" placeholder="제목을 입력하세요" required>
     </div>
 
     <div class="mb-3">
       <label for="content">내용</label>
-      <textarea name="content" id="content" class="form-control" rows="5"
-                placeholder="내용을 입력하세요" required></textarea>
+      <textarea id="content" class="form-control" rows="5" placeholder="내용을 입력하세요" required></textarea>
     </div>
 
     <div class="mb-3">
       <label for="maxMember">모집 인원</label>
-      <input type="number" name="maxMember" id="maxMember" class="form-control"
-             min="1">
+      <input type="number" id="maxMember" class="form-control" min="1" value="2">
     </div>
 
-    <button type="submit" class="btn btn-primary btn-create">작성하기</button>
+    <button type="submit" class="btn btn-primary w-100">작성하기</button>
   </form>
 </div>
 
-<!-- 하단 네비 (옵션) -->
-<div class="bottom-nav">
-  <button type="button" class="btn btn-link">파티모집</button>
-  <button type="button" class="btn btn-link">긴급모집</button>
-  <button type="button" class="btn btn-link active">홈</button>
-  <button type="button" class="btn btn-link">DM</button>
-  <button type="button" class="btn btn-link">채팅방</button>
-</div>
-
-<script src="/static/chat/js/chatPostForm.js"></script>
+<script th:src="@{/chat/js/chatPostForm.js}"></script>
 </body>
 </html>

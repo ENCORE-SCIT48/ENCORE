@@ -20,8 +20,6 @@ public class ChatRoom extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private ChatPost chatPost;
-    @Column(nullable = false)
-    private boolean isDeleted = false;
     @Enumerated(EnumType.STRING)
     private RoomType roomType;
 

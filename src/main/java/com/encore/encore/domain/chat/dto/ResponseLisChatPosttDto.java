@@ -10,15 +10,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatPostDetailResponseDto {
+public class ResponseLisChatPosttDto {
+
     private Long id;
-    private Long performanceId;
-    private String performanceTitle;
-    private Long writeProfileId;
-    private String writerName;
     private String title;
-    private String content;
-    private String currentMember;
+    private Integer currentMember;
     private Integer maxMember;
-    private ChatPost.Status status;
+    public ChatPost.Status status;
 }

@@ -38,8 +38,6 @@ public class ChatPost extends BaseEntity {
     private Integer maxMember;
     @Column(nullable = false)
     private Integer currentMember;
-    @Column(nullable = false)
-    private boolean isDeleted = false;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;

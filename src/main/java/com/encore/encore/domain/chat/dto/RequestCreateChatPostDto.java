@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatPostCreateRequestDto {
+public class RequestCreateChatPostDto {
 
     private Long performanceId;
     @NotBlank(message = "제목은 필수 입니다.")

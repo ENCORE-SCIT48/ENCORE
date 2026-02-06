@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatPostUpdateRequestDto {
+public class RequestUpdateChatPostDto {
     private String title;
     private String content;
     private ChatPost.Status status;

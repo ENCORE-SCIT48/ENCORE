@@ -1,7 +1,7 @@
 package com.encore.encore.domain.chat.controller;
 
-import com.encore.encore.domain.chat.dto.ChatPostDetailResponseDto;
-import com.encore.encore.domain.chat.dto.ChatPostListResponseDto;
+import com.encore.encore.domain.chat.dto.ResponseDetailChatPostDto;
+import com.encore.encore.domain.chat.dto.ResponseLisChatPosttDto;
 import com.encore.encore.domain.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +41,8 @@ public class ChatPageController {
      * 공연별 채팅방 조회 화면 이동
      *
      * @param performanceId
-     * @param model
-     * @return
+     * @param model         목록 리스트 저장
+     * @return chat/chatPerformanceList.html 이동
      */
     @GetMapping("/performance/{performanceId}/chat/list")
     public String chatList(
@@ -52,7 +52,7 @@ public class ChatPageController {
         log.info("공연별 채팅방 목록 조회 시작 - performanceId: {}", performanceId);
 
         try {
-            List<ChatPostListResponseDto> chatPostList = chatService.getChatPostsByPerformance(performanceId);
+            List<ResponseLisChatPosttDto> chatPostList = chatService.getChatPostsByPerformance(performanceId);
             if (chatPostList == null) {
                 chatPostList = new ArrayList<>();
             }
@@ -63,7 +63,6 @@ public class ChatPageController {
             return "chat/chatPerformanceList";
 
         } catch (Exception e) {
-            // debug 대신 error를 쓰고, 예외 객체 e를 넘겨 StackTrace를 찍습니다.
             log.error("채팅방 목록 조회 중 예외 발생! performanceId: {}", performanceId, e);
             return "redirect:/";
         }
@@ -72,9 +71,10 @@ public class ChatPageController {
     /**
      * 채팅방 글 상세사항 조회
      *
-     * @param id
-     * @param model
-     * @return
+     * @param performanceId 공연장 id
+     * @param id            글의 id
+     * @param model         찾은 글 정보 저장
+     * @return chat/chatPostDetail.html 이동
      */
     @GetMapping("/performance/{performanceId}/chat/{id}")
     public String chatPostDetail(
@@ -85,7 +85,7 @@ public class ChatPageController {
         log.info("채팅방 상세 조회 진입 - performanceId: {}, postId: {}", performanceId, id);
 
         try {
-            ChatPostDetailResponseDto dto = chatService.getChatPostDetail(id);
+            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             model.addAttribute("chatPost", dto);
             return "chat/chatPostDetail";
         } catch (Exception e) {
@@ -97,27 +97,27 @@ public class ChatPageController {
     /**
      * 글 수정 페이지 이동
      *
-     * @param postId
-     * @param performanceId
-     * @param model
-     * @return
+     * @param id            글의 id
+     * @param performanceId 공연 id
+     * @param model         수정할 정보 저장
+     * @return chat/chatPostUpdateForm.html 이동
      */
     @GetMapping("/performance/{performanceId}/chat/{id}/update")
     public String update(
-        @PathVariable("id") Long postId,
+        @PathVariable Long id,
         @PathVariable Long performanceId,
         Model model
     ) {
-        log.info("게시글 수정 폼 진입 - performanceId: {}, postId: {}", performanceId, postId);
+        log.info("게시글 수정 폼 진입 - performanceId: {}, postId: {}", performanceId, id);
 
         try {
-            ChatPostDetailResponseDto dto = chatService.getChatPostDetail(postId);
+            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             model.addAttribute("performanceId", performanceId);
             model.addAttribute("chatPost", dto);
-            return "chat/chatPostUpdateForm"; // 앞에 붙은 / 제거 (Thymeleaf 관례)
+            return "chat/chatPostUpdateForm";
         } catch (Exception e) {
-            log.error("수정 폼 로딩 중 예외 발생 postId: {}", postId, e);
-            return "redirect:/performance/" + performanceId + "/chat/" + postId;
+            log.error("수정 폼 로딩 중 예외 발생 postId: {}", id, e);
+            return "redirect:/performance/" + performanceId + "/chat/" + id;
         }
     }
 }

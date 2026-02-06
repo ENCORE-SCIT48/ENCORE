@@ -23,10 +23,10 @@
   <p><strong>상태:</strong> <span th:text="${chatPost.status}">OPEN</span></p>
 </div>
 <div class="actions">
-  <button th:if="${true}" id="btn-edit" th:data-performance-id="${performanceId}" th:data-post-id="${chatPost.id}">
+  <button th:if="${true}" id="btn-edit" th:data-performance-id="${performanceId}" th:data-id="${chatPost.id}">
     수정하기
   </button>
-  <button th:if="${true}" id="btn-delete" th:data-post-id="${chatPost.id}">삭제하기</button>
+  <button th:if="${true}" id="btn-delete" th:data-id="${chatPost.id}">삭제하기</button>
 </div>
 
 

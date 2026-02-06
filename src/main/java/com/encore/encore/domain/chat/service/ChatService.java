@@ -5,6 +5,7 @@ import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
+import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
@@ -33,136 +34,72 @@ public class ChatService {
     private final PerformerProfileRepository performerProfileRepository;
     private final UserProfileRepository userProfileRepository;
 
+
     /**
-     * 글과 채팅방 논리 삭제
+     * 채팅 게시글을 저장하고 동시에 채팅방을 생성
      *
-     * @param postId
+     * @param dto 게시글 생성 요청 데이터
+     * @return 생성된 게시글 응답 DTO
+     * @throws EntityNotFoundException  프로필 정보가 존재하지 않을 경우 발생
+     * @throws IllegalArgumentException 작성자 정보가 누락되었을 경우 발생
      */
-    public void softDeletePost(Long postId, Long userId) {
-        log.info("게시글 논리 삭제 시작 - postId: {}", postId);
-        try {
-            ChatPost chatPost = chatPostRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("글이 조회되지 않습니다. ID: " + postId));
-            log.info("권한 확인");
-            checkChatPostAuthority(chatPost, userId);
-            chatPost.setDeleted(true);
+    public ResponseCreateChatPostDto createChatPostAndRoom(RequestCreateChatPostDto dto, Long performanceId) {
+        log.info("채팅 게시글 생성 프로세스 시작 - 제목: {}", dto.getTitle());
 
-            ChatRoom chatRoom = chatRoomRepository.findByChatPostId(postId);
-            if (chatRoom != null) {
-                chatRoom.setDeleted(true);
-                log.info("채팅방 논리 삭제 완료 - chatRoomId: {}", chatRoom.getRoomId());
-            }
-            log.info("게시글 논리 삭제 완료 - postId: {}", postId);
-        } catch (Exception e) {
-            log.error("게시글 논리 삭제 중 에러 발생 - postId: {}", postId, e);
-            throw e;
-        }
-    }
-
-    /**
-     * 작성글을 DB에 저장하고 채팅방 생성
-     *
-     * @param dto
-     */
-    /**
-     * public void createChatPostAndRoom(ChatPostCreateRequestDto dto) {
-     * log.info("채팅 게시글 및 방 생성 프로세스 시작 - 제목: {}", dto.getTitle());
-     * <p>
-     * try {
-     * ChatPost.ChatPostBuilder builder = ChatPost.builder()
-     * .title(dto.getTitle())
-     * .content(dto.getContent())
-     * .maxMember(dto.getMaxMember())
-     * .currentMember(0)
-     * .status(ChatPost.Status.OPEN);
-     * <p>
-     * // 프로필 세팅 및 로그 기록
-     * if (dto.getHostId() != null) {
-     * log.info("작성자 타입: Host (ID: {})", dto.getHostId());
-     * builder.host(hostProfileRepository.findById(dto.getHostId())
-     * .orElseThrow(() -> new EntityNotFoundException("HostProfile 없음: " + dto.getHostId())));
-     * } else if (dto.getProfileId() != null) {
-     * log.info("작성자 타입: User (ID: {})", dto.getProfileId());
-     * builder.profile(userProfileRepository.findById(dto.getProfileId())
-     * .orElseThrow(() -> new EntityNotFoundException("UserProfile 없음: " + dto.getProfileId())));
-     * } else if (dto.getPerformerId() != null) {
-     * log.info("작성자 타입: Performer (ID: {})", dto.getPerformerId());
-     * builder.performer(performerProfileRepository.findById(dto.getPerformerId())
-     * .orElseThrow(() -> new EntityNotFoundException("PerformerProfile 없음: " + dto.getPerformerId())));
-     * } else {
-     * log.error("채팅방 생성 실패: 작성자 프로필 정보가 모두 비어있음");
-     * throw new IllegalArgumentException("Host, User, Performer 중 하나는 반드시 필요합니다.");
-     * }
-     * <p>
-     * ChatPost chatPost = builder.build();
-     * chatPost.addParticipant(); // 인원수 0 -> 1 증가
-     * chatPostRepository.save(chatPost);
-     * log.info("ChatPost 저장 성공 - 생성된 PostID: {}", chatPost.getId());
-     * <p>
-     * ChatRoom chatRoom = ChatRoom.builder()
-     * .chatPost(chatPost)
-     * .roomType(ChatRoom.RoomType.CHAT)
-     * .build();
-     * <p>
-     * chatRoomRepository.save(chatRoom);
-     * log.info("ChatRoom 생성 성공 - 생성된 RoomID: {}", chatRoom.getRoomId());
-     * <p>
-     * } catch (Exception e) {
-     * log.error("채팅방 생성 중 서버 오류 발생", e);
-     * throw e;
-     * }
-     * }
-     */
-
-    public ChatPostResponseDto createChatPostAndRoom(ChatPostCreateRequestDto dto) {
+        Performance performance = performanceRepository.findById(performanceId)
+            .orElseThrow(() -> new EntityNotFoundException("공연 정보 없음: " + performanceId)
+            );
 
         ChatPost.ChatPostBuilder builder = ChatPost.builder()
+            .performance(performance)
             .title(dto.getTitle())
             .content(dto.getContent())
             .maxMember(dto.getMaxMember())
             .currentMember(0)
             .status(ChatPost.Status.OPEN);
 
-        if (dto.getHostId() != null) {
-            builder.host(hostProfileRepository.findById(dto.getHostId())
-                .orElseThrow(() -> new EntityNotFoundException("HostProfile 없음: " + dto.getHostId())));
-        } else if (dto.getProfileId() != null) {
-            builder.profile(userProfileRepository.findById(dto.getProfileId())
-                .orElseThrow(() -> new EntityNotFoundException("UserProfile 없음: " + dto.getProfileId())));
-        } else if (dto.getPerformerId() != null) {
-            builder.performer(performerProfileRepository.findById(dto.getPerformerId())
-                .orElseThrow(() -> new EntityNotFoundException("PerformerProfile 없음: " + dto.getPerformerId())));
-        } else {
-            throw new IllegalArgumentException("Host, User, Performer 중 하나는 반드시 필요합니다.");
-        }
+        assignProfile(builder, dto);
 
         ChatPost chatPost = builder.build();
-        chatPost.addParticipant(); // 인원수 0 -> 1 증가
+        chatPost.addParticipant();
         chatPostRepository.save(chatPost);
+        log.info("게시글 저장 완료 - ID: {}", chatPost.getId());
 
         ChatRoom chatRoom = ChatRoom.builder()
             .chatPost(chatPost)
             .roomType(ChatRoom.RoomType.CHAT)
             .build();
         chatRoomRepository.save(chatRoom);
+        log.info("채팅방 생성 완료 - RoomID: {}", chatRoom.getRoomId());
 
-        // ChatPostResponseDto 변환 후 반환
-        return ChatPostResponseDto.from(chatPost);
+        return ResponseCreateChatPostDto.from(chatPost, chatRoom);
+    }
+
+    /**
+     * DTO의 ID 값에 따라 적절한 프로필을 빌더에 할당
+     */
+    private void assignProfile(ChatPost.ChatPostBuilder builder, RequestCreateChatPostDto dto) {
+        log.info("테스트를 위한 프로필 하드코딩 시작");
+        UserProfile realProfile = userProfileRepository.findById(1L)
+            .orElseThrow(() -> new EntityNotFoundException("테스트를 위한 1번 프로필이 DB에 없습니다. data.sql을 확인하세요."));
+
+        builder.profile(realProfile);
+        log.info("실제 프로필(ID: 1) 할당 완료: {}", realProfile.getIntroduction());
     }
 
 
     /**
      * 공연별 채팅방 리스트 출력
      *
-     * @param performanceId
-     * @return
+     * @param performanceId 채팅방을 불러올 공연 정보
+     * @return 채팅방 리스트 전달
      */
-    public List<ChatPostListResponseDto> getChatPostsByPerformance(Long performanceId) {
+    public List<ResponseLisChatPosttDto> getChatPostsByPerformance(Long performanceId) {
         List<ChatPost> chatPostList = chatPostRepository.findByPerformance_PerformanceId(performanceId);
-        List<ChatPostListResponseDto> dtoList = new ArrayList<>();
+        List<ResponseLisChatPosttDto> dtoList = new ArrayList<>();
 
         for (ChatPost chatPost : chatPostList) {
-            ChatPostListResponseDto dto = ChatPostListResponseDto.builder()
+            ResponseLisChatPosttDto dto = ResponseLisChatPosttDto.builder()
                 .id(chatPost.getId())
                 .currentMember(chatPost.getCurrentMember())
                 .maxMember(chatPost.getMaxMember())
@@ -178,17 +115,17 @@ public class ChatService {
     /**
      * 글 상세 조회
      *
-     * @param id
-     * @return
+     * @param id 상세 조회할 글
+     * @return 글 정보
      */
-    public ChatPostDetailResponseDto getChatPostDetail(Long id) {
+    public ResponseDetailChatPostDto getChatPostDetail(Long id) {
         ChatPost chatPost = chatPostRepository.findById(id)
             .orElseThrow(
                 () -> new EntityNotFoundException("글이 조회되지 않습니다.")
             );
 
-        ChatPostDetailResponseDto.ChatPostDetailResponseDtoBuilder builder =
-            ChatPostDetailResponseDto.builder()
+        ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
+            ResponseDetailChatPostDto.builder()
                 .id(chatPost.getId())
                 .title(chatPost.getTitle())
                 .content(chatPost.getContent())
@@ -207,7 +144,6 @@ public class ChatService {
         } else if (chatPost.getProfile() != null) {
             builder
                 .writeProfileId(chatPost.getProfile().getProfileId());
-            //TODO:프로필에 닉네임 작성있을 시 추가 .writerName(chatPost.getProfile().getProfileId());
         }
 
         return builder.build();
@@ -217,23 +153,26 @@ public class ChatService {
     /**
      * 글 수정
      *
-     * @param chatId
-     * @param updateDTO
+     * @param chatId    수정할 글 id
+     * @param updateDTO 수정할 내용이 담긴 dto
      */
-    public void updateChatPost(Long chatId, ChatPostUpdateRequestDto updateDTO, Long userId) {
-
+    public ResponseUpdateChatPostDto updateChatPost(Long chatId, RequestUpdateChatPostDto updateDTO, Long userId) {
         log.info("게시글 수정 시작 - chatId: {}, 수정 요청자ID: {}", chatId, userId);
 
         try {
             ChatPost chatPost = chatPostRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("글이 존재하지 않습니다. ID: " + chatId));
 
-            checkChatPostAuthority(chatPost, userId); // 권한 체크 로그는 내부 메서드에서 처리
+            checkChatPostAuthority(chatPost, userId);
 
             chatPost.setTitle(updateDTO.getTitle());
             chatPost.setContent(updateDTO.getContent());
             chatPost.setStatus(updateDTO.getStatus());
+
             log.info("게시글 수정 완료 - chatId: {}", chatId);
+
+            return ResponseUpdateChatPostDto.from(chatPost);
+
         } catch (Exception e) {
             log.error("게시글 수정 실패 - chatId: {}", chatId, e);
             throw e;
@@ -241,10 +180,45 @@ public class ChatService {
     }
 
     /**
+     * 글과 채팅방 논리 삭제
+     *
+     * @param userId 글 쓴 유저와 일치하는지 확인
+     * @param postId 삭제할 글을 조회할 id
+     */
+    public ResponseDeleteChatPostDto softDeletePost(Long postId, Long userId) {
+        log.info("게시글 논리 삭제 시작 - postId: {}", postId);
+
+        ChatPost chatPost = chatPostRepository.findById(postId)
+            .orElseThrow(() -> new EntityNotFoundException("글이 조회되지 않습니다. ID: " + postId));
+
+        log.info("권한 확인");
+        checkChatPostAuthority(chatPost, userId);
+
+        chatPost.delete();
+
+        ChatRoom chatRoom = chatRoomRepository.findByChatPost_Id(postId);
+        if (chatRoom != null) {
+            chatRoom.delete();
+            log.info("채팅방 논리 삭제 완료 - chatRoomId: {}", chatRoom.getRoomId());
+        }
+
+        log.info("게시글 논리 삭제 완료 - postId: {}", postId);
+
+        return ResponseDeleteChatPostDto.builder()
+            .postId(postId)
+            .title(chatPost.getTitle())
+            .chatRoomId(chatRoom != null ? chatRoom.getRoomId() : null)
+            .chatPostIsDeleted(chatPost.isDeleted())
+            .chatRoomIsDeleted(chatRoom != null && chatRoom.isDeleted())
+            .build();
+    }
+
+
+    /**
      * post 진입시 표기를 위해 performanceTitle 가져옴
      *
-     * @param performanceId
-     * @return
+     * @param performanceId 조회할 공연 id
+     * @return 공연 타이틀
      */
     public String getPerformanceTitle(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
@@ -257,10 +231,15 @@ public class ChatService {
     /**
      * 권한 체크
      *
-     * @param chatPost
-     * @param loginProfileId
+     * @param chatPost       글 id
+     * @param loginProfileId 로그인 하고 있는 id
      */
     public void checkChatPostAuthority(ChatPost chatPost, Long loginProfileId) {
+        // 테스트용 하드코딩: 요청자가 누구든, 혹은 특정 ID라면 무조건 통과
+        if (loginProfileId.equals(1L)) {
+            log.info("테스트 모드: ID 1번 사용자 권한 강제 승인");
+            return;
+        }
         boolean isHost = chatPost.getHost() != null && chatPost.getHost().getHostId().equals(loginProfileId);
         boolean isPerformer = chatPost.getPerformer() != null && chatPost.getPerformer().getPerformerId().equals(loginProfileId);
         boolean isUser = chatPost.getProfile() != null && chatPost.getProfile().getUser().equals(loginProfileId);

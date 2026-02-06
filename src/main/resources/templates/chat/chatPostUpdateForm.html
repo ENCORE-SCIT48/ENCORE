@@ -1,58 +1,51 @@
 <!DOCTYPE html>
-<html xmlns:th="thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>chatPostUpdateForm.html</title>
+  <title>채팅방 수정</title>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 </head>
-
 <body>
 
-<!-- 헤더 -->
 <nav class="navbar navbar-dark bg-primary fixed-top">
   <div class="container-fluid">
     <button id="backBtn" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
-    <div></div>
   </div>
 </nav>
 
-<!-- 채팅방 생성 폼 -->
-<div class="content-wrapper">
-  <form
-    th:action="@{/performance/{performanceId}/chat/{chatId}/update(performanceId=${performanceId},
-     chatId=${chatPost.id})}" method="post">
-    <input type="hidden" name="performanceId" th:value="${performanceId}">
+<div class="content-wrapper" style="margin-top: 60px;">
+  <form id="chatUpdateForm">
+    <input type="hidden" id="perfId" th:value="${performanceId}">
+    <input type="hidden" id="chatId" th:value="${chatPost.id}">
 
     <div class="mb-3">
-      <label for="performance">공연</label>
+      <label for="performance">공연 ID</label>
       <input type="text" th:value="${performanceId}" id="performance" class="form-control" readonly>
     </div>
 
     <div class="mb-3">
       <label for="title">제목</label>
-      <input type="text" name="title" id="title" th:value="${chatPost.title}" class="form-control"
-             placeholder="제목을 입력하세요" required>
+      <input type="text" id="title" th:value="${chatPost.title}" class="form-control" required>
     </div>
 
     <div class="mb-3">
       <label for="content">내용</label>
-      <textarea name="content" id="content" class="form-control" th:text="${chatPost.content}" rows="5"
-                placeholder="내용을 입력하세요" required></textarea>
+      <textarea id="content" class="form-control" th:text="${chatPost.content}" rows="5" required></textarea>
     </div>
 
+    <div class="mb-3">
+      <label for="status">모집 상태</label>
+      <select id="status" class="form-control">
+        <option value="OPEN" th:selected="${chatPost.status != null && chatPost.status.name() == 'OPEN'}">모집중</option>
+        <option value="CLOSED" th:selected="${chatPost.status != null && chatPost.status.name() == 'CLOSED'}">모집완료
+        </option>
+      </select>
+    </div>
 
-    <button type="submit" class="btn btn-primary btn-create">작성하기</button>
+    <button type="submit" class="btn btn-primary">수정 완료</button>
   </form>
 </div>
 
-<!-- 하단 네비 (옵션) -->
-<div class="bottom-nav">
-  <button type="button" class="btn btn-link">파티모집</button>
-  <button type="button" class="btn btn-link">긴급모집</button>
-  <button type="button" class="btn btn-link active">홈</button>
-  <button type="button" class="btn btn-link">DM</button>
-  <button type="button" class="btn btn-link">채팅방</button>
-</div>
-
-<script src="/static/chat/js/chatPostForm.js"></script>
+<script th:src="@{/chat/js/chatPostUpdateForm.js}"></script>
 </body>
 </html>
