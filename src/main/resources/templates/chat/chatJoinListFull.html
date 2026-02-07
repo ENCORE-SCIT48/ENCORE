@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>공연 채팅 리스트</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/chat.css}">
+  <link rel="stylesheet" th:href="@{/css/chat-list.css}">
+
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+</head>
+
+<body>
+<div class="app-container">
+
+  <!-- 🔹 헤더 (고정) -->
+  <header class="app-header">
+    <div class="d-flex align-items-center gap-2">
+      <button class="back-btn" onclick="history.back()">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h3 class="app-title">채팅방</h3>
+    </div>
+  </header>
+
+  <!-- 검색 영역 -->
+  <div class="search-container">
+    <div class="input-group">
+      <select class="form-select" id="searchType">
+        <option value="title">제목</option>
+        <option value="titleContent">제목+내용</option>
+        <option value="performanceTitle">공연</option>
+      </select>
+      <input type="text" id="keyword" class="form-control" placeholder="검색어 입력">
+      <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </div>
+
+    <div class="form-check form-switch mt-2">
+      <input class="form-check-input" type="checkbox" id="excludeClosed" checked>
+      <label class="form-check-label" for="excludeClosed">
+        내가 만든 방만 보기
+      </label>
+    </div>
+  </div>
+
+  <div id="joined-chat-container" th:attr="data-performance-id=${performanceId}">
+    <!-- JS에서 참여중 채팅방 목록 append -->
+  </div>
+
+
+  <script th:src="@{/js/chat/chatJoinListFull.js}"></script>
+</div>
+</body>
+</html>

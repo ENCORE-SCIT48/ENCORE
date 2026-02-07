@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>공연 채팅 리스트</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/chat.css}">
+  <link rel="stylesheet" th:href="@{/css/chat-list.css}">
+
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+</head>
+
+<body>
+<div class="app-container">
+
+  <!-- 🔹 헤더 (고정) -->
+  <header class="app-header">
+    <div class="d-flex align-items-center gap-2">
+      <button class="back-btn" onclick="history.back()">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h3 class="app-title">채팅방</h3>
+    </div>
+  </header>
+
+  <!-- 참여중 채팅방 + 핫한 채팅방 레이아웃 영역 -->
+
+  <p class="section-label d-flex justify-content-between align-items-center">
+    참여중 채팅방
+    <button id="btn-show-all-joined" class="btn btn-sm btn-outline-primary"
+            title="전체 보기 +">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </p>
+
+  <div id="joined-chat-container" th:attr="data-performance-id=${performanceId}">
+    <!-- JS에서 참여중 채팅방 목록 append -->
+  </div>
+
+  <p class="section-label mt-4">HOT 채팅방</p>
+
+  <div id="chat-list-container" th:attr="data-performance-id=${performanceId}">
+    <!-- JS에서 핫한 채팅방 목록 append -->
+  </div>
+
+
+  <script th:src="@{/js/chat/chatJoinList.js}"></script>
+</body>
+</html>

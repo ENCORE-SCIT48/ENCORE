@@ -146,4 +146,27 @@ public class ChatPageController {
             return "redirect:/performance/" + performanceId + "/chat/" + id;
         }
     }
+
+    /**
+     * 푸터 채팅방 이동 페이지
+     *
+     * @return
+     */
+    @GetMapping("/chat/list")
+    public String chatList(
+    ) {
+
+        return "chat/chatJoinList";
+    }
+
+    /**
+     * 참여중인 채팅방 글 전체 조회 페이지 이동
+     *
+     * @return
+     */
+    @GetMapping("/chat/list/join")
+    public String chatListJoin() {
+
+        return "chat/chatJoinListFull";
+    }
 }

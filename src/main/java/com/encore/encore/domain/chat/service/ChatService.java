@@ -15,13 +15,16 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -265,7 +268,6 @@ public class ChatService {
         log.info("채팅방 목록 비즈니스 로직 시작 - performanceId: {}, keyword: {}", performanceId, keyword);
 
         try {
-            // 빈 문자열이면 null로 변환
             if (keyword != null && keyword.isBlank()) {
                 keyword = null;
             }
@@ -288,6 +290,83 @@ public class ChatService {
         return chatPostRepository.findPerformanceAllPost(performanceId)
             .orElse(null);
     }
+
+    /**
+     * 참여중인 채팅방 리스트 조회
+     *
+     * @param loginUserId
+     * @param limit
+     * @return
+     */
+    public List<ResponseParticipatingChatPostDto> getChatPostJoinList(Long loginUserId, int limit) {
+
+        List<ChatPost> chatPostList = chatPostRepository.findTopParticipatingByUserIdNative(loginUserId, limit);
+        List<ResponseParticipatingChatPostDto> participatingChatPostDtoList = new ArrayList<>();
+
+        for (ChatPost chatPost : chatPostList) {
+            ResponseParticipatingChatPostDto dto = ResponseParticipatingChatPostDto.from(chatPost);
+
+            participatingChatPostDtoList.add(dto);
+        }
+
+        return participatingChatPostDtoList;
+
+    }
+
+    /**
+     * 보내진 메시지가 최신인 순의 채팅방 조회
+     *
+     * @param limit
+     * @return
+     */
+    public List<ResponseParticipatingChatPostDto> getChatListHot(int limit) {
+
+        List<ChatPost> chatPostList = chatPostRepository.findHotChatPosts(limit);
+
+        return chatPostList.stream()
+            .map(ResponseParticipatingChatPostDto::from)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 참여중인 전체 채팅방을 조회하고 키워드 별 검색함
+     *
+     * @param userId
+     * @param page
+     * @param size
+     * @param keyword
+     * @param searchType
+     * @return
+     */
+
+    public Slice<ResponseParticipatingChatPostDto> getChatPostJoinListFull(
+        Long userId,
+        int page,
+        int size,
+        String keyword,
+        String searchType
+    ) {
+        int offset = page * size;
+
+        List<ChatPost> chatPosts = chatPostRepository.findJoinedChats(
+            userId,
+            keyword,
+            searchType,
+            size + 1, // 한 페이지+1 개 가져와서 hasNext 판단
+            offset
+        );
+
+        boolean hasNext = chatPosts.size() > size;
+
+        List<ResponseParticipatingChatPostDto> dtoList = chatPosts.stream()
+            .limit(size)
+            .map(ResponseParticipatingChatPostDto::from)
+            .toList();
+
+        Pageable pageable = PageRequest.of(page, size);
+        return new SliceImpl<>(dtoList, pageable, hasNext);
+    }
+
 
 }
 

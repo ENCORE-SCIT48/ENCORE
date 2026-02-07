@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @Slf4j
 @RequiredArgsConstructor
 @Controller
@@ -99,7 +102,7 @@ public class ChatController {
      */
     @ResponseBody
     @GetMapping("/api/performance/{performanceId}/list")
-    public CommonResponse<Slice<ResponseListChatPostDto>> getChatList(
+    public ResponseEntity<CommonResponse<Slice<ResponseListChatPostDto>>> getChatList(
         @PathVariable Long performanceId,
         @RequestParam(defaultValue = "title") String searchType,
         @RequestParam(required = false) String keyword,
@@ -113,7 +116,84 @@ public class ChatController {
         );
 
         log.info("채팅방 목록 조회 완료 - 반환 데이터 수: {}", result.getContent().size());
-        return CommonResponse.ok(result, "채팅방 목록 조회가 완료되었습니다.");
+        return ResponseEntity.ok(CommonResponse.ok(result, "채팅방 목록 조회가 완료되었습니다."));
+    }
+
+    /**
+     * 참여하고 있는 채팅방을 최신 갱신된 순으로 limit까지 불러오는 api
+     *
+     * @param limit
+     * @return
+     */
+
+    @ResponseBody
+    @GetMapping("/api/chat/join")
+    public ResponseEntity<CommonResponse<List<ResponseParticipatingChatPostDto>>> getChatJoin(
+        @RequestParam(defaultValue = "3") int limit
+    ) {
+        log.info("참여 채팅방 목록 조회 시작");
+        Long userId = 1L;
+
+        if (userId == null) {
+            // 로그인 안 됨 -> 빈 리스트 반환
+            return ResponseEntity.ok(CommonResponse.ok(Collections.emptyList(), "로그인 필요"));
+        }
+
+        List<ResponseParticipatingChatPostDto> result = chatService.getChatPostJoinList(userId, limit);
+
+        return ResponseEntity.ok(CommonResponse.ok(result, " 참여 채팅방 목록 조회 완료"));
+    }
+
+    /**
+     * 핫한 채팅방 조회
+     *
+     * @param limit
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/api/chat/hot")
+    public ResponseEntity<CommonResponse<List<ResponseParticipatingChatPostDto>>> getChatHot(
+        @RequestParam(defaultValue = "10") int limit
+    ) {
+        log.info("핫한 채팅방 목록 조회 시작");
+
+
+        List<ResponseParticipatingChatPostDto> result = chatService.getChatListHot(limit);
+
+        return ResponseEntity.ok(CommonResponse.ok(result, " 핫한 채팅방 조회 완료"));
+
+    }
+
+    /**
+     * 참여중인 모든 채팅방 출력
+     *
+     * @param page
+     * @param size
+     * @param keyword
+     * @param searchType
+     * @param onlyMine
+     * @return
+     */
+    @ResponseBody
+    @GetMapping("/api/chat/join/full")
+    public ResponseEntity<CommonResponse<Slice<ResponseParticipatingChatPostDto>>> getChatJoin(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(defaultValue = "title") String searchType,
+        @RequestParam(defaultValue = "false") boolean onlyMine
+    ) {
+        Long userId = 1L; // 로그인 사용자 ID
+
+        // 안전 처리
+        page = Math.max(page, 0);
+        size = Math.max(size, 1);
+
+        if (keyword != null && keyword.isBlank()) keyword = null;
+        Slice<ResponseParticipatingChatPostDto> result = chatService.getChatPostJoinListFull(
+            userId, page, size, keyword, searchType
+        );
+        return ResponseEntity.ok(CommonResponse.ok(result, "참여 채팅방 목록 조회 완료"));
     }
 
 }
