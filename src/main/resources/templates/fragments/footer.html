@@ -1,0 +1,43 @@
+<!-- footer fragment -->
+<footer th:fragment="footer">
+
+  <style>
+    .footer-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 76px;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #eaeaea;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+      z-index: 100;
+    }
+
+    .footer-link {
+      text-decoration: none;
+      color: #3d3d3d;
+      font-size: 11px;
+    }
+
+    .footer-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 60px;
+    }
+  </style>
+
+  <div class="footer-wrapper">
+    <a class="footer-link"><div class="footer-item"><span>홈</span></div></a>
+    <a class="footer-link"><div class="footer-item"><span>검색</span></div></a>
+    <a class="footer-link"><div class="footer-item"><span>작성</span></div></a>
+    <a class="footer-link"><div class="footer-item"><span>알림</span></div></a>
+    <a class="footer-link"><div class="footer-item"><span>마이</span></div></a>
+  </div>
+
+</footer>

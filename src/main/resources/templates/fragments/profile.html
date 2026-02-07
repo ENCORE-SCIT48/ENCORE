@@ -1,0 +1,41 @@
+<!-- profile fragment -->
+<div th:fragment="profile">
+
+  <style>
+    .profile-circle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      background-color: #e5e5e5;
+      border-radius: 50%;
+    }
+
+    .profile-circle::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background-color: #bdbdbd;
+      border-radius: 50%;
+    }
+
+    .profile-circle::after {
+      content: "";
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 14px;
+      background-color: #bdbdbd;
+      border-radius: 10px 10px 6px 6px;
+    }
+  </style>
+
+  <div class="profile-circle"></div>
+</div>
