@@ -1,202 +1,112 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8" />
-        <title>회원가입</title>
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/litera/bootstrap.min.css"
-            rel="stylesheet"
-        />
-        <link rel="stylesheet" th:href="@{/css/auth/join.css}" />
-        <script th:src="@{/js/auth/join.js}"></script>
-    </head>
 
-    <body>
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <button type="button" class="btn btn-link mb-3">
-                                ← 뒤로가기
-                            </button>
+<head>
+    <meta charset="UTF-8" />
+    <title>회원가입</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/litera/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/css/auth/join.css}" />
+    <script th:src="@{/js/auth/join.js}"></script>
+</head>
 
-                            <form method="post" th:action="@{/auth/join}">
-                                <h1>회원 가입</h1>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <button type="button" class="btn btn-link mb-3">
+                            ← 뒤로가기
+                        </button>
 
-                                <div class="mb-3">
-                                    <label for="email" class="form-label"
-                                        >이메일</label
-                                    >
-                                    <div class="input-group">
-                                        <input
-                                            id="email"
-                                            name="email"
-                                            type="email"
-                                            class="form-control"
-                                            placeholder="이메일 입력"
-                                        />
-                                        <button
-                                            class="btn btn-outline-secondary"
-                                            type="button"
-                                        >
-                                            인증
-                                        </button>
-                                    </div>
-                                </div>
-                                <div
-                                    id="authCodeSection"
-                                    style="display: none"
-                                    class="mt-2"
-                                >
-                                    <div class="input-group">
-                                        <input
-                                            type="text"
-                                            id="authCode"
-                                            name="authCode"
-                                            class="form-control"
-                                            maxlength="6"
-                                            placeholder="인증번호 6자리"
-                                        />
-                                        <button
-                                            class="btn btn-primary"
-                                            type="button"
-                                            id="verifyBtn"
-                                        >
-                                            확인
-                                        </button>
-                                    </div>
-                                    <small class="text-muted"
-                                        >남은 시간:
-                                        <span id="timer">05:00</span></small
-                                    >
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label"
-                                        >비밀번호</label
-                                    >
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        class="form-control"
-                                        placeholder="비밀번호 입력"
-                                    />
-                                </div>
+                        <form method="post" th:action="@{/auth/join}">
+                            <h1>회원 가입</h1>
 
-                                <div class="mb-3">
-                                    <label
-                                        for="passwordConfirm"
-                                        class="form-label"
-                                        >비밀번호 확인</label
-                                    >
-                                    <input
-                                        id="passwordConfirm"
-                                        name="passwordConfirm"
-                                        type="password"
-                                        class="form-control"
-                                        placeholder="비밀번호 다시 입력"
-                                    />
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="nickname" class="form-label"
-                                        >닉네임</label
-                                    >
-                                    <input
-                                        id="nickname"
-                                        name="nickname"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="닉네임 입력"
-                                    />
-                                </div>
-                                <div
-                                    class="mb-3 d-flex justify-content-between align-items-center"
-                                >
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            name="agreeTerms"
-                                            type="checkbox"
-                                            id="agreeTerms"
-                                        />
-                                        <label
-                                            class="form-check-label"
-                                            for="agreeTerms"
-                                        >
-                                            서비스 이용약관 동의 (필수)
-                                        </label>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-link p-0"
-                                    >
-                                        약관보기
+                            <div class="mb-3">
+                                <label for="email" class="form-label">이메일</label>
+                                <div class="input-group">
+                                    <input id="email" name="email" type="email" class="form-control"
+                                        placeholder="이메일 입력" />
+                                    <button class="btn btn-outline-secondary" type="button">
+                                        인증
                                     </button>
                                 </div>
-                                <div
-                                    class="mb-3 d-flex justify-content-between align-items-center"
-                                >
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            name="agreePrivacy"
-                                            type="checkbox"
-                                            id="agreePrivacy"
-                                        />
-                                        <label
-                                            class="form-check-label"
-                                            for="agreePrivacy"
-                                        >
-                                            개인정보 수집 및 이용 동의 (필수)
-                                        </label>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-link p-0"
-                                    >
-                                        약관보기
+                            </div>
+                            <div id="authCodeSection" style="display: none" class="mt-2">
+                                <div class="input-group">
+                                    <input type="text" id="authCode" name="authCode" class="form-control" maxlength="6"
+                                        placeholder="인증번호 6자리" />
+                                    <button class="btn btn-primary" type="button" id="verifyBtn">
+                                        확인
                                     </button>
                                 </div>
-                                <div
-                                    class="mb-3 d-flex justify-content-between align-items-center"
-                                >
-                                    <div class="form-check">
-                                        <input
-                                            class="form-check-input"
-                                            name="agreeMarketing"
-                                            type="checkbox"
-                                            id="agreeMarketing"
-                                        />
-                                        <label
-                                            class="form-check-label"
-                                            for="agreeMarketing"
-                                        >
-                                            마케팅 정보수신 동의 (선택)
-                                        </label>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-link p-0"
-                                    >
-                                        약관보기
-                                    </button>
-                                </div>
+                                <small id="timerContainer" class="text-muted">남은 시간: <span
+                                        id="timer">05:00</span></small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">비밀번호</label>
+                                <input id="password" name="password" type="password" class="form-control"
+                                    placeholder="비밀번호 입력" />
+                            </div>
 
-                                <div class="d-grid mt-4">
-                                    <button
-                                        type="submit"
-                                        class="btn btn-danger btn-lg"
-                                    >
-                                        회원가입
-                                    </button>
+                            <div class="mb-3">
+                                <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
+                                <input id="passwordConfirm" name="passwordConfirm" type="password" class="form-control"
+                                    placeholder="비밀번호 다시 입력" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nickname" class="form-label">닉네임</label>
+                                <input id="nickname" name="nickname" type="text" class="form-control"
+                                    placeholder="닉네임 입력" />
+                            </div>
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" name="agreeTerms" type="checkbox" id="agreeTerms" />
+                                    <label class="form-check-label" for="agreeTerms">
+                                        서비스 이용약관 동의 (필수)
+                                    </label>
                                 </div>
-                            </form>
-                        </div>
+                                <button type="button" class="btn btn-link p-0">
+                                    약관보기
+                                </button>
+                            </div>
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" name="agreePrivacy" type="checkbox"
+                                        id="agreePrivacy" />
+                                    <label class="form-check-label" for="agreePrivacy">
+                                        개인정보 수집 및 이용 동의 (필수)
+                                    </label>
+                                </div>
+                                <button type="button" class="btn btn-link p-0">
+                                    약관보기
+                                </button>
+                            </div>
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" name="agreeMarketing" type="checkbox"
+                                        id="agreeMarketing" />
+                                    <label class="form-check-label" for="agreeMarketing">
+                                        마케팅 정보수신 동의 (선택)
+                                    </label>
+                                </div>
+                                <button type="button" class="btn btn-link p-0">
+                                    약관보기
+                                </button>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    회원가입
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>
