@@ -292,19 +292,19 @@ public class ChatService {
     }
 
     /**
-     * 참여중인 채팅방 리스트 조회
+     * 참여중인 채팅방 리스트를 리미트까지 조회
      *
      * @param loginUserId
      * @param limit
      * @return
      */
-    public List<ResponseParticipatingChatPostDto> getChatPostJoinList(Long loginUserId, int limit) {
+    public List<ResponseParticipantChatPostDto> getChatPostJoinList(Long loginUserId, int limit) {
 
         List<ChatPost> chatPostList = chatPostRepository.findTopParticipatingByUserIdNative(loginUserId, limit);
-        List<ResponseParticipatingChatPostDto> participatingChatPostDtoList = new ArrayList<>();
+        List<ResponseParticipantChatPostDto> participatingChatPostDtoList = new ArrayList<>();
 
         for (ChatPost chatPost : chatPostList) {
-            ResponseParticipatingChatPostDto dto = ResponseParticipatingChatPostDto.from(chatPost);
+            ResponseParticipantChatPostDto dto = ResponseParticipantChatPostDto.from(chatPost);
 
             participatingChatPostDtoList.add(dto);
         }
@@ -314,22 +314,22 @@ public class ChatService {
     }
 
     /**
-     * 보내진 메시지가 최신인 순의 채팅방 조회
+     * 모든 커뮤니티 채팅방 중 보내진 메시지가 최신인 순인 핫한 채팅방 조회
      *
      * @param limit
      * @return
      */
-    public List<ResponseParticipatingChatPostDto> getChatListHot(int limit) {
+    public List<ResponseParticipantChatPostDto> getChatListHot(int limit) {
 
         List<ChatPost> chatPostList = chatPostRepository.findHotChatPosts(limit);
 
         return chatPostList.stream()
-            .map(ResponseParticipatingChatPostDto::from)
+            .map(ResponseParticipantChatPostDto::from)
             .collect(Collectors.toList());
     }
 
     /**
-     * 참여중인 전체 채팅방을 조회하고 키워드 별 검색함
+     * 참여중인 전체 채팅방을 조회하고 키워드 별 검색
      *
      * @param userId
      * @param page
@@ -339,7 +339,7 @@ public class ChatService {
      * @return
      */
 
-    public Slice<ResponseParticipatingChatPostDto> getChatPostJoinListFull(
+    public Slice<ResponseParticipantChatPostDto> getChatPostJoinListFull(
         Long userId,
         int page,
         int size,
@@ -358,9 +358,9 @@ public class ChatService {
 
         boolean hasNext = chatPosts.size() > size;
 
-        List<ResponseParticipatingChatPostDto> dtoList = chatPosts.stream()
+        List<ResponseParticipantChatPostDto> dtoList = chatPosts.stream()
             .limit(size)
-            .map(ResponseParticipatingChatPostDto::from)
+            .map(ResponseParticipantChatPostDto::from)
             .toList();
 
         Pageable pageable = PageRequest.of(page, size);

@@ -150,7 +150,7 @@ public class ChatPageController {
     /**
      * 푸터 채팅방 이동 페이지
      *
-     * @return
+     * @return chat/chatJoinList.html
      */
     @GetMapping("/chat/list")
     public String chatList(
@@ -162,7 +162,7 @@ public class ChatPageController {
     /**
      * 참여중인 채팅방 글 전체 조회 페이지 이동
      *
-     * @return
+     * @return chat/chatJoinListFull.html
      */
     @GetMapping("/chat/list/join")
     public String chatListJoin() {

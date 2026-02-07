@@ -91,7 +91,7 @@ public class ChatController {
     }
 
     /**
-     * [설명] 특정 공연에 종속된 채팅방 목록을 페이징하여 조회합니다.
+     * 특정 공연에 종속된 채팅방 목록을 페이징하여 조회한다.
      *
      * @param performanceId 공연 ID
      * @param searchType    검색 타입 (title, titleContent)
@@ -120,63 +120,60 @@ public class ChatController {
     }
 
     /**
-     * 참여하고 있는 채팅방을 최신 갱신된 순으로 limit까지 불러오는 api
+     * 참여하고 있는 채팅방을 최신 갱신된 순으로 limit까지 불러온다.
      *
-     * @param limit
-     * @return
+     * @param limit 가져올 채팅방의 최대 수
+     * @return 참여한 채팅방 목록
      */
-
     @ResponseBody
     @GetMapping("/api/chat/join")
-    public ResponseEntity<CommonResponse<List<ResponseParticipatingChatPostDto>>> getChatJoin(
+    public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatJoin(
         @RequestParam(defaultValue = "3") int limit
     ) {
         log.info("참여 채팅방 목록 조회 시작");
         Long userId = 1L;
-
         if (userId == null) {
             // 로그인 안 됨 -> 빈 리스트 반환
             return ResponseEntity.ok(CommonResponse.ok(Collections.emptyList(), "로그인 필요"));
         }
-
-        List<ResponseParticipatingChatPostDto> result = chatService.getChatPostJoinList(userId, limit);
-
+        List<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinList(userId, limit);
         return ResponseEntity.ok(CommonResponse.ok(result, " 참여 채팅방 목록 조회 완료"));
     }
 
     /**
      * 핫한 채팅방 조회
      *
-     * @param limit
-     * @return
+     * @param limit 가져올 채팅방의 최대 수
+     * @return 모든 채팅방 중 가장 최근 활동이 있는 채팅방
      */
     @ResponseBody
     @GetMapping("/api/chat/hot")
-    public ResponseEntity<CommonResponse<List<ResponseParticipatingChatPostDto>>> getChatHot(
+    public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatHot(
         @RequestParam(defaultValue = "10") int limit
     ) {
         log.info("핫한 채팅방 목록 조회 시작");
-
-
-        List<ResponseParticipatingChatPostDto> result = chatService.getChatListHot(limit);
-
+        List<ResponseParticipantChatPostDto> result = chatService.getChatListHot(limit);
         return ResponseEntity.ok(CommonResponse.ok(result, " 핫한 채팅방 조회 완료"));
 
     }
 
     /**
-     * 참여중인 모든 채팅방 출력
+     * 로그인한 사용자가 참여 중인 모든 채팅방 목록을 조회한다.
+     * <p>
+     * 페이지네이션 기반으로 채팅방 목록을 반환하며,
+     * 검색어 및 검색 타입을 통해 채팅방을 필터링할 수 있다.
      *
-     * @param page
-     * @param size
-     * @param keyword
-     * @param searchType
-     * @param onlyMine
-     * @return
+     * @param page       조회할 페이지 번호 (0부터 시작, 기본값: 0)
+     * @param size       한 페이지당 조회할 채팅방 개수 (기본값: 20)
+     * @param keyword    검색어 (null 또는 공백일 경우 전체 조회)
+     * @param searchType 검색 기준 (예: title, content 등 / 기본값: title)
+     * @param onlyMine   본인이 작성한 채팅방만 조회할지 여부
+     *                   (true: 본인 작성 채팅방만, false: 참여 중인 모든 채팅방)
+     * @return 참여 중인 채팅방 목록을 담은 {@link Slice} 형태의 응답 객체
      */
     @ResponseBody
     @GetMapping("/api/chat/join/full")
-    public ResponseEntity<CommonResponse<Slice<ResponseParticipatingChatPostDto>>> getChatJoin(
+    public ResponseEntity<CommonResponse<Slice<ResponseParticipantChatPostDto>>> getChatJoin(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @RequestParam(required = false) String keyword,
@@ -185,12 +182,11 @@ public class ChatController {
     ) {
         Long userId = 1L; // 로그인 사용자 ID
 
-        // 안전 처리
         page = Math.max(page, 0);
         size = Math.max(size, 1);
 
         if (keyword != null && keyword.isBlank()) keyword = null;
-        Slice<ResponseParticipatingChatPostDto> result = chatService.getChatPostJoinListFull(
+        Slice<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinListFull(
             userId, page, size, keyword, searchType
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "참여 채팅방 목록 조회 완료"));

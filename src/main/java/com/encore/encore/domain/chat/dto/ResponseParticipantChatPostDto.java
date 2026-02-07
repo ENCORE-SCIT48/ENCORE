@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseParticipatingChatPostDto {
+public class ResponseParticipantChatPostDto {
     private Long id;
     private String title;
     private ChatPost.Status status;
@@ -21,9 +21,16 @@ public class ResponseParticipatingChatPostDto {
     private LocalDateTime updatedAt;
     private Long performanceId;
     private String performanceTitle;
+    private String roomType;
 
-    public static ResponseParticipatingChatPostDto from(ChatPost chatPost) {
-        return ResponseParticipatingChatPostDto.builder()
+    /**
+     * 가장 최근에 활동이 일어난 시간을 기준으로 가져오기 채팅방을 가져오기 위한 dto
+     *
+     * @param chatPost
+     * @return
+     */
+    public static ResponseParticipantChatPostDto from(ChatPost chatPost) {
+        return ResponseParticipantChatPostDto.builder()
             .id(chatPost.getId())
             .title(chatPost.getTitle())
             .status(chatPost.getStatus())

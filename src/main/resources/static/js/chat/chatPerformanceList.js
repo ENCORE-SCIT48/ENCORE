@@ -10,15 +10,12 @@ $(document).ready(function() {
         return;
     }
 
-    // 초기 로드
     loadChatList(0, PERFORMANCE_ID);
 
-    // 검색 버튼/Enter 이벤트
     $('#searchBtn').click(() => resetAndSearch(PERFORMANCE_ID));
     $('#keyword').on('keypress', e => { if (e.key === 'Enter') resetAndSearch(PERFORMANCE_ID); });
     $('#excludeClosed').change(() => resetAndSearch(PERFORMANCE_ID));
 
-    // 무한 스크롤
     $(window).scroll(() => {
         if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
             if (!isLoading && !isLastPage) loadChatList(currentPage + 1, PERFORMANCE_ID);
@@ -26,7 +23,6 @@ $(document).ready(function() {
     });
 });
 
-// 검색 리셋 + 재조회
 function resetAndSearch(performanceId) {
     $('#chat-list-container').empty();
     currentPage = 0;
@@ -34,7 +30,6 @@ function resetAndSearch(performanceId) {
     loadChatList(0, performanceId);
 }
 
-// AJAX 호출
 function loadChatList(page, performanceId) {
     isLoading = true;
 
@@ -67,7 +62,6 @@ function loadChatList(page, performanceId) {
     });
 }
 
-// 리스트 렌더링
 function renderList(items, performanceId) {
     let html = '';
     items.forEach(chat => {
@@ -75,24 +69,25 @@ function renderList(items, performanceId) {
         const statusClass = isClosed ? 'closed' : 'open';
         const statusText = isClosed ? '마감' : '모집중';
 
-        html += `
-        <div class="chat-item-card mb-2" onclick="location.href='/performance/${performanceId}/chat/${chat.id}'">
-            <div class="chat-info">
-                <div class="d-flex align-items-center mb-1">
-                    <small class="performance-tag">${chat.performanceTitle}</small>
-                    <span class="status-badge ${statusClass}">${statusText}</span>
-                </div>
-                <h5 class="chat-title">${chat.title}</h5>
-                <div class="chat-meta">
-                    <span class="divider">|</span>
-                    <span class="date">${chat.updatedAt}</span>
-                </div>
-            </div>
-            <div class="member-info">
-                <div class="member-count">${chat.currentMember}/${chat.maxMember}</div>
-            </div>
-        </div>`;
+        $('#chat-list-container').append(`
+        <div class="chat-item"
+             onclick="location.href='/performance/${performanceId}/chat/${chat.id}'">
+          <span class="status-badge ${statusClass}">
+            ${statusText}
+          </span>
+          <div class="chat-title">
+            ${chat.title}
+          </div>
+          <div class="chat-bottom">
+            <span class="date">${chat.updatedAt}</span>
+            <span><i class="fa-solid fa-users"></i>
+              ${chat.currentMember}/${chat.maxMember}명
+            </span>
+          </div>
+        </div>
+
+        `);
     });
 
-    $('#chat-list-container').append(html);
+
 }

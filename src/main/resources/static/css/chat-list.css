@@ -26,6 +26,9 @@
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    display: flex;
+    flex-direction: column; /* ⭐ 전부 세로 */
+    gap: 4px;
 }
 
 .chat-item:hover {
@@ -41,6 +44,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.chat-bottom {
+  display: flex;          /* ⭐ 맨 아래만 가로 */
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #777;
 }
 
 /* 참여 인원 및 날짜 정보 */
@@ -96,5 +105,19 @@
 
 .chat-show-all:hover {
   color: #a71d2a; /* 좀 더 어두운 빨강 */
+}
+
+
+.chat-right {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+
+.chat-left {
+  display: flex;
+  flex-direction: column; /* ⭐ status 위 / title 아래 */
+  gap: 6px;
 }
 

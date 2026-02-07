@@ -8,14 +8,13 @@ $(document).ready(function() {
     $('#chatUpdateForm').submit(function(e) {
         e.preventDefault();
 
-        // 1. HTML Hidden Input 및 입력 필드에서 데이터 추출
         const performanceId = $('#perfId').val();
         const id = $('#chatId').val();
 
         const data = {
             title: $('#title').val(),
             content: $('#content').val(),
-            status: $('#status').val() // 모집 상태 (OPEN/CLOSED)
+            status: $('#status').val()
         };
 
         console.log("전송 데이터:", data);
@@ -27,10 +26,8 @@ $(document).ready(function() {
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: function(res) {
-                // 서버 응답 규격(CommonResponse)에 따른 분기 처리
                 if(res.data || res.success) {
                     alert('수정이 완료되었습니다.');
-                    // 수정 완료 후 상세 페이지로 리다이렉트
                     window.location.href = `/performance/${performanceId}/chat/${id}`;
                 } else {
                     alert('실패: ' + res.message);
@@ -38,7 +35,6 @@ $(document).ready(function() {
             },
             error: function(xhr) {
                 console.error("에러 상세:", xhr);
-                // 서버에서 전달한 에러 메시지가 있을 경우 우선 출력
                 const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "서버 에러가 발생했습니다.";
                 alert('에러 발생: ' + errorMsg);
             }

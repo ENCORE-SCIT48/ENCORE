@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" th:href="@{/css/chat.css}">
+  <link rel="stylesheet" th:href="@{/css/chat-list.css}">
 
   <!-- JS -->
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -16,7 +17,7 @@
 <body>
 <div class="app-container">
 
-  <!-- 🔹 헤더 (고정) -->
+  <!--  헤더 (고정) -->
   <header class="app-header">
     <div class="d-flex align-items-center gap-2">
       <button class="back-btn" onclick="history.back()">
@@ -47,15 +48,13 @@
         </button>
       </div>
 
-      <div class="form-check form-switch mt-2">
+      <div class="form-check form-switch mt-2 ">
         <input class="form-check-input" type="checkbox" id="excludeClosed" checked>
         <label class="form-check-label" for="excludeClosed">
           모집 중인 방만 보기
         </label>
       </div>
     </div>
-
-    <!-- 글로벌 채팅방 -->
 
     <div th:if="${performanceAllChatPost != null}" class="chat-global-section"
          th:onclick="|location.href='/performance/${performanceId}/chat/${performanceAllChatPost.id}'|">

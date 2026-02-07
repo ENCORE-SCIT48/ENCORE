@@ -1,9 +1,6 @@
-$(document).ready(function() {
-
+$(document).ready(function () {
     const performanceId = $("#chat-list-container").data("performance-id");
-
-    // 전체보기 + 버튼 클릭 이벤트
-    $('#btn-show-all-joined').on('click', function() {
+    $('#btn-show-all-joined').on('click', function () {
         location.href = '/chat/list/join'; // 전체 목록 페이지 URL
     });
 
@@ -14,7 +11,7 @@ $(document).ready(function() {
         url: `/api/chat/join`,
         method: "GET",
         data: { limit: 3 },
-        success: function(response) {
+        success: function (response) {
 
             let data = Array.isArray(response.data) ? response.data : [];
 
@@ -23,27 +20,31 @@ $(document).ready(function() {
                     `<div class="chat-empty">참여중인 채팅방이 없습니다.</div>`
                 );
             } else {
-                data.forEach(function(chat) {
+                data.forEach(function (chat) {
                     const formattedDate = dayjs(chat.updatedAt).format('YY.MM.DD HH:mm');
+                    const isClosed = chat.status === 'CLOSED';
+                    const statusClass = isClosed ? 'closed' : 'open';
+                    const statusText = isClosed ? '마감' : '모집중';
+
                     $("#joined-chat-container").append(
                         `<div class="chat-item" onclick="location.href='/performance/${chat.performanceId}/chat/${chat.id}'">
-                            <div class="performance-title">${chat.performanceTitle}</div>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            <small class="performance-tag">${chat.performanceTitle || '공연 정보 없음'}</small>
                             <div class="chat-title">${chat.title}</div>
-                            <div class="chat-info">
-                                <span>${chat.currentMember}/${chat.maxMember}명 참여</span>
+                        <div class="chat-info">
                                 <span>${formattedDate}</span>
-                            </div>
-                         </div>`
+                                <span><i class="fa-solid fa-users"></i> ${chat.currentMember}/${chat.maxMember}명</span>
+                        </div>
+                        </div>`
+
+
                     );
                 });
             }
-
-            // 참여중 채팅방 없거나 로그인 안 됐으면 HOT 채팅방도 같이 로드
             loadHotChats();
         },
-        error: function(err) {
+        error: function (err) {
             console.error("참여중 채팅방 로딩 실패", err);
-            // 오류 시에도 HOT 채팅방 로드
             loadHotChats();
         }
     });
@@ -56,7 +57,7 @@ $(document).ready(function() {
             url: `/api/chat/hot`,
             method: "GET",
             data: { limit: 10 },
-            success: function(response) {
+            success: function (response) {
                 let data = Array.isArray(response.data) ? response.data : [];
 
                 if (data.length === 0) {
@@ -66,22 +67,27 @@ $(document).ready(function() {
                     return;
                 }
 
-                data.forEach(function(chat) {
+                data.forEach(function (chat) {
                     const formattedDate = dayjs(chat.updatedAt).format('YY.MM.DD HH:mm');
+                    const isClosed = chat.status === 'CLOSED';
+                    const statusClass = isClosed ? 'closed' : 'open';
+                    const statusText = isClosed ? '마감' : '모집중';
 
                     $("#chat-list-container").append(
                         `<div class="chat-item hot" onclick="location.href='/performance/${chat.performanceId}/chat/${chat.id}'">
-                            <div class="performance-title">${chat.performanceTitle}</div>
+<span class="status-badge ${statusClass}">${statusText}</span>
+                            <small class="performance-tag">${chat.performanceTitle || '공연 정보 없음'}</small>
+
                             <div class="chat-title">${chat.title}</div>
                             <div class="chat-info">
-                                <span>${chat.currentMember}/${chat.maxMember}명 참여</span>
                                 <span>${formattedDate}</span>
+                                <div class="member-count">${chat.currentMember}/${chat.maxMember}</div>
                             </div>
-                         </div>`
+                        </div>`
                     );
                 });
             },
-            error: function(err) {
+            error: function (err) {
                 console.error("HOT 채팅방 로딩 실패", err);
             }
         });
