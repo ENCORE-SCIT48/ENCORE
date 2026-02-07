@@ -54,7 +54,7 @@ public class UserService {
 
         // 2. 비밀번호 일치 여부 확인
         if (!userJoinRequestDto.getPassword().equals(userJoinRequestDto.getPasswordConfirm())) {
-            throw new ApiException(ErrorCode.INVALID_REQUEST);
+            throw new ApiException(ErrorCode.INVALID_REQUEST,"비밀번호가 일치하지 않습니다.");
         }
 
         // 3.가장 최근에 성공한 인증 기록이 있는지 확인합니다
@@ -66,7 +66,7 @@ public class UserService {
 
         //4. 중복 체크
         if (userRepository.existsByEmail(email)) {
-            throw new ApiException(ErrorCode.CONFLICT);
+            throw new ApiException(ErrorCode.CONFLICT, "이미 가입된 이메일입니다.");
         }
 
         try {

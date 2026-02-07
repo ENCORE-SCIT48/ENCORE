@@ -1,113 +1,183 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const sendBtn = document.querySelector(".btn-outline-secondary"); // 인증버튼
-    const emailInput = document.getElementById("email");
-    const authSection = document.getElementById("authCodeSection");
-    const authCode = document.getElementById("authCode");
-    const verifyBtn = document.getElementById("verifyBtn");
-    const container = document.getElementById("timerContainer");
-    let timerInterval;
+document.addEventListener("DOMContentLoaded", () => {
+    // --- [1. 요소 캐싱] ---
+    const els = {
+        form: document.getElementById("joinForm"),
+        email: document.getElementById("email"),
+        sendBtn: document.getElementById("sendBtn"),
+        authSection: document.getElementById("authCodeSection"),
+        authCode: document.getElementById("authCode"),
+        verifyBtn: document.getElementById("verifyBtn"),
+        timerBox: document.getElementById("timerContainer"),
+        timer: document.getElementById("timer"),
+        pw: document.getElementById("password"),
+        pwConfirm: document.getElementById("passwordConfirm"),
+        nick: document.getElementById("nickname"),
+        agreeTerms: document.getElementById("agreeTerms"),
+        agreePrivacy: document.getElementById("agreePrivacy"),
+    };
 
-    verifyBtn.addEventListener("click", function () {
-        // 3. 입력한 이메일과 인증번호를 가져온다.
-        const email = emailInput.value;
-        const code = authCode.value;
+    // --- [2. 상태] ---
+    let state = {
+        timerId: null,
+        isEmailVerified: false,
+    };
 
-        // 4. fetch로 서버(/api/email/verify)에 보낸다.
-        // 5. 성공하면 "성공!" 알림을 띄우고, 실패하면 "다시 확인해라"라고 한다.
-        fetch("/api/email/verify", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: email,
-                code: code,
-            }),
-        }).then((res) => {
-            if (res.ok) {
-                alert("성공!");
-                // 타이머 멈추기
-                clearInterval(timerInterval);
+    // --- [3. 공통 유효성 표시] ---
+    function setValidation(el, isValid, message = "") {
+        const feedback =
+            el.parentElement.querySelector(".invalid-feedback") ||
+            el.closest(".mb-3")?.querySelector(".invalid-feedback");
 
-                // 1. 기존 회색 클래스(text-muted) 제거하고 초록색 클래스(text-success) 추가
-                container.classList.remove("text-muted");
-                container.classList.add("text-success");
-                container.innerHTML = "<b>인증 완료</b>";
+        el.classList.toggle("is-valid", isValid);
+        el.classList.toggle("is-invalid", !isValid);
 
-                // 1. 이메일 입력창이랑 인증번호 입력창을 수정 못 하게 막기
-                emailInput.readOnly = true;
-                authCode.readOnly = true;
+        if (!isValid && feedback && message) feedback.innerText = message;
+        return isValid;
+    }
 
-                // 2. 버튼들도 더 안 눌리게 비활성화
-                sendBtn.disabled = true;
-                verifyBtn.disabled = true;
-                verifyBtn.innerText = "인증 완료";
-            } else {
-                alert("인증 번호가 틀렸습니다.");
-            }
-        });
+    // --- [4. 검증 함수들] ---
+    const validators = {
+        password() {
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
+            return setValidation(
+                els.pw,
+                regex.test(els.pw.value),
+                "8자 이상, 영문+숫자 조합",
+            );
+        },
+        confirm() {
+            const ok =
+                els.pw.value === els.pwConfirm.value &&
+                els.pwConfirm.value !== "";
+            return setValidation(
+                els.pwConfirm,
+                ok,
+                "비밀번호가 일치하지 않습니다.",
+            );
+        },
+        nickname() {
+            const ok =
+                els.nick.value.length >= 2 && els.nick.value.length <= 10;
+            return setValidation(els.nick, ok, "닉네임은 2~10자");
+        },
+    };
+
+    // --- [5. 실시간 검증 바인딩] ---
+    els.pw.addEventListener("input", () => {
+        validators.password();
+        if (els.pwConfirm.value) validators.confirm();
     });
-    function startTimer(durationInSeconds) {
-        const timerDisplay = document.getElementById("timer");
-        let timeLeft = durationInSeconds;
+    els.pwConfirm.addEventListener("input", validators.confirm);
+    els.nick.addEventListener("input", validators.nickname);
 
-        // 혹시 이미 돌아가고 있는 타이머가 있다면 초기화
-        if (timerInterval) {
-            clearInterval(timerInterval);
-        }
+    // --- [6. 타이머] ---
+    function startTimer(seconds) {
+        clearInterval(state.timerId);
+        let left = seconds;
 
-        timerInterval = setInterval(function () {
-            let minutes = Math.floor(timeLeft / 60);
-            let seconds = timeLeft % 60;
+        state.timerId = setInterval(() => {
+            const m = String(Math.floor(left / 60)).padStart(2, "0");
+            const s = String(left % 60).padStart(2, "0");
+            els.timer.textContent = `${m}:${s}`;
 
-            // 한 자릿수일 때 앞에 0 붙이기 (ex: 09:05)
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
-
-            timerDisplay.textContent = minutes + ":" + seconds;
-
-            if (--timeLeft < 0) {
-                clearInterval(timerInterval);
-                timerDisplay.textContent = "시간 초과";
-                timerDisplay.style.color = "red";
-
-                // 시간 초과 시 '확인' 버튼 비활성화 (보안상 재발송 유도)
-                document.getElementById("verifyBtn").disabled = true;
-                alert("인증 시간이 만료되었습니다. 다시 발송해주세요.");
+            if (--left < 0) {
+                clearInterval(state.timerId);
+                els.timer.textContent = "시간 초과";
+                els.timer.style.color = "red";
+                els.verifyBtn.disabled = true;
             }
         }, 1000);
     }
-    sendBtn.addEventListener("click", function () {
-        // 1. 이메일 입력값 가져오기
-        const email = emailInput.value;
 
-        // 버튼 비활성화 (연타 방지)
-        sendBtn.disabled = true;
-        sendBtn.innerText = "발송 완료";
-        // 2. Fetch를 이용해서 서버에 보내기 (여기를 직접 짜보세요!)
-        // 힌트: fetch("/url", { method: "POST", ... })
-        fetch("/api/email/send", {
-            method: "post",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: email,
-            }),
-        })
-            // 3. 성공했을 때 authSection 보여주기
-            // 힌트: .style.display = "block"
-            .then((res) => {
-                if (res.ok) {
-                    alert("메일이 발송되었습니다!");
-                    startTimer(300); // 5분 타이머 시작
-                    authSection.style.display = "block";
-                } else {
-                    alert("실패했습니다. 이메일을 확인하세요.");
-                    // 실패하면 다시 누를 수 있게 복구
-                    sendBtn.disabled = false;
-                    sendBtn.innerText = "인증";
-                }
+    // --- [7. 이메일 전송] ---
+    els.sendBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(els.email.value)) {
+            return setValidation(
+                els.email,
+                false,
+                "올바른 이메일 형식이 아닙니다.",
+            );
+        }
+
+        try {
+            const res = await fetch("/api/email/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: els.email.value }),
             });
+
+            if (!res.ok) throw new Error("send fail");
+
+            alert("인증 메일이 발송되었습니다.");
+            els.authSection.style.display = "block";
+            startTimer(300);
+            setValidation(els.email, true);
+        } catch (err) {
+            alert("발송 실패. 이메일을 확인해주세요.");
+            els.sendBtn.disabled = false;
+        }
+    });
+
+    // --- [8. 인증 확인] ---
+    els.verifyBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        try {
+            const res = await fetch("/api/email/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: els.email.value,
+                    code: els.authCode.value,
+                }),
+            });
+
+            if (!res.ok) throw new Error("verify fail");
+
+            alert("인증 성공!");
+            state.isEmailVerified = true;
+            clearInterval(state.timerId);
+            els.timerBox.className = "text-success fw-bold";
+            els.timerBox.innerHTML = "✓ 인증 완료";
+            [els.email, els.authCode, els.sendBtn, els.verifyBtn].forEach(
+                (el) => (el.disabled = true),
+            );
+            setValidation(els.authCode, true);
+        } catch (err) {
+            setValidation(els.authCode, false, "인증번호가 틀렸습니다.");
+        }
+    });
+
+    // --- [9. 최종 제출] ---
+    els.form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const ok =
+            validators.password() &
+            validators.confirm() &
+            validators.nickname();
+
+        if (!state.isEmailVerified) {
+            alert("이메일 인증을 먼저 완료해주세요.");
+            return;
+        }
+
+        if (!els.agreeTerms.checked || !els.agreePrivacy.checked) {
+            alert("필수 약관에 동의해야 합니다.");
+            return;
+        }
+
+        if (!ok) {
+            alert("입력값을 다시 확인해주세요.");
+            document.querySelector(".is-invalid")?.focus();
+            return;
+        }
+
+        // disabled 해제 후 제출
+        els.email.disabled = false;
+        e.target.submit();
     });
 });

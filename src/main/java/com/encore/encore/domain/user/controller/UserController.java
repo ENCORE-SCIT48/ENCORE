@@ -3,6 +3,8 @@ package com.encore.encore.domain.user.controller;
 
 import com.encore.encore.domain.user.dto.UserJoinRequestDto;
 import com.encore.encore.domain.user.service.UserService;
+import com.encore.encore.global.error.ApiException;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +45,18 @@ public class UserController {
                        Model model) {
 
         log.info("POST /user/join : 회원가입 시도 [Email: {}]", userJoinRequestDto.getEmail());
-
+    try{
         String email = userService.join(userJoinRequestDto);
 
         model.addAttribute("userJoinRequest", email);
 
         return "redirect:/auth/login"; // 가입 성공 시 로그인 페이지로 이동
+    } catch (ApiException e) {
+        log.warn("회원가입 실패 - Email: {}, Error: {}", userJoinRequestDto.getEmail(), e.getMessage());
+        model.addAttribute("message", e.getMessage());
+        return "auth/join"; // ❗ 다시 회원가입 페이지로
     }
+}
 
     /**
      * 로그인 화면 이동
