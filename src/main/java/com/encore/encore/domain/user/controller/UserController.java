@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
 @Controller
@@ -41,14 +42,16 @@ public class UserController {
      * @return 로그인 페이지로의 redirect 경로
      */
     @PostMapping("/join")
-    public String join(@Valid UserJoinRequestDto userJoinRequestDto,
-                       Model model) {
+    public String join(
+        @Valid UserJoinRequestDto userJoinRequestDto
+        ,RedirectAttributes rttr
+        ,Model model) {
 
         log.info("POST /user/join : 회원가입 시도 [Email: {}]", userJoinRequestDto.getEmail());
     try{
         String email = userService.join(userJoinRequestDto);
 
-        model.addAttribute("userJoinRequest", email);
+        rttr.addFlashAttribute("message", email + "님, 가입을 축하합니다! 로그인을 진행해주세요.");
 
         return "redirect:/auth/login"; // 가입 성공 시 로그인 페이지로 이동
     } catch (ApiException e) {
