@@ -247,4 +247,9 @@ public class ChatService {
         log.info("권한 확인 완료");
     }
 
+    public Long getChatRoomId(Long id) {
+        ChatRoom chatRoom = chatRoomRepository.findByChatPost_Id(id);
+
+        return chatRoom.getRoomId();
+    }
 }

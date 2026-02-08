@@ -31,7 +31,7 @@
 
 
 <!-- 참가 버튼 -->
-<form th:action="@{/chat/addParticipant/{id}(id=${chatPost.id})}" method="post">
+<form th:action="@{/chat/{id}(id=${roomId})}" method="post">
   <button type="submit">참가하기</button>
 </form>
 

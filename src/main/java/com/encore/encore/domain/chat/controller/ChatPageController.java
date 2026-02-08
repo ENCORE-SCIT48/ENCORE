@@ -86,6 +86,8 @@ public class ChatPageController {
 
         try {
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+            Long roomId = chatService.getChatRoomId(id);
+            model.addAttribute("roomId", roomId);
             model.addAttribute("chatPost", dto);
             return "chat/chatPostDetail";
         } catch (Exception e) {
