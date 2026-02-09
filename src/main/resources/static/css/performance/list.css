@@ -1,0 +1,76 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    background: #eaeaea;
+    display: flex;
+    justify-content: center;
+}
+
+.app-wrapper {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+.top-slot {
+    height: 24px;
+}
+
+.bottom-slot {
+    height: 24px;
+}
+
+.app-main {
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.hot-carousel-inner {
+    background: #dcdcdc;
+    border-radius: 8px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    padding-left: 18px;
+    box-sizing: border-box;
+}
+
+.hot-title {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.tab-btn {
+    border: 0;
+    background: transparent;
+    padding: 6px 2px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0.85;
+}
+
+.tab-btn.active {
+    opacity: 1;
+    border-bottom: 2px solid #111;
+}
+
+.perf-card {
+    width: 100%;
+    background: #dcdcdc;
+    border-radius: 8px;
+    aspect-ratio: 3 / 4;
+}

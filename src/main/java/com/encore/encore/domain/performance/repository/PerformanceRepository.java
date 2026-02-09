@@ -4,8 +4,11 @@ import com.encore.encore.domain.performance.entity.Performance;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PerformanceRepository extends JpaRepository<Performance, Long> {
 
@@ -40,4 +43,12 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
      * @return 최신순 Top10 공연
      */
     List<Performance> findTop10ByStatusOrderByCreatedAtDesc(String status);
+
+    // 공연 상세 조회: venue를 fetch join 해서 LAZY 문제 방지
+    @Query("""
+    select p from Performance p
+    left join fetch p.venue v
+    where p.performanceId = :performanceId
+    """)
+    Optional<Performance> findDetailById(@Param("performanceId") Long performanceId);
 }
