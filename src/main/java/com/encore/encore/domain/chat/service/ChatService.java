@@ -3,6 +3,7 @@ package com.encore.encore.domain.chat.service;
 import com.encore.encore.domain.chat.dto.*;
 import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.entity.ChatRoom;
+import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.UserProfile;
@@ -36,6 +37,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final PerformanceRepository performanceRepository;
     private final UserProfileRepository userProfileRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
 
 
     /**
@@ -366,6 +368,39 @@ public class ChatService {
         Pageable pageable = PageRequest.of(page, size);
         return new SliceImpl<>(dtoList, pageable, hasNext);
     }
+
+    public Long getChatRoomId(Long id) {
+        ChatRoom chatRoom = chatRoomRepository.findByChatPost_Id(id);
+
+        return chatRoom.getRoomId();
+    }
+
+   /* public void getChatAlreadJoin(Long roomId, Long userId) {
+
+        boolean alreadyJoined = chatParticipantRepository.existsByRoomRoomIdAndUserUserId(roomId, userId);
+
+        if (!alreadyJoined) {
+
+
+            ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(
+                    () -> new EntityNotFoundException("채팅방이 존재하지 않습니다.")
+                );
+
+            User user = userRepository.findById(userId)
+                .orElseThrow(
+                    () -> new EntityNotFoundException("유저가 존재하지 않습니다.")
+                );
+            ChatParticipant participant = ChatParticipant.builder()
+                .user(user)
+                .room(chatRoom)
+                .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
+                .build();
+
+            chatParticipantRepository.save(participant);
+
+            chatRoom.getChatPost().setCurrentMember(chatRoom.getChatPost().getCurrentMember() + 1);
+        }*/
 
 
 }
