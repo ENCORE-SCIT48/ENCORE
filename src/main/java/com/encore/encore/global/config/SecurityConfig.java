@@ -4,8 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -20,23 +20,49 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. CSRF 보안 해제 (POST, PUT 테스트를 위해 필수)
-            .csrf(AbstractHttpConfigurer::disable)
+            // 1. CSRF 보호 비활성화 (개발 단계나 API 위주일 때 주로 끕니다. 운영 시에는 고려 필요)
+            .csrf(csrf -> csrf.disable())
 
-            // 2. CORS 허용 (프론트엔드 연결 대비)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // 3. H2 Console 등 프레임 사용 허용
-            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-
-            // 4. 모든 요청 완전 허용 (인증 절차 생략)
+            // 3. 개발용 임시로 모든 요청에 대해 인증 없이 접근 허용
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // 모든 요청(루트, API, Swagger 등)을 다 열어줌
+                .anyRequest().permitAll()
+            )
+//            // 2. 접근 권한 설정 (누가 어디에 들어올 수 있는지)
+//            .authorizeHttpRequests(auth -> auth
+//                // 회원가입, 메인 페이지, 정적 리소스(CSS/JS)는 누구나 접근 가능
+//                .requestMatchers("/", "/join", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+//                // 아까 언급한 Swagger 관련 경로도 열어줘야 합니다.
+//                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//                // 그 외 모든 요청은 로그인한 사용자만 접근 가능
+//                .anyRequest().authenticated()
+//            )
+
+            .formLogin(form -> form
+                .loginPage("/auth/login")
+                .loginProcessingUrl("/login")
+                .usernameParameter("email")
+                .defaultSuccessUrl("/", true)
+                .failureHandler((request, response, exception) -> {
+                    response.sendRedirect("/login?error=true");
+                })
+                .permitAll()
+            )
+
+            // 4. 로그아웃 설정
+            .logout(logout -> logout
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)   // 세션 무효화
             );
 
         return http.build();
     }
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        // 비밀번호를 데이터베이스에 그대로 저장하면 절대 안 됩니다!
+        // BCrypt라는 알고리즘으로 암호화해주는 빈을 등록합니다.
+        return new BCryptPasswordEncoder();
+    }
 
     // CORS 기본 설정: 모든 도메인 허용 (개발 단계용)
     @Bean
