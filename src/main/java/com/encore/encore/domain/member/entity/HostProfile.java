@@ -18,6 +18,11 @@ public class HostProfile extends BaseEntity {
     private Long hostId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+
+    // 초기 설정 완료 여부
+    @Builder.Default
+    private boolean isInitialized = false;
+
     private User user;
     private String organizationName;
     private String businessNumber;

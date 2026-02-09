@@ -11,10 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+/**
+ * 사용자의 프로필 선택 및 모드 전환을 관리하는 컨트롤러입니다.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/profiles")
@@ -24,34 +25,59 @@ public class ProfileController {
     private final ProfileService profileService;
 
     /**
-     * 프로필 전환 기능
-     * - 현재 사용자의 ActiveMode(USER, PERFORMER, HOST)를 변경합니다.
-     * @param mode        바꾸고 싶은 프로필
-     * @param userDetails 현재 유저 정보
+     * [화면] 프로필 선택 메인 페이지로 이동합니다.
+     * @return 프로필 선택 뷰 경로
+     */
+    @GetMapping("/select")
+    public String selectPage() {
+        return "profile/select";
+    }
+
+    /**
+     * [화면] 각 모드별 상세 설정 페이지로 이동합니다.
+     */
+    @GetMapping("/{mode}/setup")
+    public String setupPage(@PathVariable String mode) {
+        return "profile/" + mode + "-setup";
+    }
+    /**
+     * 사용자의 활성 프로필을 전환하고 세션을 갱신합니다.
+     * @param mode        변경하고자 하는 프로필 (USER, PERFORMER, HOST)
+     * @param userDetails 현재 로그인한 사용자의 상세 정보
      * @param session
      * @return
      */
     @PostMapping("/switch")
-    public String switchMode(@RequestParam ActiveMode mode, @AuthenticationPrincipal CustomUserDetails userDetails, HttpSession session) {
-        log.info("[Mode Switch] 요청 수신 - 유저: {}, 변경하려는 모드: {}", userDetails.getUsername(), mode);
+    public String switchMode(
+        @RequestParam ActiveMode mode,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        HttpSession session) {
 
-           // 1. 서비스를 통해 프로필 ID 조회 (비즈니스 로직 분리)
-           Long profileId = profileService.findProfileIdByMode(mode, userDetails.getUser());
-           log.info("[Mode Switch] 프로필 조회 성공 - ProfileID: {}", profileId);
+        // 1. 데이터 조회
+        Long profileId = profileService.findProfileIdByMode(mode, userDetails.getUser());
+        boolean isInitialized = profileService.checkIfInitialized(mode, profileId);
 
-           // 2. UserDetails 내부 필드 업데이트
-           userDetails.updateActiveProfile(mode, profileId);
+        log.debug("[Mode Switch] Profile search result - ID: {}, Initialized: {}", profileId, isInitialized);
 
-           // 3. SecurityContext 갱신 및 세션 동기화
-           Authentication newAuth = new UsernamePasswordAuthenticationToken(
-               userDetails, userDetails.getPassword(), userDetails.getAuthorities());
-           SecurityContextHolder.getContext().setAuthentication(newAuth);
+        // 2. 권한 및 세션 갱신
+        userDetails.updateActiveProfile(mode, profileId);
 
-           session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+            userDetails, userDetails.getPassword(), userDetails.getAuthorities());
 
-           log.info("[Mode Switch] 세션 갱신 완료 - 유저: {} 가 현재 {} 모드로 활동 중", userDetails.getUsername(), mode);
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-           return "redirect:/";
+        // 유저명, 선택한 모드, 신규 유저 여부
+        log.info("[Mode Switch] User: '{}' switched to '{}' (NewUser: {})",
+            userDetails.getUsername(), mode, !isInitialized);
 
+        // 4. 초기화 여부에 따른 리다이렉트
+        if (!isInitialized) {
+            log.info("[Mode Switch] Redirecting to setup page for user: '{}'", userDetails.getUsername());
+            return "redirect:/profiles/" + mode.name().toLowerCase() + "/setup";
+        }
+
+        return "redirect:/";
     }
 }

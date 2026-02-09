@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/login") // 이제 시큐리티가 이 경로의 POST를 낚아챕니다.
                 .usernameParameter("email")
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/profiles/select", true)
                 .failureHandler((request, response, exception) -> {
                     response.sendRedirect("/auth/login?error=true"); // 경로 수정 권장
                 })

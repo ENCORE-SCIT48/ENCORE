@@ -19,6 +19,11 @@ public class UserProfile extends BaseEntity {
     private Long profileId;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // 초기 설정 완료 여부
+    @Builder.Default
+    private boolean isInitialized = false;
+
     private String profileImageUrl;
     private String introduction;
     private LocalDate birthDate;
