@@ -1,44 +1,49 @@
 <!DOCTYPE html>
-<html xmlns:th="thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <title>chatPostDetail</title>
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script th:src="@{/chat/js/chatPostDetail.js}"></script>
+    <meta charset="UTF-8">
+    <title>채팅방 상세</title>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script th:src="@{/js/chat/chatPostDetail.js}"></script>
 </head>
+
 <body>
-<header>
-  <button class="back-btn" onclick="history.back()">←</button>
-  <!--<div class="performance-title" th:text="${postDetail.performanceTitle}">공연 이름</div>-->
+<header class="app-header">
+    <button id="btn-back" class="back-btn">←</button>
 </header>
 
-<h1>채팅방 상세</h1>
+<main class="chat-detail">
+    <h1>채팅방 상세</h1>
 
-<div>
-  <h2 th:text="${chatPost.title}">제목</h2>
-  <!-- <p><strong>공연:</strong> <span th:text="${chatPost.performanceTitle}">공연 이름</span></p>-->
-  <p><strong>현재 인원:</strong> <span th:text="${chatPost.currentMember}">0</span> /
-    <span th:text="${chatPost.maxMember}">0</span></p>
-  <p><strong>내용:</strong> <span th:text="${chatPost.content}">내용</span></p>
-  <p><strong>상태:</strong> <span th:text="${chatPost.status}">OPEN</span></p>
-</div>
-<div class="actions">
-  <button th:if="${true}" id="btn-edit" th:data-performance-id="${performanceId}" th:data-id="${chatPost.id}">
-    수정하기
-  </button>
-  <button th:if="${true}" id="btn-delete" th:data-id="${chatPost.id}">삭제하기</button>
-</div>
+    <section class="chat-info">
+        <h2 th:text="${chatPost.title}">제목</h2>
+        <!-- <p><strong>공연:</strong> <span th:text="${chatPost.performanceTitle}">공연 이름</span></p> -->
+        <p><strong>현재 인원:</strong> <span th:text="${chatPost.currentMember}">0</span> /
+            <span th:text="${chatPost.maxMember}">0</span></p>
+        <p><strong>내용:</strong> <span th:text="${chatPost.content}">내용</span></p>
+        <p><strong>상태:</strong> <span th:text="${chatPost.status}">OPEN</span></p>
+    </section>
 
+    <section class="chat-actions">
+        <button th:if="${true}" id="btn-edit" th:data-performance-id="${performanceId}"
+                th:data-id="${chatPost.id}">수정하기
+        </button>
+        <button th:if="${true}" id="btn-delete" th:data-performance-id="${performanceId}"
+                th:data-id="${chatPost.id}">삭제하기
+        </button>
+    </section>
 
-<!-- 참가 버튼 -->
-<form th:action="@{/chat/addParticipant/{id}(id=${chatPost.id})}" method="post">
-  <button type="submit">참가하기</button>
-</form>
+    <section class="chat-participation">
+        <form th:action="@{/chat/addParticipant/{id}(id=${chatPost.id})}" method="post">
+            <button type="submit">참가하기</button>
+        </form>
 
-<!-- 나가기 버튼 -->
-<form th:action="@{/chat/removeParticipant/{id}(id=${chatPost.id})}" method="post">
-  <button type="submit">나가기</button>
-</form>
-
+        <form th:action="@{/chat/removeParticipant/{id}(id=${chatPost.id})}" method="post">
+            <button type="submit">나가기</button>
+        </form>
+    </section>
+</main>
 </body>
+
 </html>

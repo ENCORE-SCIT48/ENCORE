@@ -28,15 +28,14 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
      * @return
      */
     @Query("""
-            SELECT new com.encore.encore.domain.chat.dto.ResponseListChatPostDto(
+            SELECT DISTINCT new com.encore.encore.domain.chat.dto.ResponseListChatPostDto(
                 p.id, p.title, p.status, p.currentMember, p.maxMember, p.updatedAt
             )
             FROM ChatPost p
-            JOIN ChatRoom r ON r.chatPost.id = p.id
+            JOIN ChatRoom r ON r.chatPost.id = p.id AND r.isDeleted = false
             WHERE p.performance.id = :performanceId
               AND r.roomType = com.encore.encore.domain.chat.entity.ChatRoom.RoomType.CHAT
               AND p.isDeleted = false
-              AND r.isDeleted = false
               AND (:keyword IS NULL OR
                    (:searchType = 'title' AND p.title LIKE CONCAT('%', :keyword, '%')) OR
                    (:searchType = 'titleContent' AND (p.title LIKE CONCAT('%', :keyword, '%') OR p.content LIKE CONCAT('%', :keyword, '%')))
@@ -49,7 +48,8 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
         @Param("keyword") String keyword,
         @Param("searchType") String searchType,
         @Param("onlyOpen") boolean onlyOpen,
-        Pageable pageable);
+        Pageable pageable
+    );
 
 
     /**
@@ -119,9 +119,10 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
     @Query(value = """
             SELECT p.*
             FROM chat_post p
-            JOIN chat_room r ON r.post_id = p.id
+            JOIN chat_room r ON r.post_id = p.id AND r.is_deleted = false
             LEFT JOIN chat_message m ON m.room_id = r.room_id
             WHERE r.room_type IN ('CHAT', 'PERFORMANCE_ALL')
+              AND p.is_deleted = false
             GROUP BY p.id
             ORDER BY COALESCE(MAX(m.sent_at), p.updated_at) DESC
             LIMIT :limit

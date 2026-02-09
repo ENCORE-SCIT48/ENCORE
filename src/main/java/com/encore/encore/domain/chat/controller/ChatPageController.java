@@ -39,36 +39,6 @@ public class ChatPageController {
     }
 
     /**
-     * 공연별 채팅방 조회 화면 이동
-     *
-     * @param performanceId
-     * @param model         목록 리스트 저장
-     * @return chat/chatPerformanceList.html 이동
-     * @GetMapping("/performance/{performanceId}/chat/list") public String chatList(
-     * @PathVariable Long performanceId,
-     * Model model
-     * ) {
-     * log.info("공연별 채팅방 목록 조회 시작 - performanceId: {}", performanceId);
-     * <p>
-     * try {
-     * List<ResponseListChatPostDto> chatPostList = chatService.getChatPostsByPerformance(performanceId);
-     * if (chatPostList == null) {
-     * chatPostList = new ArrayList<>();
-     * }
-     * <p>
-     * log.info("채팅방 목록 조회 완료 - 조회된 개수: {}", chatPostList.size());
-     * model.addAttribute("chatPostList", chatPostList);
-     * model.addAttribute("performanceId", performanceId);
-     * return "chat/chatPerformanceList";
-     * <p>
-     * } catch (Exception e) {
-     * log.error("채팅방 목록 조회 중 예외 발생! performanceId: {}", performanceId, e);
-     * return "redirect:/";
-     * }
-     * }
-     */
-
-    /**
      * 공연 별 채팅방 목록 화면 진입
      *
      * @param performanceId

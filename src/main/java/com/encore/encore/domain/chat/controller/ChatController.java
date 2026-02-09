@@ -11,7 +11,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -19,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 public class ChatController {
     private final ChatService chatService;
 
@@ -32,7 +31,6 @@ public class ChatController {
      * @return 생성된 게시글 정보와 성공 메시지
      */
     @PostMapping("/performance/{performanceId}/chat/post")
-    @ResponseBody
     public ResponseEntity<CommonResponse<ResponseCreateChatPostDto>> createChatPost(
         @PathVariable Long performanceId,
         @Valid @RequestBody RequestCreateChatPostDto dto
@@ -54,7 +52,6 @@ public class ChatController {
      * @return 삭제한 글 정보
      */
     @DeleteMapping("/chat/{id}")
-    @ResponseBody
     public ResponseEntity<CommonResponse<ResponseDeleteChatPostDto>> deletePost(@PathVariable Long id) {
         log.info("게시글 삭제 요청 - postId: {}", id);
 
@@ -73,7 +70,6 @@ public class ChatController {
      * @return 수정 완료 정보
      */
     @PostMapping("/performance/{performanceId}/chat/{chatId}/update")
-    @ResponseBody // JSON 응답을 위해 추가
     public ResponseEntity<CommonResponse<ResponseUpdateChatPostDto>> updatePost(
         @PathVariable Long performanceId,
         @PathVariable Long chatId,
@@ -100,7 +96,6 @@ public class ChatController {
      * @param pageable      페이징 정보
      * @return 페이징 처리된 채팅방 목록
      */
-    @ResponseBody
     @GetMapping("/api/performance/{performanceId}/list")
     public ResponseEntity<CommonResponse<Slice<ResponseListChatPostDto>>> getChatList(
         @PathVariable Long performanceId,
@@ -125,9 +120,8 @@ public class ChatController {
      * @param limit 가져올 채팅방의 최대 수
      * @return 참여한 채팅방 목록
      */
-    @ResponseBody
     @GetMapping("/api/chat/join")
-    public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatJoin(
+    public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatJoinLimit(
         @RequestParam(defaultValue = "3") int limit
     ) {
         log.info("참여 채팅방 목록 조회 시작");
@@ -146,7 +140,6 @@ public class ChatController {
      * @param limit 가져올 채팅방의 최대 수
      * @return 모든 채팅방 중 가장 최근 활동이 있는 채팅방
      */
-    @ResponseBody
     @GetMapping("/api/chat/hot")
     public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatHot(
         @RequestParam(defaultValue = "10") int limit
@@ -171,7 +164,6 @@ public class ChatController {
      *                   (true: 본인 작성 채팅방만, false: 참여 중인 모든 채팅방)
      * @return 참여 중인 채팅방 목록을 담은 {@link Slice} 형태의 응답 객체
      */
-    @ResponseBody
     @GetMapping("/api/chat/join/full")
     public ResponseEntity<CommonResponse<Slice<ResponseParticipantChatPostDto>>> getChatJoin(
         @RequestParam(defaultValue = "0") int page,

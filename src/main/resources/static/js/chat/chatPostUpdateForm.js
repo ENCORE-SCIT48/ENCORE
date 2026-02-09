@@ -1,48 +1,53 @@
 /**
- * 채팅방 정보 수정을 위한 제출 프로세스를 관리합니다.
- * - Hidden 필드에서 ID를 추출하고, 변경된 데이터를 JSON 형식으로 서버에 전송합니다.
+ * chatUpdateForm.js
+ * 🎯 채팅방 수정 JS
+ * - Hidden 필드에서 ID 추출 후 변경 데이터를 JSON으로 서버 전송
  */
-$(document).ready(function() {
+
+$(document).ready(() => {
 
     /** 수정 폼 제출 이벤트 핸들러 */
-    $('#chatUpdateForm').submit(function(e) {
+    $('#chatUpdateForm').on('submit', e => {
         e.preventDefault();
 
         const performanceId = $('#perfId').val();
-        const id = $('#chatId').val();
+        const chatId = $('#chatId').val();
 
-        const data = {
-            title: $('#title').val(),
-            content: $('#content').val(),
-            status: $('#status').val()
-        };
+        const title = $('#title').val().trim();
+        const content = $('#content').val().trim();
+        const status = $('#status').val();
 
-        console.log("전송 데이터:", data);
+        if (!title || !content) {
+            alert('제목과 내용을 입력해주세요.');
+            return;
+        }
 
-        /** 채팅방 수정 API 호출 (AJAX) */
+        const data = { title, content, status };
+
+        console.log('전송 데이터:', data);
+
         $.ajax({
-            url: `/performance/${performanceId}/chat/${id}/update`,
+            url: `/performance/${performanceId}/chat/${chatId}/update`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),
-            success: function(res) {
-                if(res.data || res.success) {
+            success: res => {
+                if (res.data || res.success) {
                     alert('수정이 완료되었습니다.');
-                    window.location.href = `/performance/${performanceId}/chat/${id}`;
+                    window.location.href = `/performance/${performanceId}/chat/${chatId}`;
                 } else {
-                    alert('실패: ' + res.message);
+                    alert(`수정 실패: ${res.message || '알 수 없는 이유'}`);
                 }
             },
-            error: function(xhr) {
-                console.error("에러 상세:", xhr);
-                const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "서버 에러가 발생했습니다.";
-                alert('에러 발생: ' + errorMsg);
+            error: xhr => {
+                console.error('채팅방 수정 실패:', xhr);
+                const errorMsg = xhr.responseJSON?.message || xhr.responseText || '서버 에러가 발생했습니다.';
+                alert(`에러 발생: ${errorMsg}`);
             }
         });
     });
 
-    /** 뒤로가기 버튼 클릭 시 이전 페이지로 이동 */
-    $('#backBtn').click(function() {
-        window.history.back();
-    });
+    /** 뒤로가기 버튼 클릭 */
+    $('#backBtn').on('click', () => window.history.back());
+
 });
