@@ -1,6 +1,7 @@
 package com.encore.encore.domain.chat.service;
 
 import com.encore.encore.domain.chat.dto.*;
+import com.encore.encore.domain.chat.entity.ChatParticipant;
 import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
@@ -10,6 +11,8 @@ import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
+import com.encore.encore.domain.user.entity.User;
+import com.encore.encore.domain.user.repository.UserRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +41,7 @@ public class ChatService {
     private final PerformanceRepository performanceRepository;
     private final UserProfileRepository userProfileRepository;
     private final ChatParticipantRepository chatParticipantRepository;
+    private final UserRepository userRepository;
 
 
     /**
@@ -375,7 +379,7 @@ public class ChatService {
         return chatRoom.getRoomId();
     }
 
-   /* public void getChatAlreadJoin(Long roomId, Long userId) {
+    public void getChatAlreadJoin(Long roomId, Long userId) {
 
         boolean alreadyJoined = chatParticipantRepository.existsByRoomRoomIdAndUserUserId(roomId, userId);
 
@@ -400,7 +404,8 @@ public class ChatService {
             chatParticipantRepository.save(participant);
 
             chatRoom.getChatPost().setCurrentMember(chatRoom.getChatPost().getCurrentMember() + 1);
-        }*/
+        }
+    }
 
 
 }

@@ -22,5 +22,13 @@ public class ChatParticipant extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    private String participantStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ParticipantStatus participantStatus;
+
+    public enum ParticipantStatus {
+        PENDING,
+        ACCEPTED;
+    }
+
 }

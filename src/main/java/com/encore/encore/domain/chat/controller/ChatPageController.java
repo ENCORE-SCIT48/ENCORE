@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.security.Principal;
+
 @RequiredArgsConstructor
 @Controller
 @Slf4j
@@ -129,14 +131,19 @@ public class ChatPageController {
         return "chat/chatJoinList";
     }
 
-    /**
-     * 참여중인 채팅방 글 전체 조회 페이지 이동
-     *
-     * @return chat/chatJoinListFull.html
-     */
-    @GetMapping("/chat/list/join")
-    public String chatListJoin() {
 
-        return "chat/chatJoinListFull";
+    @GetMapping("/chat/{id}")
+    public String chatRoom(
+        @PathVariable("id") Long roomId,
+        Model model,
+        Principal principal) {
+
+        Long userId = 1L;
+
+        // 이미 참가자인지 확인
+        chatService.getChatAlreadJoin(roomId, userId);
+
+        model.addAttribute("roomId", roomId);
+        return "chat/chatRoom";
     }
 }

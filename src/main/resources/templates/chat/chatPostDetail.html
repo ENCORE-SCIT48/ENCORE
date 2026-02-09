@@ -35,7 +35,7 @@
     </section>
 
     <section class="chat-participation">
-        <form th:action="@{/chat/addParticipant/{id}(id=${chatPost.id})}" method="post">
+        <form th:action="@{/chat/{id}(id=${chatPost.id})}" method="post">
             <button type="submit">참가하기</button>
         </form>
 
