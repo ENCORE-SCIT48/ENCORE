@@ -1,10 +1,6 @@
 package com.encore.encore.domain.community.service;
 
-import com.encore.encore.domain.community.dto.RequestCreatePostDto;
-import com.encore.encore.domain.community.dto.ResponseCreatePostDto;
-import com.encore.encore.domain.community.dto.ResponseDeletePostDto;
-import com.encore.encore.domain.community.dto.ResponseListPostDto;
-import com.encore.encore.domain.community.dto.ResponseReadPostDto;
+import com.encore.encore.domain.community.dto.*;
 import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.repository.PostRepository;
 import com.encore.encore.domain.performance.entity.Performance;
@@ -35,7 +31,7 @@ public class PostService {
      * @param dto 게시글 등록 요청 객체
      * @return 등록된 게시글 정보
      */
-    public ResponseCreatePostDto createPost(RequestCreatePostDto dto) {
+    public ResponseCreatePerformerPostDto createPost(RequestCreatePerformerPostDto dto) {
         log.info("게시글 등록 시작 - postType={}", dto.getPostType());
 
         Performance performance = null;
@@ -59,7 +55,7 @@ public class PostService {
 
         log.info("게시글 등록 완료 - postId={}", savedPost.getPostId());
 
-        return ResponseCreatePostDto.builder()
+        return ResponseCreatePerformerPostDto.builder()
                 .postId(savedPost.getPostId())
                 .postType(savedPost.getPostType())
                 .title(savedPost.getTitle())
@@ -73,7 +69,7 @@ public class PostService {
      * @param postId 삭제할 게시글 ID
      * @return 게시글 삭제 결과
      */
-    public ResponseDeletePostDto deletePost(Long postId) {
+    public ResponseDeletePerformerPostDto deletePost(Long postId) {
 
         log.info("게시글 삭제 요청 - postId={}", postId);
 
@@ -97,7 +93,7 @@ public class PostService {
 
         log.info("게시글 삭제 완료 - postId={}", postId);
 
-        return ResponseDeletePostDto.builder()
+        return ResponseDeletePerformerPostDto.builder()
                 .postId(postId)
                 .deleted(true)
                 .build();
@@ -110,7 +106,7 @@ public class PostService {
      * @param postId 게시글 ID
      * @return 게시글 상세 정보
      */
-    public ResponseReadPostDto readPost(Long postId) {
+    public ResponseReadPerformerPostDto readPost(Long postId) {
         log.info("게시글 단건 조회 요청 - postId={}", postId);
 
         Post post;
@@ -134,7 +130,7 @@ public class PostService {
          */
         post.setViewCount(post.getViewCount() + 1);
 
-        return ResponseReadPostDto.builder()
+        return ResponseReadPerformerPostDto.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
                 .title(post.getTitle())
@@ -145,6 +141,73 @@ public class PostService {
     }
 
     /**
+     * [설명] 공연자 모집 게시글을 수정합니다.
+     *
+     * @param postId 수정할 게시글 ID
+     * @param dto 수정 요청 객체
+     * @return 수정된 게시글 정보
+     */
+    public ResponseUpdatePerformerPostDto updatePerformerPost(
+        Long postId,
+        RequestUpdatePerformerPostDto dto
+    ) {
+        log.info("게시글 수정 요청 - postId={}", postId);
+
+        Post post = postRepository
+            .findByPostIdAndPostTypeAndIsDeletedFalse(postId, "PERFORMER_RECRUIT")
+            .orElseThrow(() -> {
+                log.error("수정 대상 게시글 없음 - postId={}", postId);
+                return new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
+            });
+
+        /**
+         * Why:
+         * 공연자 모집글 수정 API이므로
+         * postType이 공연자 모집글이 아닌 경우는 허용하지 않는다.
+         */
+
+        if (dto.getTitle() != null) {
+            post.setTitle(dto.getTitle());
+        }
+
+        if (dto.getContent() != null) {
+            post.setContent(dto.getContent());
+        }
+
+        if (dto.getPerformanceId() != null) {
+            Performance performance = performanceRepository
+                .findById(dto.getPerformanceId())
+                .orElseThrow(() -> {
+                    log.error(
+                        "공연 정보 없음 - performanceId={}",
+                        dto.getPerformanceId()
+                    );
+                    return new ApiException(
+                        ErrorCode.NOT_FOUND,
+                        "공연 정보를 찾을 수 없습니다."
+                    );
+                });
+            post.setPerformance(performance);
+        }
+
+        log.info("게시글 수정 완료 - postId={}", post.getPostId());
+
+        return ResponseUpdatePerformerPostDto.builder()
+            .postId(post.getPostId())
+            .postType(post.getPostType())
+            .title(post.getTitle())
+            .content(post.getContent())
+            .performanceId(
+                post.getPerformance() != null
+                    ? post.getPerformance().getPerformanceId()
+                    : null
+            )
+            .updatedAt(post.getUpdatedAt())
+            .build();
+    }
+
+
+    /**
      * [설명] 공연자 모집 게시글 목록을 페이징 조회합니다.
      * 삭제되지 않은 게시글만 조회 대상입니다.
      *
@@ -152,14 +215,14 @@ public class PostService {
      * @return 게시글 페이지
      */
     @Transactional(readOnly = true)
-    public Page<ResponseListPostDto> listPosts(Pageable pageable) {
+    public Page<ResponseListPerformerPostDto> listPosts(Pageable pageable) {
         log.info(
                 "게시글 목록 페이징 조회 요청 - page={}, size={}",
                 pageable.getPageNumber(),
                 pageable.getPageSize());
 
         return postRepository.findByIsDeletedFalse(pageable)
-                .map(post -> ResponseListPostDto.builder()
+                .map(post -> ResponseListPerformerPostDto.builder()
                         .postId(post.getPostId())
                         .postType(post.getPostType())
                         .title(post.getTitle())
@@ -177,7 +240,7 @@ public class PostService {
      * @return 게시글 페이지
      */
     @Transactional(readOnly = true)
-    public Page<ResponseListPostDto> listPostsByType(String postType, Pageable pageable) {
+    public Page<ResponseListPerformerPostDto> listPostsByType(String postType, Pageable pageable) {
         log.info(
                 "게시글 목록 페이징 조회 요청 - postType={}, page={}, size={}",
                 postType,
@@ -185,7 +248,7 @@ public class PostService {
                 pageable.getPageSize());
 
         return postRepository.findByPostTypeAndIsDeletedFalse(postType, pageable)
-                .map(post -> ResponseListPostDto.builder()
+                .map(post -> ResponseListPerformerPostDto.builder()
                         .postId(post.getPostId())
                         .postType(post.getPostType())
                         .title(post.getTitle())

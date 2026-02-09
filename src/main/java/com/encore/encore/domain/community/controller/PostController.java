@@ -1,10 +1,6 @@
 package com.encore.encore.domain.community.controller;
 
-import com.encore.encore.domain.community.dto.RequestCreatePostDto;
-import com.encore.encore.domain.community.dto.ResponseCreatePostDto;
-import com.encore.encore.domain.community.dto.ResponseDeletePostDto;
-import com.encore.encore.domain.community.dto.ResponseListPostDto;
-import com.encore.encore.domain.community.dto.ResponseReadPostDto;
+import com.encore.encore.domain.community.dto.*;
 import com.encore.encore.domain.community.service.PostService;
 import com.encore.encore.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +21,16 @@ public class PostController {
 
     /**
      * [설명] 게시글을 등록합니다.
-     * 
+     *
      * @param request 게시글 등록 요청 객체
      * @return 게시글 등록 결과
      */
     @PostMapping
-    public CommonResponse<ResponseCreatePostDto> create(
-            @RequestBody RequestCreatePostDto request) {
+    public CommonResponse<ResponseCreatePerformerPostDto> create(
+            @RequestBody RequestCreatePerformerPostDto request) {
         log.info("POST /api/posts - 게시글 등록 요청");
 
-        ResponseCreatePostDto result = postService.createPost(request);
+        ResponseCreatePerformerPostDto result = postService.createPost(request);
 
         log.info("POST /api/posts - 게시글 등록 완료, postId={}", result.getPostId());
 
@@ -43,23 +39,46 @@ public class PostController {
 
     /**
      * [설명] 게시글을 삭제합니다. (논리 삭제)
-     * 
+     *
      * @param id 삭제할 게시글 ID
      * @return 게시글 삭제 결과
      */
     @DeleteMapping("/{id}")
-    public CommonResponse<ResponseDeletePostDto> delete(
+    public CommonResponse<ResponseDeletePerformerPostDto> delete(
             @PathVariable("id") Long id) {
 
         log.error("### POST CONTROLLER DELETE CALLED ###");
 
         log.info("DELETE /api/posts/{} - 게시글 삭제 요청", id);
 
-        ResponseDeletePostDto result = postService.deletePost(id);
+        ResponseDeletePerformerPostDto result = postService.deletePost(id);
 
         log.info("DELETE /api/posts/{} - 게시글 삭제 완료", id);
 
         return CommonResponse.ok(result, "게시글이 정상적으로 삭제되었습니다.");
+    }
+
+
+    /**
+     * [설명] 공연자 모집 게시글을 수정합니다.
+     *
+     * @param id 게시글 ID
+     * @param request 게시글 수정 요청 객체
+     * @return 수정된 게시글 정보
+     */
+    @PatchMapping("/{id}")
+    public CommonResponse<ResponseUpdatePerformerPostDto> update(
+        @PathVariable("id") Long id,
+        @RequestBody RequestUpdatePerformerPostDto request
+    ) {
+        log.info("PATCH /api/posts/{} - 게시글 수정 요청", id);
+
+        ResponseUpdatePerformerPostDto result =
+            postService.updatePerformerPost(id, request);
+
+        log.info("PATCH /api/posts/{} - 게시글 수정 완료", id);
+
+        return CommonResponse.ok(result, "게시글이 정상적으로 수정되었습니다.");
     }
 
     /**
@@ -71,7 +90,7 @@ public class PostController {
      * @return 게시글 목록 페이지
      */
     @GetMapping
-    public CommonResponse<Page<ResponseListPostDto>> listPosts(
+    public CommonResponse<Page<ResponseListPerformerPostDto>> listPosts(
             @RequestParam(name = "postType", required = false) String postType,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         log.info(
@@ -80,7 +99,7 @@ public class PostController {
                 pageable.getPageNumber(),
                 pageable.getPageSize());
 
-        Page<ResponseListPostDto> result = (postType == null || postType.isBlank())
+        Page<ResponseListPerformerPostDto> result = (postType == null || postType.isBlank())
                 ? postService.listPosts(pageable)
                 : postService.listPostsByType(postType, pageable);
 
@@ -99,11 +118,11 @@ public class PostController {
      * @return 게시글 상세 정보
      */
     @GetMapping("/{id}")
-    public CommonResponse<ResponseReadPostDto> readPost(
+    public CommonResponse<ResponseReadPerformerPostDto> readPost(
             @PathVariable("id") Long id) {
         log.info("GET /api/posts/{} - 게시글 단건 조회 요청", id);
 
-        ResponseReadPostDto result = postService.readPost(id);
+        ResponseReadPerformerPostDto result = postService.readPost(id);
 
         log.info("GET /api/posts/{} - 게시글 단건 조회 완료", id);
 

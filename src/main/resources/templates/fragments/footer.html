@@ -54,11 +54,11 @@
 
 <div th:replace="~{fragments/footer :: footer(
       ${ {
+          {label:'모집글', href:'/posts'},
+          {label:'공연장리스트', href:'/venueList'},
           {label:'홈', href:'/'},
-          {label:'검색', href:'/search'},
-          {label:'작성', href:'/post/write'},
-          {label:'알림', href:'/notifications'},
-          {label:'마이', href:'/mypage'}
+          {label:'DM', href:'/deirectMessage'},
+          {label:'채팅방', href:'/chat'}
       } }
   )}"></div>
 
