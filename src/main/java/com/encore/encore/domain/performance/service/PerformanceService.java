@@ -1,7 +1,9 @@
 package com.encore.encore.domain.performance.service;
 
+import com.encore.encore.domain.community.repository.ReviewRepository;
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
+import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.global.error.ApiException;
@@ -21,6 +23,7 @@ import java.util.List;
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
+    private final ReviewRepository reviewRepository;
 
     /**
      * 공연 목록 조회 (검색/카테고리/페이징 지원)
@@ -103,5 +106,29 @@ public class PerformanceService {
 
         log.info("[Performance] hot list result - size={}", result.size());
         return result;
+    }
+
+    /**
+     * 공연에 대한 후기 목록 조회
+     * - 좌석 후기(seat_id가 있는 리뷰)는 제외하고 공연 후기만 조회
+     * - 공연이 존재하지 않을 경우 NOT_FOUND 예외를 발생시킴
+     * - 페이징 처리를 지원
+     *
+     * @param performanceId 공연 ID
+     * @param pageable 페이징 정보
+     * @return 공연 후기 페이지(리스트 DTO)
+     * @throws ApiException 공연이 존재하지 않을 경우
+     */
+    public Page<PerformanceReviewItemDto> getPerformanceReviews(Long performanceId, Pageable pageable) {
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new ApiException(
+                ErrorCode.NOT_FOUND,
+                "공연을 찾을 수 없습니다. performanceId=" + performanceId
+            );
+        }
+
+        return reviewRepository
+            .findByPerformance_PerformanceIdAndSeatIsNull(performanceId, pageable)
+            .map(PerformanceReviewItemDto::new);
     }
 }

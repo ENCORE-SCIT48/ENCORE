@@ -2,6 +2,7 @@ package com.encore.encore.domain.performance.controller;
 
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
+import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
 import com.encore.encore.domain.performance.service.PerformanceService;
 import com.encore.encore.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +70,20 @@ public class PerformanceController {
         return CommonResponse.ok(
             performanceService.getHotPerformances(),
             "핫한 공연 조회 성공"
+        );
+    }
+
+    @GetMapping("/{performanceId}/reviews")
+    public CommonResponse<Page<PerformanceReviewItemDto>> getPerformanceReviews(
+        @PathVariable Long performanceId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("[Performance] controller reviews - performanceId={}, page={}, size={}", performanceId, page, size);
+
+        return CommonResponse.ok(
+            performanceService.getPerformanceReviews(performanceId, PageRequest.of(page, size)),
+            "공연 리뷰 조회 성공"
         );
     }
 }
