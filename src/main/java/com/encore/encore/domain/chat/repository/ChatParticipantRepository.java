@@ -1,3 +1,5 @@
+package com.encore.encore.domain.chat.repository;
+
 import com.encore.encore.domain.chat.entity.ChatParticipant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

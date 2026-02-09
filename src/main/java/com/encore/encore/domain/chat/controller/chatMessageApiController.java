@@ -1,3 +1,5 @@
+package com.encore.encore.domain.chat.controller;
+
 import com.encore.encore.domain.chat.dto.RequestChatMessage;
 import com.encore.encore.domain.chat.dto.ResponseChatMessage;
 import com.encore.encore.domain.chat.service.ChatMessageService;

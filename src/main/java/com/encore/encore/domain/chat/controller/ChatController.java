@@ -11,8 +11,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
@@ -182,6 +184,22 @@ public class ChatController {
             userId, page, size, keyword, searchType
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "참여 채팅방 목록 조회 완료"));
+    }
+
+
+    @GetMapping("/chat/{id}")
+    public String chatRoom(
+        @PathVariable("id") Long roomId,
+        Model model,
+        Principal principal) {
+
+        Long userId = 1L;
+
+        // 이미 참가자인지 확인
+        chatService.getChatAlreadJoin(roomId, userId);
+
+        model.addAttribute("roomId", roomId);
+        return "chat/chatRoom";
     }
 
 }

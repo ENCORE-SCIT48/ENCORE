@@ -1,3 +1,5 @@
+package com.encore.encore.domain.chat.dto;
+
 import com.encore.encore.domain.chat.entity.ChatMessage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
