@@ -18,17 +18,24 @@ public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_id")
     private Performance performance;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_author_id")
     private HostProfile hostAuthor;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performer_author_id")
     private PerformerProfile performerAuthor;
+
     private String postType;
+
     private String title;
+    
     private String content;
+
     private Integer viewCount;
 }

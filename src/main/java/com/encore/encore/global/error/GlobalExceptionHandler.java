@@ -23,5 +23,4 @@ public class GlobalExceptionHandler {
             .body(ErrorResponse.of(ErrorCode.INTERNAL_ERROR, request.getRequestURI(), "서버 내부 오류가 발생했습니다."));
     }
 
-
 }
