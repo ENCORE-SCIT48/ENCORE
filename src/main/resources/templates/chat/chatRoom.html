@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅방 입장</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/chat.css}">
+  <link rel="stylesheet" th:href="@{/css/chat-list.css}">
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- 채팅 메시지 영역 -->
+  <div class="chat-area" id="chatArea">
+    <div class="message-row">
+      <div class="avatar" aria-label="사용자 프로필 사진"></div>
+      <div>
+        <div class="message-name">이름</div>
+        <div class="message-content">안녕하세요! 여기에 채팅 메시지가 표시됩니다.</div>
+      </div>
+    </div>
+    <!-- 더 많은 메시지 추가 -->
+  </div>
+
+  <!-- 채팅 입력 -->
+  <div class="chat-input-area d-flex gap-2">
+    <input
+      type="text"
+      id="chatInput"
+      class="form-control"
+      placeholder="채팅입력"
+    />
+    <button
+      type="button"
+      id="sendBtn"
+      class="btn btn-danger"
+    >
+      전송
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const roomId = [[${roomId}]];
+</script>
+<script src="/js/chat/chatRoom.js"></script>
+
+</body>
+</html>
