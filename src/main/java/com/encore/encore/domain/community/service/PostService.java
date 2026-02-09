@@ -3,6 +3,8 @@ package com.encore.encore.domain.community.service;
 import com.encore.encore.domain.community.dto.RequestCreatePostDto;
 import com.encore.encore.domain.community.dto.ResponseCreatePostDto;
 import com.encore.encore.domain.community.dto.ResponseDeletePostDto;
+import com.encore.encore.domain.community.dto.ResponseListPostDto;
+import com.encore.encore.domain.community.dto.ResponseReadPostDto;
 import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.repository.PostRepository;
 import com.encore.encore.domain.performance.entity.Performance;
@@ -11,6 +13,11 @@ import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +76,6 @@ public class PostService {
      */
     public ResponseDeletePostDto deletePost(Long postId) {
 
-
         log.info("게시글 삭제 요청 - postId={}", postId);
 
         Post post = postRepository.findById(postId)
@@ -96,5 +102,95 @@ public class PostService {
                 .postId(postId)
                 .deleted(true)
                 .build();
+    }
+
+    /**
+     * [설명] 공연자 모집 게시글 단건 상세 정보를 조회합니다.
+     * 조회 시 조회수를 1 증가시킵니다.
+     *
+     * @param postId 게시글 ID
+     * @return 게시글 상세 정보
+     */
+    public ResponseReadPostDto readPost(Long postId) {
+        log.info("게시글 단건 조회 요청 - postId={}", postId);
+
+        Post post;
+        try {
+            post = postRepository.findById(postId).orElseThrow();
+        } catch (Exception e) {
+            log.error("게시글 조회 실패 - postId={}", postId, e);
+            throw new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
+        }
+
+        if (post.isDeleted()) {
+            ApiException ex = new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
+            log.error("삭제된 게시글 접근 - postId={}", postId, ex);
+            throw ex;
+        }
+
+        /**
+         * Why:
+         * 단건 상세 조회는 실제 사용자 열람 행위이므로
+         * 이 시점에 조회수를 증가시킨다.
+         */
+        post.setViewCount(post.getViewCount() + 1);
+
+        return ResponseReadPostDto.builder()
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .viewCount(post.getViewCount())
+                .createdAt(post.getCreatedAt())
+                .build();
+    }
+
+    /**
+     * [설명] 공연자 모집 게시글 목록을 페이징 조회합니다.
+     * 삭제되지 않은 게시글만 조회 대상입니다.
+     *
+     * @param pageable 페이징 정보
+     * @return 게시글 페이지
+     */
+    @Transactional(readOnly = true)
+    public Page<ResponseListPostDto> listPosts(Pageable pageable) {
+        log.info(
+                "게시글 목록 페이징 조회 요청 - page={}, size={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize());
+
+        return postRepository.findByIsDeletedFalse(pageable)
+                .map(post -> ResponseListPostDto.builder()
+                        .postId(post.getPostId())
+                        .postType(post.getPostType())
+                        .title(post.getTitle())
+                        .viewCount(post.getViewCount())
+                        .createdAt(post.getCreatedAt())
+                        .build());
+    }
+
+    /**
+     * [설명] 특정 postType의 공연자 모집 게시글을 페이징 조회합니다.
+     *
+     * @param postType 게시글 타입
+     * @param pageable 페이징 정보
+     * @return 게시글 페이지
+     */
+    @Transactional(readOnly = true)
+    public Page<ResponseListPostDto> listPostsByType(String postType, Pageable pageable) {
+        log.info(
+                "게시글 목록 페이징 조회 요청 - postType={}, page={}, size={}",
+                postType,
+                pageable.getPageNumber(),
+                pageable.getPageSize());
+
+        return postRepository.findByPostTypeAndIsDeletedFalse(postType, pageable)
+                .map(post -> ResponseListPostDto.builder()
+                        .postId(post.getPostId())
+                        .postType(post.getPostType())
+                        .title(post.getTitle())
+                        .viewCount(post.getViewCount())
+                        .createdAt(post.getCreatedAt())
+                        .build());
     }
 }
