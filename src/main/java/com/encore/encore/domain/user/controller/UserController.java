@@ -67,7 +67,7 @@ public class UserController {
      */
     @GetMapping("/login")
     public String loginPage() {
-        log.info("GET /user/login : 로그인 페이지 이동");
+        log.info("GET /auth/login : 로그인 페이지 이동");
         return "auth/login"; // login.html
     }
 }

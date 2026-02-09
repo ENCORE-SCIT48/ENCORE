@@ -20,38 +20,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. CSRF 보호 비활성화 (개발 단계나 API 위주일 때 주로 끕니다. 운영 시에는 고려 필요)
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // 3. 개발용 임시로 모든 요청에 대해 인증 없이 접근 허용
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
-            )
-//            // 2. 접근 권한 설정 (누가 어디에 들어올 수 있는지)
-//            .authorizeHttpRequests(auth -> auth
-//                // 회원가입, 메인 페이지, 정적 리소스(CSS/JS)는 누구나 접근 가능
-//                .requestMatchers("/", "/join", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-//                // 아까 언급한 Swagger 관련 경로도 열어줘야 합니다.
-//                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//                // 그 외 모든 요청은 로그인한 사용자만 접근 가능
-//                .anyRequest().authenticated()
-//            )
-
+            // 1. 로그인/로그아웃 설정을 먼저 정의
             .formLogin(form -> form
                 .loginPage("/auth/login")
-                .loginProcessingUrl("/login")
+                .loginProcessingUrl("/login") // 이제 시큐리티가 이 경로의 POST를 낚아챕니다.
                 .usernameParameter("email")
                 .defaultSuccessUrl("/", true)
                 .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("/login?error=true");
+                    response.sendRedirect("/auth/login?error=true"); // 경로 수정 권장
                 })
                 .permitAll()
             )
-
-            // 4. 로그아웃 설정
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)   // 세션 무효화
+                .invalidateHttpSession(true)
+            )
+
+            // 2. 권한 설정은 마지막에 (가장 포괄적인 permitAll은 맨 아래)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+                .anyRequest().permitAll()
             );
 
         return http.build();

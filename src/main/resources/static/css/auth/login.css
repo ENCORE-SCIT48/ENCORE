@@ -1,0 +1,45 @@
+/* src/main/resources/static/css/auth/login.css */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.login-container {
+    max-width: 400px;
+    margin-top: 100px;
+}
+
+/* 메인 컬러 포인트 */
+.btn-primary {
+    background-color: #e63946 !important;
+    border-color: #e63946 !important;
+}
+
+.btn-primary:hover {
+    background-color: #d62839 !important;
+    border-color: #d62839 !important;
+}
+
+.form-control:focus {
+    border-color: #e63946 !important;
+    box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.25) !important;
+}
+
+/* 링크 스타일 */
+.signup-link {
+    color: #e63946;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.signup-link:hover {
+    text-decoration: underline;
+}
+
+.text-muted-small {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+.alert:empty {
+    display: none;
+}
