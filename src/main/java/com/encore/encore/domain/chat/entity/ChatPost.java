@@ -24,6 +24,8 @@ public class ChatPost extends BaseEntity {
     private Performance performance;
     @Column(nullable = false)
     private Long profileId; // 글쓴이 Id
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ActiveMode profileMode;  // USER / PERFORMER / HOST
     private String title;

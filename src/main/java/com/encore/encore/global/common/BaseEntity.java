@@ -1,10 +1,13 @@
 package com.encore.encore.global.common;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -25,5 +28,10 @@ public abstract class BaseEntity {
     // 논리 삭제 메서드
     public void delete() {
         this.isDeleted = true;
+    }
+
+    // 되살리기 메서드
+    public void restore() {
+        this.isDeleted = false;
     }
 }

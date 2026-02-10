@@ -2,6 +2,7 @@ package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.dto.ResponseDetailChatPostDto;
 import com.encore.encore.domain.chat.dto.ResponseListChatPostDto;
+import com.encore.encore.domain.chat.dto.ResponseParticipantDto;
 import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.service.ChatService;
 import com.encore.encore.domain.member.entity.ActiveMode;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -82,10 +85,16 @@ public class ChatPageController {
     ) {
         log.info("채팅방 상세 조회 진입 - performanceId: {}, postId: {}", performanceId, id);
 
+
         try {
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             Long roomId = chatService.getChatRoomId(id);
 
+            List<ResponseParticipantDto> chatParticipantList = chatService.getChatParticipants(roomId);
+            model.addAttribute("currentProfileId", 2L); // Long 타입으로 일치
+            model.addAttribute("currentProfileMode", ActiveMode.USER); // 타입 일치
+
+            model.addAttribute("participantIds", chatParticipantList);
             model.addAttribute("roomId", roomId);
             model.addAttribute("chatPost", dto);
             return "chat/chatPostDetail";
@@ -168,7 +177,7 @@ public class ChatPageController {
         //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 1L;
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);

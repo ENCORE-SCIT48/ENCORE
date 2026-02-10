@@ -8,9 +8,9 @@ import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.member.service.ProfileService;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
-import com.encore.encore.domain.user.repository.UserRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,7 +38,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final PerformanceRepository performanceRepository;
     private final ChatParticipantRepository chatParticipantRepository;
-    private final UserRepository userRepository;
+    private final ProfileService profileService;
 
 
     /**
@@ -78,6 +78,14 @@ public class ChatService {
             .build();
         chatRoomRepository.save(chatRoom);
         log.info("채팅방 생성 완료 - RoomID: {}", chatRoom.getRoomId());
+
+        ChatParticipant chatParticipant = ChatParticipant.builder()
+            .profileMode(activeMode)
+            .profileId(activeProfileId)
+            .room(chatRoom)
+            .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
+            .build();
+        chatParticipantRepository.save(chatParticipant);
 
         return ResponseCreateChatPostDto.from(chatPost, chatRoom);
     }
@@ -257,13 +265,13 @@ public class ChatService {
      * @param limit
      * @return
      */
-    public List<ResponseParticipantChatPostDto> getChatPostJoinList(Long activeId, ActiveMode activeMode, int limit) {
+    public List<ResponseMyChatPostDto> getChatPostJoinList(Long activeId, ActiveMode activeMode, int limit) {
 
         List<ChatPost> chatPostList = chatPostRepository.findTopParticipatingByProfileAndModeNative(activeId, activeMode.name(), limit);
-        List<ResponseParticipantChatPostDto> participatingChatPostDtoList = new ArrayList<>();
+        List<ResponseMyChatPostDto> participatingChatPostDtoList = new ArrayList<>();
 
         for (ChatPost chatPost : chatPostList) {
-            ResponseParticipantChatPostDto dto = ResponseParticipantChatPostDto.from(chatPost);
+            ResponseMyChatPostDto dto = ResponseMyChatPostDto.from(chatPost);
 
             participatingChatPostDtoList.add(dto);
         }
@@ -278,12 +286,12 @@ public class ChatService {
      * @param limit
      * @return
      */
-    public List<ResponseParticipantChatPostDto> getChatListHot(int limit) {
+    public List<ResponseMyChatPostDto> getChatListHot(int limit) {
 
         List<ChatPost> chatPostList = chatPostRepository.findHotChatPosts(limit);
 
         return chatPostList.stream()
-            .map(ResponseParticipantChatPostDto::from)
+            .map(ResponseMyChatPostDto::from)
             .collect(Collectors.toList());
     }
 
@@ -304,7 +312,7 @@ public class ChatService {
      * @param onlyMine   true이면 본인이 작성한 게시글만 조회
      * @return Slice<ResponseParticipantChatPostDto> 페이징된 참여 게시글 목록
      */
-    public Slice<ResponseParticipantChatPostDto> getChatPostJoinListFull(
+    public Slice<ResponseMyChatPostDto> getChatPostJoinListFull(
         Long activeId,
         ActiveMode activeMode,
         int page,
@@ -322,9 +330,9 @@ public class ChatService {
 
         boolean hasNext = chatPosts.size() > size;
 
-        List<ResponseParticipantChatPostDto> dtoList = chatPosts.stream()
+        List<ResponseMyChatPostDto> dtoList = chatPosts.stream()
             .limit(size)
-            .map(ResponseParticipantChatPostDto::from)
+            .map(ResponseMyChatPostDto::from)
             .toList();
 
         Pageable pageable = PageRequest.of(page, size);
@@ -353,36 +361,77 @@ public class ChatService {
      */
     public void getChatAlreadJoin(Long roomId, Long activeId, ActiveMode activeMode) {
 
-        boolean alreadyJoined = chatParticipantRepository.existsByRoomRoomIdAndProfileIdAndProfileMode(roomId, activeId, activeMode);
+        ChatParticipant chatParticipant = chatParticipantRepository
+            .findByRoom_RoomIdAndProfileIdAndProfileModeAndIsDeletedFalse(roomId, activeId, activeMode)
+            .orElse(null);
 
-        if (!alreadyJoined) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+            .orElseThrow(() -> new EntityNotFoundException("채팅방이 존재하지 않습니다."));
 
-            ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(
-                    () -> new EntityNotFoundException("채팅방이 존재하지 않습니다.")
-                );
-            ChatPost chatPost = chatPostRepository.findById(chatRoom.getChatPost().getId())
-                .orElseThrow(
-                    () -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+        ChatPost chatPost = chatPostRepository.findById(chatRoom.getChatPost().getId())
+            .orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
 
-            if ("CLOSED".equals(chatPost.getStatus().name()) ||
-                chatPost.getCurrentMember() >= chatPost.getMaxMember()) {
-                throw new IllegalStateException("참여 불가 상태");
-            }
+        if ("CLOSED".equals(chatPost.getStatus().name()) ||
+            chatPost.getCurrentMember() >= chatPost.getMaxMember()) {
+            throw new IllegalStateException("참여 불가 상태");
+        }
 
-            ChatParticipant participant = ChatParticipant.builder()
+        // 1️⃣ 처음 참여
+        if (chatParticipant == null) {
+            ChatParticipant newParticipant = ChatParticipant.builder()
                 .profileId(activeId)
                 .profileMode(activeMode)
                 .room(chatRoom)
                 .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
                 .build();
 
-            chatParticipantRepository.save(participant);
+            chatParticipantRepository.save(newParticipant);
+            chatPost.setCurrentMember(chatPost.getCurrentMember() + 1);
+            return;
+        }
 
-            chatRoom.getChatPost().setCurrentMember(chatRoom.getChatPost().getCurrentMember() + 1);
+        // 2️⃣ 재입장 (소프트 삭제 복구)
+        if (chatParticipant.isDeleted()) {
+            chatParticipant.restore(); // isDeleted=false + 상태 초기화
+            chatPost.setCurrentMember(chatPost.getCurrentMember() + 1);
+            return;
         }
     }
 
+    /**
+     * roomId의 채팅방에 참여중인 유저 리스트를 가져옴
+     *
+     * @param roomId
+     * @return
+     */
+    /**
+     * 채팅방 참여자 목록을 조회합니다.
+     *
+     * @param roomId 조회할 채팅방 ID
+     * @return 채팅방 참여자 정보 목록 {@link ResponseParticipantDto}
+     */
+    public List<ResponseParticipantDto> getChatParticipants(Long roomId) {
+        // 채팅방 참여자 엔티티 조회
+        List<ChatParticipant> chatParticipantList = chatParticipantRepository.findByRoomRoomId(roomId);
+
+        // DTO 변환
+        List<ResponseParticipantDto> participantDtos = new ArrayList<>();
+        for (ChatParticipant chatParticipant : chatParticipantList) {
+            ResponseParticipantDto dto = ResponseParticipantDto.builder()
+                .participantId(chatParticipant.getParticipantId())
+                .nickName(profileService.resolveSenderName(
+                    chatParticipant.getProfileId(),
+                    chatParticipant.getProfileMode()
+                ))
+                .activeId(chatParticipant.getProfileId())
+                .activeMode(chatParticipant.getProfileMode().name())
+                .roomId(roomId)
+                .build();
+            participantDtos.add(dto);
+        }
+
+        return participantDtos;
+    }
 
 }
 

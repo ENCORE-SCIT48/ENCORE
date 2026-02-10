@@ -23,6 +23,7 @@ public class ChatParticipant extends BaseEntity {
     @Column(nullable = false)
     private Long profileId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ActiveMode profileMode;  // USER / PERFORMER / HOST
 

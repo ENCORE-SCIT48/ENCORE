@@ -41,7 +41,7 @@ public class ChatController {
         //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 1L;
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         ResponseCreateChatPostDto result = chatService.createChatPostAndRoom(dto, performanceId, activeProfileId, activeMode);
@@ -68,7 +68,7 @@ public class ChatController {
         //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 1L;
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         ResponseDeleteChatPostDto result = chatService.softDeletePost(id, activeProfileId, activeMode);
@@ -96,7 +96,7 @@ public class ChatController {
         //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 1L;
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         ResponseUpdateChatPostDto result = chatService.updateChatPost(chatId, updateDTO, activeProfileId, activeMode);
@@ -141,7 +141,7 @@ public class ChatController {
      * @return 참여한 채팅방 목록
      */
     @GetMapping("/api/chat/join")
-    public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatJoinLimit(
+    public ResponseEntity<CommonResponse<List<ResponseMyChatPostDto>>> getChatJoinLimit(
         @RequestParam(defaultValue = "3") int limit
         //, @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -156,7 +156,7 @@ public class ChatController {
             // 로그인 안 됨 -> 빈 리스트 반환
             return ResponseEntity.ok(CommonResponse.ok(Collections.emptyList(), "로그인 필요"));
         }
-        List<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinList(activeProfileId, activeMode, limit);
+        List<ResponseMyChatPostDto> result = chatService.getChatPostJoinList(activeProfileId, activeMode, limit);
         return ResponseEntity.ok(CommonResponse.ok(result, " 참여 채팅방 목록 조회 완료"));
     }
 
@@ -167,11 +167,11 @@ public class ChatController {
      * @return 모든 채팅방 중 가장 최근 활동이 있는 채팅방
      */
     @GetMapping("/api/chat/hot")
-    public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatHot(
+    public ResponseEntity<CommonResponse<List<ResponseMyChatPostDto>>> getChatHot(
         @RequestParam(defaultValue = "10") int limit
     ) {
         log.info("핫한 채팅방 목록 조회 시작");
-        List<ResponseParticipantChatPostDto> result = chatService.getChatListHot(limit);
+        List<ResponseMyChatPostDto> result = chatService.getChatListHot(limit);
         return ResponseEntity.ok(CommonResponse.ok(result, " 핫한 채팅방 조회 완료"));
 
     }
@@ -191,7 +191,7 @@ public class ChatController {
      * @return 참여 중인 채팅방 목록을 담은 {@link Slice} 형태의 응답 객체
      */
     @GetMapping("/api/chat/join/full")
-    public ResponseEntity<CommonResponse<Slice<ResponseParticipantChatPostDto>>> getChatJoin(
+    public ResponseEntity<CommonResponse<Slice<ResponseMyChatPostDto>>> getChatJoin(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @RequestParam(required = false) String keyword,
@@ -202,14 +202,14 @@ public class ChatController {
         //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 1L;
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         page = Math.max(page, 0);
         size = Math.max(size, 1);
 
         if (keyword != null && keyword.isBlank()) keyword = null;
-        Slice<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinListFull(
+        Slice<ResponseMyChatPostDto> result = chatService.getChatPostJoinListFull(
             activeProfileId, activeMode, page, size, keyword, searchType, onlyMine
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "참여 채팅방 목록 조회 완료"));

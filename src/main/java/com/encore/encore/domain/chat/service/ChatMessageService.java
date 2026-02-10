@@ -1,21 +1,24 @@
 package com.encore.encore.domain.chat.service;
 
 import com.encore.encore.domain.chat.dto.RequestChatMessage;
+import com.encore.encore.domain.chat.dto.ResponseChatExitDto;
 import com.encore.encore.domain.chat.dto.ResponseChatMessage;
+import com.encore.encore.domain.chat.dto.ResponseParticipantDto;
 import com.encore.encore.domain.chat.entity.ChatMessage;
+import com.encore.encore.domain.chat.entity.ChatParticipant;
 import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatMessageRepository;
+import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
+import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
-import com.encore.encore.domain.member.entity.HostProfile;
-import com.encore.encore.domain.member.repository.HostProfileRepository;
-import com.encore.encore.domain.member.repository.PerformerProfileRepository;
-import com.encore.encore.domain.member.repository.UserProfileRepository;
+import com.encore.encore.domain.member.service.ProfileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,11 +27,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatMessageService {
 
+    private final ChatPostRepository chatPostRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final UserProfileRepository userProfileRepository;
-    private final PerformerProfileRepository performerProfileRepository;
-    private final HostProfileRepository hostProfileRepository;
+    private final ChatParticipantRepository chatParticipantRepository;
+    private final ProfileService profileService;
 
     /**
      * 채팅방에 메시지를 전송합니다.
@@ -59,7 +62,7 @@ public class ChatMessageService {
         return ResponseChatMessage.builder()
             .messageId(message.getMessageId())
             .profileId(message.getProfileId())
-            .senderName(resolveSenderName(message.getMessageId(), message.getProfileMode()))
+            .senderName(profileService.resolveSenderName(message.getMessageId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())
             .build();
@@ -82,7 +85,7 @@ public class ChatMessageService {
             .map(message -> ResponseChatMessage.builder()
                 .messageId(message.getMessageId())
                 .profileId(message.getProfileId())
-                .senderName(resolveSenderName(message.getProfileId(), message.getProfileMode()))
+                .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
                 .build()
@@ -92,22 +95,88 @@ public class ChatMessageService {
 
 
     /**
-     * 송신자의 닉네임을 가져오는 메소드
+     * 채팅방 퇴장 처리
      *
-     * @param profileId
-     * @param profileMode
-     * @return
+     * @param roomId
+     * @param activeProfileId
+     * @param activeMode
      */
-    public String resolveSenderName(Long profileId, ActiveMode profileMode) {
-        return switch (profileMode) {
-            case USER -> null;
-            case PERFORMER -> performerProfileRepository.findById(profileId)
-                .map(p -> p.getStageName()) // 람다 사용
-                .orElse("Unknown");
-            case HOST -> hostProfileRepository.findById(profileId)
-                .map(HostProfile::getOrganizationName)
-                .orElse("Unknown");
-        };
+    public ResponseChatExitDto leaveChat(Long roomId, Long activeProfileId, ActiveMode activeMode) {
+        log.info("[Service] 채팅방 퇴장 처리 시작 - roomId: {}, activeProfileId: {}, activeMode: {}", roomId, activeProfileId, activeMode);
+
+        // 1. 참여 정보 확인
+        ChatParticipant chatParticipant = chatParticipantRepository
+            .findByRoom_RoomIdAndProfileIdAndProfileModeAndIsDeletedFalse(roomId, activeProfileId, activeMode)
+            .orElse(null);
+
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+            .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+
+        Long writerId = chatRoom.getChatPost().getProfileId();
+        String writerMode = chatRoom.getChatPost().getProfileMode().name();
+
+        // 2. 방장(글쓴이) 체크
+        if (activeProfileId.equals(writerId) && activeMode.name().equals(writerMode)) {
+            return ResponseChatExitDto.builder()
+                .roomId(roomId)
+                .exitSuccess(false)
+                .isOwner(true)
+                .message("글쓴이는 퇴장할 수 없습니다.")
+                .build();
+        }
+
+        // 3. 참여 정보 Soft Delete
+        if (chatParticipant != null) {
+            chatParticipant.restore();  // isDeleted로 바꿔야 함
+            chatParticipantRepository.save(chatParticipant);
+            log.info("[Service] 멤버 상태 변경 완료 - is_deleted: 1");
+
+            // 4. 채팅방 인원수 감소
+            chatRoom.getChatPost().setCurrentMember(chatRoom.getChatPost().getCurrentMember() - 1);
+            chatRoomRepository.save(chatRoom);
+            log.info("[Service] 채팅방 인원수 감소 완료 - 현재 인원: {}", chatRoom.getChatPost().getCurrentMember());
+        } else {
+            return ResponseChatExitDto.builder()
+                .roomId(roomId)
+                .exitSuccess(false)
+                .isOwner(false)
+                .message("참여자가 아니거나 이미 나간 상태입니다.")
+                .build();
+        }
+
+        // 5. 정상 퇴장 반환
+        return ResponseChatExitDto.builder()
+            .roomId(roomId)
+            .exitSuccess(true)
+            .isOwner(false)
+            .message("채팅방을 나갔습니다.")
+            .build();
     }
 
+    /**
+     * 채팅방 참여자 목록을 조회
+     *
+     * @param roomId
+     * @return
+     */
+    public List<ResponseParticipantDto> getParticipantList(Long roomId) {
+
+        List<ChatParticipant> participantList = chatParticipantRepository.findByRoomRoomId(roomId);
+
+        List<ResponseParticipantDto> responseParticipantDtoList = new ArrayList<>();
+
+        for (ChatParticipant chatParticipant : participantList) {
+            ResponseParticipantDto dto = ResponseParticipantDto.builder()
+                .participantId(chatParticipant.getParticipantId())
+                .nickName(profileService.resolveSenderName(
+                    chatParticipant.getProfileId(),
+                    chatParticipant.getProfileMode()))
+                .activeId(chatParticipant.getParticipantId())
+                .activeMode(chatParticipant.getProfileMode().name())
+                .build();
+            responseParticipantDtoList.add(dto);
+        }
+        return responseParticipantDtoList;
+    }
 }
+

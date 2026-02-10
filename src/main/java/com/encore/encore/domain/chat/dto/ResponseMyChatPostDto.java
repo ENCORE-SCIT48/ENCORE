@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseParticipantChatPostDto {
+public class ResponseMyChatPostDto {
     private Long id;
     private String title;
     private ChatPost.Status status;
@@ -38,8 +38,8 @@ public class ResponseParticipantChatPostDto {
      * @param chatPost 변환 대상 ChatPost 엔티티
      * @return 변환된 ResponseParticipantChatPostDto 객체
      */
-    public static ResponseParticipantChatPostDto from(ChatPost chatPost) {
-        return ResponseParticipantChatPostDto.builder()
+    public static ResponseMyChatPostDto from(ChatPost chatPost) {
+        return ResponseMyChatPostDto.builder()
             .id(chatPost.getId())
             .title(chatPost.getTitle())
             .status(chatPost.getStatus())

@@ -23,6 +23,7 @@ public class ChatMessage extends BaseEntity {
     private ChatRoom room;
     @Column(nullable = false)
     private Long profileId;
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ActiveMode profileMode;
     @Column(nullable = false)
