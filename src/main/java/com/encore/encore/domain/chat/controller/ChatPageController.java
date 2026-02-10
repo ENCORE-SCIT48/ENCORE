@@ -122,6 +122,8 @@ public class ChatPageController {
 
         try {
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+
+            model.addAttribute("performanceTitle", chatService.getPerformanceTitle(performanceId));
             model.addAttribute("performanceId", performanceId);
             model.addAttribute("chatPost", dto);
             return "chat/chatPostUpdateForm";

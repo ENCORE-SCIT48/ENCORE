@@ -11,10 +11,9 @@ import java.util.Optional;
 @Repository
 public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
 
-
-    boolean existsByRoomRoomIdAndProfileIdAndProfileMode(Long roomId, Long activeId, ActiveMode activeMode);
-
     List<ChatParticipant> findByRoomRoomId(Long roomId);
 
     Optional<ChatParticipant> findByRoom_RoomIdAndProfileIdAndProfileModeAndIsDeletedFalse(Long roomId, Long activeId, ActiveMode activeMode);
+
+    List<ChatParticipant> findByRoomRoomIdAndIsDeletedFalse(Long roomId);
 }

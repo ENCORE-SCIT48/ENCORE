@@ -70,8 +70,8 @@ public class chatMessageApiController {
      * @param roomId 퇴장할 채팅방 ID
      * @return 성공 메시지를 담은 응답 객체
      */
-    @PostMapping("/{ROOM_ID}/leave")
-    public ResponseEntity<CommonResponse<ResponseChatExitDto>> leaveChat(
+    @PostMapping("/{roomId}/exit")
+    public ResponseEntity<CommonResponse<ResponseChatExitDto>> exitChat(
         @PathVariable Long roomId
         //@AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -79,7 +79,7 @@ public class chatMessageApiController {
         //Long activeProfileId = userDetails.getActiveProfileId();
         //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 2L;
+        Long activeProfileId = 3L;
         ActiveMode activeMode = ActiveMode.USER;
 
         log.info("[API] 채팅방 퇴장 요청 - roomId: {}, userId: {}", roomId, activeProfileId, activeMode);
@@ -95,7 +95,7 @@ public class chatMessageApiController {
      * @param roomId
      * @return
      */
-    @PostMapping("/{ROOM_ID}/participants")
+    @GetMapping("/{roomId}/participants")
     public ResponseEntity<CommonResponse<List<ResponseParticipantDto>>> participants(
         @PathVariable Long roomId
         //@AuthenticationPrincipal CustomUserDetails userDetails

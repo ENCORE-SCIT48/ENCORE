@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,7 @@ public class ChatMessageService {
             .profileId(activeId)
             .profileMode(activeMode)
             .content(request.getContent())
+            .sentAt(LocalDateTime.now())
             .build();
 
         chatMessageRepository.save(message);
@@ -127,13 +129,13 @@ public class ChatMessageService {
 
         // 3. 참여 정보 Soft Delete
         if (chatParticipant != null) {
-            chatParticipant.restore();  // isDeleted로 바꿔야 함
+            chatParticipant.delete();
             chatParticipantRepository.save(chatParticipant);
             log.info("[Service] 멤버 상태 변경 완료 - is_deleted: 1");
 
             // 4. 채팅방 인원수 감소
             chatRoom.getChatPost().setCurrentMember(chatRoom.getChatPost().getCurrentMember() - 1);
-            chatRoomRepository.save(chatRoom);
+
             log.info("[Service] 채팅방 인원수 감소 완료 - 현재 인원: {}", chatRoom.getChatPost().getCurrentMember());
         } else {
             return ResponseChatExitDto.builder()
@@ -161,7 +163,8 @@ public class ChatMessageService {
      */
     public List<ResponseParticipantDto> getParticipantList(Long roomId) {
 
-        List<ChatParticipant> participantList = chatParticipantRepository.findByRoomRoomId(roomId);
+        List<ChatParticipant> participantList = chatParticipantRepository.findByRoomRoomIdAndIsDeletedFalse(roomId);
+
 
         List<ResponseParticipantDto> responseParticipantDtoList = new ArrayList<>();
 

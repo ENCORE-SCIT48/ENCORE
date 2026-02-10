@@ -32,7 +32,7 @@ $(document).ready(() => {
     // 5. 채팅방 퇴장
     $('#leaveChatBtn').on('click', function () {
         if (confirm('정말 채팅방에서 나가시겠습니까?')) {
-            leaveChat();
+            exitChat();
         }
     });
 
@@ -103,7 +103,7 @@ $(document).ready(() => {
                     participantList.append(`
                         <li class="list-group-item d-flex align-items-center">
                             <i class="fa-solid fa-user-circle me-2 text-secondary"></i>
-                            ${user.nickname}
+                            ${user.nickName}
                         </li>
                     `);
                 });
@@ -124,11 +124,10 @@ $(document).ready(() => {
     /**
      * 채팅방 퇴장 API 호출 및 목록 페이지 이동
      */
-    function leaveChat() {
+    function exitChat() {
         $.ajax({
-            url: '/chat/exit',
+            url: `/api/chat/room/${ROOM_ID}/exit`,
             method: 'POST',
-            data: { roomId: ROOM_ID },
             success: function (response) {
                 if (!response.exitSuccess) {
                     if (response.isOwner) {

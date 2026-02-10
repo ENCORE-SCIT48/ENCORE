@@ -24,7 +24,7 @@
 
     <!-- ===== 상단 헤더 ===== -->
     <header class="app-header">
-        <button type="button" onclick="history.back();" class="btn-icon" aria-label="뒤로가기">
+        <button type="button" onclick="history.back();" class="back-btn" aria-label="뒤로가기">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
 
@@ -51,7 +51,6 @@
             <!-- 수정/삭제 버튼 -->
             <div class="post-actions">
                 <button
-                    th:if="${#authentication.principal != null and currentProfileId == chatPost.writerId and currentProfileMode == chatPost.writerProfileMode}"
                     id="btn-edit"
                     class="btn-action"
                     th:data-performance-id="${performanceId}"
@@ -60,7 +59,6 @@
                 </button>
 
                 <button
-                    th:if="${#authentication.principal != null and currentProfileId == chatPost.writerId and currentProfileMode == chatPost.writerProfileMode}"
                     id="btn-delete"
                     class="btn-action"
                     th:data-performance-id="${performanceId}"

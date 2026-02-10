@@ -59,7 +59,9 @@ public class ProfileService {
      */
     public String resolveSenderName(Long profileId, ActiveMode profileMode) {
         return switch (profileMode) {
-            case USER -> null; //TODO: userEntity 변경 후 수정
+            case USER -> userProfileRepository.findById(profileId)
+                .map(p -> p.getUser().getNickname()) // 람다 사용
+                .orElse("Unknown");
             case PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(p -> p.getStageName()) // 람다 사용
                 .orElse("Unknown");

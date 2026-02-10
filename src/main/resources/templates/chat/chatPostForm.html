@@ -23,8 +23,9 @@
 
     <!-- ===== 상단 헤더 ===== -->
     <header class="app-header">
-        <button id="backBtn" class="back-btn" aria-label="뒤로가기">&larr;</button>
-
+        <button type="button" onclick="history.back();" class="back-btn" aria-label="뒤로가기">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
         <h1 class="app-title">채팅방 생성</h1>
 
         <!-- 우측 더미 요소 -->
@@ -55,7 +56,6 @@
                            id="title"
                            class="form-control"
                            placeholder="제목을 입력하세요"
-                           th:value="${chatPost.title}"
                            required>
                 </div>
 
@@ -66,7 +66,6 @@
                               class="form-control"
                               rows="5"
                               placeholder="내용을 입력하세요"
-                              th:text="${chatPost.content}"
                               required></textarea>
                 </div>
 
@@ -76,7 +75,6 @@
                     <input type="number"
                            id="maxMember"
                            class="form-control"
-                           th:value="${chatPost.maxMember}"
                            min="1"
                            required>
                 </div>
