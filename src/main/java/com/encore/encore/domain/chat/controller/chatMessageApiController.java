@@ -7,10 +7,12 @@ import com.encore.encore.domain.chat.dto.ResponseParticipantDto;
 import com.encore.encore.domain.chat.service.ChatMessageService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
+import com.encore.encore.global.config.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -72,15 +74,12 @@ public class chatMessageApiController {
      */
     @PostMapping("/{roomId}/exit")
     public ResponseEntity<CommonResponse<ResponseChatExitDto>> exitChat(
-        @PathVariable Long roomId
-        //@AuthenticationPrincipal CustomUserDetails userDetails
+        @PathVariable Long roomId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        //Long activeProfileId = userDetails.getActiveProfileId();
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 3L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         log.info("[API] 채팅방 퇴장 요청 - roomId: {}, userId: {}", roomId, activeProfileId, activeMode);
 
@@ -97,11 +96,11 @@ public class chatMessageApiController {
      */
     @GetMapping("/{roomId}/participants")
     public ResponseEntity<CommonResponse<List<ResponseParticipantDto>>> participants(
-        @PathVariable Long roomId
-        //@AuthenticationPrincipal CustomUserDetails userDetails
+        @PathVariable Long roomId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        //Long activeProfileId = userDetails.getActiveProfileId();
-        //ActiveMode activeMode = userDetails.getActiveMode();
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         List<ResponseParticipantDto> result = chatMessageService.getParticipantList(roomId);
 

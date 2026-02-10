@@ -6,11 +6,13 @@ import com.encore.encore.domain.chat.dto.ResponseParticipantDto;
 import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.service.ChatService;
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -172,15 +174,12 @@ public class ChatPageController {
     @GetMapping("/chat/{roomId}")
     public String chatRoom(
         @PathVariable("roomId") Long roomId,
-        Model model
-        //, @AuthenticationPrincipal CustomUserDetails userDetails
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
 

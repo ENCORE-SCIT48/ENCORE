@@ -4,6 +4,7 @@ import com.encore.encore.domain.chat.dto.*;
 import com.encore.encore.domain.chat.service.ChatService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
+import com.encore.encore.global.config.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -34,15 +36,12 @@ public class ChatController {
     @PostMapping("/performance/{performanceId}/chat/post")
     public ResponseEntity<CommonResponse<ResponseCreateChatPostDto>> createChatPost(
         @PathVariable Long performanceId,
-        @Valid @RequestBody RequestCreateChatPostDto dto
-        //, @AuthenticationPrincipal CustomUserDetails userDetails
+        @Valid @RequestBody RequestCreateChatPostDto dto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("채팅방 생성 요청 시작 - performanceId: {}", performanceId);
-        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseCreateChatPostDto result = chatService.createChatPostAndRoom(dto, performanceId, activeProfileId, activeMode);
 
@@ -60,16 +59,13 @@ public class ChatController {
      */
     @DeleteMapping("/chat/{id}")
     public ResponseEntity<CommonResponse<ResponseDeleteChatPostDto>> deletePost(
-        @PathVariable Long id
-        //, @AuthenticationPrincipal CustomUserDetails userDetails
+        @PathVariable Long id,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("게시글 삭제 요청 - postId: {}", id);
 
-        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseDeleteChatPostDto result = chatService.softDeletePost(id, activeProfileId, activeMode);
 
@@ -88,16 +84,13 @@ public class ChatController {
     public ResponseEntity<CommonResponse<ResponseUpdateChatPostDto>> updatePost(
         @PathVariable Long performanceId,
         @PathVariable Long chatId,
-        @RequestBody RequestUpdateChatPostDto updateDTO
-        //, @AuthenticationPrincipal CustomUserDetails userDetails
+        @RequestBody RequestUpdateChatPostDto updateDTO,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("게시글 수정 요청 - chatId: {}, updateDTO: {}", chatId, updateDTO);
 
-        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseUpdateChatPostDto result = chatService.updateChatPost(chatId, updateDTO, activeProfileId, activeMode);
 
@@ -142,15 +135,12 @@ public class ChatController {
      */
     @GetMapping("/api/chat/join")
     public ResponseEntity<CommonResponse<List<ResponseMyChatPostDto>>> getChatJoinLimit(
-        @RequestParam(defaultValue = "3") int limit
-        //, @AuthenticationPrincipal CustomUserDetails userDetails
+        @RequestParam(defaultValue = "3") int limit,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("참여 채팅방 목록 조회 시작");
-        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 1L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         if (activeProfileId == null) {
             // 로그인 안 됨 -> 빈 리스트 반환
@@ -196,14 +186,11 @@ public class ChatController {
         @RequestParam(defaultValue = "20") int size,
         @RequestParam(required = false) String keyword,
         @RequestParam(defaultValue = "title") String searchType,
-        @RequestParam(defaultValue = "false") boolean onlyMine
-        //, @AuthenticationPrincipal CustomUserDetails userDetails
+        @RequestParam(defaultValue = "false") boolean onlyMine,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         page = Math.max(page, 0);
         size = Math.max(size, 1);
