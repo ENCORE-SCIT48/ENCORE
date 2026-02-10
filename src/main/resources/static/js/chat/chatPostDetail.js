@@ -49,3 +49,20 @@ $(document).ready(() => {
         });
     });
 });
+
+/**
+ * 채팅방 참가 버튼 클릭 이벤트 핸들러
+ * - 참가 여부 확인 후 입장 페이지로 이동
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const btnJoin = document.getElementById('btn-join');
+    const roomId = btnJoin.getAttribute('data-room-id');
+
+    btnJoin.addEventListener('click', () => {
+        const confirmEnter = confirm('채팅방에 입장하시겠습니까?');
+
+        if (confirmEnter) {
+            window.location.href = `/chat/${roomId}`;
+        }
+    });
+});

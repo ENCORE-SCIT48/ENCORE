@@ -3,6 +3,7 @@ package com.encore.encore.domain.chat.controller;
 import com.encore.encore.domain.chat.dto.RequestChatMessage;
 import com.encore.encore.domain.chat.dto.ResponseChatMessage;
 import com.encore.encore.domain.chat.service.ChatMessageService;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +33,17 @@ public class chatMessageApiController {
     public ResponseEntity<CommonResponse<ResponseChatMessage>> sendMessage(
         @PathVariable Long roomId,
         @RequestBody RequestChatMessage request
+        //@AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        Long userId = 1L;
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 1L;
+        ActiveMode activeMode = ActiveMode.USER;
 
         ResponseChatMessage result = chatMessageService.sendMessage(
-            roomId, userId, request
+            roomId, activeProfileId, activeMode, request
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "메시지 전송 성공"));
     }

@@ -14,10 +14,22 @@ $(document).ready(() => {
         const content = $('#content').val().trim();
         const maxMember = Number($('#maxMember').val());
 
-        if (!performanceId || !title || !content || !maxMember) {
-            alert('모든 입력값을 올바르게 입력해주세요.');
-            return;
-        }
+       if (!performanceId || !title || !content || !maxMember) {
+           alert('모든 입력값을 올바르게 입력해주세요.');
+           return;
+       }
+
+       if (!title.replace(/\s/g, '') || title.length < 2 || title.length > 100) {
+           alert('제목은 2~100자 사이로 입력해주세요.');
+           return;
+       }
+
+
+       if (!Number.isInteger(maxMember) || maxMember < 2 || maxMember > 50) {
+           alert('모집 인원은 2~50 사이의 정수로 입력해주세요.');
+           return;
+       }
+
 
         const data = { performanceId: Number(performanceId), title, content, maxMember };
 

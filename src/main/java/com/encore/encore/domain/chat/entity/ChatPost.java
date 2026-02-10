@@ -1,8 +1,6 @@
 package com.encore.encore.domain.chat.entity;
 
-import com.encore.encore.domain.member.entity.HostProfile;
-import com.encore.encore.domain.member.entity.PerformerProfile;
-import com.encore.encore.domain.member.entity.UserProfile;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -24,15 +22,10 @@ public class ChatPost extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_id")
     private Performance performance;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id")
-    private HostProfile host;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_id")
-    private UserProfile profile;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "performer_id")
-    private PerformerProfile performer;
+    @Column(nullable = false)
+    private Long profileId; // 글쓴이 Id
+    @Column(nullable = false)
+    private ActiveMode profileMode;  // USER / PERFORMER / HOST
     private String title;
     private String content;
     private Integer maxMember;

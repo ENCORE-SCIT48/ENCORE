@@ -1,6 +1,6 @@
 package com.encore.encore.domain.chat.entity;
 
-import com.encore.encore.domain.user.entity.User;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,9 +21,10 @@ public class ChatMessage extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private ChatRoom room;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    @Column(nullable = false)
+    private Long profileId;
+    @Column(nullable = false)
+    private ActiveMode profileMode;
     @Column(nullable = false)
     private String content;
     private LocalDateTime sentAt;

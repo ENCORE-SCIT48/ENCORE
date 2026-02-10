@@ -5,47 +5,77 @@
     <meta charset="UTF-8">
     <title>채팅방 생성</title>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/chat/chat.css}">
+    <link rel="stylesheet" th:href="@{/css/chat/chat-post-form.css}">
+
 </head>
 
 <body>
-<nav class="navbar navbar-dark bg-primary fixed-top">
-    <div class="container-fluid">
-        <button id="backBtn" class="btn btn-outline-light btn-sm">&larr; 뒤로</button>
-        <span class="navbar-brand mb-0 h1">채팅방 생성</span>
-    </div>
-</nav>
+<div class="app-container">
 
-<main class="content-wrapper">
-    <section class="chat-form">
-        <form id="chatPostForm">
-            <input type="hidden" id="performanceId" th:value="${performanceId}">
+    <!-- ===== 상단 헤더 ===== -->
+    <header class="app-header">
+        <button id="backBtn" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </button>
 
-            <div class="mb-3">
-                <label>공연 ID</label>
-                <input type="text" th:value="${performanceId}" class="form-control" readonly>
-            </div>
+        <h1 class="app-title">채팅방 생성</h1>
 
-            <div class="mb-3">
-                <label for="title">제목</label>
-                <input type="text" id="title" class="form-control" placeholder="제목을 입력하세요" required>
-            </div>
+        <!-- 우측 여백 맞추기용 더미 -->
+        <div style="width: 36px;"></div>
+    </header>
 
-            <div class="mb-3">
-                <label for="content">내용</label>
-                <textarea id="content" class="form-control" rows="5" placeholder="내용을 입력하세요" required></textarea>
-            </div>
+    <!-- ===== 스크롤 영역 ===== -->
+    <main class="app-content">
 
-            <div class="mb-3">
-                <label for="maxMember">모집 인원</label>
-                <input type="number" id="maxMember" class="form-control" min="1" value="2">
-            </div>
+        <section class="chat-form">
+            <form id="chatPostForm">
+                <input type="hidden" id="performanceId" th:value="${performanceId}">
 
-            <button type="submit" class="btn btn-primary w-100">작성하기</button>
-        </form>
-    </section>
-</main>
+                <div class="mb-3">
+                    <label>공연명</label>
+                    <input type="text" th:value="${performanceId}" class="form-control" readonly>
+                </div>
 
-<script th:src="@{/js/chat/chatPostForm.js}"></script>
+                <div class="mb-3">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" class="form-control" placeholder="제목을 입력하세요"
+                           th:value="${chatPost.title}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="content">내용</label>
+                    <textarea id="content" class="form-control" rows="5" placeholder="내용을 입력하세요"
+                              th:text="${chatPost.content}" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="maxMember">모집 인원</label>
+                    <input type="number" id="maxMember" class="form-control" min="1"
+                           th:value="${chatPost.maxMember}" readonly>
+                </div>
+                <div class="mb-3">
+                    <label>채팅방 상태</label>
+
+                    <div class="status-toggle">
+                        <button type="button" class="status-btn active" data-status="OPEN">
+                            모집중
+                        </button>
+
+                        <button type="button" class="status-btn" data-status="CLOSED">
+                            모집완료
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">수정하기</button>
+            </form>
+        </section>
+
+    </main>
+</div>
+<script th:src="@{/js/chat/chatPostUpdateForm.js}"></script>
 </body>
 
 </html>

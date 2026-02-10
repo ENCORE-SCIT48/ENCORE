@@ -83,7 +83,7 @@ $(document).ready(() => {
                 <div class="chat-title">${chat.title}</div>
                 <div class="chat-info">
                     <span>${formattedDate}</span>
-                    <span class="member-count"><i class="fa-solid fa-users"></i> ${chat.currentMember}/${chat.maxMember}명</span>
+                    <span><i class="fa-solid fa-users"></i> ${chat.currentMember}/${chat.maxMember}명</span>
                 </div>
             </div>
         `);

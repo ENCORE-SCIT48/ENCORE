@@ -2,48 +2,75 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="UTF-8">
-    <title>채팅방 상세</title>
+    <meta charset="UTF-8"/>
+    <title>채팅 커뮤니티 게시판 상세</title>
+    <link rel="stylesheet" th:href="@{/css/chat/chat.css}"/>
+    <link rel="stylesheet" th:href="@{/css/chat/chat-post-detail.css}"/>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script th:src="@{/js/chat/chatPostDetail.js}"></script>
 </head>
 
 <body>
-<header class="app-header">
-    <button id="btn-back" class="back-btn">←</button>
-</header>
+<div class="app-container">
 
-<main class="chat-detail">
-    <h1>채팅방 상세</h1>
-
-    <section class="chat-info">
-        <h2 th:text="${chatPost.title}">제목</h2>
-        <!-- <p><strong>공연:</strong> <span th:text="${chatPost.performanceTitle}">공연 이름</span></p> -->
-        <p><strong>현재 인원:</strong> <span th:text="${chatPost.currentMember}">0</span> /
-            <span th:text="${chatPost.maxMember}">0</span></p>
-        <p><strong>내용:</strong> <span th:text="${chatPost.content}">내용</span></p>
-        <p><strong>상태:</strong> <span th:text="${chatPost.status}">OPEN</span></p>
-    </section>
-
-    <section class="chat-actions">
-        <button th:if="${true}" id="btn-edit" th:data-performance-id="${performanceId}"
-                th:data-id="${chatPost.id}">수정하기
+    <header class="app-header">
+        <button id="backBtn" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
         </button>
-        <button th:if="${true}" id="btn-delete" th:data-performance-id="${performanceId}"
-                th:data-id="${chatPost.id}">삭제하기
-        </button>
-    </section>
+        <h1 class="app-title" th:text="${performanceTitle}">공연 이름</h1>
+        <div class="header-spacer"></div>
+    </header>
 
-    <section class="chat-participation">
-        <form th:action="@{/chat/{id}(id=${chatPost.id})}" method="post">
-            <button type="submit">참가하기</button>
-        </form>
+    <main class="app-content">
 
-        <form th:action="@{/chat/removeParticipant/{id}(id=${chatPost.id})}" method="post">
-            <button type="submit">나가기</button>
-        </form>
-    </section>
-</main>
+        <article class="chat-post-detail">
+
+            <h2 class="post-title" th:text="${chatPost.title}">제목</h2>
+
+            <div class="post-meta">
+                <span class="author-nickname" th:text="${chatPost.writerName}">닉네임</span> |
+                <span th:text="${#temporals.format(chatPost.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                <span class="member-count" th:text="${chatPost.currentMember} + '/' + ${chatPost.maxMember}">1/4</span>
+            </div>
+
+            <div class="post-actions">
+                <!-- 로그인 사용자와 작성자 일치할 때만 보임 -->
+                <button
+                    th:if="${#authentication.principal != null and currentProfileId == chatPost.writerId and currentProfileMode == chatPost.writerProfileMode}"
+                    id="btn-edit"
+                    class="btn-action"
+                    th:data-performance-id="${performanceId}"
+                    th:data-id="${chatPost.id}">
+                    수정하기
+                </button>
+
+                <button
+                    th:if="${#authentication.principal != null and currentProfileId == chatPost.writerId and currentProfileMode == chatPost.writerProfileMode}"
+                    id="btn-delete"
+                    class="btn-action"
+                    th:data-performance-id="${performanceId}"
+                    th:data-id="${chatPost.id}">
+                    삭제하기
+                </button>
+            </div>
+
+            <section class="post-content" th:text="${chatPost.content}">
+                글 상세내용
+            </section>
+
+            <button th:if="(status == T(com.encore.encore.domain.chat.entity.ChatPost.Status).OPEN
+         and currentMember < maxMember)
+        or (participantIds != null and participantIds.contains(currentProfileId))"
+
+                    id="btn-join" class="btn-join" th:data-room-id="${roomId}">채팅방 참가하기
+            </button>
+
+            <button id="btn-report" class="btn-report">신고하기</button>
+
+        </article>
+
+    </main>
+</div>
+
+<script th:src="@{/js/chat/chatPostDetail.js}"></script>
 </body>
-
 </html>

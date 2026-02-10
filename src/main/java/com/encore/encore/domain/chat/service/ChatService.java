@@ -7,11 +7,9 @@ import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
-import com.encore.encore.domain.member.entity.UserProfile;
-import com.encore.encore.domain.member.repository.UserProfileRepository;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
-import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.user.repository.UserRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
@@ -39,7 +37,6 @@ public class ChatService {
     private final ChatPostRepository chatPostRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final PerformanceRepository performanceRepository;
-    private final UserProfileRepository userProfileRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final UserRepository userRepository;
 
@@ -52,7 +49,8 @@ public class ChatService {
      * @throws EntityNotFoundException  프로필 정보가 존재하지 않을 경우 발생
      * @throws IllegalArgumentException 작성자 정보가 누락되었을 경우 발생
      */
-    public ResponseCreateChatPostDto createChatPostAndRoom(RequestCreateChatPostDto dto, Long performanceId) {
+    public ResponseCreateChatPostDto createChatPostAndRoom(
+        RequestCreateChatPostDto dto, Long performanceId, Long activeProfileId, ActiveMode activeMode) {
         log.info("채팅 게시글 생성 프로세스 시작 - 제목: {}", dto.getTitle());
 
         Performance performance = performanceRepository.findById(performanceId)
@@ -64,10 +62,10 @@ public class ChatService {
             .title(dto.getTitle())
             .content(dto.getContent())
             .maxMember(dto.getMaxMember())
+            .profileId(activeProfileId)
+            .profileMode(activeMode)
             .currentMember(0)
             .status(ChatPost.Status.OPEN);
-
-        assignProfile(builder, dto);
 
         ChatPost chatPost = builder.build();
         chatPost.addParticipant();
@@ -82,43 +80,6 @@ public class ChatService {
         log.info("채팅방 생성 완료 - RoomID: {}", chatRoom.getRoomId());
 
         return ResponseCreateChatPostDto.from(chatPost, chatRoom);
-    }
-
-    /**
-     * DTO의 ID 값에 따라 적절한 프로필을 빌더에 할당
-     */
-    private void assignProfile(ChatPost.ChatPostBuilder builder, RequestCreateChatPostDto dto) {
-        log.info("테스트를 위한 프로필 하드코딩 시작");
-        UserProfile realProfile = userProfileRepository.findById(1L)
-            .orElseThrow(() -> new EntityNotFoundException("테스트를 위한 1번 프로필이 DB에 없습니다. data.sql을 확인하세요."));
-
-        builder.profile(realProfile);
-        log.info("실제 프로필(ID: 1) 할당 완료: {}", realProfile.getIntroduction());
-    }
-
-
-    /**
-     * 공연별 채팅방 목록 조회 출력
-     *
-     * @param performanceId 채팅방을 불러올 공연 정보
-     * @return 채팅방 리스트 전달
-     */
-    public List<ResponseListChatPostDto> getChatPostsByPerformance(Long performanceId) {
-        List<ChatPost> chatPostList = chatPostRepository.findByPerformance_PerformanceId(performanceId);
-        List<ResponseListChatPostDto> dtoList = new ArrayList<>();
-
-        for (ChatPost chatPost : chatPostList) {
-            ResponseListChatPostDto dto = ResponseListChatPostDto.builder()
-                .id(chatPost.getId())
-                .currentMember(chatPost.getCurrentMember())
-                .maxMember(chatPost.getMaxMember())
-                .title(chatPost.getTitle())
-                .status(chatPost.getStatus().name())
-                .build();
-            dtoList.add(dto);
-        }
-
-        return dtoList;
     }
 
     /**
@@ -137,23 +98,15 @@ public class ChatService {
             ResponseDetailChatPostDto.builder()
                 .id(chatPost.getId())
                 .title(chatPost.getTitle())
+                .writerName("임시")
+                .writerId(chatPost.getProfileId())
+                .writerProfileMode(chatPost.getProfileMode().name())
+                .createdAt(chatPost.getCreatedAt())
                 .content(chatPost.getContent())
                 .currentMember(String.valueOf(chatPost.getCurrentMember()))
                 .maxMember(chatPost.getMaxMember())
                 .status(chatPost.getStatus());
 
-        if (chatPost.getHost() != null) {
-            builder
-                .writeProfileId(chatPost.getHost().getHostId())
-                .writerName(chatPost.getHost().getOrganizationName());
-        } else if (chatPost.getPerformer() != null) {
-            builder
-                .writeProfileId(chatPost.getPerformer().getPerformerId())
-                .writerName(chatPost.getPerformer().getStageName());
-        } else if (chatPost.getProfile() != null) {
-            builder
-                .writeProfileId(chatPost.getProfile().getProfileId());
-        }
 
         return builder.build();
     }
@@ -165,14 +118,14 @@ public class ChatService {
      * @param chatId    수정할 글 id
      * @param updateDTO 수정할 내용이 담긴 dto
      */
-    public ResponseUpdateChatPostDto updateChatPost(Long chatId, RequestUpdateChatPostDto updateDTO, Long userId) {
-        log.info("게시글 수정 시작 - chatId: {}, 수정 요청자ID: {}", chatId, userId);
+    public ResponseUpdateChatPostDto updateChatPost(Long chatId, RequestUpdateChatPostDto updateDTO, Long activeProfileId, ActiveMode activeMode) {
+        log.info("게시글 수정 시작 - chatId: {}, 수정 요청자ID: {}", chatId, activeProfileId);
 
         try {
             ChatPost chatPost = chatPostRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("글이 존재하지 않습니다. ID: " + chatId));
 
-            checkChatPostAuthority(chatPost, userId);
+            checkChatPostAuthority(chatPost, activeProfileId, activeMode);
 
             chatPost.setTitle(updateDTO.getTitle());
             chatPost.setContent(updateDTO.getContent());
@@ -191,17 +144,19 @@ public class ChatService {
     /**
      * 글과 채팅방 논리 삭제
      *
-     * @param userId 글 쓴 유저와 일치하는지 확인
-     * @param postId 삭제할 글을 조회할 id
+     * @param postId     삭제할 글
+     * @param activeId   삭제 요청자 id
+     * @param activeMode 삭제 요청자 프로필 역할
+     * @return
      */
-    public ResponseDeleteChatPostDto softDeletePost(Long postId, Long userId) {
+    public ResponseDeleteChatPostDto softDeletePost(Long postId, Long activeId, ActiveMode activeMode) {
         log.info("게시글 논리 삭제 시작 - postId: {}", postId);
 
         ChatPost chatPost = chatPostRepository.findById(postId)
             .orElseThrow(() -> new EntityNotFoundException("글이 조회되지 않습니다. ID: " + postId));
 
         log.info("권한 확인");
-        checkChatPostAuthority(chatPost, userId);
+        checkChatPostAuthority(chatPost, activeId, activeMode);
 
         chatPost.delete();
 
@@ -240,23 +195,21 @@ public class ChatService {
     /**
      * 권한 체크
      *
-     * @param chatPost       글 id
-     * @param loginProfileId 로그인 하고 있는 id
+     * @param chatPost
+     * @param activeId
+     * @param activeMode
      */
-    public void checkChatPostAuthority(ChatPost chatPost, Long loginProfileId) {
-        // 테스트용 하드코딩: 요청자가 누구든, 혹은 특정 ID라면 무조건 통과
-        if (loginProfileId.equals(1L)) {
-            log.info("테스트 모드: ID 1번 사용자 권한 강제 승인");
-            return;
-        }
-        boolean isHost = chatPost.getHost() != null && chatPost.getHost().getHostId().equals(loginProfileId);
-        boolean isPerformer = chatPost.getPerformer() != null && chatPost.getPerformer().getPerformerId().equals(loginProfileId);
-        boolean isUser = chatPost.getProfile() != null && chatPost.getProfile().getUser().equals(loginProfileId);
+    public void checkChatPostAuthority(ChatPost chatPost, Long activeId, ActiveMode activeMode) {
+        Long postAuthorId = chatPost.getProfileId();
+        ActiveMode postAuthorMode = chatPost.getProfileMode();
 
-        if (!isHost && !isPerformer && !isUser) {
-            log.error("권한 없음 경고 - 요청자 ID: {} 는 해당 게시글의 작성자가 아님", loginProfileId);
-            throw new AccessDeniedException("권한이 없습니다.");
+        if (!activeId.equals(postAuthorId) || !activeMode.equals(postAuthorMode)) {
+            log.warn("권한 없음 - 로그인 프로필({}/{}) vs 작성자({}/{})",
+                activeMode, activeMode, postAuthorId, postAuthorMode);
+            throw new AccessDeniedException("글 작성자가 아닙니다.");
         }
+
+
         log.info("권한 확인 완료");
     }
 
@@ -300,13 +253,13 @@ public class ChatService {
     /**
      * 참여중인 채팅방 리스트를 리미트까지 조회
      *
-     * @param loginUserId
+     * @param
      * @param limit
      * @return
      */
-    public List<ResponseParticipantChatPostDto> getChatPostJoinList(Long loginUserId, int limit) {
+    public List<ResponseParticipantChatPostDto> getChatPostJoinList(Long activeId, ActiveMode activeMode, int limit) {
 
-        List<ChatPost> chatPostList = chatPostRepository.findTopParticipatingByUserIdNative(loginUserId, limit);
+        List<ChatPost> chatPostList = chatPostRepository.findTopParticipatingByProfileAndModeNative(activeId, activeMode.name(), limit);
         List<ResponseParticipantChatPostDto> participatingChatPostDtoList = new ArrayList<>();
 
         for (ChatPost chatPost : chatPostList) {
@@ -335,30 +288,35 @@ public class ChatService {
     }
 
     /**
-     * 참여중인 전체 채팅방을 조회하고 키워드 별 검색
+     * 로그인한 사용자가 참여 중인 채팅 게시글 목록을 가져옵니다.
+     * <p>
+     * - 참여자는 `ChatParticipant` 기준으로 필터링됩니다.
+     * - 게시글 작성자 필터링을 통해 본인 글만 가져올 수도 있습니다.
+     * - 제목/내용 검색이 가능하며, 페이징 처리(Slice)됩니다.
+     * - `profileId`와 `profileMode`는 DB에서 enum 이름(String)으로 비교됩니다.
      *
-     * @param userId
-     * @param page
-     * @param size
-     * @param keyword
-     * @param searchType
-     * @return
+     * @param activeId   현재 로그인한 프로필 ID
+     * @param activeMode 현재 로그인한 프로필의 역할(ActiveMode)
+     * @param page       조회할 페이지 번호 (0부터 시작)
+     * @param size       페이지 당 가져올 게시글 수
+     * @param keyword    검색 키워드 (제목 또는 내용)
+     * @param searchType 검색 타입 ("title" 또는 "content")
+     * @param onlyMine   true이면 본인이 작성한 게시글만 조회
+     * @return Slice<ResponseParticipantChatPostDto> 페이징된 참여 게시글 목록
      */
-
     public Slice<ResponseParticipantChatPostDto> getChatPostJoinListFull(
-        Long userId,
+        Long activeId,
+        ActiveMode activeMode,
         int page,
         int size,
         String keyword,
-        String searchType
+        String searchType,
+        boolean onlyMine
     ) {
         int offset = page * size;
 
         List<ChatPost> chatPosts = chatPostRepository.findJoinedChats(
-            userId,
-            keyword,
-            searchType,
-            size + 1, // 한 페이지+1 개 가져와서 hasNext 판단
+            activeId, activeMode.name(), keyword, searchType, onlyMine, size + 1, // 한 페이지+1 개 가져와서 hasNext 판단
             offset
         );
 
@@ -373,30 +331,48 @@ public class ChatService {
         return new SliceImpl<>(dtoList, pageable, hasNext);
     }
 
+    /**
+     * chatPost의 id를 가지고 있는 chatRoom을 조회
+     *
+     * @param id
+     * @return
+     */
     public Long getChatRoomId(Long id) {
         ChatRoom chatRoom = chatRoomRepository.findByChatPost_Id(id);
 
         return chatRoom.getRoomId();
     }
 
-    public void getChatAlreadJoin(Long roomId, Long userId) {
+    /**
+     * 해당 채팅방에 이미 참가자인지 확인하고, 참가하지 않았다면 참가자에 추가한다.
+     * 만약 최대 인원수와 참가 인원수가 같거나 상태가 CLOSED일시 참가하지 않은 참가자는 반환한다.
+     *
+     * @param roomId     채팅방 id
+     * @param activeId   로그인 되어있는 유저 프로필 id
+     * @param activeMode 선택 되어있는 유저 프로필 역할
+     */
+    public void getChatAlreadJoin(Long roomId, Long activeId, ActiveMode activeMode) {
 
-        boolean alreadyJoined = chatParticipantRepository.existsByRoomRoomIdAndUserUserId(roomId, userId);
+        boolean alreadyJoined = chatParticipantRepository.existsByRoomRoomIdAndProfileIdAndProfileMode(roomId, activeId, activeMode);
 
         if (!alreadyJoined) {
-
 
             ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(
                     () -> new EntityNotFoundException("채팅방이 존재하지 않습니다.")
                 );
-
-            User user = userRepository.findById(userId)
+            ChatPost chatPost = chatPostRepository.findById(chatRoom.getChatPost().getId())
                 .orElseThrow(
-                    () -> new EntityNotFoundException("유저가 존재하지 않습니다.")
-                );
+                    () -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+
+            if ("CLOSED".equals(chatPost.getStatus().name()) ||
+                chatPost.getCurrentMember() >= chatPost.getMaxMember()) {
+                throw new IllegalStateException("참여 불가 상태");
+            }
+
             ChatParticipant participant = ChatParticipant.builder()
-                .user(user)
+                .profileId(activeId)
+                .profileMode(activeMode)
                 .room(chatRoom)
                 .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
                 .build();

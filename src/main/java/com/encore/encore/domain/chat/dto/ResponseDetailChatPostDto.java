@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * [설명] 채팅 게시글 상세 정보 응답 DTO
  * <p>
@@ -20,11 +22,13 @@ public class ResponseDetailChatPostDto {
     private Long id;
     private Long performanceId;
     private String performanceTitle;
-    private Long writeProfileId;
     private String writerName;
+    private Long writerId;
+    private String writerProfileMode;
     private String title;
     private String content;
     private String currentMember;
     private Integer maxMember;
+    private LocalDateTime createdAt;
     private ChatPost.Status status;
 }

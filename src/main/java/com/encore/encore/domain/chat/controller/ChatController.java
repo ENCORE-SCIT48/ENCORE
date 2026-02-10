@@ -2,6 +2,7 @@ package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.dto.*;
 import com.encore.encore.domain.chat.service.ChatService;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +35,16 @@ public class ChatController {
     public ResponseEntity<CommonResponse<ResponseCreateChatPostDto>> createChatPost(
         @PathVariable Long performanceId,
         @Valid @RequestBody RequestCreateChatPostDto dto
+        //, @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("채팅방 생성 요청 시작 - performanceId: {}", performanceId);
+        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        //ActiveMode activeMode = userDetails.getActiveMode();
 
-        ResponseCreateChatPostDto result = chatService.createChatPostAndRoom(dto, performanceId);
+        Long activeProfileId = 1L;
+        ActiveMode activeMode = ActiveMode.USER;
+
+        ResponseCreateChatPostDto result = chatService.createChatPostAndRoom(dto, performanceId, activeProfileId, activeMode);
 
         log.info("채팅방 생성 완료 - postId: {}", result.getPostId());
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -52,11 +59,19 @@ public class ChatController {
      * @return 삭제한 글 정보
      */
     @DeleteMapping("/chat/{id}")
-    public ResponseEntity<CommonResponse<ResponseDeleteChatPostDto>> deletePost(@PathVariable Long id) {
+    public ResponseEntity<CommonResponse<ResponseDeleteChatPostDto>> deletePost(
+        @PathVariable Long id
+        //, @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         log.info("게시글 삭제 요청 - postId: {}", id);
 
-        Long loginProfileId = 1L;
-        ResponseDeleteChatPostDto result = chatService.softDeletePost(id, loginProfileId);
+        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 1L;
+        ActiveMode activeMode = ActiveMode.USER;
+
+        ResponseDeleteChatPostDto result = chatService.softDeletePost(id, activeProfileId, activeMode);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.ok(result, "삭제 성공"));
     }
@@ -74,12 +89,17 @@ public class ChatController {
         @PathVariable Long performanceId,
         @PathVariable Long chatId,
         @RequestBody RequestUpdateChatPostDto updateDTO
+        //, @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("게시글 수정 요청 - chatId: {}, updateDTO: {}", chatId, updateDTO);
 
-        Long loginProfileId = 1L;
+        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        //ActiveMode activeMode = userDetails.getActiveMode();
 
-        ResponseUpdateChatPostDto result = chatService.updateChatPost(chatId, updateDTO, loginProfileId);
+        Long activeProfileId = 1L;
+        ActiveMode activeMode = ActiveMode.USER;
+
+        ResponseUpdateChatPostDto result = chatService.updateChatPost(chatId, updateDTO, activeProfileId, activeMode);
 
         log.info("게시글 수정 성공 - chatId: {}", chatId);
 
@@ -123,14 +143,20 @@ public class ChatController {
     @GetMapping("/api/chat/join")
     public ResponseEntity<CommonResponse<List<ResponseParticipantChatPostDto>>> getChatJoinLimit(
         @RequestParam(defaultValue = "3") int limit
+        //, @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("참여 채팅방 목록 조회 시작");
-        Long userId = 1L;
-        if (userId == null) {
+        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 1L;
+        ActiveMode activeMode = ActiveMode.USER;
+
+        if (activeProfileId == null) {
             // 로그인 안 됨 -> 빈 리스트 반환
             return ResponseEntity.ok(CommonResponse.ok(Collections.emptyList(), "로그인 필요"));
         }
-        List<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinList(userId, limit);
+        List<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinList(activeProfileId, activeMode, limit);
         return ResponseEntity.ok(CommonResponse.ok(result, " 참여 채팅방 목록 조회 완료"));
     }
 
@@ -171,15 +197,20 @@ public class ChatController {
         @RequestParam(required = false) String keyword,
         @RequestParam(defaultValue = "title") String searchType,
         @RequestParam(defaultValue = "false") boolean onlyMine
+        //, @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = 1L; // 로그인 사용자 ID
+        //Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 1L;
+        ActiveMode activeMode = ActiveMode.USER;
 
         page = Math.max(page, 0);
         size = Math.max(size, 1);
 
         if (keyword != null && keyword.isBlank()) keyword = null;
         Slice<ResponseParticipantChatPostDto> result = chatService.getChatPostJoinListFull(
-            userId, page, size, keyword, searchType
+            activeProfileId, activeMode, page, size, keyword, searchType, onlyMine
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "참여 채팅방 목록 조회 완료"));
     }

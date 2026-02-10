@@ -1,10 +1,24 @@
-/**
- * chatUpdateForm.js
- * 🎯 채팅방 수정 JS
- * - Hidden 필드에서 ID 추출 후 변경 데이터를 JSON으로 서버 전송
- */
-
 $(document).ready(() => {
+
+    const statusButtons = $('.status-btn');
+    const statusInput = $('#status');
+
+    // 초기 상태 버튼 활성화 (수정일 경우)
+    const currentStatus = statusInput.val();
+    statusButtons.each(function() {
+        if ($(this).data('status') === currentStatus) {
+            $(this).addClass('active');
+        } else {
+            $(this).removeClass('active');
+        }
+    });
+
+    // ===== 상태 버튼 클릭 이벤트 =====
+    statusButtons.on('click', function() {
+        statusButtons.removeClass('active'); // 모두 비활성
+        $(this).addClass('active');          // 클릭한 버튼 활성
+        statusInput.val($(this).data('status')); // hidden input 값 변경
+    });
 
     /** 수정 폼 제출 이벤트 핸들러 */
     $('#chatUpdateForm').on('submit', e => {
@@ -17,10 +31,17 @@ $(document).ready(() => {
         const content = $('#content').val().trim();
         const status = $('#status').val();
 
-        if (!title || !content) {
-            alert('제목과 내용을 입력해주세요.');
-            return;
-        }
+         if (!title || title.length < 2 || title.length > 100) {
+                alert('제목은 2~100자 사이로 입력해주세요.');
+                return;
+            }
+
+            // 상태 체크
+            if (!status) {
+                alert('상태를 반드시 선택해주세요.');
+                return;
+            }
+
 
         const data = { title, content, status };
 
