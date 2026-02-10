@@ -16,6 +16,12 @@ body {
     max-width: 430px;
     min-height: 100vh;
     background: #ffffff;
+    position: relative;
+}
+
+.app-header {
+    height: 50px;
+    position: relative;
 }
 
 .top-slot {
@@ -103,9 +109,4 @@ body {
 .review-btn:active {
     background: #e6e6e6;
     transform: translateY(1px);
-}
-
-.footer-space {
-    height: 76px; /* footer 높이와 동일 */
-    background: transparent;
 }

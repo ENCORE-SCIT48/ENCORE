@@ -15,6 +15,9 @@
 <body>
 <div class="app-wrapper">
     <main class="app-main">
+        <header class="app-header">
+            <div th:replace="fragments/profile :: profile"></div>
+        </header>
         <!-- 검색창 -->
         <div class="venue-search-wrap">
             <form class="d-flex venue-search-form" role="search" onsubmit="return false;">

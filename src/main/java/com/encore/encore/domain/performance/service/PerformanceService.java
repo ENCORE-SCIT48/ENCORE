@@ -110,7 +110,7 @@ public class PerformanceService {
 
     /**
      * 공연에 대한 후기 목록 조회
-     * - 좌석 후기(seat_id가 있는 리뷰)는 제외하고 공연 후기만 조회
+     * - 좌석이 연결된 후기(Seat 연관이 존재하는 리뷰)는 제외하고 공연 후기만 조회 (seat IS NULL)
      * - 공연이 존재하지 않을 경우 NOT_FOUND 예외를 발생시킴
      * - 페이징 처리를 지원
      *
@@ -120,6 +120,12 @@ public class PerformanceService {
      * @throws ApiException 공연이 존재하지 않을 경우
      */
     public Page<PerformanceReviewItemDto> getPerformanceReviews(Long performanceId, Pageable pageable) {
+        log.info("[Performance] review list request - performanceId={}, page={}, size={}",
+            performanceId,
+            pageable.getPageNumber(),
+            pageable.getPageSize()
+        );
+
         if (!performanceRepository.existsById(performanceId)) {
             throw new ApiException(
                 ErrorCode.NOT_FOUND,
@@ -129,6 +135,13 @@ public class PerformanceService {
 
         return reviewRepository
             .findByPerformance_PerformanceIdAndSeatIsNull(performanceId, pageable)
-            .map(PerformanceReviewItemDto::new);
+            .map(review -> new PerformanceReviewItemDto(
+                review.getReviewId(),
+                review.getUser() != null ? review.getUser().getUserId() : 0L,
+                review.getUser() != null ? review.getUser().getNickname() : "-",
+                review.getRating(),
+                review.getContent(),
+                review.getCreatedAt()
+            ));
     }
 }
