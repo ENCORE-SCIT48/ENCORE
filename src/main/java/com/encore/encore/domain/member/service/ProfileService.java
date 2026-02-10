@@ -24,7 +24,15 @@ public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final PerformerProfileRepository performerProfileRepository;
     private final HostProfileRepository hostProfileRepository;
-
+    /**
+     * 사용자의 활성 모드에 따라 해당 프로필의 PK ID를 조회한다.
+     * ActiveMode 값에 따라 서로 다른 프로필 테이블을 조회하며,
+     * @param mode 현재 선택된 사용자 모드 (USER, PERFORMER, HOST)
+     * @param user 로그인한 사용자 엔티티
+     * @return 해당 모드에 대응되는 프로필의 PK ID
+     * @throws RuntimeException
+     *         선택된 모드에 해당하는 프로필이 존재하지 않을 경우
+     */
     public Long findProfileIdByMode(ActiveMode mode, User user) {
         // [중요] 어떤 유저가 무슨 모드를 찾으려 하는가 (흐름 추적용)
         log.info("[Profile Search] User: {}, Mode: {}", user.getUserId(), mode);
@@ -43,7 +51,15 @@ public class ProfileService {
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "주최자 프로필 부재"));
         };
     }
-
+    /**
+     * [설명] 선택한 모드(USER, PERFORMER, HOST)의 처음 접속 확인
+     * 각 프로필 테이블의 isInitialized 컬럼을 조회하여,
+     * 필수 정보 입력이 완료된 상태인지 판단합니다.
+     *
+     * @param mode      검사할 프로필 (USER, PERFORMER, HOST)
+     * @param profileId 해당 모드의 프로필 PK ID
+     * @return 초기화 완료 여부 (true: 완료, false: 미완료)
+     */
     public boolean checkIfInitialized(ActiveMode mode, Long profileId) {
         // [중요] ID가 없어 초기화가 불가능한 상황 (경고성 로그)
         if (profileId == null) {
