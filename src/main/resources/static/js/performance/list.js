@@ -4,7 +4,7 @@ $(function () {
         size: 9,
         keyword: "",
         category: "",
-        filter: "",
+        filter: "",     // BOOKMARK / VIEWED
         loading: false,
         last: false
     };
@@ -29,12 +29,34 @@ $(function () {
 
             const title = p.title ?? "공연";
 
+            const reviewButtons = (state.filter === "VIEWED")
+                ? `
+                    <div class="review-actions">
+                        <button
+                            type="button"
+                            class="review-btn review-btn--perf js-perf-review-btn"
+                            data-performance-id="${id}"
+                        >
+                            공연리뷰
+                        </button>
+                        <button
+                            type="button"
+                            class="review-btn review-btn--seat js-seat-review-btn"
+                            data-performance-id="${id}"
+                        >
+                            좌석리뷰
+                        </button>
+                    </div>
+                  `
+                : "";
+
             const card = `
                 <div class="col-4">
                     <a class="d-block text-decoration-none" href="/performances/${id}">
                         <div class="perf-card"></div>
                         <div class="mt-2 small text-dark text-truncate">${escapeHtml(title)}</div>
                     </a>
+                    ${reviewButtons}
                 </div>
             `;
 
@@ -42,35 +64,61 @@ $(function () {
         });
     }
 
-    function fetchList(append) {
-        if (state.loading || state.last) {
-            return;
+    function resolveApiUrl() {
+        if (state.filter === "VIEWED") {
+            return "/api/performances/watched";
         }
+        return "/api/performances";
+    }
+
+    function buildRequestData() {
+        if (state.filter === "VIEWED") {
+            return { page: state.page, size: state.size };
+        }
+
+        return {
+            keyword: state.keyword || null,
+            category: state.category || null,
+            page: state.page,
+            size: state.size
+        };
+    }
+
+    function normalizeItemsFromResponse(res) {
+        const data = res?.data;
+
+        if (!data) {
+            return { items: [], last: true };
+        }
+
+        if (Array.isArray(data.content)) {
+            return { items: data.content, last: !!data.last };
+        }
+
+        if (Array.isArray(data)) {
+            return { items: data, last: true };
+        }
+
+        return { items: [], last: true };
+    }
+
+    function fetchList(append) {
+        if (state.loading || state.last) return;
 
         state.loading = true;
 
         $.ajax({
-            url: "/api/performances",
+            url: resolveApiUrl(),
             method: "GET",
             dataType: "json",
-            data: {
-                keyword: state.keyword || null,
-                category: state.category || null,
-                page: state.page,
-                size: state.size
-            }
+            data: buildRequestData(),
+            xhrFields: { withCredentials: true }
         })
             .done(function (res) {
-                const pageObj = res?.data;
+                const normalized = normalizeItemsFromResponse(res);
+                const items = normalized.items || [];
 
-                if (!pageObj) {
-                    console.error("[performances] data 없음", res);
-                    alert("응답 형식 오류");
-                    return;
-                }
-
-                const items = pageObj.content || [];
-                state.last = !!pageObj.last;
+                state.last = !!normalized.last;
 
                 renderCards(items, append);
 
@@ -79,7 +127,7 @@ $(function () {
                 }
             })
             .fail(function (xhr) {
-                console.error("[performances] 목록 조회 실패", xhr);
+                console.error("[list] 목록 조회 실패", xhr);
                 alert("목록 조회 실패");
             })
             .always(function () {
@@ -108,16 +156,31 @@ $(function () {
         $(".tab-btn").removeClass("active");
         $(this).addClass("active");
 
+        const filter = $(this).data("filter");
         const category = $(this).data("category");
-        if (typeof category !== "undefined") {
-            state.category = category || "";
+
+        if (typeof filter !== "undefined") {
+            state.filter = filter || "";
+            state.category = "";
+            state.keyword = "";
+            $("#keyword").val("");
+            resetAndLoad();
+            return;
         }
 
+        state.filter = "";
+        state.category = category || "";
         resetAndLoad();
     });
 
     $(document).on("click", "#loadMoreBtn", function () {
         fetchList(true);
+    });
+
+    // 버튼 기능은 아직 없음
+    $(document).on("click", ".js-perf-review-btn, .js-seat-review-btn", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
     });
 
     resetAndLoad();

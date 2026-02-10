@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class PerformanceReviewItemDto {
 
     private final Long reviewId;
+    private final Long userId;
     private final String nickname;
     private final Integer rating;
     private final String content;
@@ -16,6 +17,7 @@ public class PerformanceReviewItemDto {
 
     public PerformanceReviewItemDto(Review review) {
         this.reviewId = review.getReviewId();
+        this.userId = review.getUser().getUserId();
         this.nickname = review.getUser() != null ? review.getUser().getNickname() : "-";
         this.rating = review.getRating();
         this.content = review.getContent();

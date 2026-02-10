@@ -26,28 +26,13 @@
 
                 <div class="action-buttons">
                     <button type="button" class="wish-btn" id="wishBtn" aria-label="볼 공연 찜">
-                        <img
-                            id="wishIcon"
-                            th:src="@{/image/wish_off.png}"
-                            src="/image/wish_off.png"
-                            alt="볼 공연 찜"
-                        />
+                        <img id="wishIcon" th:src="@{/image/wish_off.png}" src="/image/wish_off.png" alt="볼 공연 찜"/>
                     </button>
                     <button type="button" class="watched-btn" id="watchedBtn" aria-label="본 공연">
-                        <img
-                            id="watchedIcon"
-                            th:src="@{/image/watched_off.png}"
-                            src="/image/watched_off.png"
-                            alt="본 공연"
-                        />
+                        <img id="watchedIcon" th:src="@{/image/watched_off.png}" src="/image/watched_off.png" alt="본 공연"/>
                     </button>
                     <button type="button" class="reported-btn" id="reportedBtn" aria-label="신고">
-                        <img
-                            id="reportedIcon"
-                            th:src="@{/image/reported_off.png}"
-                            src="/image/reported_off.png"
-                            alt="신고"
-                        />
+                        <img id="reportedIcon" th:src="@{/image/reported_off.png}" src="/image/reported_off.png" alt="신고"/>
                     </button>
                 </div>
             </div>
@@ -85,6 +70,13 @@
                 </div>
 
                 <div id="tab-review" class="tab-content">
+                    <!-- 리뷰 작성 버튼 -->
+                    <div class="review-write-wrap">
+                        <button type="button" class="review-write-btn d-none" id="writeReviewBtn">
+                            리뷰 작성
+                        </button>
+                    </div>
+
                     <!-- 후기 리스트 -->
                     <div class="review-list" id="reviewList"></div>
 
@@ -103,10 +95,13 @@
 
         <!-- performanceId 전달 -->
         <input type="hidden" id="performanceId" th:value="${performanceId}"/>
+
+        <!-- 로그인 유저 id 전달(내 리뷰 판별용) -->
+        <input type="hidden" id="loginUserId" th:value="${loginUserId}"/>
     </main>
 
-    <!-- 하단 푸터 자리: 지금은 공백으로 확보만 -->
     <div class="footer-space"></div>
+    <div th:replace="fragments/footer :: footer"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

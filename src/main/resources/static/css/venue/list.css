@@ -5,7 +5,7 @@ html, body {
 }
 
 body {
-    background: #eaeaea;
+    background: #ffffff;
     display: flex;
     justify-content: center;
 }
@@ -79,4 +79,9 @@ body {
     border-radius: 10px;
     padding: 0 14px;
     white-space: nowrap;
+}
+
+.footer-space {
+    height: 76px; /* footer 높이와 동일 */
+    background: transparent;
 }
