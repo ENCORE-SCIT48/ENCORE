@@ -22,35 +22,17 @@
       position: relative;
     }
 
-    /* 상단 */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      margin-top: 16px;
-    }
-
     .back-btn {
       position: absolute;
-      left: 0;
+      top: 16px;
+      left: 16px;
       background: none;
       border: none;
-      font-size: 14px;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    .profile {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 36px;
-      height: 36px;
-      background: #ddd;
-      border-radius: 50%;
-    }
 
-    /* 제목 카드 */
     .title-card {
       background: #d9d9d9;
       margin: 80px 0 12px;
@@ -67,7 +49,6 @@
       font-weight: bold;
     }
 
-    /* 내용 카드 */
     .content-card {
       background: #d9d9d9;
       padding: 16px;
@@ -86,17 +67,14 @@
       text-align: center;
     }
 
-    /* 정보 카드 */
     .info-card {
       background: #d9d9d9;
       padding: 16px;
       margin: 12px 0;
       text-align: center;
       font-size: 14px;
-      cursor: pointer;
     }
 
-    /* 등록 버튼 */
     .submit-wrapper {
       text-align: right;
       margin-top: 16px;
@@ -109,86 +87,64 @@
       font-size: 14px;
       cursor: pointer;
     }
-
-    /* 하단 네비 */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #d9d9d9;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-    }
-
-    .bottom-nav div {
-      font-size: 14px;
-    }
   </style>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script th:src="@{/js/community/performerPost.js}"></script>
 </head>
 
 <body>
 
   <div class="app-container">
 
-    <!-- 상단 -->
-    <div class="top-bar">
-      <button class="back-btn" onclick="history.back()">뒤로</button>
-      <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
-    </div>
+    <!-- 뒤로가기 -->
+    <button class="back-btn" id="backBtn">←</button>
 
-    <!-- 글 작성 form -->
-    <form th:action="@{/posts}" method="post">
+    <!-- 프로필 -->
+    <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
 
-      <!-- 제목 입력 -->
+    <!-- 글 작성 -->
+    <form id="postForm">
+
+      <!-- 제목 -->
       <div class="title-card">
-        <input
-          type="text"
-          name="title"
-          placeholder="공연자 파티 모집글 제목"
-          required
-        >
+        <input type="text" name="title" placeholder="공연자 파티 모집글 제목">
       </div>
 
-      <!-- 내용 입력 -->
+      <!-- 내용 -->
       <div class="content-card">
-        <textarea
-          name="content"
-          placeholder="공연자 파티 모집글 내용을 작성하세요"
-          required
-        ></textarea>
+        <textarea name="content" placeholder="공연자 파티 모집글 내용을 작성하세요"></textarea>
       </div>
 
       <!-- 공연 정보 -->
-      <div class="info-card">
-        공연 정보
-      </div>
+      <div class="info-card">공연 정보</div>
 
       <!-- 공연장 정보 -->
-      <div class="info-card">
-        공연장 정보
-      </div>
+      <div class="info-card">공연장 정보</div>
 
       <!-- 등록 버튼 -->
       <div class="submit-wrapper">
-        <button type="submit" class="submit-btn">등록</button>
+        <button type="button" class="submit-btn" id="submitBtn">등록</button>
       </div>
 
     </form>
 
   </div>
 
-  <!-- 하단 네비 -->
+  <!-- footer -->
   <div th:replace="~{fragments/footer :: footer(
-      ${ {
-          {label:'모집글', href:'/posts'},
-          {label:'공연장리스트', href:'/venueList'},
-          {label:'홈', href:'/'},
-          {label:'DM', href:'/deirectMessage'},
-          {label:'채팅방', href:'/chat'}
-      } }
+    ${ {
+        {label:'모집글', href:'/posts'},
+        {label:'공연장리스트', href:'/venueList'},
+        {label:'홈', href:'/'},
+        {label:'DM', href:'/directMessage'},
+        {label:'채팅방', href:'/chat'}
+    } }
   )}"></div>
 
+
+
 </body>
+
 </html>

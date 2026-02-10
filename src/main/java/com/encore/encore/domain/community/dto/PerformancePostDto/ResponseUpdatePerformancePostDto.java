@@ -1,18 +1,15 @@
-package com.encore.encore.domain.community.dto;
+package com.encore.encore.domain.community.dto.PerformancePostDto;
 
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseUpdatePerformerPostDto {
+public class ResponseUpdatePerformancePostDto {
 
     private Long postId;
 
@@ -24,7 +21,6 @@ public class ResponseUpdatePerformerPostDto {
 
     private Long performanceId;
 
-    private Long performerAuthorId;
-
     private LocalDateTime updatedAt;
 }
+

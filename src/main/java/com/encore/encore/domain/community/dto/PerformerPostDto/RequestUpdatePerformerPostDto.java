@@ -1,4 +1,4 @@
-package com.encore.encore.domain.community.dto;
+package com.encore.encore.domain.community.dto.PerformerPostDto;
 
 
 import lombok.AllArgsConstructor;
