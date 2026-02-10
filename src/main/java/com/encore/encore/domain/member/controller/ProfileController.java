@@ -40,6 +40,7 @@ public class ProfileController {
     public String setupPage(@PathVariable String mode) {
         return "profile/" + mode + "-setup";
     }
+
     /**
      * 사용자의 활성 프로필을 전환하고 세션을 갱신합니다.
      * @param mode        변경하고자 하는 프로필 (USER, PERFORMER, HOST)
@@ -52,7 +53,11 @@ public class ProfileController {
         @RequestParam ActiveMode mode,
         @AuthenticationPrincipal CustomUserDetails userDetails,
         HttpSession session) {
-
+        // 로그인 체크 (NPE 방지)
+        if (userDetails == null) {
+            log.warn("[Mode Switch] 로그인 정보 없음.");
+            return "redirect:/auth/login";
+        }
         // 1. 데이터 조회
         Long profileId = profileService.findProfileIdByMode(mode, userDetails.getUser());
         boolean isInitialized = profileService.checkIfInitialized(mode, profileId);

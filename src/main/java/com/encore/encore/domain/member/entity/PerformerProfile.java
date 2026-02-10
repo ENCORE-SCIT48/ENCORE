@@ -20,9 +20,10 @@ public class PerformerProfile extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     // 초기 설정 완료 여부
+    @Column(nullable = false)
     @Builder.Default
     private boolean isInitialized = false;
-    
+
     private String stageName;
     private String category;
     private String description;

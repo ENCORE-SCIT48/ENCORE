@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,65 +25,51 @@ public class ProfileService {
     private final PerformerProfileRepository performerProfileRepository;
     private final HostProfileRepository hostProfileRepository;
 
-    /**
-     * 사용자의 활성 모드에 따라 해당 프로필의 PK ID를 조회합니다.
-     * @param mode 현재 선택된 프로필
-     * @param user 로그인한 사용자 객체
-     * @return 프로필 PK ID
-     * @throws ApiException 프로필이 존재하지 않을 경우 (ErrorCode.NOT_FOUND)
-     */
     public Long findProfileIdByMode(ActiveMode mode, User user) {
+        // [중요] 어떤 유저가 무슨 모드를 찾으려 하는가 (흐름 추적용)
+        log.info("[Profile Search] User: {}, Mode: {}", user.getUserId(), mode);
+
         return switch (mode) {
             case USER -> userProfileRepository.findByUser_UserId(user.getUserId())
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND, "해당 사용자의 관람객 프로필을 찾을 수 없습니다."))
-                .getProfileId();
+                .map(UserProfile::getProfileId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "관람객 프로필 부재"));
 
             case PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND, "해당 사용자의 공연자 프로필을 찾을 수 없습니다."))
-                .getPerformerId();
+                .map(PerformerProfile::getPerformerId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필 부재"));
 
             case HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND, "해당 사용자의 주최자 프로필을 찾을 수 없습니다."))
-                .getHostId();
+                .map(HostProfile::getHostId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "주최자 프로필 부재"));
         };
     }
 
-    /**
-     * [설명] 선택한 프로필의 초기 필수 정보 입력 완료 여부를 확인합니다.
-     * @param mode      조회할 활성 모드 (USER, PERFORMER, HOST)
-     * @param profileId 해당 모드의 프로필 PK ID
-     * @return 초기화 완료 여부 (true: 완료, false: 미완료)
-     * @throws ApiException 프로필 ID가 존재하지 않을 경우 (ErrorCode.NOT_FOUND)
-     */
     public boolean checkIfInitialized(ActiveMode mode, Long profileId) {
-        // 1. 방어 코드: ID가 null이면 미설정으로 간주
+        // [중요] ID가 없어 초기화가 불가능한 상황 (경고성 로그)
         if (profileId == null) {
-            log.warn("[Profile Check] Profile ID is null for mode: {}", mode);
+            log.warn("[Profile Check] Null ID for Mode: {}", mode);
             return false;
         }
 
-        // 2. 모드별 레포지토리 조회 및 초기화 상태 반환
-        return switch (mode) {
+        boolean isInitialized = switch (mode) {
             case USER -> userProfileRepository.findById(profileId)
                 .map(UserProfile::isInitialized)
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND
-                        , "관람객 프로필 정보를 찾을 수 없습니다. ID: " + profileId));
+                .orElse(false); // 가이드라인: 없으면 false 반환하여 등록 폼 유도
 
             case PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(PerformerProfile::isInitialized)
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND
-                        , "공연자 프로필 정보를 찾을 수 없습니다. ID: " + profileId));
+                .orElse(false);
 
             case HOST -> hostProfileRepository.findById(profileId)
                 .map(HostProfile::isInitialized)
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND
-                        , "주최자 프로필 정보를 찾을 수 없습니다. ID: " + profileId));
+                .orElse(false);
         };
+
+        // [중요] 최종 판정 결과 (리다이렉트 원인 파악용)
+        if (!isInitialized) {
+            log.info("[Profile Check] Mode: {} (ID: {}) is NOT initialized.", mode, profileId);
+        }
+
+        return isInitialized;
     }
 }

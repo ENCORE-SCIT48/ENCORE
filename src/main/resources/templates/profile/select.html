@@ -1,32 +1,51 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
     <head>
         <meta charset="UTF-8" />
-        <title>Title</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>프로필 선택 - Encore</title>
+
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        />
+        <link rel="stylesheet" th:href="@{/css/profile/select.css}" />
+        <script defer th:src="@{/js/profile/select.js}"></script>
     </head>
     <body>
-        <div class="header">
-            <h1>프로필 선택</h1>
-        </div>
-
         <div class="profile-container">
-            <div class="profile-item">
-                <div class="profile-circle">1번 원</div>
-                <div class="profile-name">User</div>
-                <div class="profile-desc">user 설명</div>
-            </div>
+            <header class="header">
+                <h1>프로필 선택</h1>
+            </header>
+            <main class="profile-group">
+                <div class="profile-item" data-mode="USER">
+                    <div class="profile-circle"></div>
+                    <div class="profile-name">관람객</div>
+                    <div class="profile-desc">
+                        공연을 예약하고<br />현장의 감동을 즐기세요.
+                    </div>
+                </div>
 
-            <div class="profile-item">
-                <div class="profile-circle">2번 원</div>
-                <div class="profile-name">Artist</div>
-                <div class="profile-desc">Artist 설명</div>
-            </div>
+                <div class="profile-item" data-mode="PERFORMER">
+                    <div class="profile-circle"></div>
+                    <div class="profile-name">공연자</div>
+                    <div class="profile-desc">
+                        나의 무대를 등록하고<br />팬들과 직접 소통하세요.
+                    </div>
+                </div>
 
-            <div class="profile-item">
-                <div class="profile-circle">3번 원</div>
-                <div class="profile-name">Host</div>
-                <div class="profile-desc">Host 설명</div>
-            </div>
+                <div class="profile-item" data-mode="HOST">
+                    <div class="profile-circle"></div>
+                    <div class="profile-name">주최자</div>
+                    <div class="profile-desc">
+                        다양한 공연을 기획하고<br />관리하세요.
+                    </div>
+                </div>
+            </main>
         </div>
     </body>
 </html>

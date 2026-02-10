@@ -15,12 +15,15 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class UserProfile extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long profileId;
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // 초기 설정 완료 여부
+    @Column(nullable = false)
     @Builder.Default
     private boolean isInitialized = false;
 
