@@ -4,7 +4,7 @@ $(function () {
    * 뒤로가기 버튼
    * ========================= */
   $('#backBtn').on('click', function () {
-    location.href = '/posts';
+    location.href = '/posts/performer';
   });
 
 
@@ -61,7 +61,7 @@ function createPost() {
   }
 
   $.ajax({
-    url: '/api/posts',
+    url: '/api/posts/performer',
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({
@@ -71,7 +71,7 @@ function createPost() {
     success: function (res) {
       if (res.success) {
         alert('게시글이 등록되었습니다.');
-        location.href = '/posts';
+        location.href = '/posts/performer';
       } else {
         alert(res.message);
       }
@@ -90,7 +90,7 @@ function moveToEditPage(postId) {
     alert('게시글 ID가 없습니다.');
     return;
   }
-  location.href = `/posts/${postId}/edit`;
+  location.href = `/posts/performer/${postId}/edit`;
 }
 
 
@@ -107,7 +107,7 @@ function updatePost(postId) {
   }
 
   $.ajax({
-    url: `/api/posts/${postId}`,
+    url: `/api/posts/performer/${postId}`,
     type: 'PUT',
     contentType: 'application/json',
     data: JSON.stringify({
@@ -117,7 +117,7 @@ function updatePost(postId) {
     success: function (res) {
       if (res.success) {
         alert('게시글이 수정되었습니다.');
-        location.href = `/posts/${postId}`;
+        location.href = `/posts/performer/${postId}`;
       } else {
         alert(res.message);
       }
@@ -138,12 +138,12 @@ function deletePost(postId) {
   }
 
   $.ajax({
-    url: `/api/posts/${postId}`,
+    url: `/api/posts/performer/${postId}`,
     type: 'DELETE',
     success: function (res) {
       if (res.success) {
         alert('게시글이 삭제되었습니다.');
-        location.href = '/posts';
+        location.href = '/posts/performer';
       } else {
         alert(res.message);
       }

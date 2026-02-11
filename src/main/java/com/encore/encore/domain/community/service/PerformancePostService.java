@@ -38,6 +38,7 @@ public class PerformancePostService {
         log.info("공연 모집 게시글 등록 시작");
 
         Performance performance = null;
+
         if (dto.getPerformanceId() != null) {
             performance = performanceRepository.findById(dto.getPerformanceId())
                 .orElseThrow(() -> {
@@ -56,8 +57,6 @@ public class PerformancePostService {
 
         Post savedPost = postRepository.save(post);
 
-        log.info("공연 모집 게시글 등록 완료 - postId={}", savedPost.getPostId());
-
         return ResponseCreatePerformancePostDto.builder()
             .postId(savedPost.getPostId())
             .postType(savedPost.getPostType())
@@ -73,18 +72,14 @@ public class PerformancePostService {
      * @return 게시글 삭제 결과
      */
     public ResponseDeletePerformancePostDto deletePerformancePost(Long postId) {
-        log.info("공연 모집 게시글 삭제 요청 - postId={}", postId);
 
         Post post = postRepository
             .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
-            .orElseThrow(() -> {
-                log.error("삭제 대상 게시글 없음 - postId={}", postId);
-                return new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
-            });
+            .orElseThrow(() ->
+                new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.")
+            );
 
         post.delete();
-
-        log.info("공연 모집 게시글 삭제 완료 - postId={}", postId);
 
         return ResponseDeletePerformancePostDto.builder()
             .postId(postId)
@@ -100,21 +95,23 @@ public class PerformancePostService {
      * @return 게시글 상세 정보
      */
     public ResponseReadPerformancePostDto readPerformancePost(Long postId) {
-        log.info("공연 모집 게시글 단건 조회 - postId={}", postId);
 
         Post post = postRepository
             .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
-            .orElseThrow(() -> {
-                log.error("조회 대상 게시글 없음 - postId={}", postId);
-                return new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
-            });
+            .orElseThrow(() ->
+                new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.")
+            );
 
         post.setViewCount(post.getViewCount() + 1);
 
         return ResponseReadPerformancePostDto.builder()
             .postId(post.getPostId())
             .postType(post.getPostType())
-            .performanceId(post.getPerformance().getPerformanceId())
+            .performanceId(
+                post.getPerformance() != null
+                    ? post.getPerformance().getPerformanceId()
+                    : null
+            )
             .title(post.getTitle())
             .content(post.getContent())
             .viewCount(post.getViewCount())
@@ -133,14 +130,12 @@ public class PerformancePostService {
         Long postId,
         RequestUpdatePerformancePostDto dto
     ) {
-        log.info("공연 모집 게시글 수정 요청 - postId={}", postId);
 
         Post post = postRepository
             .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
-            .orElseThrow(() -> {
-                log.error("수정 대상 게시글 없음 - postId={}", postId);
-                return new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
-            });
+            .orElseThrow(() ->
+                new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.")
+            );
 
         if (dto.getTitle() != null) {
             post.setTitle(dto.getTitle());
@@ -150,24 +145,31 @@ public class PerformancePostService {
             post.setContent(dto.getContent());
         }
 
-        if (dto.getPerformanceId() != null) {
+        /*
+         * performance 선택 허용
+         * null이면 연결 해제
+         */
+        if (dto.getPerformanceId() == null) {
+            post.setPerformance(null);
+        } else {
             Performance performance = performanceRepository
                 .findById(dto.getPerformanceId())
-                .orElseThrow(() -> {
-                    log.error("공연 정보 없음 - performanceId={}", dto.getPerformanceId());
-                    return new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.");
-                });
+                .orElseThrow(() ->
+                    new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.")
+                );
             post.setPerformance(performance);
         }
-
-        log.info("공연 모집 게시글 수정 완료 - postId={}", postId);
 
         return ResponseUpdatePerformancePostDto.builder()
             .postId(post.getPostId())
             .postType(post.getPostType())
             .title(post.getTitle())
             .content(post.getContent())
-            .performanceId(post.getPerformance().getPerformanceId())
+            .performanceId(
+                post.getPerformance() != null
+                    ? post.getPerformance().getPerformanceId()
+                    : null
+            )
             .updatedAt(post.getUpdatedAt())
             .build();
     }
@@ -181,18 +183,17 @@ public class PerformancePostService {
      */
     @Transactional(readOnly = true)
     public Page<ResponseListPerformancePostDto> listPerformancePosts(Pageable pageable) {
-        log.info(
-            "공연 모집 게시글 목록 조회 - page={}, size={}",
-            pageable.getPageNumber(),
-            pageable.getPageSize()
-        );
 
         return postRepository
             .findByPostTypeAndIsDeletedFalse(PERFORMANCE_POST_TYPE, pageable)
             .map(post -> ResponseListPerformancePostDto.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
-                .performanceId(post.getPerformance().getPerformanceId())
+                .performanceId(
+                    post.getPerformance() != null
+                        ? post.getPerformance().getPerformanceId()
+                        : null
+                )
                 .title(post.getTitle())
                 .viewCount(post.getViewCount())
                 .createdAt(post.getCreatedAt())
