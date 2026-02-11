@@ -29,7 +29,7 @@
         <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
             <i class="fa-solid fa-arrow-left"></i>
         </button>
-        <h3 class="app-title">채팅방</h3>
+        <h3 class="app-title">DM</h3>
     </header>
 
     <!-- ===== 본문 ===== -->
@@ -39,12 +39,8 @@
         <section>
             <p class="section-label d-flex justify-content-between align-items-center">
                 수락 요청 DM
-                <button id="btn-show-all-joined" class="btn btn-sm btn-outline-primary"
-                        title="전체 보기">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
             </p>
-            <div id="pending-dm-container" th:attr=>
+            <div id="pending-dm-container">
                 <!-- JS에서 렌더링 -->
             </div>
         </section>
@@ -67,6 +63,6 @@
 </div>
 
 <!-- 커스텀 JS -->
-<script th:src="@{/js/dm/dmList.js}"></script>
+<script th:src="@{/js/chat/dm/dmList.js}"></script>
 </body>
 </html>

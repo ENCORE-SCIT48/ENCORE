@@ -174,8 +174,8 @@ public class ChatMessageService {
                 .nickName(profileService.resolveSenderName(
                     chatParticipant.getProfileId(),
                     chatParticipant.getProfileMode()))
-                .activeId(chatParticipant.getParticipantId())
-                .activeMode(chatParticipant.getProfileMode().name())
+                .profileId(chatParticipant.getParticipantId())
+                .profileMode(chatParticipant.getProfileMode().name())
                 .build();
             responseParticipantDtoList.add(dto);
         }

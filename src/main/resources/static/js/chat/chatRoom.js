@@ -99,20 +99,29 @@ $(document).ready(() => {
             success: function (res) {
                 participantList.empty();
 
-                res.data.forEach(function (user) {
-                    participantList.append(`
-                        <li class="list-group-item d-flex align-items-center">
-                            <i class="fa-solid fa-user-circle me-2 text-secondary"></i>
-                            ${user.nickName}
-                        </li>
-                    `);
-                });
-            },
-            error: function (xhr) {
-                console.error('참여자 목록 로드 실패:', xhr);
-            }
-        });
-    }
+                 res.data.forEach(function (user) {
+                                // li 태그 생성
+                                const listItem = $(`
+                                    <li class="list-group-item d-flex align-items-center" style="cursor:pointer">
+                                        <i class="fa-solid fa-user-circle me-2 text-secondary"></i>
+                                        ${user.nickName}
+                                    </li>
+                                `);
+
+                                // 클릭 시 개인페이지로 이동
+                                listItem.on('click', function () {
+                                    const profileUrl = `/member/profile/${user.profileId}/${user.profileMode}`;
+                                    window.location.href = profileUrl;
+                                });
+
+                                participantList.append(listItem);
+                            });
+                        },
+                        error: function (xhr) {
+                            console.error('참여자 목록 로드 실패:', xhr);
+                        }
+                    });
+
 
     /**
      * 채팅방 스크롤 최하단으로 이동

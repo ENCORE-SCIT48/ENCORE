@@ -181,6 +181,7 @@ public class ChatPageController {
         Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 
+
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
 
         model.addAttribute("roomId", roomId);

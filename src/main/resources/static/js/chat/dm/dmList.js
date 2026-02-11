@@ -46,16 +46,20 @@ $(document).ready(() => {
             url: `/api/dm/accepted`,
             method: "GET",
             success: res => {
-                const dm = Array.isArray(res.data) ? res.data : [];
+                const dms = Array.isArray(res.data) ? res.data : [];
 
-                if (chats.length === 0) {
+                if (dms.length === 0) {
                     $acceptedContainer.append('<div class="chat-empty">참여 중인 DM이 없습니다.</div>');
-                    return;
+                } else {
+                    dms.forEach(dm => {
+                        appendDmItem($acceptedContainer, dm);
+                    });
                 }
             },
             error: err => console.error("참여 중인 dm방 로딩 실패", err)
         });
     };
+
 
     /**
      * DM DOM 생성 및 append

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>개인 페이지</title>
+
+    <!-- Bootswatch Litera CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/litera/bootstrap.min.css" rel="stylesheet"/>
+
+    <!-- 커스텀 CSS
+    <link href="/css/member/memberProfile.css" rel="stylesheet"/>-->
+</head>
+
+<body>
+<header class="bg-dark text-white p-3">
+    <div class="container d-flex align-items-center">
+        <button type="button" class="btn btn-light me-3" onclick="history.back()">&larr; 뒤로가기</button>
+        <h1 class="h4 mb-0">개인 페이지</h1>
+    </div>
+</header>
+
+<main class="container mt-4">
+
+    <section class="profile-intro mb-4">
+    </section>
+
+    <section class="profile-details mb-4">
+    </section>
+    <button id="btn-dm"
+            th:data-profile-id="${profileId}"
+            th:data-profile-mode="${profileMode}">
+        DM 보내기
+    </button>
+
+
+    <section class="recent-activity mb-4">
+    </section>
+</main>
+
+<footer class="bg-dark text-white p-3 text-center">
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+<script src="/js/member/memberProfile.js"></script>
+</body>
+
+</html>
