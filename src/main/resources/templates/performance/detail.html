@@ -70,11 +70,16 @@
                 </div>
 
                 <div id="tab-review" class="tab-content">
-                    <!-- 리뷰 작성 버튼 -->
-                    <div class="review-write-wrap">
+                    <!-- 리뷰 작성 + 정렬 -->
+                    <div class="review-controls">
                         <button type="button" class="review-write-btn d-none" id="writeReviewBtn">
                             리뷰 작성
                         </button>
+
+                        <select id="reviewSort" class="form-select form-select-sm review-sort">
+                            <option value="latest" selected>최신순</option>
+                            <option value="rating">별점순</option>
+                        </select>
                     </div>
 
                     <!-- 후기 리스트 -->

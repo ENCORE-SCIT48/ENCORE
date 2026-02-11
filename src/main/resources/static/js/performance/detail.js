@@ -7,6 +7,7 @@ $(function () {
     let isReported = false;
 
     let watchedChecked = false;
+    let wishedChecked = false;
 
     let reviewLoaded = false;
     let reviewPage = 0;
@@ -15,6 +16,11 @@ $(function () {
 
     let reviewPrefetched = false;
     let cachedReviewPage0 = null;
+
+    let wishRequesting = false; // 중복 클릭 방지
+
+    // 리뷰 정렬: latest(기본) / rating
+    let reviewSort = "latest";
 
     function escapeHtml(str) {
         return String(str ?? "")
@@ -39,6 +45,7 @@ $(function () {
                 ensureWatchedStatus();
             }
 
+            // 리뷰 탭 최초 진입 시: 캐시 우선 렌더 -> 없으면 API 호출
             if (tab === "review" && !reviewLoaded) {
                 if (cachedReviewPage0) {
                     renderReviews(cachedReviewPage0.content, true);
@@ -94,9 +101,30 @@ $(function () {
         });
 
         $("#wishBtn").off("click").on("click", function () {
-            setWishUI(!isWished);
+            if (wishRequesting) return;
+            wishRequesting = true;
+
+            $.ajax({
+                url: `/api/performances/${performanceId}/wish`,
+                method: "POST",
+                dataType: "json",
+                xhrFields: { withCredentials: true }
+            })
+                .done(function (res) {
+                    const wished = !!res?.data?.wished;
+                    setWishUI(wished);
+                    wishedChecked = true;
+                })
+                .fail(function (xhr) {
+                    console.error("[wish] toggle fail", xhr);
+                    alert("찜 처리 실패");
+                })
+                .always(function () {
+                    wishRequesting = false;
+                });
         });
 
+        // 임시: watched 버튼은 서버 반영 없이 UI 토글만(추후 watched 토글 API 연결 예정)
         $("#watchedBtn").off("click").on("click", function () {
             setWatchedUI(!isWatched);
             watchedChecked = true;
@@ -119,7 +147,7 @@ $(function () {
         const address = d?.address ?? "-";
         $("#metaText").text(`${address} · ${venueName}`);
 
-        $("#ratingText").text("-");
+        // 평점은 "summary API"로만 세팅(정렬/페이지에 따라 흔들리지 않게)
         $("#descText").text(escapeHtml(d?.description ?? "공연상세설명"));
 
         setWishUI(isWished);
@@ -127,14 +155,18 @@ $(function () {
         setReportedUI(isReported);
 
         bindActionButtons();
+
+        // 초기 상태 동기화
+        ensureWishStatus();
         ensureWatchedStatus();
+        loadReviewSummary();
     }
 
     function loadDetail() {
         $.ajax({
             url: `/api/performances/${performanceId}`,
             method: "GET",
-            dataType: "json",
+            dataType: "json"
         })
             .done(function (res) {
                 const data = res?.data;
@@ -151,6 +183,67 @@ $(function () {
             });
     }
 
+    // 공연 전체 평균/개수 요약 조회 (평점 표시용)
+    function loadReviewSummary() {
+        $.ajax({
+            url: `/api/performances/${performanceId}/reviews/summary`,
+            method: "GET",
+            dataType: "json"
+        })
+            .done(function (res) {
+
+                const count = Number(res?.data?.reviewCount ?? 0);
+
+                // 리뷰가 0개면 "-" 표시
+                if (count === 0) {
+                    $("#ratingText").text("-");
+                    return;
+                }
+
+                const avgRaw = res?.data?.avgRating;
+
+                if (avgRaw == null) {
+                    $("#ratingText").text("-");
+                    return;
+                }
+
+                const avg = Number(avgRaw);
+
+                if (Number.isNaN(avg)) {
+                    $("#ratingText").text("-");
+                    return;
+                }
+
+                $("#ratingText").text(avg.toFixed(1));
+            })
+            .fail(function (xhr) {
+                console.error("[reviews summary] 조회 실패", xhr);
+                $("#ratingText").text("-");
+            });
+    }
+
+    // 찜 여부 초기 조회
+    function ensureWishStatus() {
+        if (wishedChecked) return;
+
+        $.ajax({
+            url: `/api/performances/${performanceId}/wish`,
+            method: "GET",
+            dataType: "json",
+            xhrFields: { withCredentials: true }
+        })
+            .done(function (res) {
+                const wished = !!res?.data?.wished;
+                setWishUI(wished);
+                wishedChecked = true;
+            })
+            .fail(function () {
+                setWishUI(false);
+                wishedChecked = true;
+            });
+    }
+
+    // 본 공연 여부 초기 조회
     function ensureWatchedStatus() {
         if (watchedChecked) return;
 
@@ -175,9 +268,7 @@ $(function () {
         const nickname = escapeHtml(r?.nickname ?? "-");
         const rating = Number(r?.rating ?? 0);
         const content = escapeHtml(r?.content ?? "");
-        const createdAt = escapeHtml(
-            (r?.createdAt ?? "").replace("T", " ").substring(0, 16)
-        );
+        const createdAt = escapeHtml((r?.createdAt ?? "").replace("T", " ").substring(0, 16));
 
         const reviewId = r?.reviewId;
 
@@ -229,20 +320,6 @@ $(function () {
         `;
     }
 
-    function calcAvgRating(items) {
-        if (!items || items.length === 0) return null;
-        const sum = items.reduce((acc, cur) => acc + Number(cur?.rating ?? 0), 0);
-        return sum / items.length;
-    }
-
-    function setAvgRatingUI(avg) {
-        if (avg == null) {
-            $("#ratingText").text("-");
-            return;
-        }
-        $("#ratingText").text(avg.toFixed(1));
-    }
-
     function renderReviews(content, reset) {
         const $list = $("#reviewList");
 
@@ -273,7 +350,7 @@ $(function () {
             url: `/api/performances/${performanceId}/reviews`,
             method: "GET",
             dataType: "json",
-            data: { page: reviewPage, size: reviewSize },
+            data: { page: reviewPage, size: reviewSize, sort: reviewSort },
             xhrFields: { withCredentials: true }
         })
             .done(function (res) {
@@ -287,7 +364,6 @@ $(function () {
                 const content = pageData?.content ?? [];
                 const last = !!pageData?.last;
 
-                setAvgRatingUI(calcAvgRating(content));
                 renderReviews(content, reset);
 
                 reviewLast = last;
@@ -302,14 +378,15 @@ $(function () {
             });
     }
 
-    function preloadReviewRating() {
+    // 리뷰 탭 첫 진입 UX 위해 0페이지 미리 받아두기(리스트만 캐시)
+    function preloadReviewPage0() {
         if (reviewPrefetched) return;
 
         $.ajax({
             url: `/api/performances/${performanceId}/reviews`,
             method: "GET",
             dataType: "json",
-            data: { page: 0, size: reviewSize },
+            data: { page: 0, size: reviewSize, sort: reviewSort },
             xhrFields: { withCredentials: true }
         })
             .done(function (res) {
@@ -319,15 +396,34 @@ $(function () {
                 const content = pageData?.content ?? [];
                 const last = !!pageData?.last;
 
-                setAvgRatingUI(calcAvgRating(content));
                 cachedReviewPage0 = { content, last };
-
                 reviewPrefetched = true;
             })
             .fail(function () {
-                setAvgRatingUI(null);
+                cachedReviewPage0 = null;
+                reviewPrefetched = true;
             });
     }
+
+    $("#reviewSort").off("change").on("change", function () {
+        reviewSort = $(this).val() || "latest";
+
+        // 정렬 변경 시: 캐시/상태 리셋
+        reviewPage = 0;
+        reviewLast = true;
+        reviewLoaded = false;
+
+        cachedReviewPage0 = null;
+        reviewPrefetched = false;
+
+        $("#reviewMoreWrap").hide();
+        $("#reviewEmpty").hide();
+        $("#reviewList").empty();
+
+        // 리뷰 리스트만 다시 로드 (평균은 summary로 고정이라 다시 계산/갱신 불필요)
+        loadReviews(true);
+        preloadReviewPage0();
+    });
 
     $("#reviewMoreBtn").off("click").on("click", function () {
         if (reviewLast) return;
@@ -343,5 +439,10 @@ $(function () {
 
     bindTabs();
     loadDetail();
-    preloadReviewRating();
+
+    // 탭의 평균 평점은 "전체 평균"으로 고정 표시
+    loadReviewSummary();
+
+    // 리뷰 탭 첫 진입 시 빠르게 보여주기 위한 0페이지 프리패치
+    preloadReviewPage0();
 });

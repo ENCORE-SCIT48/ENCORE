@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -77,13 +78,27 @@ public class PerformanceController {
     public CommonResponse<Page<PerformanceReviewItemDto>> getPerformanceReviews(
         @PathVariable Long performanceId,
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "latest") String sort
     ) {
-        log.info("[Performance] controller reviews - performanceId={}, page={}, size={}", performanceId, page, size);
+        log.info("[Performance] controller reviews - performanceId={}, page={}, size={}, sort={}",
+            performanceId, page, size, sort);
 
         return CommonResponse.ok(
-            performanceService.getPerformanceReviews(performanceId, PageRequest.of(page, size)),
+            performanceService.getPerformanceReviews(performanceId, PageRequest.of(page, size), sort),
             "공연 리뷰 조회 성공"
+        );
+    }
+
+    @GetMapping("/{performanceId}/reviews/summary")
+    public CommonResponse<Map<String, Object>> getPerformanceReviewSummary(
+        @PathVariable Long performanceId
+    ) {
+        log.info("[Performance] controller reviews summary - performanceId={}", performanceId);
+
+        return CommonResponse.ok(
+            performanceService.getPerformanceReviewSummary(performanceId),
+            "공연 리뷰 요약 조회 성공"
         );
     }
 }
