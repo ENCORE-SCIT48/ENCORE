@@ -36,15 +36,12 @@ public class chatMessageApiController {
     @PostMapping("/{roomId}/messages")
     public ResponseEntity<CommonResponse<ResponseChatMessage>> sendMessage(
         @PathVariable Long roomId,
-        @RequestBody RequestChatMessage request
-        //@AuthenticationPrincipal CustomUserDetails userDetails
+        @RequestBody RequestChatMessage request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        //Long activeProfileId = userDetails.getActiveProfileId();
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseChatMessage result = chatMessageService.sendMessage(
             roomId, activeProfileId, activeMode, request
