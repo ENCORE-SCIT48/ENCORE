@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM리스트</title>
+
+    <!-- CSS 라이브러리 -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- 커스텀 CSS -->
+    <link rel="stylesheet" th:href="@{/css/chat/chat.css}">
+    <link rel="stylesheet" th:href="@{/css/chat/chat-list.css}">
+
+    <!-- JS 라이브러리 -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+</head>
+
+<body>
+<div class="app-container">
+
+    <!-- ===== 상단 헤더 ===== -->
+    <header class="app-header d-flex align-items-center gap-2">
+        <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h3 class="app-title">채팅방</h3>
+    </header>
+
+    <!-- ===== 본문 ===== -->
+    <main class="app-content">
+
+        <!-- 요청 받은 DM 목록 섹션 -->
+        <section>
+            <p class="section-label d-flex justify-content-between align-items-center">
+                수락 요청 DM
+                <button id="btn-show-all-joined" class="btn btn-sm btn-outline-primary"
+                        title="전체 보기">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </p>
+            <div id="pending-dm-container" th:attr=>
+                <!-- JS에서 렌더링 -->
+            </div>
+        </section>
+
+        <!-- 수락된 DM 목록 섹션 -->
+        <section class="mt-4">
+            <p class="section-label">DM 목록</p>
+            <div id="accepted-dm-container">
+                <!-- JS에서 렌더링 -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== 푸터 ===== -->
+    <footer class="app-footer">
+        <!-- 필요 시 추가 -->
+    </footer>
+
+</div>
+
+<!-- 커스텀 JS -->
+<script th:src="@{/js/dm/dmList.js}"></script>
+</body>
+</html>
