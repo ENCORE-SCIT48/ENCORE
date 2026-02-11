@@ -33,7 +33,9 @@ public class ChatParticipant extends BaseEntity {
 
     public enum ParticipantStatus {
         PENDING,
-        ACCEPTED;
+        ACCEPTED,
+        REJECTED;
+
     }
 
 }
