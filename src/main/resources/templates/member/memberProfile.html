@@ -1,49 +1,138 @@
 <!DOCTYPE html>
-<html xmlns:th="thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>개인 페이지</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!--<title th:text="${user.username}">User Profile</title>-->
 
-    <!-- Bootswatch Litera CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/litera/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Bootswatch Litera -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css"/>
 
-    <!-- 커스텀 CSS
-    <link href="/css/member/memberProfile.css" rel="stylesheet"/>-->
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/member/style.css}"/>
 </head>
 
 <body>
-<header class="bg-dark text-white p-3">
-    <div class="container d-flex align-items-center">
-        <button type="button" class="btn btn-light me-3" onclick="history.back()">&larr; 뒤로가기</button>
-        <h1 class="h4 mb-0">개인 페이지</h1>
-    </div>
-</header>
 
-<main class="container mt-4">
+<div class="app-container">
 
-    <section class="profile-intro mb-4">
-    </section>
+    <!-- ===== Header ===== -->
+    <header class="app-header">
+        <nav class="d-flex justify-content-between align-items-center w-100">
+            <span>&larr;</span>
 
-    <section class="profile-details mb-4">
-    </section>
-    <button id="btn-dm"
-            th:data-profile-id="${profileId}"
-            th:data-profile-mode="${profileMode}">
-        DM 보내기
-    </button>
+            <span>
+                    USER_PROFILE
+                </span>
 
+            <div class="dropdown">
+                <button class="btn text-white p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
+                    ⋮
+                </button>
 
-    <section class="recent-activity mb-4">
-    </section>
-</main>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                           data-bs-target="#blockModal">
+                            차단하기
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal">
+                            신고하기
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 
-<footer class="bg-dark text-white p-3 text-center">
-</footer>
+    <!-- ===== Main ===== -->
+    <main class="profile-section">
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
-<script src="/js/member/memberProfile.js"></script>
+        <section class="profile-top d-flex
+                        align-items-start
+                        justify-content-between">
+
+            <div class="profile-avatar">
+            </div>
+
+            <div class="d-flex flex-column
+                        align-items-stretch
+                        profile-right">
+
+                <div class="d-flex
+                            justify-content-between
+                            mb-2">
+                    <strong th:text="팔로잉">
+                        팔로잉 0
+                    </strong>
+                    <strong th:text="팔로워">
+                        팔로워 0
+                    </strong>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <!--<button id="followBtn" class="btn w-100" th:classappend="${isFollowing}
+                            ? 'btn-secondary'
+                            : 'follow-btn text-white'" th:text="${isFollowing}
+                            ? '팔로잉'
+                            : '팔로우'">
+                        팔로우
+                    </button>-->
+
+                    <button class="btn dm-btn w-100"
+                            id="btn-dm"
+                            th:data-profile-id="${profileId}"
+                            th:data-profile-mode="${profileMode}">
+                        DM
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===== Bio ===== -->
+        <section class="mt-4">
+            <h6 class="section-title">한 줄 소개</h6>
+            <!-- <div class="card-box" th:text="${user.bio}">
+                 소개 내용
+             </div>-->
+        </section>
+
+        <!-- ===== Info ===== -->
+        <section class="mt-4">
+            <h6 class="section-title">프로필 정보</h6>
+            <!--<div class="card-box">
+                <p>선호 장르: 재즈</p>
+                <p>선호 공연장: 홍대 인근</p>
+                <p>주 포지션: 보컬</p>
+                <p>주 공연장: 클럽 FF</p>
+                <p>등록 정보: 인디 레이블 소속</p>
+            </div>-->
+        </section>
+
+        <!-- ===== Activity ===== -->
+        <section class="mt-4">
+            <!--<h6 class="section-title">최근 활동</h6>
+            <div class="card-box">
+                • 2026.02.10 - 라이브 공연<br/>
+                • 2026.02.05 - 신곡 발매<br/>
+                • 2026.01.20 - 협업 프로젝트 참여
+            </div>-->
+        </section>
+
+    </main>
+</div>
+
+<!-- ===== Modals ===== -->
+<div th:replace="~{fragments/modal :: blockModal}"></div>
+<div th:replace="~{fragments/modal :: reportModal}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/member/memberProfile.js}"></script>
+
 </body>
 
 </html>
