@@ -54,7 +54,7 @@ public class ChatService {
         log.info("채팅 게시글 생성 프로세스 시작 - 제목: {}", dto.getTitle());
 
         Performance performance = performanceRepository.findById(performanceId)
-            .orElseThrow(() -> new EntityNotFoundException("공연 정보 없음: " + performanceId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연 정보 없음: " + performanceId)
             );
 
         ChatPost.ChatPostBuilder builder = ChatPost.builder()
@@ -99,7 +99,7 @@ public class ChatService {
     public ResponseDetailChatPostDto getChatPostDetail(Long id) {
         ChatPost chatPost = chatPostRepository.findById(id)
             .orElseThrow(
-                () -> new EntityNotFoundException("글이 조회되지 않습니다.")
+                () -> new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다.")
             );
 
         ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
@@ -131,7 +131,7 @@ public class ChatService {
 
         try {
             ChatPost chatPost = chatPostRepository.findById(chatId)
-                .orElseThrow(() -> new EntityNotFoundException("글이 존재하지 않습니다. ID: " + chatId));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "글이 존재하지 않습니다. ID: " + chatId));
 
             checkChatPostAuthority(chatPost, activeProfileId, activeMode);
 
@@ -161,7 +161,7 @@ public class ChatService {
         log.info("게시글 논리 삭제 시작 - postId: {}", postId);
 
         ChatPost chatPost = chatPostRepository.findById(postId)
-            .orElseThrow(() -> new EntityNotFoundException("글이 조회되지 않습니다. ID: " + postId));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다. ID: " + postId));
 
         log.info("권한 확인");
         checkChatPostAuthority(chatPost, activeId, activeMode);
@@ -195,7 +195,7 @@ public class ChatService {
     public String getPerformanceTitle(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
             .orElseThrow(
-                () -> new EntityNotFoundException("공연이 존재 하지 않습니다.")
+                () -> new ApiException(ErrorCode.NOT_FOUND, "공연이 존재 하지 않습니다.")
             );
         return performance.getTitle();
     }
@@ -366,10 +366,10 @@ public class ChatService {
             .orElse(null);
 
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-            .orElseThrow(() -> new EntityNotFoundException("채팅방이 존재하지 않습니다."));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방이 존재하지 않습니다."));
 
         ChatPost chatPost = chatPostRepository.findById(chatRoom.getChatPost().getId())
-            .orElseThrow(() -> new EntityNotFoundException("게시글이 존재하지 않습니다."));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글이 존재하지 않습니다."));
 
         if ("CLOSED".equals(chatPost.getStatus().name()) ||
             chatPost.getCurrentMember() >= chatPost.getMaxMember()) {

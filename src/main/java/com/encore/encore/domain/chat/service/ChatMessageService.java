@@ -13,6 +13,8 @@ import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.service.ProfileService;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +51,7 @@ public class ChatMessageService {
      */
     public ResponseChatMessage sendMessage(Long roomId, Long activeId, ActiveMode activeMode, RequestChatMessage request) {
         ChatRoom room = chatRoomRepository.findById(roomId)
-            .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방 없음"));
 
         ChatMessage message = ChatMessage.builder()
             .room(room)
@@ -113,7 +115,7 @@ public class ChatMessageService {
             .orElse(null);
 
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-            .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방 없음"));
 
         Long writerId = chatRoom.getChatPost().getProfileId();
         String writerMode = chatRoom.getChatPost().getProfileMode().name();
