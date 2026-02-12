@@ -59,7 +59,7 @@ function loadChatList(page, performanceId) {
     isLoading = true;
 
     $.ajax({
-        url: `/api/performance/${performanceId}/list`,
+        url: `/performances/${performanceId}/chats`,
         method: 'GET',
         data: {
             page: page,

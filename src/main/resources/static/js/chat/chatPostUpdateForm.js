@@ -54,8 +54,8 @@ $(document).ready(() => {
 
         // ===== AJAX 요청 =====
         $.ajax({
-            url: `/performance/${performanceId}/chat/${chatId}/update`,
-            method: 'POST',
+            url: `/api/performances/${performanceId}/chats/${chatId}`,
+            method: 'PATCH',
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: (res) => {
