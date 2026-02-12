@@ -85,9 +85,17 @@
                 </div>
 
                 <div id="tab-review" class="tab-content">
-                    <div class="placeholder-center">
-                        <div class="placeholder-title">공연후기</div>
-                        <div class="placeholder-sub">후기 리스트/작성 UI 붙일 자리</div>
+                    <!-- 후기 리스트 -->
+                    <div class="review-list" id="reviewList"></div>
+
+                    <!-- 페이징 -->
+                    <div class="review-more-wrap" id="reviewMoreWrap" style="display:none;">
+                        <button type="button" class="review-more-btn" id="reviewMoreBtn">더보기</button>
+                    </div>
+
+                    <!-- 빈 상태 -->
+                    <div class="review-empty" id="reviewEmpty" style="display:none;">
+                        아직 등록된 후기가 없어요
                     </div>
                 </div>
             </div>
