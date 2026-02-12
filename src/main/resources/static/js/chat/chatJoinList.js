@@ -1,5 +1,5 @@
 /**
- * chatPreview.js
+ * chatJoinList.js
  * 🎯 참여중 채팅방 3개 + HOT 채팅방 10개 미리보기
  */
 

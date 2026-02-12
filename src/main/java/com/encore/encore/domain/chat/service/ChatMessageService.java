@@ -18,6 +18,9 @@ import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -82,9 +85,11 @@ public class ChatMessageService {
      * @param roomId 조회할 채팅방의 ID
      * @return 채팅방에 속한 메시지들을 {@link ResponseChatMessage} 형태로 변환한 리스트
      */
-    public List<ResponseChatMessage> getMessages(Long roomId) {
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size) {
 
-        return chatMessageRepository.findByRoomRoomIdOrderByCreatedAtAsc(roomId)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+
+        return chatMessageRepository.findByRoomRoomId(roomId, pageable)
             .stream()
             .map(message -> ResponseChatMessage.builder()
                 .messageId(message.getMessageId())
