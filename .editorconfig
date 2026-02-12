@@ -10,3 +10,4 @@ end_of_line = lf
 
 [*.{js,html,css,yml,yaml}]
 indent_size = 4
+

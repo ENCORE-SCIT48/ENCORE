@@ -2,6 +2,7 @@ package com.encore.encore.domain.performance.controller;
 
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
+import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
 import com.encore.encore.domain.performance.service.PerformanceService;
 import com.encore.encore.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -69,6 +71,34 @@ public class PerformanceController {
         return CommonResponse.ok(
             performanceService.getHotPerformances(),
             "핫한 공연 조회 성공"
+        );
+    }
+
+    @GetMapping("/{performanceId}/reviews")
+    public CommonResponse<Page<PerformanceReviewItemDto>> getPerformanceReviews(
+        @PathVariable Long performanceId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "latest") String sort
+    ) {
+        log.info("[Performance] controller reviews - performanceId={}, page={}, size={}, sort={}",
+            performanceId, page, size, sort);
+
+        return CommonResponse.ok(
+            performanceService.getPerformanceReviews(performanceId, PageRequest.of(page, size), sort),
+            "공연 리뷰 조회 성공"
+        );
+    }
+
+    @GetMapping("/{performanceId}/reviews/summary")
+    public CommonResponse<Map<String, Object>> getPerformanceReviewSummary(
+        @PathVariable Long performanceId
+    ) {
+        log.info("[Performance] controller reviews summary - performanceId={}", performanceId);
+
+        return CommonResponse.ok(
+            performanceService.getPerformanceReviewSummary(performanceId),
+            "공연 리뷰 요약 조회 성공"
         );
     }
 }
