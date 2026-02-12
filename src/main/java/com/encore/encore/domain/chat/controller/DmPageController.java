@@ -42,7 +42,7 @@ public class DmPageController {
         // Long myProfileId = userDetails.getActiveProfileId();
         //ActiveMode myMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 2L; // 현재 프로필 ID
+        Long activeProfileId = 3L; // 현재 프로필 ID
         ActiveMode activeMode = ActiveMode.USER;
 
         String participantStatus = dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);

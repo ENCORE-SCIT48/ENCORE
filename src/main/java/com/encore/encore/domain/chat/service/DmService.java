@@ -1,10 +1,6 @@
 package com.encore.encore.domain.chat.service;
 
-import com.encore.encore.domain.chat.dto.ResponseChatMessage;
-import com.encore.encore.domain.chat.dto.dm.RequestDmDto;
-import com.encore.encore.domain.chat.dto.dm.RequestSendDmDto;
-import com.encore.encore.domain.chat.dto.dm.ResponseDmRoomStatusDto;
-import com.encore.encore.domain.chat.dto.dm.ResponseListDmDto;
+import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.entity.ChatMessage;
 import com.encore.encore.domain.chat.entity.ChatParticipant;
 import com.encore.encore.domain.chat.entity.ChatRoom;
@@ -12,6 +8,9 @@ import com.encore.encore.domain.chat.repository.ChatMessageRepository;
 import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.member.repository.HostProfileRepository;
+import com.encore.encore.domain.member.repository.PerformerProfileRepository;
+import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.member.service.ProfileService;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
@@ -35,13 +34,60 @@ public class DmService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final PerformerProfileRepository performerProfileRepository;
+    private final HostProfileRepository hostProfileRepository;
+
+    /**
+     * String으로 받은 activeMode를 ActiveMode로 전환
+     *
+     * @param modeStr
+     * @return
+     */
+    private ActiveMode mapToActiveMode(String modeStr) {
+        if (modeStr == null || modeStr.isBlank()) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "ActiveMode가 비어있습니다.");
+        }
+
+        switch (modeStr.toLowerCase()) { // 소문자로 통일
+            case "user":
+                return ActiveMode.USER;
+            case "performer":
+                return ActiveMode.PERFORMER;
+            case "host":
+                return ActiveMode.HOST;
+            default:
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 ActiveMode: " + modeStr);
+        }
+    }
+
+    /**
+     * 대상 프로필이 존재하는 프로필인지 확인
+     *
+     * @param profileId
+     * @param mode
+     * @return
+     */
+    private boolean isProfileExist(Long profileId, ActiveMode mode) {
+        switch (mode) {
+            case USER:
+                return userProfileRepository.existsById(profileId);
+            case PERFORMER:
+                return performerProfileRepository.existsById(profileId);
+            case HOST:
+                return hostProfileRepository.existsById(profileId);
+            default:
+                return false;
+        }
+    }
+
 
     /**
      * 로그인한 사용자의 Pending 상태인 DM 참여 내역을 조회합니다.
      *
      * <p>메서드 동작:
      * <ul>
-     *     <li>로그인한 사용자의 프로필 ID와 프로필 모드에 해당하는 Pending DM 참s여 목록을 조회합니다.</li>
+     *     <li>로그인한 사용자의 프로필 ID와 프로필 모드에 해당하는 Pending DM 참여 목록을 조회합니다.</li>
      *     <li>각 참여 채팅방에서 상대방 참가자를 조회합니다 (본인 제외).</li>
      *     <li>상대방의 닉네임은 ProfileService를 통해 조회합니다.</li>
      *     <li>각 채팅방에서 최신 메시지를 조회하여 DTO에 포함합니다.</li>
@@ -149,9 +195,21 @@ public class DmService {
      * @return DM 방 상태 DTO
      */
     public ResponseDmRoomStatusDto requestDm(Long myProfileId, ActiveMode myMode, RequestDmDto dto) {
+
+        ActiveMode targetProfileMode = mapToActiveMode(dto.getTargetProfileMode());
+
+        if (myProfileId.equals(dto.getTargetProfileId()) &&
+            myMode == targetProfileMode) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신에게 DM을 보낼 수 없습니다.");
+        }
+
+        if (!isProfileExist(dto.getTargetProfileId(), targetProfileMode)) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "존재하지 않는 프로필입니다.");
+        }
+
         // 1. 기존 DM 방 조회 (이미 존재하는지 확인)
         Optional<ChatRoom> existingRoomOpt = chatRoomRepository
-            .findDmRoomWithParticipants(myProfileId, myMode, dto.getTargetProfileId(), dto.getTargetProfileMode());
+            .findDmRoomWithParticipants(myProfileId, myMode, dto.getTargetProfileId(), targetProfileMode);
 
         // 2. 기존 방이 있으면 그대로 사용
         if (existingRoomOpt.isPresent()) {
@@ -208,10 +266,11 @@ public class DmService {
             .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
             .build();
 
+        ActiveMode targetProfileMode = mapToActiveMode(dto.getTargetProfileMode());
         ChatParticipant other = ChatParticipant.builder()
             .room(room)
             .profileId(dto.getTargetProfileId())
-            .profileMode(dto.getTargetProfileMode())
+            .profileMode(targetProfileMode)
             .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
             .build();
 
@@ -238,7 +297,7 @@ public class DmService {
      * @param request
      * @return
      */
-    public ResponseChatMessage sendMessage(Long activeProfileId, ActiveMode activeMode, RequestSendDmDto request) {
+    public ResponseSendDmDto sendMessage(Long activeProfileId, ActiveMode activeMode, RequestSendDmDto request) {
         ChatRoom room = chatRoomRepository.findById(request.getRoomId())
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방 없음"));
 
@@ -278,7 +337,8 @@ public class DmService {
         }
 
 
-        return ResponseChatMessage.builder()
+        return ResponseSendDmDto.builder()
+            .roomId(message.getRoom().getRoomId())
             .messageId(message.getMessageId())
             .profileId(message.getProfileId())
             .profileMode(message.getProfileMode().name())

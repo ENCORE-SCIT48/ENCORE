@@ -1,10 +1,6 @@
 package com.encore.encore.domain.chat.controller;
 
-import com.encore.encore.domain.chat.dto.ResponseChatMessage;
-import com.encore.encore.domain.chat.dto.dm.RequestDmDto;
-import com.encore.encore.domain.chat.dto.dm.RequestSendDmDto;
-import com.encore.encore.domain.chat.dto.dm.ResponseDmRoomStatusDto;
-import com.encore.encore.domain.chat.dto.dm.ResponseListDmDto;
+import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
@@ -105,17 +101,19 @@ public class DmApiController {
      * @return
      */
     @PostMapping("/sendMessage")
-    public ResponseEntity<CommonResponse<ResponseChatMessage>> sendMessage(
+    public ResponseEntity<CommonResponse<ResponseSendDmDto>> sendMessage(
         @RequestBody RequestSendDmDto request
         //@AuthenticationPrincipal CustomUserDetails userDetails,
     ) {
         // Long myProfileId = userDetails.getActiveProfileId();
         //ActiveMode myMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 2L; // 현재 프로필 ID
+        Long activeProfileId = 3L; // 현재 프로필 ID
         ActiveMode activeMode = ActiveMode.USER;
 
-        ResponseChatMessage result = dmService.sendMessage(
+        dmService.checkUserParticipantStatus(request.getRoomId(), activeProfileId, activeMode);
+
+        ResponseSendDmDto result = dmService.sendMessage(
             activeProfileId, activeMode, request
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "DM 전송 완료"));
