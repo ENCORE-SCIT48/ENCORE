@@ -28,5 +28,7 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "seat_id")
     private Seat seat;
     private Integer rating;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String content;
 }
