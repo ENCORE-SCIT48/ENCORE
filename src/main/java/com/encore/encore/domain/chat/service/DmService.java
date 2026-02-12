@@ -1,5 +1,6 @@
 package com.encore.encore.domain.chat.service;
 
+import com.encore.encore.domain.chat.dto.ResponseChatMessage;
 import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.entity.ChatMessage;
 import com.encore.encore.domain.chat.entity.ChatParticipant;
@@ -17,6 +18,9 @@ import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -100,7 +104,7 @@ public class DmService {
      */
     public List<ResponseListDmDto> getPendingList(Long activeProfileId, ActiveMode activeMode) {
         List<ChatParticipant> myPendingList = chatParticipantRepository
-            .findByProfileIdAndProfileModeAndParticipantStatusAndRoom_RoomType(
+            .findAcceptedDm(
                 activeProfileId,
                 activeMode,
                 ChatParticipant.ParticipantStatus.PENDING,
@@ -148,7 +152,7 @@ public class DmService {
 
         // 나의 ACCEPTED 상태 DM 참여 내역 조회
         List<ChatParticipant> myAcceptedList = chatParticipantRepository
-            .findByProfileIdAndProfileModeAndParticipantStatusAndRoom_RoomType(
+            .findAcceptedDm(
                 activeProfileId,
                 activeMode,
                 ChatParticipant.ParticipantStatus.ACCEPTED,  // pending -> accepted
@@ -160,11 +164,18 @@ public class DmService {
         for (ChatParticipant myCp : myAcceptedList) {
 
             // 상대방 조회: 나와 profileId, profileMode 모두 다른 사람
-            ChatParticipant other = chatParticipantRepository.findOtherParticipantInRoom(
+            Optional<ChatParticipant> otherOpt = chatParticipantRepository.findOtherParticipantInRoom(
                 myCp.getRoom().getRoomId(),
                 activeProfileId,
                 activeMode
-            ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자가 없습니다."));
+            );
+
+            if (otherOpt.isEmpty()) {
+                log.warn("상대방 참가자가 없는 DM 방입니다. roomId={}", myCp.getRoom().getRoomId());
+                continue; // dtoList에 추가하지 않고 다음 루프로 넘어감
+            }
+
+            ChatParticipant other = otherOpt.get();
 
             String nickname = profileService.resolveSenderName(other.getProfileId(), other.getProfileMode());
 
@@ -284,8 +295,8 @@ public class DmService {
         return ResponseDmRoomStatusDto.builder()
             .roomId(roomId)
             .otherProfileId(other.getProfileId())
-            .otherProfileMode(other.getProfileMode())
-            .myParticipantStatus(me.getParticipantStatus())
+            .otherProfileMode(other.getProfileMode().name())
+            .myParticipantStatus(me.getParticipantStatus().name())
             .build();
     }
 
@@ -355,5 +366,23 @@ public class DmService {
             .orElseThrow(() -> new ApiException(ErrorCode.FORBIDDEN, "채팅방 접근 불가"));
 
         return me.getParticipantStatus().name();
+    }
+
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+
+        return chatMessageRepository.findByRoomRoomId(roomId, pageable)
+            .stream()
+            .map(message -> ResponseChatMessage.builder()
+                .messageId(message.getMessageId())
+                .profileId(message.getProfileId())
+                .profileMode(message.getProfileMode().name())
+                .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
+                .content(message.getContent())
+                .createdAt(message.getCreatedAt())
+                .build()
+            )
+            .toList();
     }
 }

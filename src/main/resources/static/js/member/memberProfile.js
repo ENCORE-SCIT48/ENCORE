@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const profileId = dmBtn.dataset.profileId;
             const profileMode = dmBtn.dataset.profileMode;
 
-            fetch("/api/dm/request", {
+            fetch("/api/dms", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

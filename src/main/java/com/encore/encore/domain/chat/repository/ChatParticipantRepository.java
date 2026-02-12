@@ -46,18 +46,30 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
             SELECT cp
             FROM ChatParticipant cp
             WHERE cp.room.roomId = :roomId
-              AND cp.profileId <> :myProfileId
-              AND cp.profileMode <> :myProfileMode
+              AND NOT (cp.profileId = :profileId AND cp.profileMode = :profileMode)
         """)
     Optional<ChatParticipant> findOtherParticipantInRoom(
         @Param("roomId") Long roomId,
-        @Param("myProfileId") Long myProfileId,
-        @Param("myProfileMode") ActiveMode myProfileMode
+        @Param("profileId") Long profileId,
+        @Param("profileMode") ActiveMode profileMode
     );
 
 
-    List<ChatParticipant> findByProfileIdAndProfileModeAndParticipantStatusAndRoom_RoomType(Long activeProfileId, ActiveMode activeMode, ChatParticipant.ParticipantStatus participantStatus, ChatRoom.RoomType roomType);
-
+    @Query("""
+            SELECT cp
+            FROM ChatParticipant cp
+            JOIN cp.room r
+            WHERE cp.profileId = :profileId
+              AND cp.profileMode = :profileMode
+              AND cp.participantStatus = :status
+              AND r.roomType = :roomType
+        """)
+    List<ChatParticipant> findAcceptedDm(
+        @Param("profileId") Long profileId,
+        @Param("profileMode") ActiveMode profileMode,
+        @Param("status") ChatParticipant.ParticipantStatus status,
+        @Param("roomType") ChatRoom.RoomType roomType
+    );
 
     List<ChatParticipant> findByRoom_RoomId(Long roomId);
 

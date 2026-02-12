@@ -79,7 +79,7 @@ public class ChatPageController {
      * @param model         찾은 글 정보 저장
      * @return chat/chatPostDetail.html 이동
      */
-    @GetMapping("/performance/{performanceId}/chat/{id}")
+    @GetMapping("/performances/{performanceId}/chat/{id}")
     public String chatPostDetail(
         @PathVariable Long performanceId,
         @PathVariable Long id, Model model,
@@ -105,7 +105,7 @@ public class ChatPageController {
             return "chat/chatPostDetail";
         } catch (Exception e) {
             log.error("채팅 상세 조회 중 예외 발생! postId: {}", id, e);
-            return "redirect:/performance/" + performanceId + "/chat/list";
+            return "redirect:/performances/" + performanceId + "/chats";
         }
     }
 
@@ -134,7 +134,7 @@ public class ChatPageController {
             return "chat/chatPostUpdateForm";
         } catch (Exception e) {
             log.error("수정 폼 로딩 중 예외 발생 postId: {}", id, e);
-            return "redirect:/performance/" + performanceId + "/chat/" + id;
+            return "redirect:/performances/" + performanceId + "/chat/" + id;
         }
     }
 

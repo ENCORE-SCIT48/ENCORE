@@ -1,5 +1,6 @@
 package com.encore.encore.domain.chat.controller;
 
+import com.encore.encore.domain.chat.dto.ResponseChatMessage;
 import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
@@ -18,7 +19,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/dm")
+@RequestMapping("/api/dms")
 public class DmApiController {
 
     private final DmService dmService;
@@ -35,16 +36,14 @@ public class DmApiController {
      */
     @GetMapping("/pending")
     public ResponseEntity<CommonResponse<List<ResponseListDmDto>>> pending(
-        //@AuthenticationPrincipal CustomUserDetails userDetails
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // Long activeProfileId = userDetails.getActiveProfileId();
-        // ActiveMode activeMode = userDetails.getActiveMode();
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         List<ResponseListDmDto> result = dmService.getPendingList(activeProfileId, activeMode);
 
-        return ResponseEntity.ok(CommonResponse.ok(result, "요청 받은 DM을 불러왔습니다."));
+        return ResponseEntity.ok(CommonResponse.ok(result, "pending 받은 DM을 불러왔습니다."));
     }
 
     /**
@@ -61,17 +60,14 @@ public class DmApiController {
 
     @GetMapping("/accepted")
     public ResponseEntity<CommonResponse<List<ResponseListDmDto>>> accepted(
-        //@AuthenticationPrincipal CustomUserDetails userDetails
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        //Long activeProfileId = userDetails.getActiveProfileId();
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         List<ResponseListDmDto> result = dmService.getAcceptedList(activeProfileId, activeMode);
 
-        return ResponseEntity.ok(CommonResponse.ok(result, "요청 받은 DM을 불러왔습니다."));
+        return ResponseEntity.ok(CommonResponse.ok(result, "accepted DM을 불러왔습니다."));
     }
 
     /**
@@ -79,8 +75,8 @@ public class DmApiController {
      * - 기존 DM 확인 후 roomId 반환
      * - 없으면 새로 생성
      */
-    @PostMapping("/request")
-    public ResponseEntity<CommonResponse<ResponseDmRoomStatusDto>> requestDm(
+    @PostMapping
+    public ResponseEntity<CommonResponse<ResponseDmRoomStatusDto>> createDm(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestDmDto dto
     ) {
@@ -93,12 +89,17 @@ public class DmApiController {
     }
 
     /**
-     * DM 전송
+     * 지정된 DM 채팅방에 메시지를 전송합니다.
      *
-     * @param request
-     * @return
+     * <p>사용자의 활성 프로필과 모드를 확인하고, 참여 상태를 검증한 후
+     * 메시지를 전송합니다. 전송 성공 시 전송된 메시지 정보를 반환합니다.</p>
+     *
+     * @param request     전송할 메시지 정보가 담긴 {@link RequestSendDmDto} 객체
+     * @param userDetails 현재 인증된 사용자 정보 {@link CustomUserDetails}
+     * @return 전송된 메시지 정보와 상태 메시지를 포함한 {@link ResponseEntity} 객체
+     * - {@link CommonResponse}로 래핑되어 전송됨
      */
-    @PostMapping("/sendMessage")
+    @PostMapping("/{roomId}/messages")
     public ResponseEntity<CommonResponse<ResponseSendDmDto>> sendMessage(
         @RequestBody RequestSendDmDto request,
         @AuthenticationPrincipal CustomUserDetails userDetails
@@ -113,6 +114,27 @@ public class DmApiController {
             activeProfileId, activeMode, request
         );
         return ResponseEntity.ok(CommonResponse.ok(result, "DM 전송 완료"));
+    }
+
+    /**
+     * 지정된 DM 채팅방의 메시지 목록을 조회합니다.
+     *
+     * <p>페이지네이션을 지원하며, 기본적으로 최신 메시지부터 조회합니다.</p>
+     *
+     * @param roomId 조회할 채팅방 ID
+     * @param page   조회할 페이지 번호 (기본값: 0)
+     * @param size   한 페이지당 조회할 메시지 수 (기본값: 20)
+     * @return 메시지 목록과 상태 메시지를 포함한 {@link ResponseEntity} 객체
+     * - {@link CommonResponse}로 래핑되어 전송됨
+     */
+    @GetMapping("{roomId}/messages")
+    public ResponseEntity<CommonResponse<List<ResponseChatMessage>>> getMessages(
+        @PathVariable Long roomId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        List<ResponseChatMessage> result = dmService.getMessages(roomId, page, size);
+        return ResponseEntity.ok(CommonResponse.ok(result, "메시지 조회 성공"));
     }
 
 }
