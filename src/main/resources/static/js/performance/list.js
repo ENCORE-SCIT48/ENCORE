@@ -10,7 +10,7 @@ $(function () {
     };
 
     function escapeHtml(str) {
-        return String(str)
+        return String(str ?? "")
             .replaceAll("&", "&amp;")
             .replaceAll("<", "&lt;")
             .replaceAll(">", "&gt;")
@@ -19,9 +19,7 @@ $(function () {
     }
 
     function renderCards(items, append) {
-        if (!append) {
-            $("#performanceGrid").empty();
-        }
+        if (!append) $("#performanceGrid").empty();
 
         items.forEach(function (p) {
             const id = p.performanceId;
@@ -65,31 +63,31 @@ $(function () {
     }
 
     function resolveApiUrl() {
-        if (state.filter === "VIEWED") {
-            return "/api/performances/watched";
-        }
+        if (state.filter === "VIEWED") return "/api/performances/watched";
+        if (state.filter === "BOOKMARK") return "/api/performances/wished";
         return "/api/performances";
     }
 
+    // 어떤 탭이든 keyword는 보낼 수 있게 통일
     function buildRequestData() {
-        if (state.filter === "VIEWED") {
-            return { page: state.page, size: state.size };
+        const base = {
+            page: state.page,
+            size: state.size,
+            keyword: state.keyword || null
+        };
+
+        // 전체/카테고리 탭일 때만 category를 추가로 보냄
+        if (!state.filter) {
+            base.category = state.category || null;
         }
 
-        return {
-            keyword: state.keyword || null,
-            category: state.category || null,
-            page: state.page,
-            size: state.size
-        };
+        return base;
     }
 
     function normalizeItemsFromResponse(res) {
         const data = res?.data;
 
-        if (!data) {
-            return { items: [], last: true };
-        }
+        if (!data) return { items: [], last: true };
 
         if (Array.isArray(data.content)) {
             return { items: data.content, last: !!data.last };
@@ -122,9 +120,7 @@ $(function () {
 
                 renderCards(items, append);
 
-                if (!state.last) {
-                    state.page += 1;
-                }
+                if (!state.last) state.page += 1;
             })
             .fail(function (xhr) {
                 console.error("[list] 목록 조회 실패", xhr);
@@ -141,15 +137,14 @@ $(function () {
         fetchList(false);
     }
 
+    // 북마크/본공연 탭에서도 검색 가능하게: 강제 초기화 삭제
     $("#searchBtn").on("click", function () {
         state.keyword = $("#keyword").val().trim();
         resetAndLoad();
     });
 
     $("#keyword").on("keydown", function (e) {
-        if (e.key === "Enter") {
-            $("#searchBtn").click();
-        }
+        if (e.key === "Enter") $("#searchBtn").click();
     });
 
     $(document).on("click", ".tab-btn", function () {
@@ -159,15 +154,15 @@ $(function () {
         const filter = $(this).data("filter");
         const category = $(this).data("category");
 
+        // filter 탭(북마크/본공연)
         if (typeof filter !== "undefined") {
             state.filter = filter || "";
             state.category = "";
-            state.keyword = "";
-            $("#keyword").val("");
             resetAndLoad();
             return;
         }
 
+        // 카테고리 탭
         state.filter = "";
         state.category = category || "";
         resetAndLoad();
@@ -177,7 +172,6 @@ $(function () {
         fetchList(true);
     });
 
-    // 버튼 기능은 아직 없음
     $(document).on("click", ".js-perf-review-btn, .js-seat-review-btn", function (e) {
         e.preventDefault();
         e.stopPropagation();
