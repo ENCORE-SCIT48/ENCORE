@@ -39,10 +39,11 @@ public class DmPageController {
         @PathVariable Long roomId,
         //@AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
-        // Long myProfileId = userDetails.getActiveProfileId();
-        //ActiveMode myMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 3L; // 현재 프로필 ID
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         String participantStatus = dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);

@@ -4,10 +4,12 @@ import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
+import com.encore.encore.global.config.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,10 +37,9 @@ public class DmApiController {
     public ResponseEntity<CommonResponse<List<ResponseListDmDto>>> pending(
         //@AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        //   Long activeProfileId = userDetails.getActiveProfileId();
+        // Long activeProfileId = userDetails.getActiveProfileId();
         // ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L; // 현재 프로필 ID
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         List<ResponseListDmDto> result = dmService.getPendingList(activeProfileId, activeMode);
@@ -60,12 +61,12 @@ public class DmApiController {
 
     @GetMapping("/accepted")
     public ResponseEntity<CommonResponse<List<ResponseListDmDto>>> accepted(
-        // @AuthenticationPrincipal CustomUserDetails userDetails
+        //@AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        //   Long activeProfileId = userDetails.getActiveProfileId();
-        // ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 2L; // 현재 프로필 ID
+        Long activeProfileId = 2L;
         ActiveMode activeMode = ActiveMode.USER;
 
         List<ResponseListDmDto> result = dmService.getAcceptedList(activeProfileId, activeMode);
@@ -80,14 +81,11 @@ public class DmApiController {
      */
     @PostMapping("/request")
     public ResponseEntity<CommonResponse<ResponseDmRoomStatusDto>> requestDm(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestDmDto dto
     ) {
-        // Long myProfileId = userDetails.getActiveProfileId();
-        //ActiveMode myMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 3L; // 현재 프로필 ID
-        ActiveMode activeMode = ActiveMode.USER;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseDmRoomStatusDto result = dmService.requestDm(activeProfileId, activeMode, dto);
 
@@ -102,14 +100,12 @@ public class DmApiController {
      */
     @PostMapping("/sendMessage")
     public ResponseEntity<CommonResponse<ResponseSendDmDto>> sendMessage(
-        @RequestBody RequestSendDmDto request
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody RequestSendDmDto request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // Long myProfileId = userDetails.getActiveProfileId();
-        //ActiveMode myMode = userDetails.getActiveMode();
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
-        Long activeProfileId = 3L; // 현재 프로필 ID
-        ActiveMode activeMode = ActiveMode.USER;
 
         dmService.checkUserParticipantStatus(request.getRoomId(), activeProfileId, activeMode);
 

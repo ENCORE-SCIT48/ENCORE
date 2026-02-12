@@ -8,8 +8,14 @@ $(document).ready(() => {
     const chatArea = $('#chatArea');
     const participantList = $('#participantList');
 
+    // 페이징 관련 변수
+    let currentPage = 0;
+    const pageSize = 20;
+    let loading = false;
+    let allLoaded = false;
+
     // 1. 초기 메시지 로드
-    loadMessages();
+    loadMessages(true);
 
     // 2. 사이드바 오픈 시 참여자 목록 로드
     $('#chatSidebar').on('show.bs.offcanvas', function () {
@@ -50,7 +56,7 @@ $(document).ready(() => {
             data: JSON.stringify({ content }),
             success: function () {
                 chatInput.val('');
-                loadMessages();
+                loadMessages(true); // 메시지 전송 후 최신 메시지 불러오기
             },
             error: function (xhr) {
                 console.error('메시지 전송 실패:', xhr);
@@ -61,15 +67,28 @@ $(document).ready(() => {
 
     /**
      * 메시지 목록 불러오기 및 렌더링
+     * @param reset true면 기존 메시지 초기화 후 새로 불러오기
      */
-    function loadMessages() {
+    function loadMessages(reset = false) {
+        if (loading || allLoaded) return;
+        loading = true;
+
+        if (reset) {
+            currentPage = 0;
+            allLoaded = false;
+            chatArea.empty();
+        }
+
         $.ajax({
-            url: `/api/chat/room/${ROOM_ID}/messages`,
+            url: `/api/chat/room/${ROOM_ID}/messages?page=${currentPage}&size=${pageSize}`,
             method: 'GET',
             success: function (res) {
-                chatArea.empty();
+                if (!res.content || res.content.length === 0) {
+                    allLoaded = true;
+                    return;
+                }
 
-                res.data.forEach(function (msg) {
+                res.content.forEach(function (msg) {
                     const html = `
                         <div class="message-row mb-3">
                             <div class="message-wrapper">
@@ -82,9 +101,13 @@ $(document).ready(() => {
                 });
 
                 scrollToBottom();
+                currentPage++;
             },
             error: function (xhr) {
                 console.error('메시지 로드 실패:', xhr);
+            },
+            complete: function () {
+                loading = false;
             }
         });
     }
@@ -155,4 +178,13 @@ $(document).ready(() => {
             }
         });
     }
+
+    /**
+     * 무한 스크롤 (위로 올릴 때 이전 메시지 로딩)
+     */
+    chatArea.on('scroll', function () {
+        if (chatArea.scrollTop() === 0 && !loading && !allLoaded) {
+            loadMessages();
+        }
+    });
 });

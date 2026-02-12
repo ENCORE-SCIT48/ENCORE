@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 응답 보내주는 dm dto
+ */
 @Builder
 @Data
 @AllArgsConstructor

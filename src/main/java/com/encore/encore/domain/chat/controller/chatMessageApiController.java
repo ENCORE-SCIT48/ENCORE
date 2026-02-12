@@ -57,9 +57,11 @@ public class chatMessageApiController {
      */
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<CommonResponse<List<ResponseChatMessage>>> getMessages(
-        @PathVariable Long roomId
+        @PathVariable Long roomId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
     ) {
-        List<ResponseChatMessage> result = chatMessageService.getMessages(roomId);
+        List<ResponseChatMessage> result = chatMessageService.getMessages(roomId, page, size);
         return ResponseEntity.ok(CommonResponse.ok(result, "메시지 조회 성공"));
     }
 

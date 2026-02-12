@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * dm방 생성 후 participantStatus 를 응답하는 dto
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * dm 글쓰기 요청 dto
+ */
 @Data
 @Builder
 @NoArgsConstructor
