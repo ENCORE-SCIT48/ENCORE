@@ -64,6 +64,7 @@ public class ChatMessageService {
         return ResponseChatMessage.builder()
             .messageId(message.getMessageId())
             .profileId(message.getProfileId())
+            .profileMode(message.getProfileMode().name())
             .senderName(profileService.resolveSenderName(message.getMessageId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())

@@ -13,13 +13,13 @@ import java.util.Optional;
 
 @Repository
 public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
-    
+
     List<ChatParticipant> findByRoomRoomId(Long roomId);
-    
+
     Optional<ChatParticipant> findByRoom_RoomIdAndProfileIdAndProfileModeAndIsDeletedFalse(Long roomId, Long activeId, ActiveMode activeMode);
-    
+
     List<ChatParticipant> findByRoomRoomIdAndIsDeletedFalse(Long roomId);
-    
+
     /**
      * 로그인한 사용자의 Pending 상태 DM 참여 목록을 조회합니다.
      *
@@ -33,7 +33,7 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
         ChatParticipant.ParticipantStatus participantStatus,
         ChatRoom.RoomType roomType
     );
-    
+
     /**
      * 같은 Room에 속한, 본인과 다른 프로필 역할을 가진 상대방 Participant 조회
      *
@@ -54,10 +54,27 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
         @Param("myProfileId") Long myProfileId,
         @Param("myProfileMode") ActiveMode myProfileMode
     );
-    
-    
+
+
     List<ChatParticipant> findByProfileIdAndProfileModeAndParticipantStatusAndRoom_RoomType(Long activeProfileId, ActiveMode activeMode, ChatParticipant.ParticipantStatus participantStatus, ChatRoom.RoomType roomType);
-    
-    
+
+
     List<ChatParticipant> findByRoom_RoomId(Long roomId);
+
+    Optional<ChatParticipant> findByRoom_RoomIdAndProfileIdAndProfileMode(Long roomId, Long activeProfileId, ActiveMode activeMode);
+
+    Optional<ChatParticipant> RoomRoomIdAndProfileIdAndProfileModeAndParticipantStatusNot
+        (Long roomId, Long activeProfileId, ActiveMode activeMode, ChatParticipant.ParticipantStatus status);
+
+    @Query("SELECT p FROM ChatParticipant p " +
+        "WHERE p.room.roomId = :roomId " +
+        "AND p.participantStatus = :status " +
+        "AND (p.profileId <> :profileId OR p.profileMode <> :profileMode)")
+    Optional<ChatParticipant> findWaitingParticipantExcludingSelf(
+        @Param("roomId") Long roomId,
+        @Param("profileId") Long profileId,
+        @Param("profileMode") ActiveMode profileMode,
+        @Param("status") ChatParticipant.ParticipantStatus status
+    );
+
 }

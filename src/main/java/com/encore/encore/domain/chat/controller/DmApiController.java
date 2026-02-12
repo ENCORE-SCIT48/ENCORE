@@ -1,6 +1,8 @@
 package com.encore.encore.domain.chat.controller;
 
+import com.encore.encore.domain.chat.dto.ResponseChatMessage;
 import com.encore.encore.domain.chat.dto.dm.RequestDmDto;
+import com.encore.encore.domain.chat.dto.dm.RequestSendDmDto;
 import com.encore.encore.domain.chat.dto.dm.ResponseDmRoomStatusDto;
 import com.encore.encore.domain.chat.dto.dm.ResponseListDmDto;
 import com.encore.encore.domain.chat.service.DmService;
@@ -94,6 +96,29 @@ public class DmApiController {
         ResponseDmRoomStatusDto result = dmService.requestDm(activeProfileId, activeMode, dto);
 
         return ResponseEntity.ok(CommonResponse.ok(result, "DM 요청 처리 완료"));
+    }
+
+    /**
+     * DM 전송
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping("/sendMessage")
+    public ResponseEntity<CommonResponse<ResponseChatMessage>> sendMessage(
+        @RequestBody RequestSendDmDto request
+        //@AuthenticationPrincipal CustomUserDetails userDetails,
+    ) {
+        // Long myProfileId = userDetails.getActiveProfileId();
+        //ActiveMode myMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L; // 현재 프로필 ID
+        ActiveMode activeMode = ActiveMode.USER;
+
+        ResponseChatMessage result = dmService.sendMessage(
+            activeProfileId, activeMode, request
+        );
+        return ResponseEntity.ok(CommonResponse.ok(result, "DM 전송 완료"));
     }
 
 }

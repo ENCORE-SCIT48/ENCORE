@@ -1,6 +1,8 @@
 package com.encore.encore.domain.chat.service;
 
+import com.encore.encore.domain.chat.dto.ResponseChatMessage;
 import com.encore.encore.domain.chat.dto.dm.RequestDmDto;
+import com.encore.encore.domain.chat.dto.dm.RequestSendDmDto;
 import com.encore.encore.domain.chat.dto.dm.ResponseDmRoomStatusDto;
 import com.encore.encore.domain.chat.dto.dm.ResponseListDmDto;
 import com.encore.encore.domain.chat.entity.ChatMessage;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -115,7 +118,7 @@ public class DmService {
                 myCp.getRoom().getRoomId(),
                 activeProfileId,
                 activeMode
-            ).orElseThrow(() -> new RuntimeException("상대방 참가자가 없습니다."));
+            ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자가 없습니다."));
 
             String nickname = profileService.resolveSenderName(other.getProfileId(), other.getProfileMode());
 
@@ -156,16 +159,21 @@ public class DmService {
             ChatParticipant me = findMyParticipant(room.getRoomId(), myProfileId, myMode);
             ChatParticipant other = findOtherParticipant(room.getRoomId(), myProfileId, myMode);
 
-            // 3. 상대방이 PENDING 상태이면 방을 계속 사용
+            // 3. 상대방이 WAITING 상태일 경우
+            if (other.getParticipantStatus() == ChatParticipant.ParticipantStatus.WAITING) {
+                return buildResponseDto(room.getRoomId(), me, other);
+            }
+
+            // 4. 상대방이 PENDING 상태일 경우 (수신자가 수락/거절 대기 중)
             if (other.getParticipantStatus() == ChatParticipant.ParticipantStatus.PENDING) {
                 return buildResponseDto(room.getRoomId(), me, other);
             }
 
-            // 4. 상대방이 ACCEPTED 상태이면 방을 그대로 사용
+            // 5. 상대방이 ACCEPTED 상태일 경우 (채팅 가능 상태)
             return buildResponseDto(room.getRoomId(), me, other);
         }
 
-        // 5. 기존 DM 방이 없으면 새 방을 생성
+        // 6. 기존 DM 방이 없으면 새 방을 생성
         return createNewDmRoom(myProfileId, myMode, dto);
     }
 
@@ -197,14 +205,14 @@ public class DmService {
             .room(room)
             .profileId(myProfileId)
             .profileMode(myMode)
-            .participantStatus(ChatParticipant.ParticipantStatus.ACCEPTED)
+            .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
             .build();
 
         ChatParticipant other = ChatParticipant.builder()
             .room(room)
             .profileId(dto.getTargetProfileId())
             .profileMode(dto.getTargetProfileMode())
-            .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
+            .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
             .build();
 
         chatParticipantRepository.save(me);
@@ -222,4 +230,70 @@ public class DmService {
             .build();
     }
 
+    /**
+     * DM 메시지 전송 -> 최초 전송일 시 송신자의 상태를 ACCEPTED로 변경
+     *
+     * @param activeProfileId
+     * @param activeMode
+     * @param request
+     * @return
+     */
+    public ResponseChatMessage sendMessage(Long activeProfileId, ActiveMode activeMode, RequestSendDmDto request) {
+        ChatRoom room = chatRoomRepository.findById(request.getRoomId())
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방 없음"));
+
+        boolean isFirstMessage = chatMessageRepository.countByRoom_RoomId(room.getRoomId()) == 0;
+
+        ChatMessage message = ChatMessage.builder()
+            .room(room)
+            .profileId(activeProfileId)
+            .profileMode(activeMode)
+            .content(request.getContent())
+            .sentAt(LocalDateTime.now())
+            .build();
+
+        chatMessageRepository.save(message);
+
+        if (isFirstMessage) {
+            // 1. 송신자 상태 변경 (WAITING → ACCEPTED)
+            ChatParticipant senderParticipant = chatParticipantRepository
+                .findByRoom_RoomIdAndProfileIdAndProfileMode(
+                    room.getRoomId(), activeProfileId, activeMode
+                ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참가자 정보 없음"));
+
+            senderParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
+            chatParticipantRepository.save(senderParticipant);
+
+            // 2. 상대방 상태 변경 (WAITING → PENDING)
+            ChatParticipant recipientParticipant = chatParticipantRepository
+                .findWaitingParticipantExcludingSelf(
+                    room.getRoomId(),
+                    activeProfileId,
+                    activeMode,
+                    ChatParticipant.ParticipantStatus.WAITING
+                ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자 정보 없음"));
+
+            recipientParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.PENDING);
+            chatParticipantRepository.save(recipientParticipant);
+        }
+
+
+        return ResponseChatMessage.builder()
+            .messageId(message.getMessageId())
+            .profileId(message.getProfileId())
+            .profileMode(message.getProfileMode().name())
+            .senderName(profileService.resolveSenderName(message.getMessageId(), message.getProfileMode()))
+            .content(message.getContent())
+            .createdAt(message.getCreatedAt())
+            .build();
+    }
+
+
+    public String checkUserParticipantStatus(Long roomId, Long activeProfileId, ActiveMode activeMode) {
+        ChatParticipant me = chatParticipantRepository
+            .RoomRoomIdAndProfileIdAndProfileModeAndParticipantStatusNot(roomId, activeProfileId, activeMode, ChatParticipant.ParticipantStatus.REJECTED)
+            .orElseThrow(() -> new ApiException(ErrorCode.FORBIDDEN, "채팅방 접근 불가"));
+
+        return me.getParticipantStatus().name();
+    }
 }

@@ -1,149 +1,48 @@
-/**
- * chatRoom.js
- * 🎯 채팅 메시지 전송/조회 및 참여자 목록 확인, 퇴장 기능 관리
- */
+$(document).ready(function () {
+    const participantStatus = $('#participantStatus').val();  // 예: 'PENDING', 'WAITING', 'ACCEPTED'
 
-$(document).ready(() => {
-    const chatInput = $('#chatInput');
-    const chatArea = $('#chatArea');
-    const participantList = $('#participantList');
-
-    // 1. 초기 메시지 로드
-    loadMessages();
-
-    // 2. 사이드바 오픈 시 참여자 목록 로드
-    $('#chatSidebar').on('show.bs.offcanvas', function () {
-        fetchParticipants();
-    });
-
-    // 3. 메시지 전송 (클릭)
+    if (participantStatus === 'PENDING') {
+        // `PENDING` 상태에서는 수신자가 수락/거절을 해야하므로 입력창을 숨기고 수락/거절 버튼만 보이게
+        $('#chatInput').hide();
+        $('#sendBtn').hide();
+        $('#acceptBtn').show();
+        $('#rejectBtn').show();
+    } else if (participantStatus === 'WAITING') {
+        // `WAITING` 상태에서는 송신자만 채팅 입력 가능
+        $('#chatInput').show();
+        $('#sendBtn').show();
+        $('#acceptBtn').hide();
+        $('#rejectBtn').hide();
+    } else if (participantStatus === 'ACCEPTED') {
+        // `ACCEPTED` 상태에서는 양쪽 모두 채팅 입력 가능
+        $('#chatInput').show();
+        $('#sendBtn').show();
+        $('#acceptBtn').hide();
+        $('#rejectBtn').hide();
+    }
+    // 전송 버튼 클릭 시
     $('#sendBtn').on('click', function () {
-        sendMessage();
-    });
+        const content = $('#chatInput').val();
 
-    // 4. 메시지 전송 (엔터키)
-    chatInput.on('keydown', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
+        if (!content) {
+            return;  // 메시지가 비어있으면 전송하지 않음
         }
-    });
-
-    // 5. 채팅방 퇴장
-    $('#leaveChatBtn').on('click', function () {
-        if (confirm('정말 채팅방에서 나가시겠습니까?')) {
-            exitChat();
-        }
-    });
-
-    /**
-     * 메시지 전송 API 호출
-     */
-    function sendMessage() {
-        const content = chatInput.val().trim();
-        if (!content) return;
 
         $.ajax({
-            url: `/api/chat/room/${ROOM_ID}/messages`,
+            url: '/api/dm/sendMessage',  // 메시지 전송 API
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ content }),
-            success: function () {
-                chatInput.val('');
-                loadMessages();
-            },
-            error: function (xhr) {
-                console.error('메시지 전송 실패:', xhr);
-                alert('메시지를 보낼 수 없습니다.');
-            }
-        });
-    }
-
-    /**
-     * 메시지 목록 불러오기 및 렌더링
-     */
-    function loadMessages() {
-        $.ajax({
-            url: `/api/chat/room/${ROOM_ID}/messages`,
-            method: 'GET',
+            data: JSON.stringify({
+                roomId: roomId,
+                content: messageContent
+            }),
             success: function (res) {
-                chatArea.empty();
-
-                res.data.forEach(function (msg) {
-                    const html = `
-                        <div class="message-row mb-3">
-                            <div class="message-wrapper">
-                                <div class="message-name">${msg.senderName}</div>
-                                <div class="message-content">${msg.content}</div>
-                            </div>
-                        </div>
-                    `;
-                    chatArea.append(html);
-                });
-
-                scrollToBottom();
+                alert('메시지가 전송되었습니다!');
+                $('#chatInput').val('');  // 메시지 전송 후 입력창 비우기
             },
             error: function (xhr) {
-                console.error('메시지 로드 실패:', xhr);
+                alert('메시지 전송 실패: ' + xhr.statusText);
             }
         });
-    }
-
-    /**
-     * 참여자 목록 조회
-     */
-    function fetchParticipants() {
-        $.ajax({
-            url: `/api/chat/room/${ROOM_ID}/participants`,
-            method: 'GET',
-            success: function (res) {
-                participantList.empty();
-
-                res.data.forEach(function (user) {
-                    participantList.append(`
-                        <li class="list-group-item d-flex align-items-center">
-                            <i class="fa-solid fa-user-circle me-2 text-secondary"></i>
-                            ${user.nickName}
-                        </li>
-                    `);
-                });
-            },
-            error: function (xhr) {
-                console.error('참여자 목록 로드 실패:', xhr);
-            }
-        });
-    }
-
-    /**
-     * 채팅방 스크롤 최하단으로 이동
-     */
-    function scrollToBottom() {
-        chatArea.scrollTop(chatArea[0].scrollHeight);
-    }
-
-    /**
-     * 채팅방 퇴장 API 호출 및 목록 페이지 이동
-     */
-    function exitChat() {
-        $.ajax({
-            url: `/api/chat/room/${ROOM_ID}/exit`,
-            method: 'POST',
-            success: function (response) {
-                if (!response.exitSuccess) {
-                    if (response.isOwner) {
-                        alert('글쓴이는 퇴장할 수 없습니다.');
-                    } else {
-                        alert(response.message);
-                    }
-                    return;
-                }
-
-                alert(response.message);
-                location.href = '/chat/list';
-            },
-            error: function () {
-                alert('퇴장 처리 중 오류가 발생했습니다.');
-            }
-        });
-    }
+    });
 });

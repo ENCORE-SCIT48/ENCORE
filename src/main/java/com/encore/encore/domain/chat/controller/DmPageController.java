@@ -1,13 +1,13 @@
 package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.service.DmService;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RequiredArgsConstructor
 @Controller
@@ -21,7 +21,7 @@ public class DmPageController {
      *
      * @return
      */
-    @GetMapping("dm/list")
+    @GetMapping("/dm/list")
     public String dmList() {
 
         return "chat/dm/dmList";
@@ -31,18 +31,24 @@ public class DmPageController {
      * DM방 이동
      *
      * @param roomId
-     * @param pending
      * @param model
      * @return
      */
     @GetMapping("/dm/{roomId}")
     public String dmRoomPage(
         @PathVariable Long roomId,
-        @RequestParam(required = false) Boolean pending,
+        //@AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
+        // Long myProfileId = userDetails.getActiveProfileId();
+        //ActiveMode myMode = userDetails.getActiveMode();
 
+        Long activeProfileId = 2L; // 현재 프로필 ID
+        ActiveMode activeMode = ActiveMode.USER;
+
+        String participantStatus = dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);
+
+        model.addAttribute("participantStatus", participantStatus);
         model.addAttribute("roomId", roomId);
-        model.addAttribute("isPending", Boolean.TRUE.equals(pending));
 
         return "chat/dm/dmRoom";
     }

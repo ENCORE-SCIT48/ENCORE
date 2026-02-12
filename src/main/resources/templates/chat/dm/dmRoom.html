@@ -52,11 +52,25 @@
     <!-- 입력 영역 -->
     <footer class="chat-input-area border-top p-2 bg-white">
         <div class="input-group">
+            <!-- 송신자: WAITING 상태에서 채팅 입력 가능 -->
             <input type="text" id="chatInput" class="form-control border-0"
-                   placeholder="메시지를 입력하세요." aria-label="채팅 입력창">
-            <button type="button" id="sendBtn" class="btn btn-danger px-4">전송</button>
+                   placeholder="메시지를 입력하세요." aria-label="채팅 입력창"
+                   th:if="${participantStatus == 'WAITING' || participantStatus == 'ACCEPTED'}"/>
+
+            <!-- 송신자: WAITING / ACCEPTED 상태에서 전송 버튼 보이기 -->
+            <button type="button" id="sendBtn" class="btn btn-danger px-4"
+                    th:if="${participantStatus == 'WAITING' || participantStatus == 'ACCEPTED'}">전송
+            </button>
+
+            <!-- 수신자: PENDING 상태일 때만 수락/거절 버튼 보이기 -->
+            <div th:if="${participantStatus == 'PENDING'}">
+                <button type="button" id="acceptBtn" class="btn btn-success">수락</button>
+                <button type="button" id="rejectBtn" class="btn btn-danger">거절</button>
+            </div>
         </div>
     </footer>
+
+
 </div>
 
 <!-- JS 라이브러리 -->
