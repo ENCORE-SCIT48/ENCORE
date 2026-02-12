@@ -5,7 +5,6 @@ $(function () {
     let isWished = false;
     let isWatched = false;
     let isReported = false;
-
     let watchedChecked = false;
     let wishedChecked = false;
 
