@@ -22,5 +22,5 @@ public class UserPerformanceRelation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "performance_id")
     private Performance performance;
     private String status;
-    @Column(nullable = false) private LocalDateTime watchedAt;
+    @Column(nullable = true) private LocalDateTime watchedAt;
 }

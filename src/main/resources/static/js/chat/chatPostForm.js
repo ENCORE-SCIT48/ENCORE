@@ -49,7 +49,7 @@ $(document).ready(() => {
 
         // ===== Ajax 요청 =====
         $.ajax({
-            url: `/performance/${performanceId}/chat/post`,
+            url: `/api/performances/${performanceId}/chats`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

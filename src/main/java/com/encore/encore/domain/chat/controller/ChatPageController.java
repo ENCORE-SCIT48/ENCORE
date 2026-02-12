@@ -33,7 +33,7 @@ public class ChatPageController {
      * @param model 작성 performance 저장
      * @return chatPostForm.html 페이지 이동
      */
-    @GetMapping("/performance/{performanceId}/chat/post")
+    @GetMapping("/performances/{performanceId}/chats/new")
     public String post(
         @PathVariable Long performanceId,
 
@@ -53,7 +53,7 @@ public class ChatPageController {
      * @param pageable
      * @return
      */
-    @GetMapping("/performance/{performanceId}/chat/list")
+    @GetMapping("/performances/{performanceId}/chats")
     public String chatListPage(@PathVariable Long performanceId, Model model,
                                @PageableDefault(size = 10) Pageable pageable) {
         log.info("채팅 목록 페이지 진입 - performanceId: {}", performanceId);
@@ -82,19 +82,22 @@ public class ChatPageController {
     @GetMapping("/performance/{performanceId}/chat/{id}")
     public String chatPostDetail(
         @PathVariable Long performanceId,
-        @PathVariable Long id, Model model
-
+        @PathVariable Long id, Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("채팅방 상세 조회 진입 - performanceId: {}, postId: {}", performanceId, id);
 
 
         try {
+            Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+            ActiveMode activeMode = userDetails.getActiveMode();
+
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             Long roomId = chatService.getChatRoomId(id);
 
             List<ResponseParticipantDto> chatParticipantList = chatService.getChatParticipants(roomId);
-            model.addAttribute("currentProfileId", 2L); // Long 타입으로 일치
-            model.addAttribute("currentProfileMode", ActiveMode.USER); // 타입 일치
+            model.addAttribute("currentProfileId", activeProfileId); // Long 타입으로 일치
+            model.addAttribute("currentProfileMode", activeMode); // 타입 일치
 
             model.addAttribute("participantIds", chatParticipantList);
             model.addAttribute("roomId", roomId);
@@ -114,7 +117,7 @@ public class ChatPageController {
      * @param model         수정할 정보 저장
      * @return chat/chatPostUpdateForm.html 이동
      */
-    @GetMapping("/performance/{performanceId}/chat/{id}/update")
+    @GetMapping("/performances/{performanceId}/chats/{id}/edit")
     public String update(
         @PathVariable Long id,
         @PathVariable Long performanceId,
@@ -140,7 +143,7 @@ public class ChatPageController {
      *
      * @return chat/chatJoinList.html
      */
-    @GetMapping("/chat/list")
+    @GetMapping("/chats")
     public String chatList(
     ) {
 
@@ -152,10 +155,9 @@ public class ChatPageController {
      *
      * @return chat/chatJoinListFull.html
      */
-    @GetMapping("/chat/list/join")
-    public String chatListJoin(
-    ) {
 
+    @GetMapping("/chats/join")
+    public String chatListJoin() {
         return "chat/chatJoinListFull";
     }
 

@@ -1,7 +1,10 @@
 package com.encore.encore.domain.performance.service;
 
+import com.encore.encore.domain.community.entity.Review;
+import com.encore.encore.domain.community.repository.ReviewRepository;
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
+import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.global.error.ApiException;
@@ -13,7 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -21,6 +26,7 @@ import java.util.List;
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
+    private final ReviewRepository reviewRepository;
 
     /**
      * 공연 목록 조회 (검색/카테고리/페이징 지원)
@@ -103,5 +109,77 @@ public class PerformanceService {
 
         log.info("[Performance] hot list result - size={}", result.size());
         return result;
+    }
+
+    /**
+     * 공연에 대한 후기 목록 조회
+     * - 좌석이 연결된 후기(Seat 연관이 존재하는 리뷰)는 제외하고 공연 후기만 조회 (seat IS NULL)
+     * - 공연이 존재하지 않을 경우 NOT_FOUND 예외를 발생시킴
+     * - 페이징 처리를 지원
+     * - 정렬 기준을 지원
+     *   - sort = "latest" (기본값) -> 작성일 최신순 (createdAt DESC)
+     *   - sort = "rating" > 별점순 (rating DESC, createdAt DESC)
+     *
+     * @param performanceId 공연 ID
+     * @param pageable 페이징 정보
+     * @param sort 정렬 기준 (latest / rating)
+     * @return 공연 후기 페이지(리스트 DTO)
+     * @throws ApiException 공연이 존재하지 않을 경우
+     */
+    public Page<PerformanceReviewItemDto> getPerformanceReviews(Long performanceId, Pageable pageable, String sort) {
+
+        // 리뷰 조회 요청 로그
+        log.info("[Performance] reviews request - performanceId={}, sort={}, page={}, size={}",
+            performanceId,
+            sort,
+            pageable.getPageNumber(),
+            pageable.getPageSize()
+        );
+
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId);
+        }
+
+        Page<Review> page;
+
+        if ("rating".equalsIgnoreCase(sort)) {
+            page = reviewRepository.findByPerformance_PerformanceIdAndSeatIsNullOrderByRatingDescCreatedAtDesc(
+                performanceId, pageable
+            );
+        } else {
+            page = reviewRepository.findByPerformance_PerformanceIdAndSeatIsNullOrderByCreatedAtDesc(
+                performanceId, pageable
+            );
+        }
+
+        return page.map(review -> new PerformanceReviewItemDto(
+            review.getReviewId(),
+            review.getUser() != null ? review.getUser().getUserId() : 0L,
+            review.getUser() != null ? review.getUser().getNickname() : "-",
+            review.getRating(),
+            review.getContent(),
+            review.getCreatedAt()
+        ));
+    }
+
+    public Map<String, Object> getPerformanceReviewSummary(Long performanceId) {
+
+        Object[] row = reviewRepository.getPerformanceReviewSummary(performanceId);
+
+        double avgRating = 0.0;
+        long reviewCount = 0L;
+
+        if (row != null && row.length > 0 && row[0] instanceof Object[] inner && inner.length >= 2) {
+            Object avgObj = inner[0];
+            Object cntObj = inner[1];
+
+            avgRating = (avgObj == null) ? 0.0 : ((Number) avgObj).doubleValue();
+            reviewCount = (cntObj == null) ? 0L : ((Number) cntObj).longValue();
+        }
+
+        return Map.of(
+            "avgRating", avgRating,
+            "reviewCount", reviewCount
+        );
     }
 }

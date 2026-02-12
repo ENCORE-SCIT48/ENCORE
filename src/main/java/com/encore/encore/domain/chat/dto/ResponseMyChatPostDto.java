@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class ResponseMyChatPostDto {
     private Long id;
     private String title;
-    private ChatPost.Status status;
+    private String status;
     private Integer currentMember;
     private Integer maxMember;
     private LocalDateTime updatedAt;
@@ -42,7 +42,7 @@ public class ResponseMyChatPostDto {
         return ResponseMyChatPostDto.builder()
             .id(chatPost.getId())
             .title(chatPost.getTitle())
-            .status(chatPost.getStatus())
+            .status(chatPost.getStatus().name())
             .currentMember(chatPost.getCurrentMember())
             .maxMember(chatPost.getMaxMember())
             .updatedAt(chatPost.getUpdatedAt())

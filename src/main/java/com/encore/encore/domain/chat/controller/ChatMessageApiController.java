@@ -22,16 +22,23 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/chat/room")
-public class chatMessageApiController {
+public class ChatMessageApiController {
 
     private final ChatMessageService chatMessageService;
 
     /**
-     * 메시지 전송
+     * [설명] 지정된 채팅방(roomId)에 메시지를 전송합니다.
+     * <p>
+     * 요청한 사용자의 프로필 ID와 모드를 기준으로 메시지를 저장하며,
+     * 저장 후 메시지 정보(ResponseChatMessage)를 반환합니다.
+     * </p>
      *
-     * @param roomId
-     * @param request
-     * @return
+     * @param roomId      메시지를 전송할 채팅방 ID
+     * @param request     전송할 메시지 내용 및 추가 정보가 담긴 DTO {@link RequestChatMessage}
+     * @param userDetails 현재 로그인한 사용자의 인증 정보 {@link CustomUserDetails}
+     * @return 메시지 전송 결과를 담은 {@link CommonResponse} 객체
+     * @throws IllegalArgumentException 메시지 내용이 유효하지 않을 경우
+     * @throws RuntimeException         저장 중 서버 에러 발생 시
      */
     @PostMapping("/{roomId}/messages")
     public ResponseEntity<CommonResponse<ResponseChatMessage>> sendMessage(
@@ -50,10 +57,17 @@ public class chatMessageApiController {
     }
 
     /**
-     * 메시지 조회
+     * [설명] 지정된 채팅방(roomId)의 메시지 목록을 조회합니다.
+     * <p>
+     * 페이지네이션 기능을 제공하며, page, size 파라미터로 조회 범위를 지정할 수 있습니다.
+     * 최신 메시지부터 정렬되어 반환됩니다.
+     * </p>
      *
-     * @param roomId
-     * @return
+     * @param roomId 채팅방 ID
+     * @param page   조회할 페이지 번호 (0부터 시작, 기본값: 0)
+     * @param size   한 페이지당 조회할 메시지 수 (기본값: 20)
+     * @return 조회된 메시지 목록을 담은 {@link CommonResponse} 객체
+     * @throws RuntimeException DB 조회 실패 등 서버 에러 발생 시
      */
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<CommonResponse<List<ResponseChatMessage>>> getMessages(
@@ -66,10 +80,17 @@ public class chatMessageApiController {
     }
 
     /**
-     * [설명] 사용자를 채팅방에서 퇴장 처리합니다.
+     * [설명] 현재 로그인 사용자를 지정된 채팅방(roomId)에서 퇴장 처리합니다.
+     * <p>
+     * 퇴장 요청 시 DB에서 사용자의 채팅방 참여 상태를 변경하고,
+     * 퇴장 결과 정보를 {@link ResponseChatExitDto}로 반환합니다.
+     * </p>
      *
-     * @param roomId 퇴장할 채팅방 ID
-     * @return 성공 메시지를 담은 응답 객체
+     * @param roomId      퇴장할 채팅방 ID
+     * @param userDetails 현재 로그인한 사용자의 인증 정보 {@link CustomUserDetails}
+     * @return 퇴장 결과를 담은 {@link CommonResponse} 객체
+     * @throws IllegalStateException 채팅방에 참여하지 않은 사용자가 요청할 경우
+     * @throws RuntimeException      서버 오류 발생 시
      */
     @PostMapping("/{roomId}/exit")
     public ResponseEntity<CommonResponse<ResponseChatExitDto>> exitChat(
@@ -88,10 +109,15 @@ public class chatMessageApiController {
     }
 
     /**
-     * 채팅방에 참가중인 참가자의 목록을 불러옴
+     * [설명] 지정된 채팅방(roomId)에 참여 중인 모든 참가자의 목록을 조회합니다.
+     * <p>
+     * 참가자의 프로필 정보와 상태를 포함하여 {@link ResponseParticipantDto} 형태로 반환합니다.
+     * </p>
      *
-     * @param roomId
-     * @return
+     * @param roomId      조회할 채팅방 ID
+     * @param userDetails 현재 로그인한 사용자의 인증 정보 {@link CustomUserDetails}
+     * @return 채팅방 참가자 목록을 담은 {@link CommonResponse} 객체
+     * @throws RuntimeException 서버 조회 오류 발생 시
      */
     @GetMapping("/{roomId}/participants")
     public ResponseEntity<CommonResponse<List<ResponseParticipantDto>>> participants(

@@ -13,7 +13,6 @@ import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,12 +41,20 @@ public class ChatService {
 
 
     /**
-     * 채팅 게시글을 저장하고 동시에 채팅방을 생성
+     * [설명] 채팅 게시글 생성 및 채팅방 생성
      *
-     * @param dto 게시글 생성 요청 데이터
-     * @return 생성된 게시글 응답 DTO
-     * @throws EntityNotFoundException  프로필 정보가 존재하지 않을 경우 발생
-     * @throws IllegalArgumentException 작성자 정보가 누락되었을 경우 발생
+     * <p>
+     * 주어진 DTO를 기반으로 채팅 게시글을 저장하고, 해당 게시글에 대응하는 채팅방을 생성합니다.
+     * 생성 후 작성자를 채팅방 참가자로 등록합니다.
+     * </p>
+     *
+     * @param dto             게시글 생성 요청 데이터 {@link RequestCreateChatPostDto}
+     * @param performanceId   게시글이 속한 공연 ID
+     * @param activeProfileId 작성자 프로필 ID
+     * @param activeMode      작성자 활동 모드({@link ActiveMode})
+     * @return 생성된 게시글 및 채팅방 정보를 담은 {@link ResponseCreateChatPostDto}
+     * @throws ApiException             공연 정보가 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
+     * @throws IllegalArgumentException 작성자 정보가 누락되었을 경우
      */
     public ResponseCreateChatPostDto createChatPostAndRoom(
         RequestCreateChatPostDto dto, Long performanceId, Long activeProfileId, ActiveMode activeMode) {
@@ -91,10 +98,11 @@ public class ChatService {
     }
 
     /**
-     * 글 상세 조회
+     * [설명] 특정 게시글 상세 조회
      *
-     * @param id 상세 조회할 글
-     * @return 글 정보
+     * @param id 조회할 게시글 ID
+     * @return 게시글 상세 정보를 담은 {@link ResponseDetailChatPostDto}
+     * @throws ApiException 게시글이 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
      */
     public ResponseDetailChatPostDto getChatPostDetail(Long id) {
         ChatPost chatPost = chatPostRepository.findById(id)
@@ -113,7 +121,7 @@ public class ChatService {
                 .content(chatPost.getContent())
                 .currentMember(String.valueOf(chatPost.getCurrentMember()))
                 .maxMember(chatPost.getMaxMember())
-                .status(chatPost.getStatus());
+                .status(chatPost.getStatus().name());
 
 
         return builder.build();
@@ -121,10 +129,18 @@ public class ChatService {
 
 
     /**
-     * 글 수정
+     * [설명] 게시글 수정
      *
-     * @param chatId    수정할 글 id
-     * @param updateDTO 수정할 내용이 담긴 dto
+     * <p>
+     * 게시글 작성자인 경우에만 수정 가능하며, 제목, 내용, 상태를 업데이트합니다.
+     * </p>
+     *
+     * @param chatId          수정할 게시글 ID
+     * @param updateDTO       수정 요청 DTO {@link RequestUpdateChatPostDto}
+     * @param activeProfileId 요청자 프로필 ID
+     * @param activeMode      요청자 활동 모드({@link ActiveMode})
+     * @return 수정된 게시글 정보를 담은 {@link ResponseUpdateChatPostDto}
+     * @throws ApiException 게시글이 존재하지 않거나 권한이 없는 경우
      */
     public ResponseUpdateChatPostDto updateChatPost(Long chatId, RequestUpdateChatPostDto updateDTO, Long activeProfileId, ActiveMode activeMode) {
         log.info("게시글 수정 시작 - chatId: {}, 수정 요청자ID: {}", chatId, activeProfileId);
@@ -137,7 +153,7 @@ public class ChatService {
 
             chatPost.setTitle(updateDTO.getTitle());
             chatPost.setContent(updateDTO.getContent());
-            chatPost.setStatus(updateDTO.getStatus());
+            chatPost.setStatusFromString(updateDTO.getStatus());
 
             log.info("게시글 수정 완료 - chatId: {}", chatId);
 
@@ -150,12 +166,17 @@ public class ChatService {
     }
 
     /**
-     * 글과 채팅방 논리 삭제
+     * [설명] 게시글과 해당 채팅방 논리 삭제
      *
-     * @param postId     삭제할 글
-     * @param activeId   삭제 요청자 id
-     * @param activeMode 삭제 요청자 프로필 역할
-     * @return
+     * <p>
+     * 게시글 작성자인 경우 삭제 가능하며, Soft Delete 방식으로 게시글과 채팅방을 삭제 처리합니다.
+     * </p>
+     *
+     * @param postId     삭제할 게시글 ID
+     * @param activeId   요청자 프로필 ID
+     * @param activeMode 요청자 활동 모드({@link ActiveMode})
+     * @return 삭제 처리 결과를 담은 {@link ResponseDeleteChatPostDto}
+     * @throws ApiException 게시글이 존재하지 않거나 권한이 없는 경우
      */
     public ResponseDeleteChatPostDto softDeletePost(Long postId, Long activeId, ActiveMode activeMode) {
         log.info("게시글 논리 삭제 시작 - postId: {}", postId);
@@ -187,10 +208,11 @@ public class ChatService {
 
 
     /**
-     * post 진입시 표기를 위해 performanceTitle 가져옴
+     * [설명] 특정 공연의 타이틀 조회
      *
-     * @param performanceId 조회할 공연 id
-     * @return 공연 타이틀
+     * @param performanceId 공연 ID
+     * @return 공연 타이틀 문자열
+     * @throws ApiException 공연이 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
      */
     public String getPerformanceTitle(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
@@ -201,11 +223,16 @@ public class ChatService {
     }
 
     /**
-     * 권한 체크
+     * [설명] 게시글 권한 체크
      *
-     * @param chatPost
-     * @param activeId
-     * @param activeMode
+     * <p>
+     * 로그인 프로필과 게시글 작성자가 일치하는지 확인합니다.
+     * </p>
+     *
+     * @param chatPost   대상 게시글
+     * @param activeId   요청자 프로필 ID
+     * @param activeMode 요청자 활동 모드({@link ActiveMode})
+     * @throws AccessDeniedException 권한이 없을 경우 발생
      */
     public void checkChatPostAuthority(ChatPost chatPost, Long activeId, ActiveMode activeMode) {
         Long postAuthorId = chatPost.getProfileId();
@@ -248,10 +275,10 @@ public class ChatService {
     }
 
     /**
-     * 공연의 전체 채팅방을 조회
+     * [설명] 특정 공연의 전체 채팅 게시글 조회
      *
-     * @param performanceId
-     * @return
+     * @param performanceId 공연 ID
+     * @return 게시글 객체 {@link ChatPost} 또는 존재하지 않을 경우 null
      */
     public ChatPost findPerformanceAllChatPost(Long performanceId) {
         return chatPostRepository.findPerformanceAllPost(performanceId)
@@ -259,11 +286,12 @@ public class ChatService {
     }
 
     /**
-     * 참여중인 채팅방 리스트를 리미트까지 조회
+     * [설명] 참여 중인 채팅 게시글 리스트 조회 (리미트 적용)
      *
-     * @param
-     * @param limit
-     * @return
+     * @param activeId   로그인 프로필 ID
+     * @param activeMode 로그인 프로필 활동 모드({@link ActiveMode})
+     * @param limit      조회할 최대 개수
+     * @return 참여 중인 게시글 리스트 {@link ResponseMyChatPostDto}
      */
     public List<ResponseMyChatPostDto> getChatPostJoinList(Long activeId, ActiveMode activeMode, int limit) {
 
@@ -281,10 +309,10 @@ public class ChatService {
     }
 
     /**
-     * 모든 커뮤니티 채팅방 중 보내진 메시지가 최신인 순인 핫한 채팅방 조회
+     * [설명] 모든 커뮤니티 채팅방 중 메시지 최신순으로 조회 (Hot 채팅)
      *
-     * @param limit
-     * @return
+     * @param limit 조회할 최대 개수
+     * @return 채팅 게시글 리스트 {@link ResponseMyChatPostDto}
      */
     public List<ResponseMyChatPostDto> getChatListHot(int limit) {
 
@@ -340,10 +368,10 @@ public class ChatService {
     }
 
     /**
-     * chatPost의 id를 가지고 있는 chatRoom을 조회
+     * [설명] 게시글 ID로 채팅방 ID 조회
      *
-     * @param id
-     * @return
+     * @param id 게시글 ID
+     * @return 채팅방 ID
      */
     public Long getChatRoomId(Long id) {
         ChatRoom chatRoom = chatRoomRepository.findByChatPost_Id(id);
@@ -352,12 +380,17 @@ public class ChatService {
     }
 
     /**
-     * 해당 채팅방에 이미 참가자인지 확인하고, 참가하지 않았다면 참가자에 추가한다.
-     * 만약 최대 인원수와 참가 인원수가 같거나 상태가 CLOSED일시 참가하지 않은 참가자는 반환한다.
+     * [설명] 채팅방 참여 여부 확인 및 신규 참가자 추가
      *
-     * @param roomId     채팅방 id
-     * @param activeId   로그인 되어있는 유저 프로필 id
-     * @param activeMode 선택 되어있는 유저 프로필 역할
+     * <p>
+     * 최대 인원수 초과 또는 CLOSED 상태인 경우 참여 불가 처리.
+     * 이미 참여자면 재입장 시 Soft Delete 복구.
+     * </p>
+     *
+     * @param roomId     채팅방 ID
+     * @param activeId   로그인 프로필 ID
+     * @param activeMode 로그인 프로필 활동 모드({@link ActiveMode})
+     * @throws IllegalStateException 참여 불가 상태일 경우
      */
     public void getChatAlreadJoin(Long roomId, Long activeId, ActiveMode activeMode) {
 
@@ -373,7 +406,7 @@ public class ChatService {
 
         if ("CLOSED".equals(chatPost.getStatus().name()) ||
             chatPost.getCurrentMember() >= chatPost.getMaxMember()) {
-            throw new IllegalStateException("참여 불가 상태");
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "참여 불가 상태");
         }
 
         // 1️⃣ 처음 참여
@@ -399,16 +432,10 @@ public class ChatService {
     }
 
     /**
-     * roomId의 채팅방에 참여중인 유저 리스트를 가져옴
-     *
-     * @param roomId
-     * @return
-     */
-    /**
-     * 채팅방 참여자 목록을 조회합니다.
+     * [설명] 채팅방 참여자 목록 조회
      *
      * @param roomId 조회할 채팅방 ID
-     * @return 채팅방 참여자 정보 목록 {@link ResponseParticipantDto}
+     * @return 채팅방 참여자 목록 {@link ResponseParticipantDto}
      */
     public List<ResponseParticipantDto> getChatParticipants(Long roomId) {
         // 채팅방 참여자 엔티티 조회

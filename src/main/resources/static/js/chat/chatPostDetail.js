@@ -20,7 +20,7 @@ $(document).ready(() => {
         }
 
         // 수정 페이지로 이동
-        window.location.href = `/performance/${performanceId}/chat/${postId}/update`;
+        window.location.href = `/performances/${performanceId}/chats/${postId}/edit`;
     });
 
     // =========================
@@ -38,13 +38,14 @@ $(document).ready(() => {
         if (!confirm('정말 삭제하시겠습니까?')) return;
 
         $.ajax({
-            url: `/chat/${postId}`,
+            url: `/api/chat/${postId}`,
             type: 'DELETE',
-            success: () => {
-                alert('삭제되었습니다.');
-                window.location.href = `/performance/${performanceId}/chat/list`;
-            },
-            error: (xhr) => {
+        success: () => {
+            alert('삭제되었습니다.');
+            window.location.href = `/performances/${performanceId}/chats`;
+        },
+            error: xhr => {
+
                 const message = xhr.responseJSON?.message || xhr.responseText || '삭제 실패';
                 alert(`삭제 실패: ${message}`);
             }

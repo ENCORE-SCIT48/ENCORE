@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,7 +29,7 @@ public class SecurityConfig {
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/login") // 이제 시큐리티가 이 경로의 POST를 낚아챕니다.
                 .usernameParameter("email")
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/profiles/select", true)
                 .failureHandler((request, response, exception) -> {
                     response.sendRedirect("/auth/login?error=true"); // 경로 수정 권장
                 })
@@ -50,6 +51,12 @@ public class SecurityConfig {
             );
 
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+            .requestMatchers("/favicon.ico", "/.well-known/**"); // .well-known 하위 모든 요청 무시
     }
 
     @Bean
