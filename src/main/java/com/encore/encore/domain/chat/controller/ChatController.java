@@ -30,7 +30,7 @@ public class ChatController {
      * @param dto           생성 요청 정보
      * @return 생성된 게시글 정보와 성공 메시지
      */
-    @PostMapping("/performance/{performanceId}/chat/post")
+    @PostMapping("/api/performances/{performanceId}/chats")
     public ResponseEntity<CommonResponse<ResponseCreateChatPostDto>> createChatPost(
         @PathVariable Long performanceId,
         @Valid @RequestBody RequestCreateChatPostDto dto
@@ -51,7 +51,7 @@ public class ChatController {
      * @param id 삭제할 글 id
      * @return 삭제한 글 정보
      */
-    @DeleteMapping("/chat/{id}")
+    @DeleteMapping("/api/chat/{id}")
     public ResponseEntity<CommonResponse<ResponseDeleteChatPostDto>> deletePost(@PathVariable Long id) {
         log.info("게시글 삭제 요청 - postId: {}", id);
 
@@ -69,7 +69,7 @@ public class ChatController {
      * @param updateDTO     수정 요청 정보dto
      * @return 수정 완료 정보
      */
-    @PostMapping("/performance/{performanceId}/chat/{chatId}/update")
+    @PatchMapping("/api/performances/{performanceId}/chats/{chatId}")
     public ResponseEntity<CommonResponse<ResponseUpdateChatPostDto>> updatePost(
         @PathVariable Long performanceId,
         @PathVariable Long chatId,
@@ -96,7 +96,7 @@ public class ChatController {
      * @param pageable      페이징 정보
      * @return 페이징 처리된 채팅방 목록
      */
-    @GetMapping("/api/performance/{performanceId}/list")
+    @GetMapping("/api/performances/{performanceId}/chats")
     public ResponseEntity<CommonResponse<Slice<ResponseListChatPostDto>>> getChatList(
         @PathVariable Long performanceId,
         @RequestParam(defaultValue = "title") String searchType,
@@ -164,7 +164,7 @@ public class ChatController {
      *                   (true: 본인 작성 채팅방만, false: 참여 중인 모든 채팅방)
      * @return 참여 중인 채팅방 목록을 담은 {@link Slice} 형태의 응답 객체
      */
-    @GetMapping("/api/chat/join/full")
+    @GetMapping("/api/users/{userId}/chats")
     public ResponseEntity<CommonResponse<Slice<ResponseParticipantChatPostDto>>> getChatJoin(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,

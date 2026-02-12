@@ -134,7 +134,7 @@ public class ChatService {
                 .content(chatPost.getContent())
                 .currentMember(String.valueOf(chatPost.getCurrentMember()))
                 .maxMember(chatPost.getMaxMember())
-                .status(chatPost.getStatus());
+                .status(chatPost.getStatus().name());
 
         if (chatPost.getHost() != null) {
             builder
@@ -170,7 +170,7 @@ public class ChatService {
 
             chatPost.setTitle(updateDTO.getTitle());
             chatPost.setContent(updateDTO.getContent());
-            chatPost.setStatus(updateDTO.getStatus());
+            chatPost.setStatusFromString(updateDTO.getStatus());
 
             log.info("게시글 수정 완료 - chatId: {}", chatId);
 

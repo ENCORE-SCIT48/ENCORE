@@ -5,6 +5,8 @@ import com.encore.encore.domain.member.entity.PerformerProfile;
 import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.global.common.BaseEntity;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Where;
@@ -46,6 +48,20 @@ public class ChatPost extends BaseEntity {
         OPEN,
         CLOSED
     }
+
+    public void setStatusFromString(String statusStr) {
+        if (statusStr == null || statusStr.isBlank()) {
+            // null 또는 빈 문자열일 때 INVALID_REQUEST 예외 던지기
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+        try {
+            this.status = Status.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // Enum에 없는 값일 때도 INVALID_REQUEST 예외 던지기
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
+        }
+    }
+
 
     public void addParticipant() {
         if (this.currentMember >= this.maxMember) {

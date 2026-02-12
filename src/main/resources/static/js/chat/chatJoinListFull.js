@@ -28,7 +28,7 @@ $(document).ready(() => {
         }
 
         $.ajax({
-            url: "/api/chat/join/full",
+            url: "/api/users/{userId}/chats",
             method: "GET",
             data: {
                 page,

@@ -1,6 +1,5 @@
 package com.encore.encore.domain.chat.dto;
 
-import com.encore.encore.domain.chat.entity.ChatPost;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,5 +25,5 @@ public class ResponseDetailChatPostDto {
     private String content;
     private String currentMember;
     private Integer maxMember;
-    private ChatPost.Status status;
+    private String status;
 }

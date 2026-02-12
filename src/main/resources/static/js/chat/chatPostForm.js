@@ -22,7 +22,7 @@ $(document).ready(() => {
         const data = { performanceId: Number(performanceId), title, content, maxMember };
 
         $.ajax({
-            url: `/performance/${performanceId}/chat/post`,
+            url: `/api/performances/${performanceId}/chats`,
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data),

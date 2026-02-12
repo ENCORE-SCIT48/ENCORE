@@ -27,7 +27,7 @@ public class ChatPageController {
      * @param model 작성 performance 저장
      * @return chatPostForm.html 페이지 이동
      */
-    @GetMapping("/performance/{performanceId}/chat/post")
+    @GetMapping("/performances/{performanceId}/chats/new")
     public String post(
         @PathVariable Long performanceId,
         Model model) {
@@ -46,7 +46,7 @@ public class ChatPageController {
      * @param pageable
      * @return
      */
-    @GetMapping("/performance/{performanceId}/chat/list")
+    @GetMapping("/performances/{performanceId}/chats")
     public String chatListPage(@PathVariable Long performanceId, Model model,
                                @PageableDefault(size = 10) Pageable pageable) {
         log.info("채팅 목록 페이지 진입 - performanceId: {}", performanceId);
@@ -98,7 +98,7 @@ public class ChatPageController {
      * @param model         수정할 정보 저장
      * @return chat/chatPostUpdateForm.html 이동
      */
-    @GetMapping("/performance/{performanceId}/chat/{id}/update")
+    @GetMapping("/performances/{performanceId}/chats/{id}/edit")
     public String update(
         @PathVariable Long id,
         @PathVariable Long performanceId,
@@ -122,7 +122,7 @@ public class ChatPageController {
      *
      * @return chat/chatJoinList.html
      */
-    @GetMapping("/chat/list")
+    @GetMapping("/chats")
     public String chatList(
     ) {
 
@@ -134,7 +134,7 @@ public class ChatPageController {
      *
      * @return chat/chatJoinListFull.html
      */
-    @GetMapping("/chat/list/join")
+    @GetMapping("/chats/join")
     public String chatListJoin() {
 
         return "chat/chatJoinListFull";

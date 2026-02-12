@@ -13,7 +13,7 @@ $(document).ready(() => {
 
     // 전체 참여중 채팅방 페이지 이동
     $("#btn-show-all-joined").on('click', () => {
-        window.location.href = '/chat/list/join';
+        window.location.href = '/chats/join';
     });
 
     /** 참여중 채팅방 3개 가져오기 */
