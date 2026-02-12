@@ -17,9 +17,14 @@ $(function () {
     let cachedReviewPage0 = null;
 
     let wishRequesting = false; // 중복 클릭 방지
+    let watchedRequesting = false; // 중복 클릭 방지
 
     // 리뷰 정렬: latest(기본) / rating
     let reviewSort = "latest";
+
+    // 리뷰 상세 모달/캐시
+    const reviewCache = new Map(); // reviewId -> review 객체
+    let reviewModal = null;        // bootstrap modal instance
 
     function escapeHtml(str) {
         return String(str ?? "")
@@ -115,7 +120,6 @@ $(function () {
                     wishedChecked = true;
                 })
                 .fail(function (xhr) {
-                    console.error("[wish] toggle fail", xhr);
                     alert("찜 처리 실패");
                 })
                 .always(function () {
@@ -123,10 +127,27 @@ $(function () {
                 });
         });
 
-        // 임시: watched 버튼은 서버 반영 없이 UI 토글만(추후 watched 토글 API 연결 예정)
         $("#watchedBtn").off("click").on("click", function () {
-            setWatchedUI(!isWatched);
-            watchedChecked = true;
+            if (watchedRequesting) return;
+            watchedRequesting = true;
+
+            $.ajax({
+                url: `/api/performances/${performanceId}/watched`,
+                method: "POST",
+                dataType: "json",
+                xhrFields: { withCredentials: true }
+            })
+                .done(function (res) {
+                    const watched = !!res?.data?.watched;
+                    setWatchedUI(watched);
+                    watchedChecked = true;
+                })
+                .fail(function (xhr) {
+                    alert("본 공연 처리 실패");
+                })
+                .always(function () {
+                    watchedRequesting = false;
+                });
         });
 
         $("#reportedBtn").off("click").on("click", function () {
@@ -170,14 +191,12 @@ $(function () {
             .done(function (res) {
                 const data = res?.data;
                 if (!data) {
-                    console.error("[performance detail] data 없음", res);
                     $("#descText").text("응답 형식 오류(data 없음)");
                     return;
                 }
                 renderDetail(data);
             })
             .fail(function (xhr) {
-                console.error("[performance detail] 상세 조회 실패", xhr);
                 $("#descText").text("상세 조회 실패");
             });
     }
@@ -190,7 +209,6 @@ $(function () {
             dataType: "json"
         })
             .done(function (res) {
-
                 const count = Number(res?.data?.reviewCount ?? 0);
 
                 // 리뷰가 0개면 "-" 표시
@@ -216,7 +234,6 @@ $(function () {
                 $("#ratingText").text(avg.toFixed(1));
             })
             .fail(function (xhr) {
-                console.error("[reviews summary] 조회 실패", xhr);
                 $("#ratingText").text("-");
             });
     }
@@ -263,6 +280,28 @@ $(function () {
             });
     }
 
+    // 리뷰 상세 모달 오픈
+    function openReviewModal(reviewId) {
+        const r = reviewCache.get(String(reviewId));
+        if (!r) return;
+
+        const rating = Number(r?.rating ?? 0);
+        const stars = Array.from({ length: 5 }, (_, i) => (i < rating ? "★" : "☆")).join("");
+
+        const nickname = r?.nickname ?? "-";
+        const createdAt = (r?.createdAt ?? "").replace("T", " ").substring(0, 16);
+        const content = r?.content ?? "";
+
+        $("#modalStars").text(stars);
+        $("#modalMeta").text(`${nickname} · ${createdAt}`);
+        $("#modalContent").text(content);
+
+        if (!reviewModal) {
+            reviewModal = new bootstrap.Modal(document.getElementById("reviewDetailModal"));
+        }
+        reviewModal.show();
+    }
+
     function buildReviewCard(r) {
         const nickname = escapeHtml(r?.nickname ?? "-");
         const rating = Number(r?.rating ?? 0);
@@ -296,7 +335,7 @@ $(function () {
               `;
 
         return `
-            <div class="review-card">
+            <div class="review-card" data-review-id="${reviewId}">
                 <div class="review-left">
                     <div class="review-topline">
                         <div class="review-stars">${stars}</div>
@@ -332,6 +371,11 @@ $(function () {
             return;
         }
 
+        // 모달용 캐시 저장
+        content.forEach(function (r) {
+            if (r?.reviewId != null) reviewCache.set(String(r.reviewId), r);
+        });
+
         $list.append(content.map(buildReviewCard).join(""));
     }
 
@@ -355,7 +399,6 @@ $(function () {
             .done(function (res) {
                 const pageData = res?.data;
                 if (!pageData) {
-                    console.error("[reviews] data 없음", res);
                     $("#reviewEmpty").show().text("응답 형식 오류(data 없음)");
                     return;
                 }
@@ -372,7 +415,6 @@ $(function () {
                 else $("#reviewMoreWrap").hide();
             })
             .fail(function (xhr) {
-                console.error("[reviews] 조회 실패", xhr);
                 $("#reviewEmpty").show().text("후기 조회 실패");
             });
     }
@@ -397,6 +439,11 @@ $(function () {
 
                 cachedReviewPage0 = { content, last };
                 reviewPrefetched = true;
+
+                // 프리패치 데이터도 캐시에 저장(탭 첫 진입 모달 대비)
+                content.forEach(function (r) {
+                    if (r?.reviewId != null) reviewCache.set(String(r.reviewId), r);
+                });
             })
             .fail(function () {
                 cachedReviewPage0 = null;
@@ -419,6 +466,9 @@ $(function () {
         $("#reviewEmpty").hide();
         $("#reviewList").empty();
 
+        // 정렬 바뀌면 캐시도 초기화(리스트 내용 달라짐)
+        reviewCache.clear();
+
         // 리뷰 리스트만 다시 로드 (평균은 summary로 고정이라 다시 계산/갱신 불필요)
         loadReviews(true);
         preloadReviewPage0();
@@ -430,10 +480,22 @@ $(function () {
         loadReviews(false);
     });
 
-    $(document).on("click", ".js-review-report, .js-review-edit, .js-review-delete", function (e) {
-        e.preventDefault();
+    // 리뷰 카드 클릭 -> 상세 모달 오픈
+    $(document).on("click", ".review-card", function (e) {
+        // 액션 버튼(수정/삭제/신고) 눌렀으면 모달 열지 않음
+        if ($(e.target).closest(".review-action-btn").length) return;
+
+        const reviewId = $(this).data("review-id");
+        if (!reviewId) return;
+
+        openReviewModal(reviewId);
+    });
+
+    // 액션 버튼 클릭 시: 카드 클릭 전파 막기
+    $(document).on("click", ".js-review-edit, .js-review-delete, .js-review-report", function (e) {
         e.stopPropagation();
-        // 기능은 아직 연결하지 않음
+        const reviewId = $(this).data("review-id");
+        // 여기서 수정/삭제/신고 로직 연결
     });
 
     bindTabs();

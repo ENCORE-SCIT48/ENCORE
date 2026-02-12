@@ -36,6 +36,39 @@ public class UserPerformanceRelationService {
         return result;
     }
 
+    @Transactional
+    public boolean toggleWatched(Long userId, Long performanceId) {
+
+        log.info("[UserPerformanceRelation] toggleWatched request - userId={}, performanceId={}", userId, performanceId);
+
+        // 공연 존재 검증
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId);
+        }
+
+        // 현재 본공연 상태면 -> 최신 살아있는 row 논리삭제
+        return userPerformanceRelationRepository
+            .findTopByUser_UserIdAndPerformance_PerformanceIdAndStatusAndIsDeletedFalseOrderByRelationIdDesc(
+                userId, performanceId, WATCHED
+            )
+            .map(upr -> {
+                upr.delete(); // is_deleted=true
+                return false; // 최종 상태: 본공연 해제
+            })
+            .orElseGet(() -> {
+                // 본공연 아니면 -> 새 row INSERT
+                UserPerformanceRelation created = UserPerformanceRelation.builder()
+                    .user(User.builder().userId(userId).build())
+                    .performance(Performance.builder().performanceId(performanceId).build())
+                    .status(WATCHED)
+                    .watchedAt(java.time.LocalDateTime.now())
+                    .build();
+
+                userPerformanceRelationRepository.save(created);
+                return true; // 최종 상태: 본공연 됨
+            });
+    }
+
     @Transactional(readOnly = true)
     public boolean isWished(Long userId, Long performanceId) {
         return userPerformanceRelationRepository
