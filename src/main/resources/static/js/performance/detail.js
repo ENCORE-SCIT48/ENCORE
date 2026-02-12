@@ -5,7 +5,6 @@ $(function () {
     let isWished = false;
     let isWatched = false;
     let isReported = false;
-
     let watchedChecked = false;
 
     let reviewLoaded = false;
@@ -118,7 +117,6 @@ $(function () {
         const venueName = d?.venueName ?? "-";
         const address = d?.address ?? "-";
         $("#metaText").text(`${address} · ${venueName}`);
-
         $("#ratingText").text("-");
         $("#descText").text(escapeHtml(d?.description ?? "공연상세설명"));
 
@@ -150,7 +148,7 @@ $(function () {
                 $("#descText").text("상세 조회 실패");
             });
     }
-
+  
     function ensureWatchedStatus() {
         if (watchedChecked) return;
 
@@ -228,13 +226,13 @@ $(function () {
             </div>
         `;
     }
-
+  
     function calcAvgRating(items) {
         if (!items || items.length === 0) return null;
         const sum = items.reduce((acc, cur) => acc + Number(cur?.rating ?? 0), 0);
         return sum / items.length;
     }
-
+  
     function setAvgRatingUI(avg) {
         if (avg == null) {
             $("#ratingText").text("-");
