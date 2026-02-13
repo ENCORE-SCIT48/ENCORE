@@ -353,7 +353,7 @@ public class DmService {
             .messageId(message.getMessageId())
             .profileId(message.getProfileId())
             .profileMode(message.getProfileMode().name())
-            .senderName(profileService.resolveSenderName(message.getMessageId(), message.getProfileMode()))
+            .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())
             .build();
