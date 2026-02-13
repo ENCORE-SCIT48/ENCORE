@@ -77,14 +77,11 @@ public class DmApiController {
      */
     @PostMapping
     public ResponseEntity<CommonResponse<ResponseDmRoomStatusDto>> createDm(
-//        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestDmDto dto
     ) {
-        /*Long activeProfileId = userDetails.getActiveProfileId();
+        Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
-*/
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.USER;
 
         ResponseDmRoomStatusDto result = dmService.requestDm(activeProfileId, activeMode, dto);
 
