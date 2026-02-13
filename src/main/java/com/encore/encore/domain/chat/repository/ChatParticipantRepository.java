@@ -37,9 +37,9 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     /**
      * 같은 Room에 속한, 본인과 다른 프로필 역할을 가진 상대방 Participant 조회
      *
-     * @param roomId        대상 Room ID
-     * @param myProfileId   내 프로필 ID
-     * @param myProfileMode 내 프로필 역할
+     * @param roomId      대상 Room ID
+     * @param profileId   내 프로필 ID
+     * @param profileMode 내 프로필 역할
      * @return 상대방 ChatParticipant
      */
     @Query("""
@@ -89,4 +89,13 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
         @Param("status") ChatParticipant.ParticipantStatus status
     );
 
+    /**
+     * [설명] 프로필 ID, 프로필 모드, 방 ID를 조건으로 채팅 참가자 정보를 조회합니다.
+     *
+     * @param profileId   사용자 프로필 식별자
+     * @param profileMode 프로필 모드 (예: USER, ADMIN 등)
+     * @param roomId      채팅방 식별자
+     * @return 검색된 참가자 정보 (Optional로 감싸서 Null 안전성 확보)
+     */
+    Optional<ChatParticipant> findByProfileIdAndProfileModeAndRoomRoomId(Long profileId, ActiveMode profileMode, Long roomId);
 }

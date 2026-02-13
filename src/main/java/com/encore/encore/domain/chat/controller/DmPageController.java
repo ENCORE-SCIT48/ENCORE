@@ -5,7 +5,6 @@ import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,11 +42,14 @@ public class DmPageController {
     @GetMapping("/dm/{roomId}")
     public String dmRoomPage(
         @PathVariable Long roomId,
-        @AuthenticationPrincipal CustomUserDetails userDetails,
+        // @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
 
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.USER;
 
         String participantStatus = dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);
 

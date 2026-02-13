@@ -385,4 +385,50 @@ public class DmService {
             )
             .toList();
     }
+
+    /**
+     * DM 수락/변경에 따라 참여자의 상태를 변화시킵니다.
+     *
+     * @param roomId
+     * @param dto
+     * @param activeProfileId
+     * @param activeMode
+     * @return
+     */
+    public ResponseUpdateDmStatusDto handleRoomStatus(
+        Long roomId, RequestDmStatusDto dto, Long activeProfileId, ActiveMode activeMode) {
+
+        ChatParticipant chatParticipant =
+            chatParticipantRepository.findByProfileIdAndProfileModeAndRoomRoomId(activeProfileId, activeMode, roomId)
+                .orElseThrow(
+                    () -> new ApiException(ErrorCode.NOT_FOUND, "참여자가 존재하지 않습니다.")
+                );
+        String statusStr = dto.getStatus(); // "ACCEPTED" 또는 "REJECTED"
+
+        // 2. 상태에 따른 로직 분기 (문자열 비교 시 대소문자 주의)
+        if ("ACCEPTED".equalsIgnoreCase(statusStr)) {
+            log.info("[INFO] 참가자 수락 처리 - ProfileId: {}, RoomId: {}", activeProfileId, roomId);
+            chatParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
+            // 수락 시 추가 로직이 있다면 여기에 작성
+        } else if ("REJECTED".equalsIgnoreCase(statusStr)) {
+            log.info("[INFO] 참가자 거절 및 논리 삭제 처리 - ProfileId: {}, RoomId: {}", activeProfileId, roomId);
+            chatParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.REJECTED);
+
+            ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(
+                    () -> new ApiException(ErrorCode.NOT_FOUND, "채팅방이 존재하지 않습니다.")
+                );
+            chatRoom.delete();
+        } else {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 상태 값입니다.");
+        }
+
+        // 3. 결과 반환 (Response DTO 생성)
+        return ResponseUpdateDmStatusDto.builder()
+            .roomId(roomId)
+            .status(chatParticipant.getParticipantStatus().name())
+            .profileId(activeProfileId)
+            .profileMode(activeMode.name())
+            .build();
+    }
 }
