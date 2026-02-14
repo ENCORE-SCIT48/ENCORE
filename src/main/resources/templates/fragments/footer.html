@@ -2,64 +2,64 @@
 
   <style>
     .footer-wrapper {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
       width: 100%;
-      max-width: 420px;
-      height: 76px;
-      background-color: #ffffff;
+      background-color: #333333; /* Sub Color */
+      padding: 20px 0;
+      display: flex;
+      justify-content: center;
+      border-top: 2px solid #E63946; /* Main Color 포인트 */
+    }
+
+    .footer-container {
+      width: 100%;
+      max-width: 1200px;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      border-top: 1px solid #eaeaea;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
-      z-index: 100;
     }
 
     .footer-link {
       text-decoration: none;
-      color: #3d3d3d;
-      /* 폰트 자동 조절: 최소 11px, 권장 3.5vw, 최대 14px */
-      font-size: clamp(11px, 3.5vw, 14px);
-      text-align: center;
-      flex: 1; /* 영역을 균등하게 배분하여 클릭 범위를 넓힘 */
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.2s;
     }
 
-    .footer-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      width: 100%;
+    .footer-link:hover {
+      color: #E63946; /* Main Color */
     }
   </style>
 
   <div class="footer-wrapper">
-    <a th:each="item : ${items}" th:href="${item.href}" class="footer-link">
-      <div class="footer-item">
-        <span th:text="${item.label}"></span>
-      </div>
-    </a>
+    <div class="footer-container">
+      <a th:each="item : ${items}" 
+         th:href="${item.href}" 
+         class="footer-link"
+         th:text="${item.label}">
+      </a>
+    </div>
   </div>
 
 </footer>
 
-<!--
-// footer 사용예시
 
-아래와 같이 본인 버튼에 맞게 버튼과 url 넣기
+
+<!--
+
+footer 사용 예시
+
+아래와 같이 이동하는 url 넣기
 
 <div th:replace="~{fragments/footer :: footer(
       ${ {
           {label:'모집글', href:'/posts'},
           {label:'공연장리스트', href:'/venueList'},
           {label:'홈', href:'/'},
-          {label:'DM', href:'/deirectMessage'},
+          {label:'DM', href:'/directMessage'},
           {label:'채팅방', href:'/chat'}
       } }
-  )}"></div>
+)}"></div>
+
 
 -->

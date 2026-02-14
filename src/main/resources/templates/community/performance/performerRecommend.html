@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공연자 추천</title>
+
+  <!-- Bootswatch Litera -->
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 60px 20px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .back-btn {
+      font-size: 22px;
+      text-decoration: none;
+      color: #333333;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      color: #E63946;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .content-area {
+      margin-top: 20px;
+      min-height: 400px;
+      color: #999;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    :root {
+      --bs-primary: #E63946;
+      --bs-primary-rgb: 230, 57, 70;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- 상단 바 (상세페이지와 동일 구조) -->
+    <div class="top-bar">
+      <a th:href="@{/posts/performance}" class="back-btn">
+        ←
+      </a>
+      <div class="page-title">공연자 추천</div>
+      <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
+    </div>
+
+    <!-- 내용 영역 -->
+    <div class="content-area">
+      추천 공연자가 표시될 영역입니다.
+    </div>
+
+  </div>
+
+  <!-- 하단 네비 -->
+  <div th:replace="~{fragments/footer :: footer(
+      ${ {
+          {label:'모집글', href:'/posts/performance'},
+          {label:'공연장리스트', href:'/venueList'},
+          {label:'홈', href:'/'},
+          {label:'DM', href:'/directMessage'},
+          {label:'채팅방', href:'/chat'}
+      } }
+  )}"></div>
+
+</body>
+
+</html>

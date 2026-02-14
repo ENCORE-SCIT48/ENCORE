@@ -5,117 +5,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공연 모집글 작성</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- jQuery -->
+
+  <!-- Bootswatch Litera -->
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script th:src="@{/js/community/performancePost.js}"></script>
 
   <style>
+    html,
     body {
-      background: #e5e5e5;
       margin: 0;
-      padding-bottom: 80px;
+      padding: 0;
+      background: #ffffff;
     }
 
     .app-container {
-      max-width: 420px;
+      width: 100%;
+      max-width: 1000px;
       margin: 0 auto;
-      background: #fff;
       min-height: 100vh;
-      padding: 16px;
-      position: relative;
+      padding: 60px 20px;
     }
 
     .top-bar {
       display: flex;
       align-items: center;
-      margin-bottom: 20px;
+      justify-content: space-between;
+      margin-bottom: 40px;
     }
 
     .back-btn {
-      font-size: 18px;
-      cursor: pointer;
-      margin-right: 12px;
+      font-size: 22px;
       text-decoration: none;
-      color: #000;
+      color: #333333;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      color: #E63946;
     }
 
     .page-title {
-      font-size: 18px;
-      font-weight: bold;
+      font-size: 22px;
+      font-weight: 600;
+      color: #333333;
     }
 
     .post-title-input {
-      font-size: 22px;
-      font-weight: bold;
-      margin-top: 10px;
+      font-size: 28px;
+      font-weight: 600;
       width: 100%;
       border: none;
       outline: none;
+      padding: 10px 0;
+      color: #333333;
     }
 
     .divider {
-      margin: 16px 0;
-      border-top: 1px solid #ddd;
+      margin: 30px 0;
+      border-top: 1px solid #eee;
     }
 
     .post-content-textarea {
-      font-size: 16px;
-      line-height: 1.8;
+      font-size: 17px;
+      line-height: 2;
       width: 100%;
       border: none;
       outline: none;
-      resize: none;
-      min-height: 300px;
+      resize: vertical;
+      min-height: 400px;
+      color: #333333;
     }
 
     .btn-group {
-      margin-top: 30px;
+      margin-top: 60px;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
+      gap: 20px;
     }
 
     .btn-group button,
     .btn-group a {
-      width: 48%;
+      width: 160px;
+    }
+
+    .btn-primary {
+      background-color: #E63946;
+      border-color: #E63946;
+    }
+
+    .btn-primary:hover {
+      background-color: #c92f3a;
+      border-color: #c92f3a;
+    }
+
+    .btn-outline-secondary {
+      color: #333333;
+      border-color: #ccc;
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: #f5f5f5;
+    }
+
+    :root {
+      --bs-primary: #E63946;
+      --bs-primary-rgb: 230, 57, 70;
     }
   </style>
+
 </head>
 
 <body>
 
   <div class="app-container">
 
+    <!-- 상단 바 -->
     <div class="top-bar">
       <a id="backBtn" class="back-btn">←</a>
       <div class="page-title">공연 모집글 작성</div>
       <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
     </div>
 
-    <!-- 제목 -->
-    <input type="text" name="title" class="post-title-input" placeholder="제목을 입력하세요" required>
+    <form id="postForm">
 
-    <div class="divider"></div>
+      <!-- 제목 -->
+      <input type="text" name="title" class="post-title-input" placeholder="제목을 입력하세요" required>
 
-    <!-- 내용 -->
-    <textarea name="content" class="post-content-textarea" placeholder="내용을 입력하세요" required></textarea>
+      <div class="divider"></div>
 
-    <!-- 버튼 -->
-    <div class="btn-group">
-      <button id="submitBtn" class="btn btn-dark">
-        등록
-      </button>
+      <!-- 내용 -->
+      <textarea name="content" class="post-content-textarea" placeholder="내용을 입력하세요" required></textarea>
 
-      <a href="/posts/performance" class="btn btn-outline-secondary">
-        취소
-      </a>
-    </div>
+      <!-- 버튼 -->
+      <div class="btn-group">
+        <button type="button" id="submitBtn" class="btn btn-primary">
+          등록
+        </button>
+
+        <a th:href="@{/posts/performance}" class="btn btn-outline-secondary">
+          취소
+        </a>
+      </div>
+
+    </form>
+
   </div>
 
   <!-- 하단 네비 -->
   <div th:replace="~{fragments/footer :: footer(
     ${ {
-        {label:'모집글', href:'/posts'},
+        {label:'모집글', href:'/posts/performance'},
         {label:'공연장리스트', href:'/venueList'},
         {label:'홈', href:'/'},
         {label:'DM', href:'/directMessage'},

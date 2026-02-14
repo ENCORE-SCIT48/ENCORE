@@ -27,17 +27,15 @@ public class PerformerPostController {
      */
     @PostMapping
     public CommonResponse<ResponseCreatePerformerPostDto> create(
-        @RequestBody RequestCreatePerformerPostDto request) {
+            @RequestBody RequestCreatePerformerPostDto request) {
 
         log.info("POST /api/posts/performer - 공연자 모집 게시글 등록 요청");
 
-        ResponseCreatePerformerPostDto result =
-            performerPostService.createPerformerPost(request);
+        ResponseCreatePerformerPostDto result = performerPostService.createPerformerPost(request);
 
         log.info(
-            "POST /api/posts/performer - 공연자 모집 게시글 등록 완료, postId={}",
-            result.getPostId()
-        );
+                "POST /api/posts/performer - 공연자 모집 게시글 등록 완료, postId={}",
+                result.getPostId());
 
         return CommonResponse.ok(result, "게시글이 정상적으로 등록되었습니다.");
     }
@@ -50,20 +48,17 @@ public class PerformerPostController {
      */
     @DeleteMapping("/{id}")
     public CommonResponse<ResponseDeletePerformerPostDto> delete(
-        @PathVariable Long id) {
+            @PathVariable("id") Long id) {
 
         log.info(
-            "DELETE /api/posts/performer/{} - 공연자 모집 게시글 삭제 요청",
-            id
-        );
+                "DELETE /api/posts/performer/{} - 공연자 모집 게시글 삭제 요청",
+                id);
 
-        ResponseDeletePerformerPostDto result =
-            performerPostService.deletePerformerPost(id);
+        ResponseDeletePerformerPostDto result = performerPostService.deletePerformerPost(id);
 
         log.info(
-            "DELETE /api/posts/performer/{} - 공연자 모집 게시글 삭제 완료",
-            id
-        );
+                "DELETE /api/posts/performer/{} - 공연자 모집 게시글 삭제 완료",
+                id);
 
         return CommonResponse.ok(result, "게시글이 정상적으로 삭제되었습니다.");
     }
@@ -71,55 +66,51 @@ public class PerformerPostController {
     /**
      * [설명] 공연자 모집 게시글을 수정합니다.
      *
-     * @param id 게시글 ID
+     * @param id      게시글 ID
      * @param request 게시글 수정 요청 객체
      * @return 수정된 게시글 정보
      */
     @PutMapping("/{id}")
     public CommonResponse<ResponseUpdatePerformerPostDto> update(
-        @PathVariable Long id,
-        @RequestBody RequestUpdatePerformerPostDto request
-    ) {
+            @PathVariable("id") Long id,
+            @RequestBody RequestUpdatePerformerPostDto request) {
         log.info(
-            "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 요청",
-            id
-        );
+                "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 요청",
+                id);
 
-        ResponseUpdatePerformerPostDto result =
-            performerPostService.updatePerformerPost(id, request);
+        ResponseUpdatePerformerPostDto result = performerPostService.updatePerformerPost(id, request);
 
         log.info(
-            "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 완료",
-            id
-        );
+                "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 완료",
+                id);
 
         return CommonResponse.ok(result, "게시글이 정상적으로 수정되었습니다.");
     }
 
     /**
      * [설명] 공연자 모집 게시글 목록을 페이징 조회합니다.
-     * 삭제되지 않은 게시글만 조회 대상입니다.
+     * 검색어(keyword)가 존재하면 제목 검색을 수행합니다.
      *
+     * @param keyword  검색어
      * @param pageable 페이징 정보
      * @return 게시글 목록 페이지
      */
     @GetMapping
     public CommonResponse<Page<ResponseListPerformerPostDto>> list(
-        @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
 
         log.info(
-            "GET /api/posts/performer - 공연자 모집 게시글 목록 조회, page={}, size={}",
-            pageable.getPageNumber(),
-            pageable.getPageSize()
-        );
+                "GET /api/posts/performer - 공연자 모집 게시글 목록 조회, keyword={}, page={}, size={}",
+                keyword,
+                pageable.getPageNumber(),
+                pageable.getPageSize());
 
-        Page<ResponseListPerformerPostDto> result =
-            performerPostService.listPerformerPosts(pageable);
+        Page<ResponseListPerformerPostDto> result = performerPostService.listPerformerPosts(keyword, pageable);
 
         log.info(
-            "GET /api/posts/performer - 공연자 모집 게시글 목록 조회 완료, totalElements={}",
-            result.getTotalElements()
-        );
+                "GET /api/posts/performer - 공연자 모집 게시글 목록 조회 완료, totalElements={}",
+                result.getTotalElements());
 
         return CommonResponse.ok(result, "게시글 목록 조회 성공");
     }
@@ -133,20 +124,17 @@ public class PerformerPostController {
      */
     @GetMapping("/{id}")
     public CommonResponse<ResponseReadPerformerPostDto> read(
-        @PathVariable Long id) {
+            @PathVariable("id") Long id) {
 
         log.info(
-            "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 요청",
-            id
-        );
+                "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 요청",
+                id);
 
-        ResponseReadPerformerPostDto result =
-            performerPostService.readPerformerPost(id);
+        ResponseReadPerformerPostDto result = performerPostService.readPerformerPost(id);
 
         log.info(
-            "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 완료",
-            id
-        );
+                "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 완료",
+                id);
 
         return CommonResponse.ok(result, "게시글 조회 성공");
     }

@@ -6,7 +6,8 @@ import com.encore.encore.domain.community.service.PerformancePostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,21 +21,31 @@ public class PerformancePostPageController {
     private final PerformancePostService performancePostService;
 
     /**
-     * 공연 모집 게시글 목록 화면을 조회합니다.
+     * [설명] 공연 모집 게시글 목록 화면을 조회합니다.
+     * 검색어(keyword)가 존재하면 제목 기준 부분 검색을 수행합니다.
      *
-     * @param model 뷰에 전달할 데이터 모델
+     * @param keyword  검색어 (nullable)
+     * @param pageable 페이징 정보
+     * @param model    뷰에 전달할 데이터 모델
      * @return 게시글 목록 화면
      */
     @GetMapping
-    public String post(Model model) {
-        log.info("공연 모집 게시글 목록 화면 요청");
+    public String post(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @PageableDefault(size = 5, sort = "createdAt") Pageable pageable,
+            Model model) {
 
-        PageRequest pageRequest = PageRequest.of(0, 10);
+        log.info(
+                "공연 모집 게시글 목록 화면 요청 - keyword={}, page={}, size={}",
+                keyword,
+                pageable.getPageNumber(),
+                pageable.getPageSize());
 
-        Page<ResponseListPerformancePostDto> posts =
-                performancePostService.listPerformancePosts(pageRequest);
+        Page<ResponseListPerformancePostDto> page = performancePostService.listPerformancePosts(keyword, pageable);
 
-        model.addAttribute("posts", posts.getContent());
+        model.addAttribute("posts", page.getContent());
+        model.addAttribute("page", page);
+        model.addAttribute("keyword", keyword);
 
         return "community/performance/performancePost";
     }
@@ -48,13 +59,12 @@ public class PerformancePostPageController {
      */
     @GetMapping("/{postId}")
     public String readPost(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             Model model) {
 
         log.info("공연 모집 게시글 상세 화면 요청 - postId={}", postId);
 
-        ResponseReadPerformancePostDto post =
-                performancePostService.readPerformancePost(postId);
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId);
 
         model.addAttribute("post", post);
 
@@ -81,16 +91,34 @@ public class PerformancePostPageController {
      */
     @GetMapping("/{postId}/edit")
     public String editPostForm(
-            @PathVariable Long postId,
+            @PathVariable("postId") Long postId,
             Model model) {
 
         log.info("공연 모집 게시글 수정 화면 요청 - postId={}", postId);
 
-        ResponseReadPerformancePostDto post =
-                performancePostService.readPerformancePost(postId);
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId);
 
         model.addAttribute("post", post);
 
         return "community/performance/performancePostUpdate";
+    }
+
+    /**
+     * 특정 공연 모집 게시글에 대한 추천 공연자 화면을 조회합니다.
+     *
+     * @param postId 공연 모집 게시글 ID
+     * @param model  뷰에 전달할 데이터 모델
+     * @return 추천 공연자 화면
+     */
+    @GetMapping("/{postId}/recommend")
+    public String recommendPerformers(
+            @PathVariable("postId") Long postId,
+            Model model) {
+
+        log.info("추천 공연자 화면 요청 - postId={}", postId);
+
+        model.addAttribute("postId", postId);
+
+        return "community/performance/performerRecommend";
     }
 }
