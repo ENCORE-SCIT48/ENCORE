@@ -1,15 +1,13 @@
-<footer th:fragment="footer(items)">
+<footer th:fragment="footer">
 
   <style>
     .footer-wrapper {
       width: 100%;
       background-color: #333333;
-      /* Sub Color */
       padding: 20px 0;
       display: flex;
       justify-content: center;
       border-top: 2px solid #E63946;
-      /* Main Color 포인트 */
     }
 
     .footer-container {
@@ -30,36 +28,19 @@
 
     .footer-link:hover {
       color: #E63946;
-      /* Main Color */
     }
   </style>
 
   <div class="footer-wrapper">
     <div class="footer-container">
-      <a th:each="item : ${items}" th:href="${item.href}" class="footer-link" th:text="${item.label}">
-      </a>
+
+      <a th:href="@{/posts/performance}" class="footer-link">모집글</a>
+      <a th:href="@{/performer/venueList}" class="footer-link">공연장리스트</a>
+      <a th:href="@{/performer}" class="footer-link">홈</a>
+      <a th:href="@{/performer/directMessage}" class="footer-link">DM</a>
+      <a th:href="@{/performer/chat}" class="footer-link">채팅방</a>
+
     </div>
   </div>
 
 </footer>
-
-
-
-<!--
-
-footer 사용 예시
-
-아래와 같이 이동하는 url 넣기
-
-<div th:replace="~{fragments/footer :: footer(
-      ${ {
-          {label:'모집글', href:'/posts'},
-          {label:'공연장리스트', href:'/venueList'},
-          {label:'홈', href:'/'},
-          {label:'DM', href:'/directMessage'},
-          {label:'채팅방', href:'/chat'}
-      } }
-)}"></div>
-
-
--->

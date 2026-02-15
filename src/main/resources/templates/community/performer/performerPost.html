@@ -148,7 +148,7 @@
 
     <div class="page-title">공연자 모집글</div>
 
-    <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
+    <div th:replace="~{fragments/performer/profile :: profile}"></div>
 
     <div class="tab-buttons">
       <button class="active">공연자 모집</button>
@@ -236,15 +236,8 @@
 
   </div>
 
-  <div th:replace="~{fragments/footer :: footer(
-      ${ {
-          {label:'모집글', href:'/posts/performer'},
-          {label:'공연장리스트', href:'/venueList'},
-          {label:'홈', href:'/'},
-          {label:'DM', href:'/directMessage'},
-          {label:'채팅방', href:'/chat'}
-      } }
-  )}"></div>
+  <!-- 하단 네비 -->
+  <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
 </body>
 

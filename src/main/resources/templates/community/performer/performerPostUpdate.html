@@ -125,7 +125,7 @@
     <div class="top-bar">
       <a th:href="@{/posts/performer/{id}(id=${post.postId})}" class="back-btn">←</a>
       <div class="page-title">공연자 모집글 수정</div>
-      <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
+      <div th:replace="~{fragments/performer/profile :: profile}"></div>
     </div>
 
     <input type="hidden" id="postId" th:value="${post.postId}">
@@ -152,15 +152,7 @@
   </div>
 
   <!-- 하단 네비 -->
-  <div th:replace="~{fragments/footer :: footer(
-    ${ {
-        {label:'모집글', href:'/posts/performer'},
-        {label:'공연장리스트', href:'/venueList'},
-        {label:'홈', href:'/'},
-        {label:'DM', href:'/directMessage'},
-        {label:'채팅방', href:'/chat'}
-    } }
-  )}"></div>
+  <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
 </body>
 
