@@ -74,6 +74,7 @@ public class PerformerPostController {
     public CommonResponse<ResponseUpdatePerformerPostDto> update(
             @PathVariable("id") Long id,
             @RequestBody RequestUpdatePerformerPostDto request) {
+
         log.info(
                 "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 요청",
                 id);

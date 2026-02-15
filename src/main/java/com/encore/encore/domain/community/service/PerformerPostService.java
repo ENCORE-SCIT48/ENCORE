@@ -34,6 +34,7 @@ public class PerformerPostService {
      */
     public ResponseCreatePerformerPostDto createPerformerPost(
             RequestCreatePerformerPostDto dto) {
+
         log.info("공연자 모집 게시글 등록 시작");
 
         Performance performance = null;
@@ -72,6 +73,7 @@ public class PerformerPostService {
      * @return 게시글 삭제 결과
      */
     public ResponseDeletePerformerPostDto deletePerformerPost(Long postId) {
+
         log.info("공연자 모집 게시글 삭제 요청 - postId={}", postId);
 
         Post post = postRepository
@@ -99,6 +101,7 @@ public class PerformerPostService {
      * @return 게시글 상세 정보
      */
     public ResponseReadPerformerPostDto readPerformerPost(Long postId) {
+
         log.info("공연자 모집 게시글 단건 조회 - postId={}", postId);
 
         Post post = postRepository
@@ -130,6 +133,7 @@ public class PerformerPostService {
     public ResponseUpdatePerformerPostDto updatePerformerPost(
             Long postId,
             RequestUpdatePerformerPostDto dto) {
+
         log.info("공연자 모집 게시글 수정 요청 - postId={}", postId);
 
         Post post = postRepository
@@ -213,5 +217,4 @@ public class PerformerPostService {
                 .createdAt(post.getCreatedAt())
                 .build());
     }
-
 }
