@@ -40,7 +40,7 @@ public class RelationApiController {
      * @return 팔로우 상태가 반영된 {@link ResponseFollowDto}를 포함한
      * {@link CommonResponse} 객체
      */
-    @PostMapping("/{targetUserId}/{targetProfileMode}/follow")
+    @PostMapping("/{targetProfileId}/{targetProfileMode}/follow")
     public ResponseEntity<CommonResponse<ResponseFollowDto>> follow(
         //@AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
@@ -52,7 +52,7 @@ public class RelationApiController {
         Long profileId = 2L;
         ActiveMode profileMode = ActiveMode.HOST;
 
-        ResponseFollowDto result = relationService.follow(
+        ResponseFollowDto result = relationService.userFollow(
             profileId, profileMode, targetProfileId, targetProfileMode
         );
 
@@ -67,10 +67,10 @@ public class RelationApiController {
      * @param targetProfileMode 팔로잉 리스트를 조회할 대상의 프로필 모드
      * @return
      */
-    @GetMapping("/{targetUserId}/{targetProfileMode}/following")
+    @GetMapping("/{targetProfileId}/{targetProfileMode}/following")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowingList(
         //@AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long targetId,
+        @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode
     ) {
 
@@ -89,7 +89,7 @@ public class RelationApiController {
 
         List<ResponseFollowListDto> result =
             relationService.getFollowingList(
-                targetId,
+                targetProfileId,
                 targetMode,
                 loginProfileId,
                 loginProfileMode
@@ -106,10 +106,10 @@ public class RelationApiController {
      * @param userDetails       로그인 사용자 정보
      * @return 팔로워 리스트 DTO
      */
-    @GetMapping("/{targetUserId}/{targetProfileMode}/follower")
+    @GetMapping("/{targetProfileId}/{targetProfileMode}/follower")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowerList(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long targetId,
+        @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode) {
 
         ActiveMode targetMode;
@@ -123,7 +123,7 @@ public class RelationApiController {
         ActiveMode loginProfileMode = userDetails.getActiveMode();
 
         List<ResponseFollowListDto> followers = relationService.getFollowerList(
-            targetId,
+            targetProfileId,
             loginProfileMode,
             loginProfileId,
             targetMode

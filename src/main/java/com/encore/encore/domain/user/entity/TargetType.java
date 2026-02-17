@@ -8,6 +8,5 @@ import lombok.RequiredArgsConstructor;
 public enum TargetType {
     USER,
     PERFORMANCE,
-    VENUE,
-    CHAT_ROOM
+    VENUE
 }

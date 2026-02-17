@@ -41,14 +41,14 @@ function fetchRecommendedFriends() {
 }
 
 function fetchFollowingList() {
-    fetch(`/api/users/${targetId}/${profileMode}/following`)
+    fetch(`/api/users/${targetProfileId}/${profileMode}/following`)
         .then(res => res.json())
         .then(data => renderUserList('following-container', data))
         .catch(err => console.error('팔로잉 리스트 로드 실패', err));
 }
 
 function fetchFollowerList() {
-    fetch(`/api/users/${targetId}/${profileMode}/follower`)
+    fetch(`/api/users/${targetProfileId}/${profileMode}/follower`)
         .then(res => res.json())
         .then(data => renderUserList('follower-container', data))
         .catch(err => console.error('팔로워 리스트 로드 실패', err));

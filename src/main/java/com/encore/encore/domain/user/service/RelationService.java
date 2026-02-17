@@ -10,6 +10,7 @@ import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.user.dto.ResponseFollowDto;
 import com.encore.encore.domain.user.dto.ResponseFollowListDto;
 import com.encore.encore.domain.user.entity.RelationType;
+import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.user.entity.UserRelation;
 import com.encore.encore.domain.user.repository.UserRelationRepository;
@@ -92,53 +93,50 @@ public class RelationService {
      * - isFollowing: 현재 팔로우 상태 (true: 팔로우중, false: 언팔로우)
      * @throws ApiException targetProfileMode 값이 올바르지 않거나, 조회 대상 프로필이 존재하지 않을 경우 발생
      */
-    public ResponseFollowDto follow(Long profileId, ActiveMode profileMode, Long targetProfileId, String targetProfileMode) {
+    public ResponseFollowDto userFollow(Long profileId, ActiveMode profileMode, Long targetProfileId, String targetProfileMode) {
 
-        ActiveMode targetMode;
-        try {
-            targetMode = ActiveMode.valueOf(targetProfileMode.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 targetProfileMode 값: " + targetProfileMode);
-        }
-
-        // 기존 팔로우 관계 조회
-        Optional<UserRelation> optionalRelation =
-            userRelationRepository.findByActor_IdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
-                profileId, profileMode, targetProfileId, targetMode, RelationType.FOLLOW
-            );
-
+        // 1. 나(Actor)의 '알맹이(User)' 찾기
         User actor = findProfileById(profileId, profileMode);
+        ActiveMode targetMode = ActiveMode.valueOf(targetProfileMode);
+
+        // 2. [조회] 이전에 맺은 관계가 있는지 확인 (is_deleted 상관없이 다 뒤짐)
+        // 여기서 actor.getUserId()를 쓰는 게 핵심입니다!
+        Optional<UserRelation> optionalRelation = userRelationRepository
+            .findExistingRelation(actor.getUserId(), profileMode, targetProfileId, targetMode, RelationType.FOLLOW);
+
         UserRelation relation;
 
-
         if (optionalRelation.isPresent()) {
+            // 3-1. [수정] 관계가 이미 있다면? 상태만 반대로 뒤집기 (토글)
             relation = optionalRelation.get();
             if (relation.isDeleted()) {
-                // 팔로우 상태가 아니면 복구
-                relation.restore();
+                relation.restore(); // true -> false (다시 팔로우)
             } else {
-                // 이미 팔로우 중이면 논리삭제
-                relation.delete();
+                relation.delete();  // false -> true (언팔로우)
             }
+            log.info("기존 관계 상태 변경: isDeleted={}", relation.isDeleted());
         } else {
-            // 신규 팔로우 생성
+            // 3-2. [생성] 관계가 아예 없다면? 새로 만들기
             relation = UserRelation.builder()
-                .actor(actor)
+                .actor(actor) // User 객체 통째로 넣기
                 .actorProfileMode(profileMode)
-                .targetId(targetProfileId)
+                .targetId(targetProfileId) // Target은 숫자 ID만
                 .targetProfileMode(targetMode)
+                .targetType(TargetType.USER)
                 .relationType(RelationType.FOLLOW)
                 .build();
             userRelationRepository.save(relation);
+            log.info("새로운 관계 생성");
         }
 
+        // 4. 결과 반환 (현재 팔로우 중인지 여부)
         return ResponseFollowDto.builder()
             .targetId(targetProfileId)
             .targetProfileMode(targetProfileMode)
             .isFollowing(!relation.isDeleted())
             .build();
-
     }
+
 
     /**
      * 특정 프로필이 팔로잉 중인 사용자 리스트를 조회합니다.
@@ -162,7 +160,7 @@ public class RelationService {
         // 1️⃣ target 프로필이 팔로우하고 있는 관계 조회
         List<UserRelation> relations =
             userRelationRepository
-                .findByActor_IdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(
+                .findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(
                     targetId,
                     targetMode,
                     RelationType.FOLLOW
@@ -181,7 +179,7 @@ public class RelationService {
                 // 로그인 사용자가 이 유저를 팔로우 중인지 확인
                 boolean isFollowing =
                     userRelationRepository
-                        .findByActor_IdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
+                        .findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
                             loginProfileId,
                             loginProfileMode,
                             relation.getTargetId(),
@@ -241,7 +239,7 @@ public class RelationService {
 
                 // 로그인 사용자가 팔로워를 팔로우 중인지 확인
                 boolean isFollowing =
-                    userRelationRepository.findByActor_IdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
+                    userRelationRepository.findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
                             loginProfileId,
                             loginProfileMode,
                             relation.getActor().getUserId(),
