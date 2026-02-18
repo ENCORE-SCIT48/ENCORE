@@ -1,14 +1,13 @@
 // ==========================
-// following-follower.js
+// following-follower.js (리팩토링)
 // ==========================
 
 document.addEventListener('DOMContentLoaded', () => {
     activateTab(activeTab);
 
     // 초기 리스트 로드
-    fetchFollowingList();
-    fetchFollowerList();
-    //fetchRecommendedFriends();
+    fetchList('following', 'following-container', `/api/users/${targetId}/${profileMode}/following`);
+    fetchList('follower', 'follower-container', `/api/users/${targetId}/${profileMode}/follower`);
 
     // 탭 버튼 이벤트
     document.getElementById('tab-following')
@@ -26,109 +25,34 @@ function activateTab(tab) {
     const followingContent = document.getElementById('following-content');
     const followerContent = document.getElementById('follower-content');
 
-    if (tab === 'following') {
-        tabFollowing.classList.add('active');
-        tabFollower.classList.remove('active');
-        followingContent.style.display = 'block';
-        followerContent.style.display = 'none';
-        //fetchRecommendedFriends();
-    } else {
-        tabFollower.classList.add('active');
-        tabFollowing.classList.remove('active');
-        followerContent.style.display = 'block';
-        followingContent.style.display = 'none';
-    }
+    const isFollowingTab = tab === 'following';
+
+    tabFollowing.classList.toggle('active', isFollowingTab);
+    tabFollower.classList.toggle('active', !isFollowingTab);
+
+    followingContent.style.display = isFollowingTab ? 'block' : 'none';
+    followerContent.style.display = isFollowingTab ? 'none' : 'block';
 }
 
 // ==========================
-// API 호출
+// API 호출 공통 함수
 // ==========================
-/*function fetchRecommendedFriends() {
-    fetch('/api/recommended-friends')
+function fetchList(type, containerId, url) {
+    fetch(url)
         .then(res => res.json())
         .then(commonResponse => {
             if (!commonResponse.success) {
-                console.error('추천 친구 조회 실패:', commonResponse.message);
+                console.error(`${type} 리스트 조회 실패:`, commonResponse.message);
                 return;
             }
-            renderRecommendFriends(commonResponse.data);
+            renderUserList(containerId, commonResponse.data);
         })
-        .catch(err => console.error('추천 친구 로드 실패', err));
-}
-*/
-function fetchFollowingList() {
-    fetch(`/api/users/${targetId}/${profileMode}/following`)
-        .then(res => res.json())
-        .then(commonResponse => {
-            if (!commonResponse.success) {
-                console.error('팔로잉 리스트 조회 실패:', commonResponse.message);
-                return;
-            }
-            renderUserList('following-container', commonResponse.data);
-        })
-        .catch(err => console.error('팔로잉 리스트 로드 실패', err));
-}
-
-function fetchFollowerList() {
-    fetch(`/api/users/${targetId}/${profileMode}/follower`)
-        .then(res => res.json())
-        .then(commonResponse => {
-            if (!commonResponse.success) {
-                console.error('팔로워 리스트 조회 실패:', commonResponse.message);
-                return;
-            }
-            renderUserList('follower-container', commonResponse.data);
-        })
-        .catch(err => console.error('팔로워 리스트 로드 실패', err));
+        .catch(err => console.error(`${type} 리스트 로드 실패:`, err));
 }
 
 // ==========================
-// 렌더링 함수
+// 렌더링 함수 공통
 // ==========================
-function renderRecommendFriends(data) {
-    const container = document.getElementById('recommend-container');
-    container.innerHTML = '';
-
-    if (!data || data.length === 0) {
-        container.innerHTML = '<div class="text-muted">추천 친구가 없습니다.</div>';
-        return;
-    }
-
-    data.forEach(user => {
-        const div = document.createElement('div');
-        div.className = 'list-group-item d-flex align-items-center justify-content-between';
-
-        div.innerHTML = `
-            <div class="d-flex align-items-center">
-                <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle" style="width:48px; height:48px; margin-right: 10px;">
-                <div>
-                    <a href="/user/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a><br>
-                </div>
-            </div>
-        `;
-
-        // 자기 자신이면 버튼 생성 안함
-        if (user.profileId !== loginProfileId || user.profileMode !== loginProfileMode) {
-            const btn = document.createElement('button');
-            const isFollow = user.following;
-            btn.className = `btn btn-sm ${isFollow ? 'btn-following' : 'btn-unfollowed'}`;
-            btn.innerText = isFollow ? '팔로우중' : '팔로우';
-            btn.addEventListener('click', () => handleFollow(user.profileId, user.profileMode, btn));
-            div.appendChild(btn);
-        } else {
-            // 자기 자신이면 버튼 대신 '본인' 표시
-            const infoDiv = document.createElement('div');
-            infoDiv.innerText = '본인';
-            infoDiv.className = 'text-muted';
-            div.appendChild(infoDiv);
-        }
-
-        container.appendChild(div);
-    });
-
-}
-
-
 function renderUserList(containerId, data) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -142,34 +66,32 @@ function renderUserList(containerId, data) {
         const div = document.createElement('div');
         div.className = 'list-group-item d-flex align-items-center justify-content-between';
 
+        // 프로필 영역
         div.innerHTML = `
             <div class="d-flex align-items-center">
                 <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle" style="width:48px; height:48px; margin-right: 10px;">
                 <div>
-                    <a href="/user/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a><br>
+                    <a href="/user/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a>
                 </div>
             </div>
         `;
 
-        // 자기 자신이면 버튼 생성 안함
-        if (user.profileId !== loginProfileId || user.profileMode !== loginProfileMode) {
+        // 버튼 영역
+        if (user.profileId === loginProfileId && user.profileMode === loginProfileMode) {
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'text-muted';
+            infoDiv.innerText = '본인';
+            div.appendChild(infoDiv);
+        } else {
             const btn = document.createElement('button');
-            const isFollow = user.following;
-            btn.className = `btn btn-sm ${isFollow ? 'btn-following' : 'btn-unfollowed'}`;
-            btn.innerText = isFollow ? '팔로우중' : '팔로우';
+            btn.className = `btn btn-sm ${user.isFollowing ? 'btn-following' : 'btn-unfollowed'}`;
+            btn.innerText = user.isFollowing ? '팔로우중' : '팔로우';
             btn.addEventListener('click', () => handleFollow(user.profileId, user.profileMode, btn));
             div.appendChild(btn);
-        } else {
-            // 자기 자신이면 버튼 대신 '본인' 표시
-            const infoDiv = document.createElement('div');
-            infoDiv.innerText = '본인';
-            infoDiv.className = 'text-muted';
-            div.appendChild(infoDiv);
         }
 
         container.appendChild(div);
     });
-
 }
 
 // ==========================
@@ -179,33 +101,20 @@ function handleFollow(targetProfileId, targetProfileMode, buttonElement) {
     if (!buttonElement) return;
     buttonElement.disabled = true;
 
-    fetch(`/api/users/${targetProfileId}/${targetProfileMode}/follow`, {
-        method: 'POST'
-    })
-    .then(res => res.json())
-    .then(result => {
-        if (!result.success || !result.data) {
-            console.error("데이터 로드 실패");
-            return;
-        }
+    fetch(`/api/users/${targetProfileId}/${targetProfileMode}/follow`, { method: 'POST' })
+        .then(res => res.json())
+        .then(result => {
+            if (!result.success || !result.data) {
+                console.error("팔로우 처리 실패");
+                return;
+            }
 
-        // 서버 응답에서 'following' 필드를 가져옵니다. (확인 완료된 필드명)
-        const isFollowing = result.data.following;
+            const isFollowing = result.data.isFollowing; // DTO @JsonProperty 적용됨
+            buttonElement.innerText = isFollowing ? '팔로우중' : '팔로우';
 
-        // 1. 텍스트 변경
-        buttonElement.innerText = isFollowing ? "팔로우중" : "팔로우";
-
-        // 2. 클래스 교체
-        if (isFollowing) {
-            buttonElement.classList.remove("btn-unfollowed");
-            buttonElement.classList.add("btn-following");
-        } else {
-            buttonElement.classList.remove("btn-following");
-            buttonElement.classList.add("btn-unfollowed");
-        }
-    })
-    .catch(err => console.error("오류:", err))
-    .finally(() => {
-        buttonElement.disabled = false;
-    });
+            buttonElement.classList.toggle('btn-following', isFollowing);
+            buttonElement.classList.toggle('btn-unfollowed', !isFollowing);
+        })
+        .catch(err => console.error('오류:', err))
+        .finally(() => buttonElement.disabled = false);
 }

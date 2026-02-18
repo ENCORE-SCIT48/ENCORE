@@ -45,7 +45,9 @@ public class RelationService {
     private final VenueRepository venueRepository;
 
     /**
-     * 주어진 프로필 ID와 프로필 모드에 따라 해당 프로필의 User 엔티티를 조회합니다.
+     * 프로필 id, 프로필 모드로 찾을 각각의 정보를 찾을 경우(ProfileInfoDto반환)
+     * <p>
+     * 주어진 프로필 ID와 프로필 모드에 따라 해당 프로필의 엔티티를 조회하고, ProfileInfoDto에 담아 return 합니다.
      *
      * <p>프로필 모드는 USER, PERFORMER, HOST 중 하나여야 하며,
      * 각 모드에 따라 적절한 Repository에서 조회합니다.</p>
@@ -64,7 +66,7 @@ public class RelationService {
             case USER:
                 UserProfile userProfile = userProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필이 존재하지 않습니다."));
-                return new ProfileInfoDto(userProfile.getProfileId(), profileMode.name(), userProfile.getUser().getNickname(), userProfile.getProfileImageUrl() == null ? userProfile.getProfileImageUrl() : null);
+                return new ProfileInfoDto(userProfile.getProfileId(), profileMode.name(), userProfile.getUser().getNickname(), userProfile.getProfileImageUrl());
             case PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필이 존재하지 않습니다."));
@@ -78,18 +80,27 @@ public class RelationService {
         }
     }
 
-    public ProfileInfoDto getProfileInfoUserId(Long profileId, ActiveMode profileMode) {
+    /**
+     * 유저 Id, 프로필 모드로 각각 정보를 찾을 경우(ProfileInfoDto반환)
+     * 유저Id를 기준으로 각 프로필 mode에 따라 조회합니다.
+     *
+     * @param userId      user의 아이디
+     * @param profileMode 프로필 모드
+     * @return 각 정보가 들어간 ProfileInfoDto
+     */
+
+    public ProfileInfoDto getProfileInfoUserId(Long userId, ActiveMode profileMode) {
         switch (profileMode) {
             case USER:
-                UserProfile userProfile = userProfileRepository.findByUser_UserId(profileId)
+                UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필이 존재하지 않습니다."));
-                return new ProfileInfoDto(userProfile.getProfileId(), profileMode.name(), userProfile.getUser().getNickname(), userProfile.getProfileImageUrl() == null ? userProfile.getProfileImageUrl() : null);
+                return new ProfileInfoDto(userProfile.getProfileId(), profileMode.name(), userProfile.getUser().getNickname(), userProfile.getProfileImageUrl());
             case PERFORMER:
-                PerformerProfile performerProfile = performerProfileRepository.findByUser_UserId(profileId)
+                PerformerProfile performerProfile = performerProfileRepository.findByUser_UserId(userId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(performerProfile.getPerformerId(), profileMode.name(), performerProfile.getStageName(), null);
             case HOST:
-                HostProfile hostProfile = hostProfileRepository.findByUser_UserId(profileId)
+                HostProfile hostProfile = hostProfileRepository.findByUser_UserId(userId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(hostProfile.getHostId(), profileMode.name(), hostProfile.getOrganizationName(), null);
             default:
@@ -97,17 +108,24 @@ public class RelationService {
         }
     }
 
+    /**
+     * 프로필 id, 프로필 모드로 찾을 각각의 정보를 찾을 경우(User반환)
+     *
+     * @param profileId
+     * @param profileMode
+     * @return User엔티티
+     */
     public User findProfileById(Long profileId, ActiveMode profileMode) {
         switch (profileMode) {
-            case ActiveMode.USER:
+            case USER:
                 UserProfile userProfile = userProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필이 존재하지 않습니다."));
                 return userProfile.getUser();
-            case ActiveMode.PERFORMER:
+            case PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필이 존재하지 않습니다."));
                 return performerProfile.getUser();
-            case ActiveMode.HOST:
+            case HOST:
                 HostProfile hostProfile = hostProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트 프로필이 존재하지 않습니다."));
                 return hostProfile.getUser();
@@ -117,21 +135,26 @@ public class RelationService {
     }
 
     /**
-     * profileMode와 profileId를 기반으로 이름을 가져오는 메소드
+     * 프로필 ID와 프로필 모드를 기반으로 해당 User의 ID를 조회합니다.
+     *
+     * @param profileId   프로필 ID
+     * @param profileMode 프로필 모드
+     * @return 해당 프로필에 연결된 User ID
+     * @throws ApiException 프로필이 존재하지 않을 경우
      */
-    public Long getUserIdByProfile(Long profileId, String profileMode) {
+    public Long getUserIdByProfile(Long profileId, ActiveMode profileMode) {
         if (profileId == null || profileMode == null) return null;
 
-        return switch (profileMode.toUpperCase()) {
-            case "USER" -> userProfileRepository.findById(profileId)
+        return switch (profileMode) {
+            case USER -> userProfileRepository.findById(profileId)
                 .map(UserProfile::getUser)
                 .map(User::getUserId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저가 존재하지 않습니다."));
-            case "PERFORMER" -> performerProfileRepository.findById(profileId)
+            case PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(PerformerProfile::getUser)
                 .map(User::getUserId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자가 존재하지 않습니다."));
-            case "HOST" -> hostProfileRepository.findById(profileId)
+            case HOST -> hostProfileRepository.findById(profileId)
                 .map(HostProfile::getUser)
                 .map(User::getUserId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트가 존재하지 않습니다."));
@@ -209,25 +232,49 @@ public class RelationService {
 
 
     /**
-     * 특정 프로필이 팔로잉 중인 사용자 리스트를 조회합니다.
+     * 특정 프로필이 팔로우하고 있는 대상 목록(팔로잉 리스트)을 조회합니다.
      *
-     * <p>동작 방식:
+     * <p>
+     * 동작 방식:
      * <ol>
-     *   <li>주어진 targetId/targetMode에 해당하는 프로필이 팔로우 중인 UserRelation 엔티티를 조회합니다.</li>
-     *   <li>각 관계의 대상(target) 프로필 정보를 찾아 {@link ResponseFollowListDto}로 변환합니다.</li>
-     *   <li>로그인한 사용자가 각 대상 유저를 팔로우 중인지 여부를 확인하여 DTO에 반영합니다.</li>
+     *   <li>targetId와 targetMode를 기반으로 해당 프로필의 실제 User ID를 조회합니다.</li>
+     *   <li>해당 사용자가 FOLLOW 관계를 맺고 있는 모든 UserRelation을 조회합니다
+     *       (isDeleted = false 인 관계만 조회).</li>
+     *   <li>각 관계의 targetType(USER, PERFORMANCE, VENUE)에 따라
+     *       적절한 엔티티를 조회하여 {@link ProfileInfoDto}로 변환합니다.</li>
+     *   <li>로그인 사용자가 각 대상에 대해 팔로우 중인지 여부를 확인합니다.</li>
+     *   <li>각 항목을 {@link ResponseFollowListDto}로 변환하여 반환합니다.</li>
      * </ol>
      * </p>
      *
-     * @param targetId         팔로잉 리스트를 조회할 대상 프로필 ID
-     * @param targetMode       대상 프로필의 {@link ActiveMode} (USER, PERFORMER, HOST 등)
+     * <p>
+     * targetType 처리 방식:
+     * <ul>
+     *   <li>USER → getProfileInfo()를 통해 프로필 정보 조회</li>
+     *   <li>PERFORMANCE → performanceRepository를 통해 공연 정보 조회</li>
+     *   <li>VENUE → venueRepository를 통해 공연장 정보 조회</li>
+     * </ul>
+     * </p>
+     *
+     * @param targetId         팔로잉 목록을 조회할 프로필 ID
+     * @param targetMode       조회 대상 프로필의 활성 모드 (USER, PERFORMER, HOST 등)
      * @param loginProfileId   로그인한 사용자의 프로필 ID (팔로우 여부 확인용)
-     * @param loginProfileMode 로그인한 사용자의 {@link ActiveMode} (팔로우 여부 확인용)
-     * @return 로그인 사용자 기준으로 팔로잉 상태를 포함한 {@link ResponseFollowListDto} 리스트
+     * @param loginProfileMode 로그인한 사용자의 활성 모드
+     * @return 로그인 사용자 기준 팔로우 여부(isFollowing)를 포함한
+     * {@link ResponseFollowListDto} 리스트
+     * @throws ApiException <ul>
+     *                                                                                                                                                                                                                               <li>프로필이 존재하지 않는 경우</li>
+     *                                                                                                                                                                                                                               <li>공연(PERFORMANCE)이 존재하지 않는 경우</li>
+     *                                                                                                                                                                                                                               <li>공연장(VENUE)이 존재하지 않는 경우</li>
+     *                                                                                                                                                                                                                               <li>알 수 없는 targetType이 들어온 경우</li>
+     *                                                                                                                                                                                                                           </ul>
+     * @implNote 현재 구현은 각 relation마다 추가 조회가 발생할 수 있어
+     * 팔로잉 수가 많을 경우 N+1 쿼리 문제가 발생할 수 있습니다.
+     * 필요 시 fetch join 또는 일괄 조회 방식으로 최적화가 필요합니다.
      */
     public List<ResponseFollowListDto> getFollowingList(Long targetId, ActiveMode targetMode, Long loginProfileId, ActiveMode loginProfileMode) {
 
-        Long targetUserId = getUserIdByProfile(targetId, targetMode.name());
+        Long targetUserId = getUserIdByProfile(targetId, targetMode);
 
         // 1️⃣ target 프로필이 팔로우하고 있는 관계 조회
         List<UserRelation> relations =
@@ -311,7 +358,7 @@ public class RelationService {
     public List<ResponseFollowListDto> getFollowerList(
         Long targetId, ActiveMode targetMode, Long loginProfileId, ActiveMode loginProfileMode) {
 
-        Long targetUserId = getUserIdByProfile(targetId, targetMode.name());
+        Long targetUserId = getUserIdByProfile(targetId, targetMode);
 
         // 1️⃣ target 프로필을 팔로우하고 있는 관계 조회
         List<UserRelation> relations =
@@ -321,6 +368,7 @@ public class RelationService {
                 RelationType.FOLLOW
             );
 
+        User loginUser = findProfileById(loginProfileId, loginProfileMode);
         // 2️⃣ DTO 변환
         return relations.stream()
             .map(relation -> {
@@ -330,7 +378,7 @@ public class RelationService {
                     relation.getActorProfileMode()
                 );
 
-                User loginUser = findProfileById(loginProfileId, loginProfileMode);
+
                 // 로그인 사용자가 팔로워를 팔로우 중인지 확인
                 boolean isFollowing =
                     userRelationRepository.findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(

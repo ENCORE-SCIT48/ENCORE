@@ -15,19 +15,22 @@
         <button id="tab-follower" class="tab-btn">팔로워</button>
     </div>
 
+    <!-- 팔로잉 리스트 -->
     <div id="following-content">
-        <div class="recommend-section">
-            <div class="recommend-grid" id="recommend-container"></div>
-        </div>
-
         <div id="following-container" class="list-group"></div>
     </div>
 
+    <!-- 팔로워 리스트 -->
     <div id="follower-content" style="display:none;">
         <div id="follower-container" class="list-group"></div>
     </div>
-</div>
 
+
+    <!-- 공용 Footer -->
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <!-- JS 변수 안전 처리 -->
+</div>
 <script th:inline="javascript">
     /*<![CDATA[*/
         const targetId = [[${targetId}]];
