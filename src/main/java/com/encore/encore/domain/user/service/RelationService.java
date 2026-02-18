@@ -241,11 +241,13 @@ public class RelationService {
                     relation.getTargetProfileMode()
                 );
 
+                User loginUser = findProfileById(loginProfileId, loginProfileMode);
+
                 // 로그인 사용자가 이 유저를 팔로우 중인지 확인
                 boolean isFollowing =
                     userRelationRepository
                         .findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
-                            loginProfileId,
+                            loginUser.getUserId(),
                             loginProfileMode,
                             relation.getTargetId(),
                             relation.getTargetProfileMode(),
@@ -304,10 +306,11 @@ public class RelationService {
                     relation.getActorProfileMode()
                 );
 
+                User loginUser = findProfileById(loginProfileId, loginProfileMode);
                 // 로그인 사용자가 팔로워를 팔로우 중인지 확인
                 boolean isFollowing =
                     userRelationRepository.findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(
-                            loginProfileId,
+                            loginUser.getUserId(),
                             loginProfileMode,
                             follower.getProfileId(),
                             relation.getActorProfileMode(),

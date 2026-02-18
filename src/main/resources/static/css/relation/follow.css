@@ -73,3 +73,27 @@
     background-color: #E63946;
     color: white;
 }
+/* CSS 우선순위를 강제로 높입니다 */
+.btn-primary {
+    background-color: #E63946 !important;
+    border-color: #E63946 !important;
+    color: white !important;
+}
+
+.btn-light {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+    color: #333 !important;
+}
+/* follow.css */
+.btn-unfollowed {
+    background-color: #E63946 !important; /* 빨강 */
+    color: white !important;
+    border-color: #E63946 !important;
+}
+
+.btn-following {
+    background-color: #ffffff !important; /* 하양 */
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+}

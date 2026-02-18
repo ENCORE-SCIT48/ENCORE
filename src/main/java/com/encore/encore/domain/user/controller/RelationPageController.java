@@ -21,7 +21,7 @@ public class RelationPageController {
 
 
         model.addAttribute("activeTab", tab);
-        model.addAttribute("targetId", 4L);
+        model.addAttribute("targetId", 2L);
         model.addAttribute("profileMode", "USER");
 
         return "relation/following-follower";
