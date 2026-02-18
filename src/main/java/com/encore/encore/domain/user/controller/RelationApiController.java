@@ -5,13 +5,11 @@ import com.encore.encore.domain.user.dto.ResponseFollowDto;
 import com.encore.encore.domain.user.dto.ResponseFollowListDto;
 import com.encore.encore.domain.user.service.RelationService;
 import com.encore.encore.global.common.CommonResponse;
-import com.encore.encore.global.config.CustomUserDetails;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -85,7 +83,7 @@ public class RelationApiController {
         //ActiveMode loginProfileMode = userDetails.getActiveMode();
 
         Long loginProfileId = 2L;
-        ActiveMode loginProfileMode = ActiveMode.USER;
+        ActiveMode loginProfileMode = ActiveMode.HOST;
 
         List<ResponseFollowListDto> result =
             relationService.getFollowingList(
@@ -108,7 +106,7 @@ public class RelationApiController {
      */
     @GetMapping("/{targetProfileId}/{targetProfileMode}/follower")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowerList(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
+        //@AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode) {
 
@@ -119,14 +117,17 @@ public class RelationApiController {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 profileMode 값입니다.");
         }
 
-        Long loginProfileId = userDetails.getActiveProfileId();
-        ActiveMode loginProfileMode = userDetails.getActiveMode();
+        //Long loginProfileId = userDetails.getActiveProfileId();
+        //ActiveMode loginProfileMode = userDetails.getActiveMode();
+
+        Long loginProfileId = 2L;
+        ActiveMode loginProfileMode = ActiveMode.HOST;
 
         List<ResponseFollowListDto> followers = relationService.getFollowerList(
             targetProfileId,
-            loginProfileMode,
+            targetMode,
             loginProfileId,
-            targetMode
+            loginProfileMode
         );
 
         return ResponseEntity.ok(CommonResponse.ok(followers, "팔로워 리스트 조회 성공"));

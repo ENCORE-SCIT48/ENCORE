@@ -1,3 +1,7 @@
+// ==========================
+// following-follower.js
+// ==========================
+
 document.addEventListener('DOMContentLoaded', () => {
     activateTab(activeTab);
 
@@ -13,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tab-follower').addEventListener('click', () => activateTab('follower'));
 });
 
+// ==========================
+// 탭 전환
+// ==========================
 function activateTab(tab) {
     const tabFollowing = document.getElementById('tab-following');
     const tabFollower = document.getElementById('tab-follower');
@@ -33,27 +40,51 @@ function activateTab(tab) {
     }
 }
 
+// ==========================
+// 팔로잉 / 팔로워 / 추천 친구 API 호출
+// ==========================
 function fetchRecommendedFriends() {
     fetch('/api/recommended-friends')
         .then(res => res.json())
-        .then(data => renderRecommendFriends(data))
+        .then(commonResponse => {
+            if (!commonResponse.success) {
+                console.error('추천 친구 조회 실패:', commonResponse.message);
+                return;
+            }
+            renderRecommendFriends(commonResponse.data);
+        })
         .catch(err => console.error('추천 친구 로드 실패', err));
 }
 
 function fetchFollowingList() {
-    fetch(`/api/users/${targetProfileId}/${profileMode}/following`)
+    fetch(`/api/users/${targetId}/${profileMode}/following`)
         .then(res => res.json())
-        .then(data => renderUserList('following-container', data))
+        .then(commonResponse => {
+            if (!commonResponse.success) {
+                console.error('팔로잉 리스트 조회 실패:', commonResponse.message);
+                return;
+            }
+            renderUserList('following-container', commonResponse.data);
+        })
         .catch(err => console.error('팔로잉 리스트 로드 실패', err));
 }
 
 function fetchFollowerList() {
-    fetch(`/api/users/${targetProfileId}/${profileMode}/follower`)
+    fetch(`/api/users/${targetId}/${profileMode}/follower`)
         .then(res => res.json())
-        .then(data => renderUserList('follower-container', data))
+        .then(commonResponse => {
+            if (!commonResponse.success) {
+                console.error('팔로워 리스트 조회 실패:', commonResponse.message);
+                return;
+            }
+            renderUserList('follower-container', commonResponse.data);
+        })
         .catch(err => console.error('팔로워 리스트 로드 실패', err));
 }
 
+// ==========================
+// 리스트 렌더링
+// ==========================
 function renderRecommendFriends(data) {
     const container = document.getElementById('recommend-container');
     container.innerHTML = '';
@@ -69,8 +100,8 @@ function renderRecommendFriends(data) {
 
         div.innerHTML = `
             <img src="${user.profileImageUrl || '/images/default-profile.png'}" class="rounded-circle mb-2" style="width:48px; height:48px;">
-            <div class="fw-bold">${user.name}</div>
-            <button class="btn btn-primary btn-sm mt-1" onclick="handleFollow(${user.id}, '${user.profileMode}', this)">팔로우</button>
+            <div class="fw-bold">${user.userName}</div>
+            <button class="btn btn-primary btn-sm mt-1" onclick="handleFollow(${user.profileId}, '${user.profileMode}', this)">팔로우</button>
         `;
 
         container.appendChild(div);
@@ -81,6 +112,11 @@ function renderUserList(containerId, data) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
 
+    if (!data || data.length === 0) {
+        container.innerHTML = '<div class="text-muted">리스트가 없습니다.</div>';
+        return;
+    }
+
     data.forEach(user => {
         const div = document.createElement('div');
         div.className = 'list-group-item d-flex align-items-center justify-content-between';
@@ -89,13 +125,13 @@ function renderUserList(containerId, data) {
             <div class="d-flex align-items-center">
                 <img src="${user.profileImageUrl || '/images/default-profile.png'}" class="rounded-circle" style="width:48px; height:48px; margin-right: 10px;">
                 <div>
-                    <a href="/user/profile/${user.id}" class="text-sub fw-bold">${user.name}</a><br>
+                    <a href="/user/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a><br>
                     <small class="text-muted">@${user.username || ''}</small>
                 </div>
             </div>
             <button
                 class="btn btn-sm ${user.isFollowing ? 'btn-outline-danger' : 'btn-primary'}"
-                onclick="handleFollow(${user.id}, '${user.profileMode}', this)">
+                onclick="handleFollow(${user.profileId}, '${user.profileMode}', this)">
                 ${user.isFollowing ? '팔로우중' : '팔로우'}
             </button>
         `;
@@ -104,6 +140,9 @@ function renderUserList(containerId, data) {
     });
 }
 
+// ==========================
+// 팔로우 / 언팔로우 처리
+// ==========================
 function handleFollow(targetProfileId, targetProfileMode, buttonElement) {
     buttonElement.disabled = true;
 
@@ -113,7 +152,7 @@ function handleFollow(targetProfileId, targetProfileMode, buttonElement) {
     .then(res => res.json())
     .then(result => {
         if (!result.success) {
-            console.error("팔로우 실패");
+            console.error("팔로우 실패:", result.message);
             return;
         }
 

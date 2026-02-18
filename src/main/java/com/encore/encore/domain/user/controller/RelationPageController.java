@@ -21,10 +21,10 @@ public class RelationPageController {
 
 
         model.addAttribute("activeTab", tab);
-        model.addAttribute("targetId", targetId);
-        model.addAttribute("profileMode", profileMode);
+        model.addAttribute("targetId", 4L);
+        model.addAttribute("profileMode", "USER");
 
-        return "relation/follower-following";
+        return "relation/following-follower";
     }
 
 }
