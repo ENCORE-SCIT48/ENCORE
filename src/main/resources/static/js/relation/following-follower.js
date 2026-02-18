@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 초기 리스트 로드
     fetchFollowingList();
     fetchFollowerList();
-    fetchRecommendedFriends();
+    //fetchRecommendedFriends();
 
     // 탭 버튼 이벤트
     document.getElementById('tab-following')
@@ -31,7 +31,7 @@ function activateTab(tab) {
         tabFollower.classList.remove('active');
         followingContent.style.display = 'block';
         followerContent.style.display = 'none';
-        fetchRecommendedFriends();
+        //fetchRecommendedFriends();
     } else {
         tabFollower.classList.add('active');
         tabFollowing.classList.remove('active');
@@ -43,7 +43,7 @@ function activateTab(tab) {
 // ==========================
 // API 호출
 // ==========================
-function fetchRecommendedFriends() {
+/*function fetchRecommendedFriends() {
     fetch('/api/recommended-friends')
         .then(res => res.json())
         .then(commonResponse => {
@@ -55,7 +55,7 @@ function fetchRecommendedFriends() {
         })
         .catch(err => console.error('추천 친구 로드 실패', err));
 }
-
+*/
 function fetchFollowingList() {
     fetch(`/api/users/${targetId}/${profileMode}/following`)
         .then(res => res.json())
@@ -96,25 +96,36 @@ function renderRecommendFriends(data) {
 
     data.forEach(user => {
         const div = document.createElement('div');
-        div.className = 'user-card text-center';
-
-        const btn = document.createElement('button');
-        // ⚠️ user.isFollowing -> user.following 으로 수정
-        const isFollow = user.following;
-
-        btn.className = `btn btn-sm ${isFollow ? 'btn-following' : 'btn-unfollowed'}`;
-        btn.innerText = isFollow ? '팔로우중' : '팔로우';
-
-        btn.addEventListener('click', () => handleFollow(user.profileId, user.profileMode, btn));
+        div.className = 'list-group-item d-flex align-items-center justify-content-between';
 
         div.innerHTML = `
-            <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle mb-2" style="width:48px; height:48px;">
-            <div class="fw-bold">${user.userName}</div>
+            <div class="d-flex align-items-center">
+                <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle" style="width:48px; height:48px; margin-right: 10px;">
+                <div>
+                    <a href="/user/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a><br>
+                </div>
+            </div>
         `;
 
-        div.appendChild(btn);
+        // 자기 자신이면 버튼 생성 안함
+        if (user.profileId !== loginProfileId || user.profileMode !== loginProfileMode) {
+            const btn = document.createElement('button');
+            const isFollow = user.following;
+            btn.className = `btn btn-sm ${isFollow ? 'btn-following' : 'btn-unfollowed'}`;
+            btn.innerText = isFollow ? '팔로우중' : '팔로우';
+            btn.addEventListener('click', () => handleFollow(user.profileId, user.profileMode, btn));
+            div.appendChild(btn);
+        } else {
+            // 자기 자신이면 버튼 대신 '본인' 표시
+            const infoDiv = document.createElement('div');
+            infoDiv.innerText = '본인';
+            infoDiv.className = 'text-muted';
+            div.appendChild(infoDiv);
+        }
+
         container.appendChild(div);
     });
+
 }
 
 
@@ -131,15 +142,6 @@ function renderUserList(containerId, data) {
         const div = document.createElement('div');
         div.className = 'list-group-item d-flex align-items-center justify-content-between';
 
-        const btn = document.createElement('button');
-        // ⚠️ user.isFollowing -> user.following 으로 수정
-        const isFollow = user.following;
-
-        btn.className = `btn btn-sm ${isFollow ? 'btn-following' : 'btn-unfollowed'}`;
-        btn.innerText = isFollow ? '팔로우중' : '팔로우';
-
-        btn.addEventListener('click', () => handleFollow(user.profileId, user.profileMode, btn));
-
         div.innerHTML = `
             <div class="d-flex align-items-center">
                 <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle" style="width:48px; height:48px; margin-right: 10px;">
@@ -149,9 +151,25 @@ function renderUserList(containerId, data) {
             </div>
         `;
 
-        div.appendChild(btn);
+        // 자기 자신이면 버튼 생성 안함
+        if (user.profileId !== loginProfileId || user.profileMode !== loginProfileMode) {
+            const btn = document.createElement('button');
+            const isFollow = user.following;
+            btn.className = `btn btn-sm ${isFollow ? 'btn-following' : 'btn-unfollowed'}`;
+            btn.innerText = isFollow ? '팔로우중' : '팔로우';
+            btn.addEventListener('click', () => handleFollow(user.profileId, user.profileMode, btn));
+            div.appendChild(btn);
+        } else {
+            // 자기 자신이면 버튼 대신 '본인' 표시
+            const infoDiv = document.createElement('div');
+            infoDiv.innerText = '본인';
+            infoDiv.className = 'text-muted';
+            div.appendChild(infoDiv);
+        }
+
         container.appendChild(div);
     });
+
 }
 
 // ==========================

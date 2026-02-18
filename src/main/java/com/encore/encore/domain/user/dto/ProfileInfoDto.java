@@ -11,4 +11,5 @@ public class ProfileInfoDto {
     Long profileId;
     String profileMode;
     String profileName;
+    private String profileImageUrl;
 }

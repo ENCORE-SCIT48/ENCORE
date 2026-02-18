@@ -50,6 +50,10 @@ public class RelationApiController {
         Long profileId = 2L;
         ActiveMode profileMode = ActiveMode.HOST;
 
+        if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 팔로우 할 수 없습니다.");
+        }
+
         ResponseFollowDto result = relationService.userFollow(
             profileId, profileMode, targetProfileId, targetProfileMode
         );
