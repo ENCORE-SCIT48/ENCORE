@@ -33,20 +33,21 @@ public class ProfileService {
      * @throws RuntimeException
      *         선택된 모드에 해당하는 프로필이 존재하지 않을 경우
      */
+    @Transactional(readOnly = true)
     public Long findProfileIdByMode(ActiveMode mode, User user) {
         // [중요] 어떤 유저가 무슨 모드를 찾으려 하는가 (흐름 추적용)
         log.info("[Profile Search] User: {}, Mode: {}", user.getUserId(), mode);
 
         return switch (mode) {
-            case USER -> userProfileRepository.findByUser_UserId(user.getUserId())
+            case ROLE_USER -> userProfileRepository.findByUser_UserId(user.getUserId())
                 .map(UserProfile::getProfileId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "관람객 프로필 부재"));
 
-            case PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
+            case ROLE_PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
                 .map(PerformerProfile::getPerformerId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필 부재"));
 
-            case HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
+            case ROLE_HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
                 .map(HostProfile::getHostId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "주최자 프로필 부재"));
         };
@@ -60,6 +61,7 @@ public class ProfileService {
      * @param profileId 해당 모드의 프로필 PK ID
      * @return 초기화 완료 여부 (true: 완료, false: 미완료)
      */
+    @Transactional(readOnly = true)
     public boolean checkIfInitialized(ActiveMode mode, Long profileId) {
         // [중요] ID가 없어 초기화가 불가능한 상황 (경고성 로그)
         if (profileId == null) {
@@ -68,15 +70,15 @@ public class ProfileService {
         }
 
         boolean isInitialized = switch (mode) {
-            case USER -> userProfileRepository.findById(profileId)
+            case ROLE_USER -> userProfileRepository.findById(profileId)
                 .map(UserProfile::isInitialized)
                 .orElse(false); // 가이드라인: 없으면 false 반환하여 등록 폼 유도
 
-            case PERFORMER -> performerProfileRepository.findById(profileId)
+            case ROLE_PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(PerformerProfile::isInitialized)
                 .orElse(false);
 
-            case HOST -> hostProfileRepository.findById(profileId)
+            case ROLE_HOST -> hostProfileRepository.findById(profileId)
                 .map(HostProfile::isInitialized)
                 .orElse(false);
         };
@@ -88,4 +90,6 @@ public class ProfileService {
 
         return isInitialized;
     }
+
+
 }

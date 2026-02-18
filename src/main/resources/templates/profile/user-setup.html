@@ -5,6 +5,12 @@
     <title>프로필 선택 화면</title>
 </head>
 <body>
+<script th:inline="javascript">
+    /* <![CDATA[ */
+    console.log([[${userProfile}]]);
+    /* ]]> */
+</script>
 
+<pre>[[${userProfile}]]</pre>
 </body>
 </html>

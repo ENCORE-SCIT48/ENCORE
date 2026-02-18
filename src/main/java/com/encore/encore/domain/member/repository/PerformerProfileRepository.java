@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface PerformerProfileRepository extends JpaRepository<PerformerProfile, Long> {
     // UserProfileRepository.java
     Optional<PerformerProfile> findByUser_UserId(Long userId);
+    Optional<PerformerProfile> findByUser_Email(String email);
+
 }
