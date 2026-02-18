@@ -174,8 +174,6 @@ function handleFollow(targetProfileId, targetProfileMode, buttonElement) {
         // 서버 응답에서 'following' 필드를 가져옵니다. (확인 완료된 필드명)
         const isFollowing = result.data.following;
 
-        console.log("드디어 확인된 진짜 상태:", isFollowing);
-
         // 1. 텍스트 변경
         buttonElement.innerText = isFollowing ? "팔로우중" : "팔로우";
 

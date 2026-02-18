@@ -22,7 +22,7 @@ public class RelationPageController {
 
         model.addAttribute("activeTab", tab);
         model.addAttribute("targetId", 2L);
-        model.addAttribute("profileMode", "USER");
+        model.addAttribute("profileMode", "HOST");
 
         return "relation/following-follower";
     }
