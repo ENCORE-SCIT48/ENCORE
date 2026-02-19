@@ -26,6 +26,7 @@ public class ResponseChatMessage {
     private String senderName;
     private String content;
     private LocalDateTime createdAt;
+    private boolean isMine;
 
 
 }

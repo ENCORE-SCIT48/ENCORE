@@ -74,6 +74,7 @@ public class ChatMessageService {
             .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())
+            .isMine(message.getProfileId().equals(activeId) && message.getProfileMode().equals(activeMode))
             .build();
 
     }
@@ -91,7 +92,7 @@ public class ChatMessageService {
      * @param size   한 페이지당 메시지 수
      * @return {@link ResponseChatMessage} DTO로 변환된 메시지 리스트
      */
-    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size) {
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeId, ActiveMode activeMode) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
@@ -104,6 +105,7 @@ public class ChatMessageService {
                 .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
+                .isMine(message.getProfileId().equals(activeId) && message.getProfileMode().equals(activeMode))
                 .build()
             )
             .toList();

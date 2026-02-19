@@ -23,7 +23,7 @@ html, body {
   background: #fff;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* 또는 auto */
 }
 /* 상단 헤더 */
 .app-header {
@@ -248,35 +248,7 @@ position: relative;
     word-break: break-word;
   }
 
-  /* 색상 구분 */
-  .chat-message.mine .message-wrapper {
-    background-color: #dcf8c6; /* 연한 초록 */
-    border-top-right-radius: 0; /* 화살표쪽 각 */
-  }
 
-  .chat-message.other .message-wrapper {
-    background-color: #e9ecef; /* 연한 회색 */
-    border-top-left-radius: 0;
-  }
-
-  /* 말풍선 화살표 */
-  .chat-message.mine .message-wrapper::after {
-    content: "";
-    position: absolute;
-    right: -6px;
-    top: 8px;
-    border: 6px solid transparent;
-    border-left-color: #dcf8c6;
-  }
-
-  .chat-message.other .message-wrapper::after {
-    content: "";
-    position: absolute;
-    left: -6px;
-    top: 8px;
-    border: 6px solid transparent;
-    border-right-color: #e9ecef;
-  }
 
   /* 이름 */
   .message-name {
