@@ -121,3 +121,66 @@
   gap: 6px;
 }
 
+/* 2. 상단 헤더 고정 */
+.app-header {
+    height: 56px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+}
+
+/* 3. 메인 채팅 영역 (중앙 스크롤) */
+.chat-area {
+    flex: 1; /* 남는 공간 모두 차지 */
+    overflow-y: auto; /* 내용 많으면 스크롤 */
+    padding: 15px;
+    background-color: #f9f9f9;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 4. 하단 입력 영역 고정 */
+.chat-input-area {
+    flex-shrink: 0;
+    background-color: #ffffff;
+    padding: 10px;
+}
+
+/* 5. 버튼 아이콘 스타일 */
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--sub-dark);
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 6. 사이드바(Offcanvas) 내부 스타일 */
+.offcanvas-body {
+    padding: 0; /* 목록이 꽉 차게 */
+}
+
+#participantList .list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+}
+
+/* 방장 배지 스타일 */
+.badge.bg-warning {
+    font-size: 0.7rem;
+    color: #000;
+}
+
+/* 나가기 버튼 영역 */
+.offcanvas-body nav {
+    padding: 15px;
+}

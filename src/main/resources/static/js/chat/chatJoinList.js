@@ -1,5 +1,5 @@
 /**
- * chatPreview.js
+ * chatJoinList.js
  * 🎯 참여중 채팅방 3개 + HOT 채팅방 10개 미리보기
  */
 
@@ -83,7 +83,7 @@ $(document).ready(() => {
                 <div class="chat-title">${chat.title}</div>
                 <div class="chat-info">
                     <span>${formattedDate}</span>
-                    <span class="member-count"><i class="fa-solid fa-users"></i> ${chat.currentMember}/${chat.maxMember}명</span>
+                    <span><i class="fa-solid fa-users"></i> ${chat.currentMember}/${chat.maxMember}명</span>
                 </div>
             </div>
         `);
