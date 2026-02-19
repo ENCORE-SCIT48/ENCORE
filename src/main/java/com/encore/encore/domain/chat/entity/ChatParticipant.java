@@ -1,6 +1,6 @@
 package com.encore.encore.domain.chat.entity;
 
-import com.encore.encore.domain.user.entity.User;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,8 +19,24 @@ public class ChatParticipant extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private ChatRoom room;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-    private String participantStatus;
+
+    @Column(nullable = false)
+    private Long profileId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ActiveMode profileMode;  // USER / PERFORMER / HOST
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ParticipantStatus participantStatus;
+
+    public enum ParticipantStatus {
+        PENDING,
+        ACCEPTED,
+        WAITING,
+        REJECTED;
+
+    }
+
 }
