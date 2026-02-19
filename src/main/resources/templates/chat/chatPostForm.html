@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅방 생성</title>
+
+    <!-- JS 라이브러리 -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <!-- CSS 라이브러리 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- 커스텀 CSS -->
+    <link rel="stylesheet" th:href="@{/css/chat/chat.css}">
+    <link rel="stylesheet" th:href="@{/css/chat/chat-post-form.css}">
+</head>
+
+<body>
+<div class="app-container">
+
+    <!-- ===== 상단 헤더 ===== -->
+    <header class="app-header">
+        <button type="button" onclick="history.back();" class="back-btn" aria-label="뒤로가기">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <h1 class="app-title">채팅방 생성</h1>
+
+        <!-- 우측 더미 요소 -->
+        <div style="width: 36px;"></div>
+    </header>
+
+    <!-- ===== 스크롤 영역 ===== -->
+    <main class="app-content">
+        <section class="chat-form">
+            <form id="chatPostForm">
+                <!-- 공연 ID 숨김 -->
+                <input type="hidden" id="performanceId" th:value="${performanceId}">
+
+                <!-- 공연명 -->
+                <div class="mb-3">
+                    <label for="performanceName" class="form-label">공연명</label>
+                    <input type="text"
+                           id="performanceName"
+                           class="form-control"
+                           th:value="${performanceTitle}"
+                           readonly>
+                </div>
+
+                <!-- 제목 -->
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text"
+                           id="title"
+                           class="form-control"
+                           placeholder="제목을 입력하세요"
+                           required>
+                </div>
+
+                <!-- 내용 -->
+                <div class="mb-3">
+                    <label for="content" class="form-label">내용</label>
+                    <textarea id="content"
+                              class="form-control"
+                              rows="5"
+                              placeholder="내용을 입력하세요"
+                              required></textarea>
+                </div>
+
+                <!-- 모집 인원 -->
+                <div class="mb-3">
+                    <label for="maxMember" class="form-label">모집 인원</label>
+                    <input type="number"
+                           id="maxMember"
+                           class="form-control"
+                           min="1"
+                           required>
+                </div>
+
+                <!-- 제출 버튼 -->
+                <button type="submit" class="btn btn-primary w-100">생성하기</button>
+            </form>
+        </section>
+    </main>
+
+</div>
+
+<!-- Custom JS -->
+<script th:src="@{/js/chat/chatPostForm.js}"></script>
+
+</body>
+</html>
