@@ -4,89 +4,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공연장 리스트</title>
+  <title>공연장 대관 신청 리스트</title>
 
   <!-- Bootswatch Litera -->
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
 
   <style>
-    html,
     body {
       margin: 0;
-      padding: 0;
       background: #ffffff;
     }
 
-    .app-container {
+    .app-wrapper {
       width: 100%;
-      max-width: 1000px;
+      max-width: 420px;
       margin: 0 auto;
+      background: #ffffff;
       min-height: 100vh;
-      padding: 60px 20px;
+    }
+
+    .app-container {
+      padding: 20px 16px;
     }
 
     .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 40px;
+      margin-bottom: 24px;
     }
 
     .back-btn {
-      font-size: 22px;
+      font-size: 20px;
       text-decoration: none;
       color: #333333;
-      transition: 0.2s;
-    }
-
-    .back-btn:hover {
-      color: #E63946;
     }
 
     .page-title {
-      font-size: 22px;
+      font-size: 16px;
       font-weight: 600;
       color: #333333;
     }
 
     .content-area {
-      margin-top: 20px;
-      min-height: 400px;
+      margin-top: 10px;
+      min-height: 300px;
+      font-size: 14px;
       color: #999;
       text-align: center;
-      font-size: 16px;
     }
 
-    :root {
-      --bs-primary: #E63946;
-      --bs-primary-rgb: 230, 57, 70;
+    .divider {
+      margin: 20px 0;
+      border-top: 1px solid #eee;
+    }
+
+    .btn-primary {
+      background-color: #E63946;
+      border-color: #E63946;
+    }
+
+    .btn-primary:hover {
+      background-color: #c92f3a;
+      border-color: #c92f3a;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="app-container">
+  <div class="app-wrapper">
 
-    <!-- 상단 바 -->
-    <div class="top-bar">
-      <a th:href="@{/posts/performance}" class="back-btn">
-        ←
-      </a>
-      <div class="page-title">공연장 대관 신청 리스트</div>
-      <div th:replace="~{fragments/performer/profile :: profile}"></div>
+    <div class="app-container">
+
+      <!-- 상단 바 -->
+      <div class="top-bar">
+        <a th:href="@{/posts/performance}" class="back-btn">←</a>
+        <div class="page-title">공연장 대관 신청 리스트</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 내용 영역 -->
+      <div class="content-area">
+        공연장 리스트가 표시될 영역입니다.
+      </div>
+
     </div>
 
-    <!-- 내용 영역 -->
-    <div class="content-area">
-      공연장 리스트가 표시될 영역입니다.
-    </div>
+    <!-- 하단 네비 -->
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>
-
-  <!-- 하단 네비 -->
-  <div th:replace="~{fragments/performer/footer :: footer}"></div>
-
 
 </body>
 
