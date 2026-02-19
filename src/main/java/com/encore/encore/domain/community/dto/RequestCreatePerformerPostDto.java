@@ -1,22 +1,20 @@
 package com.encore.encore.domain.community.dto;
 
-
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseCreatePostDto {
+public class RequestCreatePerformerPostDto {
 
-    private Long postId;
+    private Long performanceId;
 
     private String postType;
 
     private String title;
 
-    private LocalDateTime createdAt;
+    private String content;
+
 }
