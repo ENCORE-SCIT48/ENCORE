@@ -1,72 +1,71 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const dmBtn = document.getElementById("btn-dm");
+(() => {
+    /**
+     * 팔로우 버튼 & DM 버튼 DOM
+     */
     const followBtn = document.getElementById("followBtn");
+    const dmBtn = document.getElementById("btn-dm");
 
     /**
-     * 팔로우 버튼 처리
+     * 공용 toast 함수 (실제 구현 필요)
+     */
+    function showToast(message) {
+        // 예: 부트스트랩 Toast 또는 사용자 정의 UI
+        console.log("Toast:", message);
+    }
+
+    /**
+     * 팔로우 버튼 클릭 처리
      */
     if (followBtn) {
         followBtn.addEventListener("click", function () {
-            // dataset에서 값을 읽어올 때, HTML의 data-profile-mode와 일치하는지 확인
             const profileId = this.dataset.profileId;
             const profileMode = this.dataset.profileMode;
 
             if (!profileId || !profileMode || profileMode === "undefined") {
                 console.error("데이터 누락:", { profileId, profileMode });
+                showToast("데이터가 올바르지 않습니다.");
                 return;
             }
 
-            // 버튼 비활성화 (중복 클릭 방지)
+            // 중복 클릭 방지
             followBtn.disabled = true;
 
             fetch(`/api/users/${profileId}/${profileMode}/follow`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" }
             })
-            .then(response => {
-                if (!response.ok) throw new Error("네트워크 응답에 문제가 있습니다.");
-                return response.json();
+            .then(res => {
+                if (!res.ok) throw new Error("네트워크 응답에 문제가 있습니다.");
+                return res.json();
             })
             .then(res => {
-                if (!res.success) {
-                    throw new Error(res.message);
-                }
+                if (!res.success) throw new Error(res.message);
 
-                // 1. 서버에서 온 최신 팔로우 상태 적용
-                const nextState = res.data.isFollowing;
+                const isFollowing = res.data.isFollowing;
 
-                if (nextState) {
-                    // 팔로잉 중일 때 스타일
-                    followBtn.innerText = "팔로잉";
-                    followBtn.classList.replace("btn-danger", "btn-outline-danger");
-                    followBtn.classList.remove("text-white");
-                } else {
-                    // 팔로우 안 한 상태 스타일
-                    followBtn.innerText = "팔로우";
-                    followBtn.classList.replace("btn-outline-danger", "btn-danger");
-                    followBtn.classList.add("text-white");
-                }
+                // 버튼 상태 및 스타일 업데이트
+                followBtn.innerText = isFollowing ? "팔로잉" : "팔로우";
+                followBtn.classList.toggle("btn-following", isFollowing);
+                followBtn.classList.toggle("btn-unfollowed", !isFollowing);
 
-                // 2. 팔로워 수 실시간 업데이트
+                // 팔로워 수 실시간 업데이트
                 const followerCountElement = document.getElementById("followerCount");
                 if (followerCountElement && res.data.followerCount !== undefined) {
                     followerCountElement.innerText = res.data.followerCount;
                 }
             })
-            // <--- 여기에 있던 'g' 오타를 지웠습니다.
-            .catch(error => {
-                console.error("Follow Error:", error);
-                alert("처리 중 오류가 발생했습니다: " + error.message);
+            .catch(err => {
+                console.error("Follow Error:", err);
+                showToast("팔로우 처리 실패: " + err.message);
             })
             .finally(() => {
-                // 성공하든 실패하든 버튼 잠금 해제
                 followBtn.disabled = false;
             });
         });
     }
 
     /**
-     * DM 요청 처리 (기존 로직 유지)
+     * DM 버튼 클릭 처리
      */
     if (dmBtn) {
         dmBtn.addEventListener("click", function () {
@@ -81,15 +80,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     targetProfileMode: profileMode
                 })
             })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(res => {
                 if (!res.success) throw new Error(res.message);
                 window.location.href = `/dm/${res.data.roomId}`;
             })
-            .catch(error => {
-                console.error("DM Error:", error);
-                alert("DM 요청 실패: " + error.message);
+            .catch(err => {
+                console.error("DM Error:", err);
+                showToast("DM 요청 실패: " + err.message);
             });
         });
     }
-});
+})();

@@ -179,3 +179,17 @@ body {
     color: #6c757d;
     margin-top: 2px;
 }
+/* style.css */
+.profile-avatar img {
+    width: 90px;
+    height: 90px;
+}
+.btn-following {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+.btn-unfollowed {
+    background: #dc3545;
+    color: #fff;
+}

@@ -52,10 +52,7 @@
         <section class="profile-top d-flex align-items-start justify-content-between">
 
             <div class="profile-avatar">
-                <img th:src="${user.profileImg}"
-                     alt="프로필 사진"
-                     class="rounded-circle"
-                     style="width:90px; height:90px;">
+                <img th:src="${user.profileImg}" alt="프로필 사진" class="rounded-circle">
             </div>
 
 
@@ -102,7 +99,7 @@
 
         <!-- ===== Bio ===== -->
         <section class="mt-4">
-            <h6 class="section-title">한 줄 소개</h6>
+            <h6 class="section-title">소개</h6>
             <div class="card-box" th:text="${user.userInfo}">
                 소개 내용
             </div>
@@ -110,14 +107,10 @@
 
         <!-- ===== Info ===== -->
         <section class="mt-4">
-            <h6 class="section-title">프로필 정보</h6>
-            <!-- <div class="card-box">
-                 <p th:text="'선호 장르: ' + ${user.preferredGenre}"></p>
-                 <p th:text="'선호 공연장: ' + ${user.preferredVenue}"></p>
-                 <p th:text="'주 포지션: ' + ${user.mainPosition}"></p>
-                 <p th:text="'주 공연장: ' + ${user.mainVenue}"></p>
-                 <p th:text="'등록 정보: ' + ${user.label}"></p>
-             </div>-->
+            <h6 class="section-title">최신 활동</h6>
+            <div class="card-box">
+
+            </div>
         </section>
 
     </main>

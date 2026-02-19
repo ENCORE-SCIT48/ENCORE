@@ -30,8 +30,8 @@ function activateTab(tab) {
     tabFollowing.classList.toggle('active', isFollowingTab);
     tabFollower.classList.toggle('active', !isFollowingTab);
 
-    followingContent.style.display = isFollowingTab ? 'block' : 'none';
-    followerContent.style.display = isFollowingTab ? 'none' : 'block';
+    followingContent.classList.toggle('hidden', !isFollowingTab);
+    followerContent.classList.toggle('hidden', isFollowingTab);
 }
 
 // ==========================
@@ -69,7 +69,7 @@ function renderUserList(containerId, data) {
         // 프로필 영역
         div.innerHTML = `
             <div class="d-flex align-items-center">
-                <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle" style="width:48px; height:48px; margin-right: 10px;">
+                <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle profile-thumb">
                 <div>
                     <a href="/member/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a>
                 </div>

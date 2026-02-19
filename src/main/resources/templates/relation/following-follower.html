@@ -19,7 +19,7 @@
         <div class="header-center">
         </div>
 
-        <div class="header-right" style="width: 40px;"></div>
+        <div class="header-right fixed-width-40"></div>
     </header>
 
     <div class="d-flex mb-3">
@@ -27,16 +27,17 @@
         <button id="tab-follower" class="tab-btn">팔로워</button>
     </div>
 
-    <!-- 팔로잉 리스트 -->
-    <div id="following-content">
-        <div id="following-container" class="list-group"></div>
-    </div>
+    <main>
+        <!-- 팔로잉 리스트 -->
+        <section id="following-content">
+            <div id="following-container" class="list-group"></div>
+        </section>
 
-    <!-- 팔로워 리스트 -->
-    <div id="follower-content" style="display:none;">
-        <div id="follower-container" class="list-group"></div>
-    </div>
-
+        <!-- 팔로워 리스트 -->
+        <section id="follower-content" class="hidden">
+            <div id="follower-container" class="list-group"></div>
+        </section>
+    </main>
 
     <!-- 공용 Footer -->
     <div th:replace="fragments/footer :: footer"></div>
