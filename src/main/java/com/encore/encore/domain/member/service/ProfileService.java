@@ -1,10 +1,15 @@
 package com.encore.encore.domain.member.service;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.member.entity.HostProfile;
+import com.encore.encore.domain.member.entity.PerformerProfile;
+import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.user.entity.User;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +24,6 @@ public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final PerformerProfileRepository performerProfileRepository;
     private final HostProfileRepository hostProfileRepository;
-
     /**
      * 사용자의 활성 모드에 따라 해당 프로필의 PK ID를 조회한다.
      * ActiveMode 값에 따라 서로 다른 프로필 테이블을 조회하며,
@@ -30,16 +34,58 @@ public class ProfileService {
      *         선택된 모드에 해당하는 프로필이 존재하지 않을 경우
      */
     public Long findProfileIdByMode(ActiveMode mode, User user) {
+        // [중요] 어떤 유저가 무슨 모드를 찾으려 하는가 (흐름 추적용)
+        log.info("[Profile Search] User: {}, Mode: {}", user.getUserId(), mode);
+
         return switch (mode) {
-            case PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("공연자 프로필이 없습니다."))
-                .getPerformerId();
-            case HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("주최자 프로필이 없습니다."))
-                .getHostId();
             case USER -> userProfileRepository.findByUser_UserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("관람객 프로필이 없습니다."))
-                .getProfileId();
-        }; // 이 끝에 세미콜론(;)이 반드시 있어야 합니다!
+                .map(UserProfile::getProfileId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "관람객 프로필 부재"));
+
+            case PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
+                .map(PerformerProfile::getPerformerId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필 부재"));
+
+            case HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
+                .map(HostProfile::getHostId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "주최자 프로필 부재"));
+        };
+    }
+    /**
+     * [설명] 선택한 모드(USER, PERFORMER, HOST)의 처음 접속 확인
+     * 각 프로필 테이블의 isInitialized 컬럼을 조회하여,
+     * 필수 정보 입력이 완료된 상태인지 판단합니다.
+     *
+     * @param mode      검사할 프로필 (USER, PERFORMER, HOST)
+     * @param profileId 해당 모드의 프로필 PK ID
+     * @return 초기화 완료 여부 (true: 완료, false: 미완료)
+     */
+    public boolean checkIfInitialized(ActiveMode mode, Long profileId) {
+        // [중요] ID가 없어 초기화가 불가능한 상황 (경고성 로그)
+        if (profileId == null) {
+            log.warn("[Profile Check] Null ID for Mode: {}", mode);
+            return false;
+        }
+
+        boolean isInitialized = switch (mode) {
+            case USER -> userProfileRepository.findById(profileId)
+                .map(UserProfile::isInitialized)
+                .orElse(false); // 가이드라인: 없으면 false 반환하여 등록 폼 유도
+
+            case PERFORMER -> performerProfileRepository.findById(profileId)
+                .map(PerformerProfile::isInitialized)
+                .orElse(false);
+
+            case HOST -> hostProfileRepository.findById(profileId)
+                .map(HostProfile::isInitialized)
+                .orElse(false);
+        };
+
+        // [중요] 최종 판정 결과 (리다이렉트 원인 파악용)
+        if (!isInitialized) {
+            log.info("[Profile Check] Mode: {} (ID: {}) is NOT initialized.", mode, profileId);
+        }
+
+        return isInitialized;
     }
 }
