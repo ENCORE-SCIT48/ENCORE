@@ -33,9 +33,18 @@ public class UserProfileController {
     @GetMapping("/setup")
     public String setup(@AuthenticationPrincipal CustomUserDetails userDetails,
                         Model model) {
+        // 1. 방어 코드 추가
+        if (userDetails == null) {
+            log.error("[UserProfileController] 유저 정보가 없습니다! 로그인 페이지로 튕깁니다.");
+            return "redirect:/auth/login";
+        }
+
+        log.info("[UserProfileController] 프로필 조회 요청 - Email: {}", userDetails.getUsername());
+        // ... 이하 동일
         log.info("[UserProfileController] 프로필 조회 요청 - Email: {}", userDetails.getUsername());
         //db에서 유저 프로필 정보를 가져옴
         UserProfileResponseDto userProfileDto = userProfileService.getUserProfile(userDetails.getUsername());
+
         log.debug("[UserProfileController] 조회된 프로필 데이터 확인 - hasPhoto: {}",
             userProfileDto.getProfileImageUrl() != null);
 
@@ -51,7 +60,7 @@ public class UserProfileController {
      * @param userDetails 인증된 사용자 정보
      * @param dto 프로필 수정 데이터 객체
      * @param profileImage 업로드된 프로필 이미지 파일 (선택 사항)
-     * @return 홈 화면으로 리다이렉트
+     * @return 관람객 프로필 화면으로 이동
      */
     @PostMapping("/setup")
     public String setup(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -65,6 +74,6 @@ public class UserProfileController {
 
         log.info("[UserProfileController] 프로필 설정 완료 - 사용자: {}", userDetails.getUsername());
 
-        return "redirect:/";
+        return "redirect:/userprofile/setup?success=true";
     }
 }

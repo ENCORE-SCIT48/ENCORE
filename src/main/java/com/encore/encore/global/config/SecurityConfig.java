@@ -31,7 +31,9 @@ public class SecurityConfig {
                 .usernameParameter("email")
                 .defaultSuccessUrl("/profiles/select", true)
                 .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("/auth/login?error=true"); // 경로 수정 권장
+                    // 콘솔창(IntelliJ 하단 Log)에 에러 원인이 찍힙니다.
+                    System.out.println("### 로그인 실패 원인: " + exception.getMessage());
+                    response.sendRedirect("/auth/login?error=true");
                 })
                 .permitAll()
             )
@@ -47,6 +49,17 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
+
+                // 2. 인증(로그인)이 필수인 경로들 (UserDetails가 필요한 모든 곳)
+                .requestMatchers("/profiles/**").authenticated()
+                .requestMatchers("/setup/**").authenticated()
+                .requestMatchers("/user/**").authenticated() // 유저 관련 일반 경로 추가
+
+                // 3. 역할(Role)에 따른 제한
+                // [기존 정보 참고] USER("관람객"), PERFORMER("공연자"), HOST("주최자")
+
+
+                // 4. 나머지 모든 요청은 로그인 없이 허용 (개발 편의성)
                 .anyRequest().permitAll()
             );
 

@@ -63,6 +63,7 @@ public class UserProfileService {
         });
         // 2. 이미지 파일이 있으면 업로드 후 URL 반환, 없으면 null
         String imageUrl = null;
+
         if (profileImage != null && !profileImage.isEmpty()) {
             // [추가] 기존에 등록된 이미지가 있다면 저장소에서 삭제
             if (userProfile.getProfileImageUrl() != null) {
@@ -72,10 +73,12 @@ public class UserProfileService {
 
             // 새 파일 업로드
             imageUrl = fileService.saveFile(profileImage);
+
             log.info("[FILE_UPLOAD] New profile image uploaded: {}", imageUrl);
         }
 
         userProfile.initialize(dto, imageUrl);
+
         log.info("[PROFILE_UPDATE_SUCCESS] Profile updated for user: {}", username);
     }
 }

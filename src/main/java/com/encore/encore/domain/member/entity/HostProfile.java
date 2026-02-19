@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "host_profiles")
+@Table(name = "host_profile")
 public class HostProfile extends BaseEntity {
 
     @Id
@@ -20,11 +20,11 @@ public class HostProfile extends BaseEntity {
     private Long hostId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "FK_HOST_USER"))
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // [사업자 신원]
-    @Column(name = "organization_name", nullable = false, length = 100)
+    @Column(name = "organization_name", length = 100)
     private String organizationName; // 법인/단체명
 
     @Column(name = "representative_name", length = 50)
@@ -43,6 +43,9 @@ public class HostProfile extends BaseEntity {
     @Column(name = "business_email", length = 100)
     private String businessEmail; // 공식 업무용 이메일
 
+    @Column(name = "profile_image_url", length = 512)
+    private String profileImageUrl;
+
     // [상태 값]
     @Builder.Default
     @Column(name = "is_verified", nullable = false)
@@ -55,20 +58,35 @@ public class HostProfile extends BaseEntity {
     /**
      * [설명] 호스트 프로필 초기화 및 업데이트
      */
-    public void initialize(HostProfileRequestDto dto) {
+    public void initialize(HostProfileRequestDto dto, String imageUrl) {
         if (dto.getOrganizationName() != null) this.organizationName = dto.getOrganizationName();
         if (dto.getRepresentativeName() != null) this.representativeName = dto.getRepresentativeName();
         if (dto.getBusinessNumber() != null) this.businessNumber = dto.getBusinessNumber().replaceAll("-", "");
         if (dto.getOpeningDate() != null) this.openingDate = dto.getOpeningDate().replaceAll("-", "");
         if (dto.getContactNumber() != null) this.contactNumber = dto.getContactNumber();
         if (dto.getBusinessEmail() != null) this.businessEmail = dto.getBusinessEmail();
+        // 이미지 URL 처리 (새로운 이미지가 업로드된 경우에만 교체)
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            this.profileImageUrl = imageUrl;
+        }
 
+        if (!this.isVerified) {
+            throw new IllegalStateException("사업자 인증이 완료되지 않아 프로필을 시작할 수 없습니다.");
+        }
         this.isInitialized = true;
     }
 
     /**
      * [설명] 국세청 API 검증 성공 시 호출되는 메서드
      */
+    /**
+     * [추가] 국세청 인증 시 사용한 실제 정보를 엔티티에 저장하는 메서드
+     */
+    public void updateVerificationInfo(String businessNumber, String representativeName, String openingDate) {
+        this.businessNumber = businessNumber;
+        this.representativeName = representativeName;
+        this.openingDate = openingDate;
+    }
     public void markAsVerified() {
         this.isVerified = true;
     }

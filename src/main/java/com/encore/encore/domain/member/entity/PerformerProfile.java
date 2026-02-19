@@ -11,7 +11,7 @@
     @Builder
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
-    @Table(name = "performer_profiles")
+    @Table(name = "performer_profile")
     public class PerformerProfile extends BaseEntity {
 
         @Id
@@ -22,25 +22,32 @@
         @JoinColumn(name = "user_id", nullable = false)
         private User user;
 
-        @Column(nullable = false, length = 100)
+        @Column(name = "stage_name", length = 100)
         private String stageName;
 
+        @Column(name = "profile_image_url", length = 512)
+        private String profileImageUrl;
         /**
-         * [설명] 선택한 카테고리(장르) 리스트를 콤마(,)로 구분된 문자열로 저장합니다.
-         * [이유] DB 설계를 단순화하면서 다중 선택 기능을 구현하기 위함.
+         *  선택한 카테고리(장르) 리스트를 콤마(,)로 구분된 문자열로 저장합니다.
+         *  DB 설계를 단순화하면서 다중 선택 기능을 구현하기 위함.
          */
-        @Column(length = 255)
+        @Column(name = "categories",length = 255)
         private String category;
 
-        @Column(columnDefinition = "TEXT")
+        @Column(name = "description",columnDefinition = "TEXT")
         private String description;
+
+        @Column(name = "activity_area", length = 100)
         private String activityArea;
 
+        @Column(name = "position", length = 50)
         private String part;
 
         @Enumerated(EnumType.STRING)
+        @Column(name = "skill_level")
         private SkillLevel skillLevel;
 
+        @Column(name = "initialized", nullable = false)
         @Builder.Default
         private boolean isInitialized = false;
 
@@ -49,12 +56,15 @@
          * [설명] 프로필 초기화 및 업데이트
          * [변경사항] List<String> 형태의 카테고리를 String.join을 통해 저장합니다.
          */
-        public void initialize(PerformerProfileRequestDto dto) {
+        public void initialize(PerformerProfileRequestDto dto, String imageUrl) {
             if (dto.getStageName() != null) this.stageName = dto.getStageName();
             if (dto.getDescription() != null) this.description = dto.getDescription();
             if (dto.getActivityArea() != null) this.activityArea = dto.getActivityArea();
             if (dto.getPart() != null) this.part = dto.getPart();
-
+            // 이미지 URL 처리 (새로운 이미지가 업로드된 경우에만 교체)
+            if (imageUrl != null && !imageUrl.isBlank()) {
+                this.profileImageUrl = imageUrl;
+            }
             // 2. 실력 등급 업데이트
             if (dto.getSkillLevel() != null) {
                 this.skillLevel = SkillLevel.from(dto.getSkillLevel());

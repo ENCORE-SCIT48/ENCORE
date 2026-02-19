@@ -21,6 +21,7 @@ public class UserProfile extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long profileId;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -43,11 +44,11 @@ public class UserProfile extends BaseEntity {
     private String location;
 
     // 복수 선택 필드: "ROCK,POP" 형태의 문자열로 저장
-    @Column(name = "preferred_genres", nullable = false)
+    @Column(name = "preferred_genres")
     private String preferredGenres;
 
     // 복수 선택 필드: "STANDING,SEATING" 형태의 문자열로 저장
-    @Column(name = "preferred_performance_types", nullable = false)
+    @Column(name = "preferred_performance_types")
     private String preferredPerformanceTypes;
 
     @Column(name = "introduction", columnDefinition = "TEXT")
