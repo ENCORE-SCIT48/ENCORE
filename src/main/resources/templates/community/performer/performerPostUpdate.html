@@ -6,54 +6,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공연자 모집글 수정</title>
 
-  <!-- Bootswatch Litera -->
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
-
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script th:src="@{/js/community/performerPost.js}"></script>
 
   <style>
-    html,
     body {
       margin: 0;
-      padding: 0;
+      background: #ffffff;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
       background: #ffffff;
     }
 
     .app-container {
-      width: 100%;
-      max-width: 1000px;
-      margin: 0 auto;
-      min-height: 100vh;
-      padding: 60px 20px;
+      padding: 20px 16px;
     }
 
     .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     .back-btn {
-      font-size: 22px;
+      font-size: 20px;
       text-decoration: none;
       color: #333333;
-      transition: 0.2s;
-    }
-
-    .back-btn:hover {
-      color: #E63946;
     }
 
     .page-title {
-      font-size: 22px;
+      font-size: 16px;
       font-weight: 600;
       color: #333333;
     }
 
     .post-title-input {
-      font-size: 28px;
+      font-size: 18px;
       font-weight: 600;
       width: 100%;
       border: none;
@@ -63,31 +57,32 @@
     }
 
     .divider {
-      margin: 30px 0;
+      margin: 20px 0;
       border-top: 1px solid #eee;
     }
 
     .post-content-textarea {
-      font-size: 17px;
-      line-height: 2;
+      font-size: 14px;
+      line-height: 1.8;
       width: 100%;
       border: none;
       outline: none;
-      resize: vertical;
-      min-height: 400px;
+      resize: none;
+      min-height: 300px;
       color: #333333;
     }
 
     .btn-group {
-      margin-top: 60px;
+      margin-top: 30px;
       display: flex;
       justify-content: flex-end;
-      gap: 20px;
+      gap: 10px;
     }
 
     .btn-group button,
     .btn-group a {
-      width: 160px;
+      width: 100px;
+      font-size: 13px;
     }
 
     .btn-primary {
@@ -108,51 +103,48 @@
     .btn-outline-secondary:hover {
       background-color: #f5f5f5;
     }
-
-    :root {
-      --bs-primary: #E63946;
-      --bs-primary-rgb: 230, 57, 70;
-    }
   </style>
 
 </head>
 
 <body>
 
-  <div class="app-container">
+  <div class="app-wrapper">
 
-    <!-- 상단 -->
-    <div class="top-bar">
-      <a th:href="@{/posts/performer/{id}(id=${post.postId})}" class="back-btn">←</a>
-      <div class="page-title">공연자 모집글 수정</div>
-      <div th:replace="~{fragments/performer/profile :: profile}"></div>
+    <div class="app-container">
+
+      <!-- 상단 -->
+      <div class="top-bar">
+        <a th:href="@{/posts/performer/{id}(id=${post.postId})}" class="back-btn">←</a>
+        <div class="page-title">공연자 모집글 수정</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
+
+      <!-- 내용 -->
+      <input type="hidden" id="postId" th:value="${post.postId}">
+
+      <input type="text" name="title" class="post-title-input" th:value="${post.title}" required>
+
+      <div class="divider"></div>
+
+      <textarea name="content" class="post-content-textarea" required th:text="${post.content}"></textarea>
+
+      <div class="btn-group">
+        <button id="updateBtn" type="button" class="btn btn-primary">
+          수정 완료
+        </button>
+
+        <a th:href="@{/posts/performer/{id}(id=${post.postId})}" class="btn btn-outline-secondary">
+          취소
+        </a>
+      </div>
+
     </div>
 
-    <input type="hidden" id="postId" th:value="${post.postId}">
-
-    <!-- 제목 -->
-    <input type="text" name="title" class="post-title-input" th:value="${post.title}" required>
-
-    <div class="divider"></div>
-
-    <!-- 내용 -->
-    <textarea name="content" class="post-content-textarea" required th:text="${post.content}"></textarea>
-
-    <!-- 버튼 -->
-    <div class="btn-group">
-      <button id="updateBtn" type="button" class="btn btn-primary">
-        수정 완료
-      </button>
-
-      <a th:href="@{/posts/performer/{id}(id=${post.postId})}" class="btn btn-outline-secondary">
-        취소
-      </a>
-    </div>
+    <!-- 하단 고정 네비 -->
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>
-
-  <!-- 하단 네비 -->
-  <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
 </body>
 
