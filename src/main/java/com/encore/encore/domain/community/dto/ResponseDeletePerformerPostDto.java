@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseDeletePostDto {
+public class ResponseDeletePerformerPostDto {
 
     private Long postId;
 

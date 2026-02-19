@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestReadPostDto {
+public class RequestReadPerformerPostDto {
     private Long postId;
 
 }
