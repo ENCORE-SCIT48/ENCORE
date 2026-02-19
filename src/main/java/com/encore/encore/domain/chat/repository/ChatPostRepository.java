@@ -82,8 +82,9 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
      * 조회 개수는 {@code limit} 파라미터로 제한된다.
      * </p>
      *
-     * @param userId 조회할 사용자의 ID
-     * @param limit  조회할 채팅방 개수 제한
+     * @param profileId       조회할 사용자의 ID
+     * @param profileModeName 조회할 사용자가 로그인 중인 프로필 이름
+     * @param limit           조회할 채팅방 개수 제한
      * @return 사용자가 참여 중인 채팅방 중 최근 활동 순으로 정렬된 목록
      */
     @Query(value = """
@@ -92,12 +93,17 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
             JOIN chat_room r ON r.post_id = p.id
             JOIN chat_participant cp ON cp.room_id = r.room_id
             LEFT JOIN chat_message m ON m.room_id = r.room_id
-            WHERE cp.user_id = :userId
+            WHERE cp.profile_id = :profileId
+              AND cp.profile_mode = :profileModeName
             GROUP BY p.id
             ORDER BY COALESCE(MAX(m.sent_at), p.updated_at) DESC
             LIMIT :limit
         """, nativeQuery = true)
-    List<ChatPost> findTopParticipatingByUserIdNative(@Param("userId") Long userId, @Param("limit") int limit);
+    List<ChatPost> findTopParticipatingByProfileAndModeNative(
+        @Param("profileId") Long profileId,
+        @Param("profileModeName") String profileModeName, // Enum name 기준
+        @Param("limit") int limit
+    );
 
 
     /**
@@ -131,58 +137,47 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
 
 
     /**
-     * 사용자가 참여 중인 채팅방 목록을 조회한다.
-     *
+     * 로그인한 프로필이 참여 중인 채팅 게시글을 조회합니다.
      * <p>
-     * 채팅방은 사용자가 참여자로 등록된 채팅방만 조회되며,
-     * 검색어와 검색 타입에 따라 다음 기준으로 필터링할 수 있다.
-     * </p>
+     * - 참여자는 chat_participant 테이블 기준으로 필터링됩니다.
+     * - 본인 글만 조회하려면 {@code onlyMine}을 true로 설정합니다.
+     * - 제목/내용 키워드 검색 가능하며, {@code searchType}에 따라 필터링됩니다.
+     * - profileModeName은 {@link com.encore.encore.domain.member.entity.ActiveMode}의 {@code name()} 값으로 전달되어야 합니다.
+     * - 페이징(offset, limit) 처리가 가능합니다.
      *
-     * <ul>
-     *   <li>title : 채팅방 제목 기준 검색</li>
-     *   <li>titleContent : 채팅방 제목 + 내용 기준 검색</li>
-     *   <li>performanceTitle : 연결된 공연 제목 기준 검색</li>
-     * </ul>
-     *
-     * <p>
-     * 채팅방 목록은 가장 최근 메시지 전송 시각을 기준으로 내림차순 정렬되며,
-     * 메시지가 없는 경우 채팅방 수정 시각을 기준으로 정렬된다.
-     * </p>
-     *
-     * @param userId     참여 중인 채팅방을 조회할 사용자 ID
-     * @param keyword    검색어 (null 또는 빈 문자열일 경우 검색 조건 미적용)
-     * @param searchType 검색 기준
-     *                   (title / titleContent / performanceTitle)
-     * @param size       조회할 채팅방 개수 (LIMIT)
-     * @param offset     조회 시작 위치 (OFFSET)
-     * @return 사용자가 참여 중인 채팅방 목록
+     * @param profileId       현재 로그인한 프로필 ID
+     * @param profileModeName 현재 로그인한 프로필 역할의 이름(enum name)
+     * @param keyword         검색 키워드 (제목 또는 내용)
+     * @param searchType      검색 타입 ("title" 또는 "content")
+     * @param onlyMine        true이면 본인 작성 글만 조회
+     * @param limit           한 번에 조회할 게시글 수
+     * @param offset          조회 시작 위치 (페이지 계산 시 page * size)
+     * @return List<ChatPost> 조건에 맞는 채팅 게시글 목록
      */
     @Query(value = """
             SELECT p.*
             FROM chat_post p
             JOIN chat_room r ON r.post_id = p.id
             JOIN chat_participant cp ON cp.room_id = r.room_id
-            LEFT JOIN chat_message m ON m.room_id = r.room_id
-            WHERE cp.user_id = :userId
-              AND (
-                     (:keyword IS NULL OR :keyword = '')
-                     OR (:searchType = 'title' AND p.title LIKE CONCAT('%', :keyword, '%'))
-                     OR (:searchType = 'titleContent' AND (p.title LIKE CONCAT('%', :keyword, '%') OR p.content LIKE CONCAT('%', :keyword, '%')))
-                     OR (:searchType = 'performanceTitle' AND p.performance_id IN (
-                         SELECT perf.performance_id FROM performance perf
-                         WHERE perf.title LIKE CONCAT('%', :keyword, '%')
-                     ))
-                 )
-            GROUP BY p.id
-            ORDER BY COALESCE(MAX(m.sent_at), p.updated_at) DESC
-            LIMIT :size OFFSET :offset
+            WHERE cp.profile_id = :profileId
+              AND cp.profile_mode = :profileModeName
+              AND (:onlyMine = false OR p.profile_id = :profileId)
+              AND (:keyword IS NULL OR
+                   (:searchType = 'title' AND p.title LIKE %:keyword%) OR
+                   (:searchType = 'content' AND p.content LIKE %:keyword%)
+              )
+            ORDER BY p.updated_at DESC
+            LIMIT :limit OFFSET :offset
         """, nativeQuery = true)
     List<ChatPost> findJoinedChats(
-        @Param("userId") Long userId,
+        @Param("profileId") Long profileId,
+        @Param("profileModeName") String profileModeName, // 여기 이름으로 바꾸기
         @Param("keyword") String keyword,
         @Param("searchType") String searchType,
-        @Param("size") int size,
+        @Param("onlyMine") boolean onlyMine,
+        @Param("limit") int limit,
         @Param("offset") int offset
     );
+
 
 }

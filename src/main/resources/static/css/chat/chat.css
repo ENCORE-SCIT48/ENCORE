@@ -219,3 +219,131 @@ position: relative;
 .back-btn i {
   font-size: 1rem;
 }
+
+ /* 채팅 메시지 영역 */
+    .chat-area {
+      flex: 1 1 auto;          /* 남은 공간 모두 차지 */
+      overflow-y: auto;         /* 스크롤 가능 */
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      background: #f8f9fa;
+    }
+
+    /* 메시지 한 줄 */
+    .message-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .message-row .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ccc;
+      flex-shrink: 0;
+    }
+
+    .message-content-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 0.2rem;
+    }
+
+    .message-content {
+      max-width: 250px;
+      background-color: #e9ecef;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      word-break: break-word;
+      position: relative;
+    }
+
+    .message-content::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: -10px;
+      border-top: 8px solid transparent;
+      border-right: 10px solid #e9ecef;
+      border-bottom: 8px solid transparent;
+    }
+
+    /* 입력 영역 */
+    .chat-input-area {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-top: 1px solid #ccc;
+      background: #fff;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border-radius: 0.25rem;
+      border: 1px solid #ccc;
+    }
+
+    .chat-input-area button {
+      padding: 0 1rem;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 0.25rem;
+      background-color: #dc3545;
+      color: #fff;
+      cursor: pointer;
+    }
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 5px;
+}
+
+.app-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #333333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 100px); /* 버튼 + 오른쪽 여백 확보 */
+    text-align: center;
+}
+
+.header-spacer {
+    width: 36px; /* 오른쪽 버튼 공간 확보용 */
+    flex-shrink: 0;
+}
+
+

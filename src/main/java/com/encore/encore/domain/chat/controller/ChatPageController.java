@@ -2,17 +2,23 @@ package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.dto.ResponseDetailChatPostDto;
 import com.encore.encore.domain.chat.dto.ResponseListChatPostDto;
+import com.encore.encore.domain.chat.dto.ResponseParticipantDto;
 import com.encore.encore.domain.chat.entity.ChatPost;
 import com.encore.encore.domain.chat.service.ChatService;
+import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -30,6 +36,7 @@ public class ChatPageController {
     @GetMapping("/performances/{performanceId}/chats/new")
     public String post(
         @PathVariable Long performanceId,
+
         Model model) {
         log.info("채팅 게시글 작성 폼 진입 - performanceId: {}", performanceId);
         String performanceTitle = chatService.getPerformanceTitle(performanceId);
@@ -75,13 +82,25 @@ public class ChatPageController {
     @GetMapping("/performance/{performanceId}/chat/{id}")
     public String chatPostDetail(
         @PathVariable Long performanceId,
-        @PathVariable Long id, Model model
-
+        @PathVariable Long id, Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("채팅방 상세 조회 진입 - performanceId: {}, postId: {}", performanceId, id);
 
+
         try {
+            Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+            ActiveMode activeMode = userDetails.getActiveMode();
+
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+            Long roomId = chatService.getChatRoomId(id);
+
+            List<ResponseParticipantDto> chatParticipantList = chatService.getChatParticipants(roomId);
+            model.addAttribute("currentProfileId", activeProfileId); // Long 타입으로 일치
+            model.addAttribute("currentProfileMode", activeMode); // 타입 일치
+
+            model.addAttribute("participantIds", chatParticipantList);
+            model.addAttribute("roomId", roomId);
             model.addAttribute("chatPost", dto);
             return "chat/chatPostDetail";
         } catch (Exception e) {
@@ -108,6 +127,8 @@ public class ChatPageController {
 
         try {
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+
+            model.addAttribute("performanceTitle", chatService.getPerformanceTitle(performanceId));
             model.addAttribute("performanceId", performanceId);
             model.addAttribute("chatPost", dto);
             return "chat/chatPostUpdateForm";
@@ -130,13 +151,41 @@ public class ChatPageController {
     }
 
     /**
-     * 참여중인 채팅방 글 전체 조회 페이지 이동
+     * 참여중인 모든 채팅방 목록
      *
      * @return chat/chatJoinListFull.html
      */
+
     @GetMapping("/chats/join")
     public String chatListJoin() {
-
         return "chat/chatJoinListFull";
+    }
+
+    /**
+     * 채팅방 페이지로 이동합니다.
+     * <p>
+     * 사용자가 해당 채팅방에 이미 참가자인지 확인하고,
+     * 참가하지 않은 경우에는 자동으로 참가자로 추가합니다.
+     * </p>
+     *
+     * @param roomId      조회할 채팅방 ID
+     * @param model       View에 전달할 데이터를 담는 Model 객체
+     * @param userDetails 현재 로그인한 사용자의 CustomUserDetails
+     * @return 채팅방 페이지 이름 ("chat/chatRoom")
+     */
+    @GetMapping("/chat/{roomId}")
+    public String chatRoom(
+        @PathVariable("roomId") Long roomId,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
+
+        chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
+
+        model.addAttribute("roomId", roomId);
+        return "chat/chatRoom";
     }
 }

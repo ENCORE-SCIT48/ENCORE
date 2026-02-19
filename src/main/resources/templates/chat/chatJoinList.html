@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head>
     <meta charset="UTF-8">
-    <title>공연 채팅 리스트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅방 리스트 | 공연 톡</title>
 
-    <!-- CSS -->
+    <!-- CSS 라이브러리 -->
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/chat.css}">
-    <link rel="stylesheet" th:href="@{/css/chat-list.css}">
 
-    <!-- JS -->
+    <!-- 커스텀 CSS -->
+    <link rel="stylesheet" th:href="@{/css/chat/chat.css}">
+    <link rel="stylesheet" th:href="@{/css/chat/chat-list.css}">
+
+    <!-- JS 라이브러리 -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 </head>
@@ -21,44 +24,49 @@
 <body>
 <div class="app-container">
 
-    <header class="app-header">
-        <div class="d-flex align-items-center gap-2">
-            <button class="back-btn" onclick="history.back()">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-            <h3 class="app-title">채팅방</h3>
-        </div>
+    <!-- ===== 상단 헤더 ===== -->
+    <header class="app-header d-flex align-items-center gap-2">
+        <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h3 class="app-title">채팅방</h3>
     </header>
 
+    <!-- ===== 본문 ===== -->
     <main class="app-content">
+
+        <!-- 참여중 채팅방 섹션 -->
         <section>
             <p class="section-label d-flex justify-content-between align-items-center">
                 참여중 채팅방
                 <button id="btn-show-all-joined" class="btn btn-sm btn-outline-primary"
-                        title="전체 보기 +">
+                        title="전체 보기">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </p>
-
-            <div id="joined-chat-container"
-                 th:attr="data-performance-id=${performanceId}">
+            <div id="joined-chat-container" th:attr="data-performance-id=${performanceId}">
+                <!-- JS에서 렌더링 -->
             </div>
         </section>
 
+        <!-- HOT 채팅방 섹션 -->
         <section class="mt-4">
             <p class="section-label">HOT 채팅방</p>
-
-            <div id="chat-list-container"
-                 th:attr="data-performance-id=${performanceId}">
+            <div id="chat-list-container" th:attr="data-performance-id=${performanceId}">
+                <!-- JS에서 렌더링 -->
             </div>
         </section>
+
     </main>
 
+    <!-- ===== 푸터 ===== -->
     <footer class="app-footer">
+        <!-- 필요 시 추가 -->
     </footer>
+
 </div>
 
+<!-- 커스텀 JS -->
 <script th:src="@{/js/chat/chatJoinList.js}"></script>
 </body>
-
 </html>

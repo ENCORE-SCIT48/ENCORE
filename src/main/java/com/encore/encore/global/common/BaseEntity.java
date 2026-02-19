@@ -30,6 +30,7 @@ public abstract class BaseEntity {
         this.isDeleted = true;
     }
 
+    // 되살리기 메서드
     public void restore() {
         this.isDeleted = false;
     }
