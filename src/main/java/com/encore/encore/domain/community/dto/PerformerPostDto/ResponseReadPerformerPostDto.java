@@ -24,4 +24,6 @@ public class ResponseReadPerformerPostDto {
 
     private LocalDateTime createdAt;
 
+    private Long performerId;
+
 }
