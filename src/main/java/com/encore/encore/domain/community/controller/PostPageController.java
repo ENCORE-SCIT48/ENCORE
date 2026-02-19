@@ -1,44 +1,38 @@
 package com.encore.encore.domain.community.controller;
 
-import com.encore.encore.domain.community.service.PostService;
+import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseListPerformerPostDto;
+import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseReadPerformerPostDto;
+import com.encore.encore.domain.community.service.PerformerPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/posts")
+@RequestMapping("/posts/performer")
 public class PostPageController {
 
-    private final PostService postService;
+    private final PerformerPostService performerPostService;
 
     /**
      * 공연자 모집 게시글 목록 화면을 조회합니다.
      *
-     * @param postType 게시글 타입 필터 (공연자 모집 / 공연 모집) - null/빈값 가능
-     * @param model    뷰에 전달할 데이터 모델
+     * @param model 뷰에 전달할 데이터 모델
      * @return 게시글 목록 화면
      */
     @GetMapping
-    public String post(
-            @RequestParam(name = "postType", required = false) String postType,
-            Model model
-    ) {
-        log.info("게시글 목록 화면 요청 - postType={}", postType);
+    public String post(Model model) {
+        log.info("공연자 모집 게시글 목록 화면 요청");
 
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        Page<?> posts = (postType == null || postType.isBlank())
-                ? postService.listPosts(pageRequest)
-                : postService.listPostsByType(postType, pageRequest);
+        Page<ResponseListPerformerPostDto> posts =
+                performerPostService.listPerformerPosts(pageRequest);
 
         model.addAttribute("posts", posts.getContent());
 
@@ -54,12 +48,15 @@ public class PostPageController {
      */
     @GetMapping("/{postId}")
     public String readPost(
-            @PathVariable(name = "postId") Long postId,
-            Model model
-    ) {
-        log.info("게시글 상세 화면 요청 - postId={}", postId);
+            @PathVariable Long postId,
+            Model model) {
 
-        model.addAttribute("post", postService.readPost(postId));
+        log.info("공연자 모집 게시글 상세 화면 요청 - postId={}", postId);
+
+        ResponseReadPerformerPostDto post =
+                performerPostService.readPerformerPost(postId);
+
+        model.addAttribute("post", post);
 
         return "community/performer/performerPostDetail";
     }
@@ -71,7 +68,29 @@ public class PostPageController {
      */
     @GetMapping("/write")
     public String writePostForm() {
-        log.info("게시글 작성 화면 요청");
+        log.info("공연자 모집 게시글 작성 화면 요청");
         return "community/performer/performerPostWrite";
+    }
+
+    /**
+     * 공연자 모집 게시글 수정 화면을 조회합니다.
+     *
+     * @param postId 수정할 게시글 ID
+     * @param model  뷰에 전달할 데이터 모델
+     * @return 게시글 수정 화면
+     */
+    @GetMapping("/{postId}/edit")
+    public String editPostForm(
+            @PathVariable Long postId,
+            Model model) {
+
+        log.info("공연자 모집 게시글 수정 화면 요청 - postId={}", postId);
+
+        ResponseReadPerformerPostDto post =
+                performerPostService.readPerformerPost(postId);
+
+        model.addAttribute("post", post);
+
+        return "community/performer/performerPostUpdate";
     }
 }
