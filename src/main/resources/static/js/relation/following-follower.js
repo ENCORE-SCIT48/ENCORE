@@ -29,9 +29,10 @@ function activateTab(tab) {
 
     tabFollowing.classList.toggle('active', isFollowingTab);
     tabFollower.classList.toggle('active', !isFollowingTab);
-
+  
     followingContent.classList.toggle('hidden', !isFollowingTab);
     followerContent.classList.toggle('hidden', isFollowingTab);
+
 }
 
 // ==========================

@@ -5,11 +5,13 @@ import com.encore.encore.domain.user.dto.ResponseFollowDto;
 import com.encore.encore.domain.user.dto.ResponseFollowListDto;
 import com.encore.encore.domain.user.service.RelationService;
 import com.encore.encore.global.common.CommonResponse;
+import com.encore.encore.global.config.CustomUserDetails;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,14 +42,12 @@ public class RelationApiController {
      */
     @PostMapping("/{targetProfileId}/{targetProfileMode}/follow")
     public ResponseEntity<CommonResponse<ResponseFollowDto>> follow(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode
     ) {
-        //Long profileId = userDetails.getActiveProfileId();
-        //ActiveMode profileMode = userDetails.getActiveMode();
-        Long profileId = 2L;
-        ActiveMode profileMode = ActiveMode.HOST;
+        Long profileId = userDetails.getActiveProfileId();
+        ActiveMode profileMode = userDetails.getActiveMode();
 
         if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 팔로우 할 수 없습니다.");
@@ -70,7 +70,7 @@ public class RelationApiController {
      */
     @GetMapping("/{targetProfileId}/{targetProfileMode}/following")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowingList(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode
     ) {
@@ -82,11 +82,8 @@ public class RelationApiController {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 profileMode 값입니다.");
         }
 
-        //Long loginProfileId = userDetails.getActiveProfileId();
-        //ActiveMode loginProfileMode = userDetails.getActiveMode();
-
-        Long loginProfileId = 2L;
-        ActiveMode loginProfileMode = ActiveMode.HOST;
+        Long loginProfileId = userDetails.getActiveProfileId();
+        ActiveMode loginProfileMode = userDetails.getActiveMode();
 
         List<ResponseFollowListDto> result =
             relationService.getFollowingList(
@@ -109,7 +106,7 @@ public class RelationApiController {
      */
     @GetMapping("/{targetProfileId}/{targetProfileMode}/follower")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowerList(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode) {
 
@@ -120,11 +117,8 @@ public class RelationApiController {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 profileMode 값입니다.");
         }
 
-        //Long loginProfileId = userDetails.getActiveProfileId();
-        //ActiveMode loginProfileMode = userDetails.getActiveMode();
-
-        Long loginProfileId = 2L;
-        ActiveMode loginProfileMode = ActiveMode.HOST;
+        Long loginProfileId = userDetails.getActiveProfileId();
+        ActiveMode loginProfileMode = userDetails.getActiveMode();
 
         List<ResponseFollowListDto> followers = relationService.getFollowerList(
             targetProfileId,
