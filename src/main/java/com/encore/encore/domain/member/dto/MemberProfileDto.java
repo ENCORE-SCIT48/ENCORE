@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 개인페이지에 출력할 정보들을 저장하는 dto
+ */
 @Builder
 @Data
 @AllArgsConstructor

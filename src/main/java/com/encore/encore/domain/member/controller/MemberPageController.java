@@ -4,8 +4,10 @@ import com.encore.encore.domain.member.dto.MemberProfileDto;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.service.MemberService;
 import com.encore.encore.domain.user.service.RelationService;
+import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +22,16 @@ public class MemberPageController {
     private final RelationService relationService;
 
     /**
-     * 개인 페이지로 이동한다.
+     * 개인 페이지로 이동 한다.
      *
+     * @param profileId   이동할 개인페이지의 프로필id
+     * @param profileMode 이동할 개인페이지의 프로필모드
+     * @param model
      * @return
      */
     @GetMapping("member/profile/{profileId}/{profileMode}")
     public String memberProfile(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long profileId,
         @PathVariable String profileMode,
         Model model
@@ -34,13 +39,9 @@ public class MemberPageController {
         MemberProfileDto dto = memberService.getMemberProfileInfo(profileId, profileMode);
 
 
-        //Long loginProfileId = userDetails.getActiveProfileId();
-        //ActiveMode loginProfileMode = userDetails.getActiveMode();
-        //Long loginUserId = userDetails.getUser().getUserId();
-
-        Long loginProfileId = 2L;
-        ActiveMode loginProfileMode = ActiveMode.HOST;
-        Long loginUserId = 5L;
+        Long loginProfileId = userDetails.getActiveProfileId();
+        ActiveMode loginProfileMode = userDetails.getActiveMode();
+        Long loginUserId = userDetails.getUser().getUserId();
 
         boolean isOwner = (loginProfileId != null) && loginProfileId.equals(profileId) && loginProfileMode.name().equals(profileMode);
 

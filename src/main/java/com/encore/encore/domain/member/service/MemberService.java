@@ -27,8 +27,12 @@ public class MemberService {
     private final HostProfileRepository hostProfileRepository;
     private final UserRelationRepository userRelationRepository;
 
-    /*
-    유저의 개인 페이지에 출력할 정보를 찾아옵니다.
+    /**
+     * 유저의 개인페이지에 출력할 정보를 불러옵니다.
+     *
+     * @param profileId   개인페이지 유저의 프로필 id
+     * @param profileMode 개인페이지 유저의 프로필 모드
+     * @return
      */
     public MemberProfileDto getMemberProfileInfo(Long profileId, String profileMode) {
 
