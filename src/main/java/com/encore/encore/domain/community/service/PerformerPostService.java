@@ -30,30 +30,40 @@ public class PerformerPostService {
     private final PerformerProfileRepository performerProfileRepository;
 
     /**
-     * [설명] 로그인 사용자의 PerformerProfile을 조회하거나 없으면 생성합니다.
+     * [설명] 로그인 사용자의 PerformerProfile을 조회합니다.
+     * 해당 사용자의 PerformerProfile이 존재하지 않는 경우
+     * 테스트용 PerformerProfile을 새로 생성하여 반환합니다.
      *
      * @param userDetails 로그인 사용자 정보
-     * @return PerformerProfile
+     * @return 조회되거나 새로 생성된 PerformerProfile
      */
     private PerformerProfile getOrCreatePerformerProfile(CustomUserDetails userDetails) {
 
         Long userId = userDetails.getUser().getUserId();
         log.info("PerformerProfile 조회 시작 - userId={}", userId);
 
-        return performerProfileRepository.findByUser_UserId(userId)
-                .orElseGet(() -> {
-                    log.info("PerformerProfile 없음 → 새로 생성");
+        PerformerProfile performer = performerProfileRepository
+                .findByUser_UserId(userId)
+                .orElse(null);
 
-                    PerformerProfile newProfile = PerformerProfile.builder()
-                            .user(userDetails.getUser())
-                            .stageName(userDetails.getUser().getNickname())
-                            .isInitialized(false)
-                            .build();
+        if (performer != null) {
+            log.info("기존 PerformerProfile 사용 - performerId={}", performer.getPerformerId());
+            return performer;
+        }
 
-                    PerformerProfile saved = performerProfileRepository.save(newProfile);
-                    log.info("PerformerProfile 생성 완료 - performerId={}", saved.getPerformerId());
-                    return saved;
-                });
+        log.info("PerformerProfile 없음 → 테스트용 생성");
+
+        PerformerProfile newProfile = PerformerProfile.builder()
+                .user(userDetails.getUser())
+                .stageName(userDetails.getUser().getNickname())
+                .isInitialized(false)
+                .build();
+
+        PerformerProfile saved = performerProfileRepository.save(newProfile);
+
+        log.info("PerformerProfile 생성 완료 - performerId={}", saved.getPerformerId());
+
+        return saved;
     }
 
     /**

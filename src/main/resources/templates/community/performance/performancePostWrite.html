@@ -116,7 +116,7 @@
 
       <!-- 상단 -->
       <div class="top-bar">
-        <a id="backBtn" class="back-btn">←</a>
+        <a id="backBtn" th:href="@{/posts/performance}" class="back-btn">←</a>
         <div class="page-title">공연 모집글 작성</div>
         <div th:replace="~{fragments/performer/profile :: profile}"></div>
       </div>
@@ -131,6 +131,7 @@
         <textarea name="content" class="post-content-textarea" placeholder="내용을 입력하세요" required></textarea>
 
         <div class="btn-group">
+
           <button type="button" id="submitBtn" class="btn btn-primary">
             등록
           </button>
@@ -138,12 +139,14 @@
           <a th:href="@{/posts/performance}" class="btn btn-outline-secondary">
             취소
           </a>
+
         </div>
 
       </form>
 
     </div>
 
+    <!-- 하단 네비 -->
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>

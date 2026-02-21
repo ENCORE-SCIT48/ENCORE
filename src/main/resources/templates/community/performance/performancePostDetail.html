@@ -105,7 +105,6 @@
       color: #fff;
     }
   </style>
-
 </head>
 
 <body>
@@ -121,9 +120,10 @@
         <div th:replace="~{fragments/performer/profile :: profile}"></div>
       </div>
 
-      <!-- 내용 -->
+      <!-- 제목 -->
       <div class="post-title" th:text="${post.title}">제목</div>
 
+      <!-- 조회수 / 작성일 -->
       <div class="post-meta">
         <span th:text="'조회수 ' + ${post.viewCount}"></span>
         <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
@@ -131,17 +131,48 @@
 
       <div class="divider"></div>
 
+      <!-- 내용 -->
       <div class="post-content" th:text="${post.content}">
         게시글 내용
       </div>
 
+      <!-- 버튼 영역 -->
       <div class="btn-group">
-        <button id="editBtn" class="btn btn-primary">수정</button>
-        <button id="deleteBtn" class="btn btn-outline-danger">삭제</button>
+
+        <!-- 작성자인 경우 -->
+        <th:block th:if="${activeAuthorId != null and 
+          ((post.hostId != null and activeAuthorId == post.hostId) 
+          or 
+          (post.performerId != null and activeAuthorId == post.performerId))}">
+
+          <button id="editBtn" class="btn btn-primary"
+            th:onclick="|location.href='@{/posts/performance/{id}/edit(id=${post.postId})}'|">
+            수정
+          </button>
+
+          <button id="deleteBtn" class="btn btn-outline-danger">
+            삭제
+          </button>
+
+        </th:block>
+
+        <!-- 로그인했고 작성자가 아닌 경우 -->
+        <th:block th:if="${activeAuthorId != null and 
+          !((post.hostId != null and activeAuthorId == post.hostId) 
+          or 
+          (post.performerId != null and activeAuthorId == post.performerId))}">
+
+          <button id="applyBtn" class="btn btn-primary">
+            신청
+          </button>
+
+        </th:block>
+
       </div>
 
     </div>
 
+    <!-- 하단 네비 -->
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>

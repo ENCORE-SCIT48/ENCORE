@@ -104,7 +104,6 @@
       background-color: #f5f5f5;
     }
   </style>
-
 </head>
 
 <body>
@@ -120,16 +119,20 @@
         <div th:replace="~{fragments/performer/profile :: profile}"></div>
       </div>
 
-      <!-- 내용 -->
+      <!-- hidden id -->
       <input type="hidden" id="postId" th:value="${post.postId}">
 
+      <!-- 제목 -->
       <input type="text" name="title" class="post-title-input" th:value="${post.title}" required>
 
       <div class="divider"></div>
 
+      <!-- 내용 -->
       <textarea name="content" class="post-content-textarea" required th:text="${post.content}"></textarea>
 
+      <!-- 버튼 -->
       <div class="btn-group">
+
         <button id="updateBtn" type="button" class="btn btn-primary">
           수정 완료
         </button>
@@ -137,10 +140,12 @@
         <a th:href="@{/posts/performance/{id}(id=${post.postId})}" class="btn btn-outline-secondary">
           취소
         </a>
+
       </div>
 
     </div>
 
+    <!-- 하단 네비 -->
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>

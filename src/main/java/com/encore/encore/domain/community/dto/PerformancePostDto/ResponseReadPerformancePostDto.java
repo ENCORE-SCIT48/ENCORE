@@ -17,7 +17,9 @@ public class ResponseReadPerformancePostDto {
 
     private Long performanceId;
 
-    private Long performerAuthorId;
+    private Long hostId;
+
+    private Long performerId;
 
     private String title;
 
