@@ -270,31 +270,38 @@ public class PerformerPostService {
      * [설명] 공연자 모집 게시글 단건 상세 정보를 조회합니다.
      *
      * - 게시글을 단건 조회합니다.
-     * - 조회 시 조회수를 1 증가시킵니다.
-     * - 해당 게시글의 승인(APPROVED) 상태 신청 인원 수를 함께 조회합니다.
-     * - 정원(capacity)과 현재 승인 인원(approvedCount)을 반환합니다.
+     * - increaseView가 true인 경우에만 조회수를 증가시킵니다.
+     * - 승인(APPROVED) 상태 신청 인원 수를 함께 조회합니다.
      *
-     * @param postId 게시글 ID
+     * @param postId       게시글 ID
+     * @param increaseView 조회수 증가 여부
      * @return 게시글 상세 정보
      */
-    public ResponseReadPerformerPostDto readPerformerPost(Long postId) {
+    public ResponseReadPerformerPostDto readPerformerPost(
+            Long postId,
+            boolean increaseView) {
 
-        log.info("[readPerformerPost] 상세 조회 시작 - postId={}", postId);
+        log.info("[readPerformerPost] 상세 조회 시작 - postId={}, increaseView={}",
+                postId, increaseView);
 
         Post post = postRepository
                 .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMER_POST_TYPE)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
-        // 조회수 증가
-        post.setViewCount(post.getViewCount() + 1);
+        // 조회수 증가 (상세 페이지에서만 증가)
+        if (increaseView) {
+            post.setViewCount(post.getViewCount() + 1);
 
-        log.info("[readPerformerPost] 조회수 증가 - postId={}, viewCount={}",
-                postId, post.getViewCount());
+            log.info("[readPerformerPost] 조회수 증가 - postId={}, viewCount={}",
+                    postId, post.getViewCount());
+        } else {
+            log.info("[readPerformerPost] 조회수 증가 없음 - 수정/기타 조회");
+        }
 
-        // 승인 인원 조회
         int approvedCount = postInteractionService.getApprovedCount(post);
 
-        log.info("[readPerformerPost] 승인 인원 조회 - approvedCount={}", approvedCount);
+        log.info("[readPerformerPost] 승인 인원 조회 완료 - postId={}, approvedCount={}",
+                postId, approvedCount);
 
         return ResponseReadPerformerPostDto.builder()
                 .postId(post.getPostId())

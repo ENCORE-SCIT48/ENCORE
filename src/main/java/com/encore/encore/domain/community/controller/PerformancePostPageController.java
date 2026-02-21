@@ -56,10 +56,9 @@ public class PerformancePostPageController {
     /**
      * [설명] 공연 모집 게시글 상세 화면을 조회합니다.
      *
-     * - 게시글 단건 조회
-     * - 로그인 상태라면 활성 작성자 ID(Host 또는 Performer)를 조회
-     * - 이미 신청 여부를 확인합니다.
-     * - 승인된 신청 인원 수를 조회하여 모집 현황에 사용합니다.
+     * - 게시글 단건 조회 (조회수 증가)
+     * - 승인된 신청 인원 수를 조회합니다.
+     * - 로그인 상태라면 활성 작성자 ID 및 신청 여부를 확인합니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @param postId      조회할 게시글 ID
@@ -74,33 +73,44 @@ public class PerformancePostPageController {
 
         log.info("GET /posts/performance/{} - 상세 페이지 요청", postId);
 
-        // 1. 게시글 조회
-        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId);
+        // 1. 게시글 조회 (조회수 증가)
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId, true);
+
+        log.info("상세 조회 완료 - postId={}, viewCount={}",
+                post.getPostId(),
+                post.getViewCount());
 
         model.addAttribute("post", post);
 
-        // 2. 모집 현황 (승인 인원 수)
+        // 2. 승인 인원 수 조회
         int approvedCount = postInteractionService.getApprovedCountByPostId(postId);
 
-        log.info("approvedCount={}", approvedCount);
+        log.info("승인 인원 조회 완료 - postId={}, approvedCount={}",
+                postId,
+                approvedCount);
 
         model.addAttribute("approvedCount", approvedCount);
 
         // 3. 로그인 사용자 처리
         if (userDetails != null) {
 
-            // 활성 작성자 ID
             Long activeAuthorId = performancePostService.getActiveAuthorId(userDetails);
+
+            log.info("활성 작성자 ID 조회 - activeAuthorId={}",
+                    activeAuthorId);
 
             model.addAttribute("activeAuthorId", activeAuthorId);
 
-            // 이미 신청 여부 확인
             boolean alreadyApplied = postInteractionService.isAlreadyApplied(postId, userDetails);
 
-            log.info("alreadyApplied={}", alreadyApplied);
+            log.info("신청 여부 확인 - postId={}, alreadyApplied={}",
+                    postId,
+                    alreadyApplied);
 
             model.addAttribute("alreadyApplied", alreadyApplied);
         }
+
+        log.info("GET /posts/performance/{} - 상세 페이지 응답 완료", postId);
 
         return "community/performance/performancePostDetail";
     }
@@ -132,7 +142,7 @@ public class PerformancePostPageController {
      *
      * - 로그인 사용자만 접근 가능합니다.
      * - Host 또는 Performer 작성자인 경우에만 접근 허용합니다.
-     * - 작성자가 아닌 경우 목록 페이지로 리다이렉트합니다.
+     * - 수정 페이지에서는 조회수를 증가시키지 않습니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @param postId      수정할 게시글 ID
@@ -149,11 +159,14 @@ public class PerformancePostPageController {
 
         // 1. 로그인 체크
         if (userDetails == null) {
+            log.info("비로그인 사용자 - 수정 페이지 접근 차단");
             return "redirect:/auth/login";
         }
 
-        // 2. 게시글 조회
-        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId);
+        // 2. 게시글 조회 (조회수 증가 없음)
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId, false);
+
+        log.info("수정용 게시글 조회 완료 - postId={}", postId);
 
         // 3. 활성 작성자 ID 조회
         Long activeAuthorId = performancePostService.getActiveAuthorId(userDetails);
@@ -163,7 +176,7 @@ public class PerformancePostPageController {
                 post.getHostId(),
                 post.getPerformerId());
 
-        // 4. Host 또는 Performer 작성자 여부 확인
+        // 4. 작성자 여부 확인
         boolean isHostOwner = post.getHostId() != null &&
                 post.getHostId().equals(activeAuthorId);
 
@@ -171,11 +184,13 @@ public class PerformancePostPageController {
                 post.getPerformerId().equals(activeAuthorId);
 
         if (!isHostOwner && !isPerformerOwner) {
-            log.info("작성자 불일치 - 수정 페이지 접근 차단");
+            log.info("작성자 불일치 - 수정 페이지 접근 차단, postId={}", postId);
             return "redirect:/posts/performance";
         }
 
         model.addAttribute("post", post);
+
+        log.info("GET /posts/performance/{}/edit - 수정 페이지 응답 완료", postId);
 
         return "community/performance/performancePostUpdate";
     }

@@ -218,7 +218,7 @@
 
         <div class="post-meta">
           <span th:text="'조회수 ' + ${post.viewCount}"></span>
-          <span th:text="${#temporals.format(post.createdAt, 'MM-dd')}"></span>
+          <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
         </div>
 
       </div>

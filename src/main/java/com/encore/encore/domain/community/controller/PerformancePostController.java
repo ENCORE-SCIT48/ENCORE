@@ -140,7 +140,8 @@ public class PerformancePostController {
                 "GET /api/posts/performance/{} - 공연 모집 게시글 단건 조회 요청",
                 id);
 
-        ResponseReadPerformancePostDto result = performancePostService.readPerformancePost(id);
+        // 상세 페이지이므로 조회수 증가 true
+        ResponseReadPerformancePostDto result = performancePostService.readPerformancePost(id, true);
 
         log.info(
                 "GET /api/posts/performance/{} - 공연 모집 게시글 단건 조회 완료",

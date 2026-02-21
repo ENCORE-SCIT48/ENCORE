@@ -126,7 +126,8 @@ public class PerformerPostController {
 
     /**
      * [설명] 공연자 모집 게시글 단건 상세 정보를 조회합니다.
-     * 조회 시 조회수가 증가합니다.
+     *
+     * - 상세 조회 시 조회수를 증가시킵니다.
      *
      * @param id 게시글 ID
      * @return 게시글 상세 정보
@@ -139,11 +140,13 @@ public class PerformerPostController {
                 "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 요청",
                 id);
 
-        ResponseReadPerformerPostDto result = performerPostService.readPerformerPost(id);
+        // 상세 조회이므로 조회수 증가 true
+        ResponseReadPerformerPostDto result = performerPostService.readPerformerPost(id, true);
 
         log.info(
-                "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 완료",
-                id);
+                "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 완료, viewCount={}",
+                id,
+                result.getViewCount());
 
         return CommonResponse.ok(result, "게시글 조회 성공");
     }
