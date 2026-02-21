@@ -3,6 +3,7 @@ package com.encore.encore.domain.community.controller;
 import com.encore.encore.domain.community.dto.PerformancePostDto.ResponseListPerformancePostDto;
 import com.encore.encore.domain.community.dto.PerformancePostDto.ResponseReadPerformancePostDto;
 import com.encore.encore.domain.community.service.PerformancePostService;
+import com.encore.encore.domain.community.service.PostInteractionService;
 import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class PerformancePostPageController {
 
     private final PerformancePostService performancePostService;
+    private final PostInteractionService postInteractionService;
 
     /**
      * [설명] 공연 모집 게시글 목록 화면을 조회합니다.
@@ -42,8 +44,7 @@ public class PerformancePostPageController {
 
         log.info("GET /posts/performance - 목록 페이지 요청");
 
-        Page<ResponseListPerformancePostDto> page =
-                performancePostService.listPerformancePosts(keyword, pageable);
+        Page<ResponseListPerformancePostDto> page = performancePostService.listPerformancePosts(keyword, pageable);
 
         model.addAttribute("posts", page.getContent());
         model.addAttribute("page", page);
@@ -73,20 +74,24 @@ public class PerformancePostPageController {
         log.info("GET /posts/performance/{} - 상세 페이지 요청", postId);
 
         // 1. 게시글 조회
-        ResponseReadPerformancePostDto post =
-                performancePostService.readPerformancePost(postId);
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId);
 
         model.addAttribute("post", post);
 
-        // 2. 로그인 사용자 활성 작성자 ID 조회
+        // 2. 로그인 사용자 처리
         if (userDetails != null) {
 
-            Long activeAuthorId =
-                    performancePostService.getActiveAuthorId(userDetails);
-
-            log.info("activeAuthorId={}", activeAuthorId);
+            // 활성 작성자 ID
+            Long activeAuthorId = performancePostService.getActiveAuthorId(userDetails);
 
             model.addAttribute("activeAuthorId", activeAuthorId);
+
+            // 이미 신청 여부 확인
+            boolean alreadyApplied = postInteractionService.isAlreadyApplied(postId, userDetails);
+
+            log.info("alreadyApplied={}", alreadyApplied);
+
+            model.addAttribute("alreadyApplied", alreadyApplied);
         }
 
         return "community/performance/performancePostDetail";
@@ -140,12 +145,10 @@ public class PerformancePostPageController {
         }
 
         // 2. 게시글 조회
-        ResponseReadPerformancePostDto post =
-                performancePostService.readPerformancePost(postId);
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId);
 
         // 3. 활성 작성자 ID 조회
-        Long activeAuthorId =
-                performancePostService.getActiveAuthorId(userDetails);
+        Long activeAuthorId = performancePostService.getActiveAuthorId(userDetails);
 
         log.info("권한 체크 - activeAuthorId={}, hostId={}, performerId={}",
                 activeAuthorId,
@@ -153,12 +156,10 @@ public class PerformancePostPageController {
                 post.getPerformerId());
 
         // 4. Host 또는 Performer 작성자 여부 확인
-        boolean isHostOwner =
-                post.getHostId() != null &&
+        boolean isHostOwner = post.getHostId() != null &&
                 post.getHostId().equals(activeAuthorId);
 
-        boolean isPerformerOwner =
-                post.getPerformerId() != null &&
+        boolean isPerformerOwner = post.getPerformerId() != null &&
                 post.getPerformerId().equals(activeAuthorId);
 
         if (!isHostOwner && !isPerformerOwner) {
