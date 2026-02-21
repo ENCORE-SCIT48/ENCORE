@@ -186,6 +186,19 @@
 
         <div class="post-content" th:text="${post.content}"></div>
 
+        <!--  정원 표시 추가 -->
+        <div style="margin-top:6px; font-size:12px; color:#E63946;">
+          <span th:if="${post.capacity != null}">
+            모집 인원
+            <span th:text="${post.approvedCount}"></span>
+            /
+            <span th:text="${post.capacity}"></span>
+          </span>
+          <span th:if="${post.capacity == null}">
+            모집 인원 제한 없음
+          </span>
+        </div>
+
         <div class="post-meta">
           <span th:text="'조회수 ' + ${post.viewCount}"></span>
           <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>

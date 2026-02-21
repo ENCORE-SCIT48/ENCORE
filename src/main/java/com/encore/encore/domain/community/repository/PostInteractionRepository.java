@@ -18,4 +18,17 @@ public interface PostInteractionRepository extends JpaRepository<PostInteraction
             Post post,
             Long applicantPerformerId,
             String interactionType);
+
+    /**
+     * [설명] 특정 게시글의 승인된 신청 인원 수를 조회합니다.
+     *
+     * @param post            게시글 엔티티
+     * @param interactionType 상호작용 타입 (APPLY)
+     * @param status          상태 (APPROVED)
+     * @return 승인 인원 수
+     */
+    long countByPostAndInteractionTypeAndStatusAndIsDeletedFalse(
+            Post post,
+            String interactionType,
+            String status);
 }

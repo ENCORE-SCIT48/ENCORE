@@ -58,7 +58,8 @@ public class PerformancePostPageController {
      *
      * - 게시글 단건 조회
      * - 로그인 상태라면 활성 작성자 ID(Host 또는 Performer)를 조회
-     * - activeAuthorId를 model에 담아 버튼 제어에 사용합니다.
+     * - 이미 신청 여부를 확인합니다.
+     * - 승인된 신청 인원 수를 조회하여 모집 현황에 사용합니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @param postId      조회할 게시글 ID
@@ -78,7 +79,14 @@ public class PerformancePostPageController {
 
         model.addAttribute("post", post);
 
-        // 2. 로그인 사용자 처리
+        // 2. 모집 현황 (승인 인원 수)
+        int approvedCount = postInteractionService.getApprovedCountByPostId(postId);
+
+        log.info("approvedCount={}", approvedCount);
+
+        model.addAttribute("approvedCount", approvedCount);
+
+        // 3. 로그인 사용자 처리
         if (userDetails != null) {
 
             // 활성 작성자 ID

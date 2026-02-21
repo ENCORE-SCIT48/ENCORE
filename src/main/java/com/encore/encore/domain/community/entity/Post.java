@@ -31,10 +31,13 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "performer_author_id")
     private PerformerProfile performerAuthor;
 
+    @Column(nullable = false)
+    private Integer capacity;
+
     private String postType;
 
     private String title;
-    
+
     private String content;
 
     private Integer viewCount;

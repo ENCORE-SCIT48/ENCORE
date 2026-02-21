@@ -77,11 +77,17 @@ public class PostInteractionService {
             throw new ApiException(ErrorCode.CONFLICT, "이미 신청한 게시글입니다.");
         }
 
+        // 모집 마감 체크
+        if (isCapacityFull(post)) {
+            log.info("[applyToPost] 모집 마감 상태 - postId={}", postId);
+            throw new ApiException(ErrorCode.CONFLICT, "모집이 마감된 게시글입니다.");
+        }
+
         PostInteraction interaction = PostInteraction.builder()
                 .post(post)
                 .applicantPerformerId(performer.getPerformerId())
                 .interactionType(APPLY_TYPE)
-                .status(PENDING)
+                .status(APPROVED)
                 .build();
 
         postInteractionRepository.save(interaction);
@@ -133,6 +139,12 @@ public class PostInteractionService {
         if (!PENDING.equals(interaction.getStatus())) {
             log.info("[approveInteraction] 이미 처리된 상태 - status={}", interaction.getStatus());
             throw new ApiException(ErrorCode.CONFLICT, "이미 처리된 신청입니다.");
+        }
+
+        // 정원 체크
+        if (isCapacityFull(post)) {
+            log.info("[approveInteraction] 모집 인원 마감 - postId={}", postId);
+            throw new ApiException(ErrorCode.CONFLICT, "모집 인원이 마감되었습니다.");
         }
 
         interaction.setStatus(APPROVED);
@@ -235,5 +247,87 @@ public class PostInteractionService {
                 performer.getPerformerId(), result);
 
         return result;
+    }
+
+    /**
+     * [설명] 특정 게시글의 승인된 신청 인원 수를 반환합니다.
+     *
+     * @param post 게시글 엔티티
+     * @return 승인 인원 수
+     */
+    @Transactional(readOnly = true)
+    public int getApprovedCount(Post post) {
+
+        log.info("[getApprovedCount] 승인 인원 조회 - postId={}", post.getPostId());
+
+        long count = postInteractionRepository
+                .countByPostAndInteractionTypeAndStatusAndIsDeletedFalse(
+                        post,
+                        APPLY_TYPE,
+                        APPROVED);
+
+        log.info("[getApprovedCount] 승인 인원 수={}", count);
+
+        return (int) count;
+    }
+
+    /**
+     * [설명] 특정 게시글이 모집 정원을 초과했는지 여부를 반환합니다.
+     *
+     * - Post에 설정된 capacity를 기준으로 판단합니다.
+     * - 승인(APPROVED) 상태인 신청 수와 비교합니다.
+     * - capacity가 null이거나 0 이하인 경우 정원 제한이 없는 것으로 간주합니다.
+     *
+     * @param post 게시글 엔티티
+     * @return 정원 초과 또는 마감 상태이면 true
+     */
+    @Transactional(readOnly = true)
+    public boolean isCapacityFull(Post post) {
+
+        log.info("[isCapacityFull] 정원 확인 시작 - postId={}", post.getPostId());
+
+        Integer capacity = post.getCapacity();
+
+        if (capacity == null || capacity <= 0) {
+            log.info("[isCapacityFull] 정원 미설정 - postId={}", post.getPostId());
+            return false;
+        }
+
+        int approvedCount = getApprovedCount(post);
+
+        boolean result = approvedCount >= capacity;
+
+        log.info("[isCapacityFull] approvedCount={}, capacity={}, full={}",
+                approvedCount, capacity, result);
+
+        return result;
+    }
+
+    /**
+     * [설명] 특정 게시글 ID 기준으로 승인된 신청 인원 수를 반환합니다.
+     *
+     * - 게시글 엔티티를 조회한 후 승인(APPROVED) 상태의 신청 수를 계산합니다.
+     * - 상세 페이지 모집현황 표시용으로 사용됩니다.
+     *
+     * @param postId 게시글 ID
+     * @return 승인 인원 수
+     */
+    @Transactional(readOnly = true)
+    public int getApprovedCountByPostId(Long postId) {
+
+        log.info("[getApprovedCountByPostId] 승인 인원 조회 시작 - postId={}", postId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        long count = postInteractionRepository
+                .countByPostAndInteractionTypeAndStatusAndIsDeletedFalse(
+                        post,
+                        APPLY_TYPE,
+                        APPROVED);
+
+        log.info("[getApprovedCountByPostId] 승인 인원 수={}", count);
+
+        return (int) count;
     }
 }

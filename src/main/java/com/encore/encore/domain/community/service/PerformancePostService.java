@@ -27,6 +27,8 @@ public class PerformancePostService {
 
     private static final String PERFORMANCE_POST_TYPE = "PERFORMANCE_RECRUIT";
 
+    private final PostInteractionService postInteractionService;
+
     private final PostRepository postRepository;
     private final PerformanceRepository performanceRepository;
     private final HostProfileRepository hostProfileRepository;
@@ -166,12 +168,17 @@ public class PerformancePostService {
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다."));
         }
 
+        if (dto.getCapacity() == null || dto.getCapacity() <= 0) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
+        }
+
         Post post = Post.builder()
                 .performance(performance)
                 .postType(PERFORMANCE_POST_TYPE)
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .viewCount(0)
+                .capacity(dto.getCapacity())
                 .hostAuthor(host)
                 .performerAuthor(performer)
                 .build();
@@ -268,11 +275,19 @@ public class PerformancePostService {
             post.setContent(dto.getContent());
         }
 
+        if (dto.getCapacity() != null) {
+            if (dto.getCapacity() <= 0) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
+            }
+            post.setCapacity(dto.getCapacity());
+        }
+
         return ResponseUpdatePerformancePostDto.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .capacity(post.getCapacity())
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
@@ -280,16 +295,27 @@ public class PerformancePostService {
     /**
      * [설명] 공연 모집 게시글 단건 상세 정보를 조회합니다.
      *
+     * - 게시글 조회 후 조회수를 증가시킵니다.
+     * - 승인(APPROVED) 상태의 신청 인원 수를 함께 반환합니다.
+     *
      * @param postId 게시글 ID
      * @return 게시글 상세 정보
      */
     public ResponseReadPerformancePostDto readPerformancePost(Long postId) {
 
+        log.info("[readPerformancePost] 상세 조회 시작 - postId={}", postId);
+
         Post post = postRepository
                 .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
+        // 조회수 증가
         post.setViewCount(post.getViewCount() + 1);
+
+        // 승인 인원 조회
+        int approvedCount = postInteractionService.getApprovedCount(post);
+
+        log.info("[readPerformancePost] 승인 인원 - approvedCount={}", approvedCount);
 
         return ResponseReadPerformancePostDto.builder()
                 .postId(post.getPostId())
@@ -309,6 +335,8 @@ public class PerformancePostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .viewCount(post.getViewCount())
+                .capacity(post.getCapacity())
+                .approvedCount(approvedCount)
                 .createdAt(post.getCreatedAt())
                 .build();
     }
@@ -338,13 +366,20 @@ public class PerformancePostService {
                             pageable);
         }
 
-        return page.map(post -> ResponseListPerformancePostDto.builder()
-                .postId(post.getPostId())
-                .postType(post.getPostType())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .viewCount(post.getViewCount())
-                .createdAt(post.getCreatedAt())
-                .build());
+        return page.map(post -> {
+
+            int approvedCount = postInteractionService.getApprovedCount(post);
+
+            return ResponseListPerformancePostDto.builder()
+                    .postId(post.getPostId())
+                    .postType(post.getPostType())
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .viewCount(post.getViewCount())
+                    .capacity(post.getCapacity())
+                    .approvedCount(approvedCount)
+                    .createdAt(post.getCreatedAt())
+                    .build();
+        });
     }
 }
