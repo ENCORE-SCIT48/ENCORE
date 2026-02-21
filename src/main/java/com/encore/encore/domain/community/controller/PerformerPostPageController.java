@@ -3,6 +3,7 @@ package com.encore.encore.domain.community.controller;
 import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseListPerformerPostDto;
 import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseReadPerformerPostDto;
 import com.encore.encore.domain.community.service.PerformerPostService;
+import com.encore.encore.domain.community.service.PostInteractionService;
 import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,14 @@ import org.springframework.web.bind.annotation.*;
 public class PerformerPostPageController {
 
     private final PerformerPostService performerPostService;
+    private final PostInteractionService postInteractionService;
 
     /**
      * [설명] 공연자 모집 게시글 목록 화면을 조회합니다.
      *
-     * - 검색어가 존재하면 검색 조건으로 조회합니다.
+     * - 검색어(keyword)가 존재하면 제목 기준 부분 검색을 수행합니다.
      * - 페이징 정보를 기반으로 게시글 목록을 조회합니다.
+     * - 각 게시글에는 정원(capacity)과 승인 인원(approvedCount)이 포함됩니다.
      * - 조회 결과를 model에 담아 뷰로 전달합니다.
      *
      * @param keyword  검색어 (nullable)
@@ -42,12 +45,10 @@ public class PerformerPostPageController {
 
         log.info("GET /posts/performer - 목록 페이지 요청");
 
-        // 게시글 목록 조회
         Page<ResponseListPerformerPostDto> page = performerPostService.listPerformerPosts(keyword, pageable);
 
-        log.info("게시글 목록 조회 완료 - totalElements={}", page.getTotalElements());
+        log.info("목록 조회 완료 - totalElements={}", page.getTotalElements());
 
-        // 뷰 전달 데이터 세팅
         model.addAttribute("posts", page.getContent());
         model.addAttribute("page", page);
         model.addAttribute("keyword", keyword);
@@ -59,8 +60,9 @@ public class PerformerPostPageController {
      * [설명] 공연자 모집 게시글 상세 화면을 조회합니다.
      *
      * - 게시글 단건 조회
-     * - 로그인 상태라면 PerformerProfile을 조회(없으면 생성)
-     * - activeProfileId를 model에 담아 버튼 제어에 사용합니다.
+     * - 승인(APPROVED) 상태 신청 인원 수를 조회하여 모집 현황에 사용합니다.
+     * - 로그인 상태라면 활성 PerformerProfile ID를 조회합니다.
+     * - 로그인 사용자의 이미 신청 여부를 확인합니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @param postId      조회할 게시글 ID
@@ -80,20 +82,35 @@ public class PerformerPostPageController {
 
         model.addAttribute("post", post);
 
-        // 2. 로그인 사용자 프로필 ID 조회 (없으면 자동 생성)
+        // 2. 모집 현황 조회 (승인 인원 수)
+        int approvedCount = postInteractionService.getApprovedCountByPostId(postId);
+
+        log.info("모집 현황 조회 - postId={}, approvedCount={}", postId, approvedCount);
+
+        model.addAttribute("approvedCount", approvedCount);
+
+        // 3. 로그인 사용자 처리
         if (userDetails != null) {
 
             log.info("로그인 사용자 존재 - userId={}",
                     userDetails.getUser().getUserId());
 
+            // 활성 PerformerProfile ID 조회
             Long activeProfileId = performerPostService.getActivePerformerId(userDetails);
 
-            log.info("activeProfileId 설정 - {}", activeProfileId);
+            log.info("activeProfileId={}", activeProfileId);
 
             model.addAttribute("activeProfileId", activeProfileId);
 
+            // 이미 신청 여부 확인
+            boolean alreadyApplied = postInteractionService.isAlreadyApplied(postId, userDetails);
+
+            log.info("alreadyApplied={}", alreadyApplied);
+
+            model.addAttribute("alreadyApplied", alreadyApplied);
+
         } else {
-            log.info("비로그인 상태 - activeProfileId 없음");
+            log.info("비로그인 상태 - 신청 관련 정보 미조회");
         }
 
         return "community/performer/performerPostDetail";
@@ -103,7 +120,6 @@ public class PerformerPostPageController {
      * [설명] 공연자 모집 게시글 작성 화면을 조회합니다.
      *
      * - 로그인하지 않은 경우 로그인 페이지로 리다이렉트합니다.
-     * - 로그인한 경우 작성 화면을 반환합니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @return 게시글 작성 화면
@@ -119,18 +135,15 @@ public class PerformerPostPageController {
             return "redirect:/auth/login";
         }
 
-        log.info("로그인 사용자 작성 페이지 접근 허용 - userId={}",
-                userDetails.getUser().getUserId());
-
         return "community/performer/performerPostWrite";
     }
 
     /**
      * [설명] 공연자 모집 게시글 수정 화면을 조회합니다.
      *
-     * - 로그인 사용자만 접근 가능
-     * - 작성자 본인인 경우에만 접근 허용
-     * - 작성자가 아닌 경우 목록 페이지로 리다이렉트
+     * - 로그인 사용자만 접근 가능합니다.
+     * - 작성자 본인(PerformerProfile)이 작성한 게시글인 경우에만 접근을 허용합니다.
+     * - 작성자가 아닌 경우 목록 페이지로 리다이렉트합니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @param postId      수정할 게시글 ID
@@ -154,7 +167,7 @@ public class PerformerPostPageController {
         // 2. 게시글 조회
         ResponseReadPerformerPostDto post = performerPostService.readPerformerPost(postId);
 
-        // 3. 로그인 사용자 프로필 ID 조회
+        // 3. 로그인 사용자 PerformerProfile ID 조회
         Long activeProfileId = performerPostService.getActivePerformerId(userDetails);
 
         log.info("수정 권한 체크 - activeProfileId={}, postPerformerId={}",

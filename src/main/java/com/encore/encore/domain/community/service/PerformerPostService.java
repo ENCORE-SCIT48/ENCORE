@@ -25,6 +25,8 @@ public class PerformerPostService {
 
     private static final String PERFORMER_POST_TYPE = "PERFORMER_RECRUIT";
 
+    private final PostInteractionService postInteractionService;
+
     private final PostRepository postRepository;
     private final PerformanceRepository performanceRepository;
     private final PerformerProfileRepository performerProfileRepository;
@@ -94,6 +96,11 @@ public class PerformerPostService {
     /**
      * [설명] 공연자 모집 게시글을 등록합니다.
      *
+     * - 로그인 사용자만 등록할 수 있습니다.
+     * - 정원(capacity)은 1명 이상이어야 합니다.
+     * - 공연 정보(performanceId)가 존재하면 연관 설정합니다.
+     * - 초기 조회수는 0으로 설정합니다.
+     *
      * @param dto         게시글 등록 요청 객체
      * @param userDetails 로그인 사용자 정보
      * @return 등록된 게시글 정보
@@ -120,12 +127,17 @@ public class PerformerPostService {
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다."));
         }
 
+        if (dto.getCapacity() == null || dto.getCapacity() <= 0) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
+        }
+
         Post post = Post.builder()
                 .performance(performance)
                 .postType(PERFORMER_POST_TYPE)
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .viewCount(0)
+                .capacity(dto.getCapacity())
                 .performerAuthor(performer)
                 .build();
 
@@ -190,6 +202,10 @@ public class PerformerPostService {
     /**
      * [설명] 공연자 모집 게시글을 수정합니다.
      *
+     * - 로그인 사용자이면서 작성자 본인만 수정 가능합니다.
+     * - 제목, 내용, 정원(capacity)을 수정할 수 있습니다.
+     * - 정원은 1명 이상이어야 합니다.
+     *
      * @param postId      수정할 게시글 ID
      * @param dto         수정 요청 객체
      * @param userDetails 로그인 사용자 정보
@@ -232,6 +248,13 @@ public class PerformerPostService {
             post.setContent(dto.getContent());
         }
 
+        if (dto.getCapacity() != null) {
+            if (dto.getCapacity() <= 0) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
+            }
+            post.setCapacity(dto.getCapacity());
+        }
+
         log.info("게시글 수정 완료 - postId={}", postId);
 
         return ResponseUpdatePerformerPostDto.builder()
@@ -246,21 +269,32 @@ public class PerformerPostService {
     /**
      * [설명] 공연자 모집 게시글 단건 상세 정보를 조회합니다.
      *
+     * - 게시글을 단건 조회합니다.
+     * - 조회 시 조회수를 1 증가시킵니다.
+     * - 해당 게시글의 승인(APPROVED) 상태 신청 인원 수를 함께 조회합니다.
+     * - 정원(capacity)과 현재 승인 인원(approvedCount)을 반환합니다.
+     *
      * @param postId 게시글 ID
      * @return 게시글 상세 정보
      */
     public ResponseReadPerformerPostDto readPerformerPost(Long postId) {
 
-        log.info("게시글 상세 조회 - postId={}", postId);
+        log.info("[readPerformerPost] 상세 조회 시작 - postId={}", postId);
 
         Post post = postRepository
                 .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMER_POST_TYPE)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
+        // 조회수 증가
         post.setViewCount(post.getViewCount() + 1);
 
-        log.info("조회수 증가 - postId={}, viewCount={}",
+        log.info("[readPerformerPost] 조회수 증가 - postId={}, viewCount={}",
                 postId, post.getViewCount());
+
+        // 승인 인원 조회
+        int approvedCount = postInteractionService.getApprovedCount(post);
+
+        log.info("[readPerformerPost] 승인 인원 조회 - approvedCount={}", approvedCount);
 
         return ResponseReadPerformerPostDto.builder()
                 .postId(post.getPostId())
@@ -268,6 +302,8 @@ public class PerformerPostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .viewCount(post.getViewCount())
+                .capacity(post.getCapacity())
+                .approvedCount(approvedCount)
                 .createdAt(post.getCreatedAt())
                 .performerId(post.getPerformerAuthor().getPerformerId())
                 .build();
@@ -275,6 +311,11 @@ public class PerformerPostService {
 
     /**
      * [설명] 공연자 모집 게시글 목록을 페이징 조회합니다.
+     *
+     * - postType이 PERFORMER_RECRUIT인 게시글만 조회합니다.
+     * - 검색어(keyword)가 존재하면 제목 기준 검색을 수행합니다.
+     * - 각 게시글의 승인(APPROVED) 상태 신청 인원 수를 함께 조회합니다.
+     * - 정원(capacity)과 승인 인원(approvedCount)을 목록에 포함합니다.
      *
      * @param keyword  검색어
      * @param pageable 페이징 정보
@@ -285,7 +326,7 @@ public class PerformerPostService {
             String keyword,
             Pageable pageable) {
 
-        log.info("게시글 목록 조회 - keyword={}, page={}, size={}",
+        log.info("[listPerformerPosts] 목록 조회 시작 - keyword={}, page={}, size={}",
                 keyword, pageable.getPageNumber(), pageable.getPageSize());
 
         Page<Post> page;
@@ -301,15 +342,25 @@ public class PerformerPostService {
                             pageable);
         }
 
-        log.info("목록 조회 완료 - totalElements={}", page.getTotalElements());
+        log.info("[listPerformerPosts] 조회 완료 - totalElements={}", page.getTotalElements());
 
-        return page.map(post -> ResponseListPerformerPostDto.builder()
-                .postId(post.getPostId())
-                .postType(post.getPostType())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .viewCount(post.getViewCount())
-                .createdAt(post.getCreatedAt())
-                .build());
+        return page.map(post -> {
+
+            int approvedCount = postInteractionService.getApprovedCount(post);
+
+            log.info("[listPerformerPosts] postId={}, approvedCount={}, capacity={}",
+                    post.getPostId(), approvedCount, post.getCapacity());
+
+            return ResponseListPerformerPostDto.builder()
+                    .postId(post.getPostId())
+                    .postType(post.getPostType())
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .capacity(post.getCapacity())
+                    .approvedCount(approvedCount)
+                    .viewCount(post.getViewCount())
+                    .createdAt(post.getCreatedAt())
+                    .build();
+        });
     }
 }

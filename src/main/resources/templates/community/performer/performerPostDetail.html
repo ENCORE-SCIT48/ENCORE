@@ -130,6 +130,22 @@
         <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
       </div>
 
+      <!-- 모집 인원 표시 -->
+      <div style="margin-top:8px; font-size:13px; color:#E63946;">
+
+        <span th:if="${post.capacity != null}">
+          모집 인원
+          <span th:text="${post.approvedCount}"></span>
+          /
+          <span th:text="${post.capacity}"></span>
+        </span>
+
+        <span th:if="${post.capacity == null}">
+          모집 인원 제한 없음
+        </span>
+
+      </div>
+
       <div class="divider"></div>
 
       <!-- 내용 -->

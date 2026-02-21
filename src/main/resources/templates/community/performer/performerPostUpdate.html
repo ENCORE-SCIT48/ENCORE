@@ -127,6 +127,12 @@
 
       <div class="divider"></div>
 
+      <!-- 정원 -->
+      <div style="margin-bottom:15px;">
+        <label style="font-size:13px; color:#666;">모집 정원</label>
+        <input type="number" name="capacity" min="1" class="form-control" th:value="${post.capacity}" required>
+      </div>
+
       <textarea name="content" class="post-content-textarea" required th:text="${post.content}"></textarea>
 
       <div class="btn-group">
