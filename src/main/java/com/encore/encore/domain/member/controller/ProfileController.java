@@ -1,7 +1,11 @@
 package com.encore.encore.domain.member.controller;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
+
+import com.encore.encore.domain.member.service.HostProfileService;
+import com.encore.encore.domain.member.service.PerformerProfileService;
 import com.encore.encore.domain.member.service.ProfileService;
+import com.encore.encore.domain.member.service.UserProfileService;
 import com.encore.encore.global.config.CustomUserDetails;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -23,26 +28,29 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final UserProfileService userProfileService;
+    private final HostProfileService hostProfileService;
+    private final PerformerProfileService performerProfileService;
 
     /**
      * [화면] 프로필 선택 메인 페이지로 이동합니다.
+     *
      * @return 프로필 선택 뷰 경로
      */
     @GetMapping("/select")
-    public String selectPage() {
+    public String selectPage(@AuthenticationPrincipal CustomUserDetails userDetails,
+                             Model model) {
+        if (userDetails == null) return "redirect:/auth/login";
+        model.addAttribute("userProfile", userProfileService.getUserProfile(userDetails.getUsername()));
+        model.addAttribute("performerProfile", hostProfileService.getHostProfile(userDetails.getUser()));
+        model.addAttribute("hostProfile", performerProfileService.getPerformerProfile(userDetails.getUser()));
         return "profile/select";
     }
 
-    /**
-     * [화면] 각 모드별 상세 설정 페이지로 이동합니다.
-     */
-    @GetMapping("/{mode}/setup")
-    public String setupPage(@PathVariable String mode) {
-        return "profile/" + mode + "-setup";
-    }
 
     /**
      * 사용자의 활성 프로필을 전환하고 세션을 갱신합니다.
+     *
      * @param mode        변경하고자 하는 프로필 (USER, PERFORMER, HOST)
      * @param userDetails 현재 로그인한 사용자의 상세 정보
      * @param session
@@ -79,10 +87,24 @@ public class ProfileController {
 
         // 4. 초기화 여부에 따른 리다이렉트
         if (!isInitialized) {
-            log.info("[Mode Switch] Redirecting to setup page for user: '{}'", userDetails.getUsername());
-            return "redirect:/profiles/" + mode.name().toLowerCase() + "/setup";
-        }
 
+            // mode.name()이 "ROLE_USER"라면 "user"로 변환
+            String cleanedMode = mode.name().replace("ROLE_", "").toLowerCase();
+
+            log.info("[Mode Switch] Redirecting to setup page: /profiles/{}/setup", cleanedMode);
+            return switch (mode) {
+                // UserProfileController의 @RequestMapping("/userprofile") 로 이동
+                case ROLE_USER -> "redirect:/userprofile/setup";
+
+                // PerformerProfileController의 @RequestMapping("/performerprofile") 로 이동
+                // (Performer 컨트롤러의 @GetMapping이 기본 경로이므로 /setup을 붙이지 않음)
+                case ROLE_PERFORMER -> "redirect:/performerprofile";
+
+                // HostProfileController의 @RequestMapping("/hostprofile") 로 이동
+                // (Host 컨트롤러 역시 @GetMapping이 기본 경로임)
+                case ROLE_HOST -> "redirect:/hostprofile";
+            };
+        }
         return "redirect:/";
     }
 }

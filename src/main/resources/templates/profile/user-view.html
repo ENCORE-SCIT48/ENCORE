@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 프로필 상세 정보</title>
+    <link rel="stylesheet" th:href="@{/css/profile/user-setup.css}">
+    <link rel="stylesheet" th:href="@{/css/profile/user-view.css}">
+</head>
+<body>
+
+<div class="view-container">
+    <div class="view-card">
+        <h2 class="view-title">내 프로필</h2>
+        <p class="view-subtitle">관람객 활동을 위한 프로필 정보입니다.</p>
+
+        <div class="view-image-section">
+            <div class="view-image-wrapper">
+                <img id="profile-img"
+                     th:src="${profile.profileImageUrl != null ? profile.profileImageUrl : '/image/default-profile.png'}"
+                     alt="프로필 이미지">
+            </div>
+        </div>
+
+        <div class="view-content">
+            <div class="view-group">
+                <label>전화번호</label>
+                <p th:text="${profile.phoneNumber}">010-0000-0000</p>
+            </div>
+
+            <div class="view-group">
+                <label>활동 지역</label>
+                <p th:text="${profile.location}">서울</p>
+            </div>
+
+            <div class="view-group">
+                <label>생년월일</label>
+                <p th:text="${profile.birthDate != null ? profile.birthDate : '미등록'}">1990-01-01</p>
+            </div>
+
+            <div class="view-group">
+                <label>선호 장르</label>
+                <div class="tag-list">
+                    <span class="view-tag" th:each="genre : ${profile.preferredGenres}" th:text="${genre}">발라드</span>
+                    <span th:if="${#lists.isEmpty(profile.preferredGenres)}" class="empty-msg">선택된 장르가 없습니다.</span>
+                </div>
+            </div>
+
+            <div class="view-group">
+                <label>선호 공연 형태</label>
+                <div class="tag-list">
+                    <span class="view-tag secondary" th:each="type : ${profile.preferredPerformanceTypes}" th:text="${type}">페스티벌</span>
+                    <span th:if="${#lists.isEmpty(profile.preferredPerformanceTypes)}" class="empty-msg">선택된 공연 형태가 없습니다.</span>
+                </div>
+            </div>
+
+            <div class="view-group">
+                <label>자기 소개</label>
+                <div class="intro-box" th:text="${profile.introduction != null && !profile.introduction.isEmpty() ? profile.introduction : '등록된 소개글이 없습니다.'}">
+                    안녕하세요! 공연을 좋아하는 관람객입니다.
+                </div>
+            </div>
+        </div>
+
+        <div class="view-actions">
+            <a th:href="@{/userprofile/setup}" class="btn-edit">프로필 수정하기</a>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/profile/user-view.js}"></script>
+</body>
+</html>

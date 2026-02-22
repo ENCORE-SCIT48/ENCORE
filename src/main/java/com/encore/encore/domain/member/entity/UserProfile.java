@@ -70,13 +70,17 @@ public class UserProfile extends BaseEntity {
             this.profileImageUrl = imageUrl;
         }
 
-        // 3. 리스트 필드 처리 (데이터가 넘어왔을 때만 join하여 저장)
+        // 3. 리스트 필드 처리 (최적화: 선택을 모두 해제했을 경우 빈 문자열로 초기화)
         if (dto.getPreferredGenres() != null && !dto.getPreferredGenres().isEmpty()) {
             this.preferredGenres = String.join(",", dto.getPreferredGenres());
+        } else {
+            this.preferredGenres = ""; // 모두 해제 대응
         }
 
         if (dto.getPreferredPerformanceTypes() != null && !dto.getPreferredPerformanceTypes().isEmpty()) {
             this.preferredPerformanceTypes = String.join(",", dto.getPreferredPerformanceTypes());
+        } else {
+            this.preferredPerformanceTypes = ""; // 모두 해제 대응
         }
 
         // 초기화 완료 플래그 설정

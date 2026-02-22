@@ -8,6 +8,7 @@ import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.common.service.FileService;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,23 +71,19 @@ public class HostProfileService {
 
     }
 
-    public void markHostAsVerified(User user, HostProfileRequestDto dto) {
-        // 1. 해당 유저의 호스트 프로필 조회
+    @Transactional
+    public void markHostAsVerifiedOnly(User user, String bNo) {
         HostProfile profile = hostProfileRepository.findByUser(user)
-            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트 프로필을 찾을 수 없습니다."));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "프로필을 찾을 수 없습니다."));
 
-        // 2. 인증된 정보 업데이트 (선택 사항이지만 권장)
-        // 인증 시 사용한 정보를 엔티티에 저장해둡니다.
-        profile.updateVerificationInfo(
-            dto.getBusinessNumber(),
-            dto.getRepresentativeName(),
-            dto.getOpeningDate()
-        );
-
-        // 3. 인증 상태 true로 변경
+        // 1. 인증 상태 변경
         profile.markAsVerified();
 
-        log.info("[BusinessVerify] 인증 성공 및 DB 기록 완료 - User: {}", user.getEmail());
+        // 2. 인증받은 번호를 미리 박아둠 (유저가 폼에서 수정하지 않도록)
+        if (bNo != null) {
+            // 엔티티의 updateVerificationInfo 활용
+            profile.updateVerificationInfo(bNo.replaceAll("-", ""), null, null);
+        }
     }
 }
 

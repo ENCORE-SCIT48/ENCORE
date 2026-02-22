@@ -1,0 +1,106 @@
+/* user-setup 전용 레이아웃 */
+.setup-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 프로필 이미지 업로드 영역 */
+.profile-upload {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 30px;
+}
+
+.upload-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--primary-red);
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.upload-badge:hover {
+    transform: scale(1.1);
+}
+
+/* 섹션 타이틀 및 그룹 */
+.section-title {
+    font-weight: 700;
+    margin: 30px 0 12px;
+    font-size: 1.05rem;
+    color: var(--dark-grey);
+    border-left: 4px solid var(--primary-red);
+    padding-left: 10px;
+}
+
+/* 체크박스 그리드 레이아웃 */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+    background: var(--soft-grey);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.check-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-red);
+    cursor: pointer;
+}
+
+.check-item input:checked + span {
+    color: var(--primary-red);
+    font-weight: 600;
+}
+
+/* 버튼 및 폼 보정 */
+.btn-save {
+    background-color: var(--primary-red) !important;
+    border: none !important;
+    width: 100%;
+    padding: 16px !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    border-radius: 12px !important;
+    margin-top: 40px;
+    color: white !important;
+    transition: opacity 0.2s;
+}
+
+.btn-save:hover {
+    opacity: 0.9;
+}
+
+/* 모바일 대응 */
+@media (max-width: 480px) {
+    .setup-container {
+        margin: 20px auto;
+    }
+    .checkbox-grid {
+        grid-template-columns: repeat(2, 1fr); /* 모바일은 깔끔하게 2열 */
+    }
+}

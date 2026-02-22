@@ -69,7 +69,15 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-            .requestMatchers("/favicon.ico", "/.well-known/**"); // .well-known 하위 모든 요청 무시
+            .requestMatchers(
+                        "/favicon.ico",
+                        "/.well-known/**",
+                        "/css/**",        // CSS 허용
+                        "/js/**",         // JS 허용
+                        "/image/**",      // 기본 이미지 폴더 허용
+                        "/images/**",     // (로그에 images라고 찍혔으니 이것도 추가)
+                        "/uploads/**"     // ★ 업로드된 프로필 사진 경로 허용
+                    );
     }
 
     @Bean

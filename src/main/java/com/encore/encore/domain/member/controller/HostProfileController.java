@@ -79,7 +79,7 @@ public class HostProfileController {
         log.info("[HostProfileController] 업데이트 완료 - User: {}", userDetails.getUsername());
 
         // 4. 완료 후 리다이렉트 (새로고침 중복 방지)
-        return "redirect:/host/setup?success=true";
+        return "redirect:/hostprofile/setup?success=true";
     }
 
 

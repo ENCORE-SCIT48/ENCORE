@@ -13,38 +13,32 @@ import java.util.List;
 @Slf4j
 public class BusinessVerificationService {
 
-    // 설정 파일에서 값을 읽어옴
     @Value("${nts.api.key}")
     private String apiKey;
 
-    @Value("${nts.api.url}")
-    private String baseUrl;
+    @Value("${nts.api.url.status}")
+    private String statusUrl;
 
-    public boolean verifyBusiness(String bNo, String startDt, String pNm) {
+    // 1. 단순 정보 조회용 (화면에 보여줄 데이터 반환)
+    public NtsStatusResponse.StatusData getBusinessStatusData(String bNo) {
         RestTemplate restTemplate = new RestTemplate();
+        String cleanBNo = bNo.replaceAll("-", "");
 
-        // 1. 요청 바디 생성
-        NtsValidateRequest request = NtsValidateRequest.builder()
-            .businesses(List.of(NtsValidateRequest.BusinessInfo.builder()
-                .b_no(bNo)
-                .start_dt(startDt)
-                .p_nm(pNm)
-                .build()))
+        NtsStatusRequest request = NtsStatusRequest.builder()
+            .b_no(List.of(cleanBNo))
             .build();
 
-        // 2. 헤더 및 URL 설정 (Query 방식 사용)
-        String url = baseUrl + "?serviceKey=" + apiKey;
+        String url = statusUrl + "?serviceKey=" + apiKey;
 
         try {
-            NtsValidateResponse response = restTemplate.postForObject(url, request, NtsValidateResponse.class);
+            NtsStatusResponse response = restTemplate.postForObject(url, request, NtsStatusResponse.class);
 
             if (response != null && response.getData() != null && !response.getData().isEmpty()) {
-                String isValid = response.getData().get(0).getValid();
-                return "01".equals(isValid); // 01이면 정상 사업자
+                return response.getData().get(0); // 조회된 첫 번째 데이터 반환
             }
         } catch (Exception e) {
-            log.error("국세청 API 호출 중 오류 발생: {}", e.getMessage());
+            log.error("API 호출 중 오류 발생: {}", e.getMessage());
         }
-        return false;
+        return null;
     }
 }
