@@ -12,9 +12,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.encore.encore.domain.community.dto.PerformanceManageDto;
 import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseListPerformerPostDto;
+import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.service.PerformerMypageService;
+import com.encore.encore.domain.community.service.PerformerPostService;
+import com.encore.encore.domain.community.service.PostInteractionService;
 import com.encore.encore.global.config.CustomUserDetails;
 
 @Controller
@@ -24,6 +29,8 @@ import com.encore.encore.global.config.CustomUserDetails;
 public class PerformerPageController {
 
     private final PerformerMypageService performerMypageService;
+    private final PerformerPostService performerPostService;
+    private final PostInteractionService postInteractionService;
 
     /**
      * [설명] 로그인 공연자가 작성한 공연자 모집글 목록 화면을 조회합니다.
@@ -156,5 +163,99 @@ public class PerformerPageController {
 
         return "community/mypage/performer/venues";
     }
-    
+
+    /**
+     * [설명] 로그인 공연자가 작성한 게시글의 신청 내역 관리 화면을 조회합니다.
+     *
+     * @param userDetails 로그인 사용자 정보
+     * @param model       화면 전달 객체
+     * @return 신청 관리 화면
+     */
+    @GetMapping("/manage")
+    public String manageInteractions(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+
+        Long performerId = performerPostService.getActivePerformerId(userDetails);
+
+        model.addAttribute("performerId", performerId);
+
+        log.info("[PerformerPageController] 신청 관리 화면 요청 - performerId={}", performerId);
+
+        return "community/mypage/performer/manage";
+    }
+
+    /**
+     * [설명] 공연자 모집글 신청 관리 화면을 조회합니다.
+     *
+     * @return 공연자 모집글 신청 관리 화면
+     */
+    @GetMapping("/manage/performer")
+    public String managePerformerPosts() {
+
+        log.info("[PerformerPageController] 공연자 모집글 신청 관리 화면 요청");
+
+        return "community/mypage/performer/managePerformer";
+    }
+
+    /**
+     * [설명] 로그인 공연자가 작성한 공연 모집글의
+     * 신청자 관리 화면을 조회합니다.
+     *
+     * - PERFORMANCE_RECRUIT 타입 게시글만 조회합니다.
+     * - 게시글 목록을 모델에 담아 화면에 전달합니다.
+     *
+     * @param userDetails 로그인 사용자 정보
+     * @param model       View 전달 모델
+     * @return 공연 모집글 신청자 관리 화면
+     */
+    @GetMapping("/manage/performance")
+    public String managePerformancePosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+
+        List<PerformanceManageDto> posts = performerMypageService.findMyPerformancePostsWithApplicants(userDetails);
+
+        model.addAttribute("posts", posts);
+
+        return "community/mypage/performer/managePerformance";
+    }
+
+    /**
+     * [설명] 공연 모집글 신청을 승인합니다.
+     *
+     * @param postId        게시글 ID
+     * @param interactionId 신청 ID
+     * @param userDetails   로그인 사용자 정보
+     * @return 신청자 관리 화면 리다이렉트
+     */
+    @GetMapping("/manage/performance/approve")
+    public String approvePerformanceApplicant(
+            @RequestParam("postId") Long postId,
+            @RequestParam("interactionId") Long interactionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        postInteractionService.approveInteraction(postId, interactionId, userDetails);
+
+        return "redirect:/mypage/performer/manage/performance";
+    }
+
+    /**
+     * [설명] 공연 모집글 신청을 거절합니다.
+     *
+     * @param postId        게시글 ID
+     * @param interactionId 신청 ID
+     * @param userDetails   로그인 사용자 정보
+     * @return 신청자 관리 화면 리다이렉트
+     */
+    @GetMapping("/manage/performance/reject")
+    public String rejectPerformanceApplicant(
+            @RequestParam("postId") Long postId,
+            @RequestParam("interactionId")Long interactionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        postInteractionService.rejectInteraction(postId, interactionId, userDetails);
+
+        return "redirect:/mypage/performer/manage/performance";
+    }
 }

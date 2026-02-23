@@ -67,7 +67,7 @@ public class PostInteractionService {
         }
 
         boolean alreadyApplied = postInteractionRepository
-                .existsByPostAndApplicantPerformerIdAndInteractionTypeAndIsDeletedFalse(
+                .existsByPostAndApplicantPerformer_PerformerIdAndInteractionTypeAndIsDeletedFalse(
                         post,
                         performer.getPerformerId(),
                         APPLY_TYPE);
@@ -85,9 +85,9 @@ public class PostInteractionService {
 
         PostInteraction interaction = PostInteraction.builder()
                 .post(post)
-                .applicantPerformerId(performer.getPerformerId())
+                .applicantPerformer(performer)
                 .interactionType(APPLY_TYPE)
-                .status(APPROVED)
+                .status(PENDING)
                 .build();
 
         postInteractionRepository.save(interaction);
@@ -238,7 +238,7 @@ public class PostInteractionService {
         }
 
         boolean result = postInteractionRepository
-                .existsByPostAndApplicantPerformerIdAndInteractionTypeAndIsDeletedFalse(
+                .existsByPostAndApplicantPerformer_PerformerIdAndInteractionTypeAndIsDeletedFalse(
                         post,
                         performer.getPerformerId(),
                         APPLY_TYPE);

@@ -17,7 +17,7 @@ public interface PostInteractionRepository extends JpaRepository<PostInteraction
      * @param interactionType      상호작용 타입 (APPLY)
      * @return 존재 여부
      */
-    boolean existsByPostAndApplicantPerformerIdAndInteractionTypeAndIsDeletedFalse(
+    boolean existsByPostAndApplicantPerformer_PerformerIdAndInteractionTypeAndIsDeletedFalse(
             Post post,
             Long applicantPerformerId,
             String interactionType);
@@ -47,8 +47,23 @@ public interface PostInteractionRepository extends JpaRepository<PostInteraction
      * @param postType        게시글 타입
      * @return 공연자 모집글 신청 내역 목록
      */
-    List<PostInteraction> findByApplicantPerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
+    List<PostInteraction> findByApplicantPerformer_PerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
             Long performerId,
             String interactionType,
             String postType);
+
+    /**
+     * [설명] 특정 게시글의 신청 목록을 조회합니다.
+     *
+     * - interactionType이 APPLY인 경우만 조회합니다.
+     * - 논리 삭제되지 않은 신청만 조회합니다.
+     *
+     * @param postId          게시글 ID
+     * @param interactionType 상호작용 타입 (예: APPLY)
+     * @return 신청 목록
+     */
+    List<PostInteraction> findByPost_PostIdAndInteractionTypeAndIsDeletedFalse(
+            Long postId,
+            String interactionType);
+
 }

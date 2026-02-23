@@ -1,5 +1,6 @@
 package com.encore.encore.domain.community.service;
 
+import com.encore.encore.domain.community.dto.PerformanceManageDto;
 import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseListPerformerPostDto;
 import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.entity.PostInteraction;
@@ -81,7 +82,7 @@ public class PerformerMypageService {
         Long performerId = performerPostService.getActivePerformerId(userDetails);
 
         List<PostInteraction> interactions = postInteractionRepository
-                .findByApplicantPerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
+                .findByApplicantPerformer_PerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
                         performerId,
                         APPLY_TYPE,
                         PERFORMER_POST_TYPE);
@@ -167,7 +168,7 @@ public class PerformerMypageService {
         log.info("[PerformerMypageService] 내가 신청한 공연 조회 - performerId={}", performerId);
 
         List<PostInteraction> interactions = postInteractionRepository
-                .findByApplicantPerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
+                .findByApplicantPerformer_PerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
                         performerId,
                         APPLY_TYPE,
                         PERFORMANCE_POST_TYPE);
@@ -189,6 +190,43 @@ public class PerformerMypageService {
                             .viewCount(post.getViewCount())
                             .createdAt(post.getCreatedAt())
                             .build();
+                })
+                .toList();
+    }
+
+    /**
+     * [설명] 로그인 공연자가 작성한 공연 모집글과
+     * 해당 게시글에 신청한 공연자 목록을 함께 조회합니다.
+     *
+     * - performerAuthor 기준으로 PERFORMANCE_RECRUIT 게시글을 조회합니다.
+     * - 각 게시글별로 interactionType이 APPLY인 신청 목록을 조회합니다.
+     * - 논리 삭제되지 않은 데이터만 조회합니다.
+     *
+     * @param userDetails 로그인 사용자 정보
+     * @return 공연 모집글과 신청자 목록 DTO 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<PerformanceManageDto> findMyPerformancePostsWithApplicants(
+            CustomUserDetails userDetails) {
+
+        Long performerId = performerPostService.getActivePerformerId(userDetails);
+
+        log.info("[PerformerMypageService] 공연 모집글 신청자 관리 조회 - performerId={}", performerId);
+
+        List<Post> posts = postRepository
+                .findByPerformerAuthor_PerformerIdAndPostTypeAndIsDeletedFalse(
+                        performerId,
+                        PERFORMANCE_POST_TYPE);
+
+        return posts.stream()
+                .map(post -> {
+
+                    List<PostInteraction> applicants = postInteractionRepository
+                            .findByPost_PostIdAndInteractionTypeAndIsDeletedFalse(
+                                    post.getPostId(),
+                                    APPLY_TYPE);
+
+                    return new PerformanceManageDto(post, applicants);
                 })
                 .toList();
     }

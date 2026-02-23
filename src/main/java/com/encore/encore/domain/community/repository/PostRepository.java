@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.encore.encore.domain.community.entity.Post;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -67,4 +68,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             Long performerId,
             String postType,
             Pageable pageable);
+
+    /**
+     * [설명] 특정 공연자(performerId)가 작성한 게시글을 조회합니다.
+     *
+     * - performerAuthor의 performerId 기준으로 조회합니다.
+     * - 특정 postType에 해당하는 게시글만 조회합니다.
+     * - 논리 삭제되지 않은 게시글만 조회합니다.
+     *
+     * @param performerId 공연자 ID
+     * @param postType    게시글 타입 (예: PERFORMANCE_RECRUIT)
+     * @return 게시글 목록
+     */
+    List<Post> findByPerformerAuthor_PerformerIdAndPostTypeAndIsDeletedFalse(
+            Long performerId,
+            String postType);
 }
