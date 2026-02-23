@@ -10,6 +10,7 @@ import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.domain.user.dto.ProfileInfoDto;
+import com.encore.encore.domain.user.dto.ResponseBlockDto;
 import com.encore.encore.domain.user.dto.ResponseFollowDto;
 import com.encore.encore.domain.user.dto.ResponseFollowListDto;
 import com.encore.encore.domain.user.entity.RelationType;
@@ -405,5 +406,99 @@ public class RelationService {
         return b;
     }
 
+    /**
+     * 타겟을 차단한다.
+     *
+     * @param profileId         차단하는 사람의 프로필 ID
+     * @param profileMode       차단하는 사람의 프로필 모드
+     * @param targetProfileId   차단 당할 사람의 프로필 아이디
+     * @param targetProfileMode 차단 당할 사람의 프로필 모드
+     * @return
+     */
+    public ResponseBlockDto userBlock(Long profileId, ActiveMode profileMode, Long targetProfileId, String targetProfileMode) {
+        User actor = findProfileById(profileId, profileMode);
+        ActiveMode targetMode = ActiveMode.valueOf(targetProfileMode);
+
+        Optional<UserRelation> optionalRelation = userRelationRepository
+            .findExistingRelation(actor.getUserId(), profileMode, targetProfileId, targetMode, RelationType.BLOCK);
+
+        UserRelation relation;
+
+        if (optionalRelation.isPresent()) {
+            relation = optionalRelation.get();
+            if (relation.isDeleted()) {
+                // 과거 기록이 있으면 다시 차단(Restore)하고 팔로우 청소
+                relation.restore();
+                cleanUpFollows(actor.getUserId(), profileId, profileMode, targetProfileId, targetMode);
+            }
+            // 이미 차단 상태(isDeleted = false)라면 아무 로직 없이 통과
+        } else {
+            // 기록이 아예 없으면 새로 생성하고 팔로우 청소
+            relation = UserRelation.builder()
+                .actor(actor)
+                .actorProfileMode(profileMode)
+                .targetId(targetProfileId)
+                .targetProfileMode(targetMode)
+                .targetType(TargetType.USER)
+                .relationType(RelationType.BLOCK)
+                .build();
+            userRelationRepository.save(relation);
+            cleanUpFollows(actor.getUserId(), profileId, profileMode, targetProfileId, targetMode);
+        }
+
+        return ResponseBlockDto.builder()
+            .targetId(targetProfileId)
+            .targetProfileMode(targetProfileMode)
+            .isBlocked(true) // 이 메서드를 타면 결과는 무조건 차단 상태
+            .build();
+    }
+
+    /**
+     * 차단 시 팔로우 해제 메소드
+     *
+     * @param actorUserId
+     * @param actorProfileId
+     * @param actorMode
+     * @param targetProfileId
+     * @param targetMode
+     */
+    private void cleanUpFollows(Long actorUserId, Long actorProfileId, ActiveMode actorMode,
+                                Long targetProfileId, ActiveMode targetMode) {
+
+        // 1. 내가(계정) 상대(프로필)를 팔로우한 것 삭제
+        // 조건: actor_id = actorUserId AND target_id = targetProfileId
+        userRelationRepository.deleteMyFollow(actorUserId, actorMode, targetProfileId, targetMode);
+
+        User targetUser = findProfileById(targetProfileId, targetMode);
+
+        // 2. 상대(프로필)가 나(프로필)를 팔로우한 것 삭제
+        // 조건: actor_id = (상대의 계정ID) AND target_id = actorProfileId
+        userRelationRepository.deleteTheirFollowToMe(targetUser.getUserId(), targetMode, actorProfileId, actorMode);
+    }
+
+    /**
+     * 차단 해제 메소드
+     *
+     * @param profileId         차단 해제를 할 유저의 아이디
+     * @param profileMode       차단 해제를 할 유저의 모드
+     * @param targetProfileId   차단 해제 당할 타겟의 프로필 아이디
+     * @param targetProfileMode 차단 해제 당할 타겟의 프로필 모드
+     */
+    public ResponseBlockDto unblockUser(Long profileId, ActiveMode profileMode, Long targetProfileId, String targetProfileMode) {
+        User actor = findProfileById(profileId, profileMode); // actor 정보를 가져오기 위함
+        ActiveMode targetMode = ActiveMode.valueOf(targetProfileMode);
+
+        UserRelation relation = userRelationRepository
+            .findExistingRelation(actor.getUserId(), profileMode, targetProfileId, targetMode, RelationType.BLOCK)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "차단 내역이 존재하지 않습니다."));
+
+        relation.delete(); // isDeleted = true (차단 해제)
+
+        return ResponseBlockDto.builder()
+            .targetId(targetProfileId)
+            .targetProfileMode(targetProfileMode)
+            .isBlocked(false) // 차단 해제니까 무조건 false
+            .build();
+    }
 }
 

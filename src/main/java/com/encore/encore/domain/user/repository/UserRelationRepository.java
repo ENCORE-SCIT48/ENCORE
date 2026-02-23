@@ -4,6 +4,7 @@ import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.user.entity.RelationType;
 import com.encore.encore.domain.user.entity.UserRelation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -69,4 +70,20 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
 
     boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode);
 
+
+    // 1. 내가(계정) 상대(프로필)를 팔로우한 관계 삭제
+    @Modifying
+    @Query("UPDATE UserRelation ur SET ur.isDeleted = true " +
+        "WHERE ur.relationType = 'FOLLOW' AND ur.isDeleted = false " +
+        "AND ur.actor.userId = :myUserId AND ur.actorProfileMode = :myMode " +
+        "AND ur.targetId = :targetProfileId AND ur.targetProfileMode = :targetMode")
+    void deleteMyFollow(Long myUserId, ActiveMode myMode, Long targetProfileId, ActiveMode targetMode);
+
+    // 2. 상대(계정)가 나(프로필)를 팔로우한 관계 삭제
+    @Modifying
+    @Query("UPDATE UserRelation ur SET ur.isDeleted = true " +
+        "WHERE ur.relationType = 'FOLLOW' AND ur.isDeleted = false " +
+        "AND ur.actor.userId = :theirUserId AND ur.actorProfileMode = :theirMode " +
+        "AND ur.targetId = :myProfileId AND ur.targetProfileMode = :myMode")
+    void deleteTheirFollowToMe(Long theirUserId, ActiveMode theirMode, Long myProfileId, ActiveMode myMode);
 }

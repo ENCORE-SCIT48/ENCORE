@@ -1,6 +1,7 @@
 package com.encore.encore.domain.user.controller;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.user.dto.ResponseBlockDto;
 import com.encore.encore.domain.user.dto.ResponseFollowDto;
 import com.encore.encore.domain.user.dto.ResponseFollowListDto;
 import com.encore.encore.domain.user.service.RelationService;
@@ -106,7 +107,7 @@ public class RelationApiController {
      */
     @GetMapping("/{targetProfileId}/{targetProfileMode}/follower")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowerList(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
+        //@AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode) {
 
@@ -117,8 +118,11 @@ public class RelationApiController {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 profileMode 값입니다.");
         }
 
-        Long loginProfileId = userDetails.getActiveProfileId();
-        ActiveMode loginProfileMode = userDetails.getActiveMode();
+       /* Long loginProfileId = userDetails.getActiveProfileId();
+        ActiveMode loginProfileMode = userDetails.getActiveMode();*/
+
+        Long loginProfileId = 2L;
+        ActiveMode loginProfileMode = ActiveMode.HOST;
 
         List<ResponseFollowListDto> followers = relationService.getFollowerList(
             targetProfileId,
@@ -130,4 +134,51 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(followers, "팔로워 리스트 조회 성공"));
     }
 
+    @PostMapping("/{targetProfileId}/{targetProfileMode}/block")
+    public ResponseEntity<CommonResponse<ResponseBlockDto>> block(
+        //@AuthenticationPrincipal CustomUserDetails userDetails,
+
+        @PathVariable Long targetProfileId,
+        @PathVariable String targetProfileMode
+    ) {
+       /* Long profileId = userDetails.getActiveProfileId();
+        ActiveMode profileMode = userDetails.getActiveMode();*/
+
+        Long profileId = 2L;
+        ActiveMode profileMode = ActiveMode.HOST;
+
+
+        if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 할 수 없습니다.");
+        }
+
+        ResponseBlockDto result = relationService.userBlock(
+            profileId, profileMode, targetProfileId, targetProfileMode
+        );
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "차단 되었습니다."));
+    }
+
+    @PostMapping("/{targetProfileId}/{targetProfileMode}/unBlock")
+    public ResponseEntity<CommonResponse<ResponseBlockDto>> unBlock(
+        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long targetProfileId,
+        @PathVariable String targetProfileMode
+    ) {
+        //Long profileId = userDetails.getActiveProfileId();
+        //ActiveMode profileMode = userDetails.getActiveMode();
+
+        Long profileId = 2L;
+        ActiveMode profileMode = ActiveMode.HOST;
+
+        if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 해제 할 수 없습니다.");
+        }
+
+        ResponseBlockDto result = relationService.unblockUser(
+            profileId, profileMode, targetProfileId, targetProfileMode
+        );
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "차단이 해제 되었습니다."));
+    }
 }
