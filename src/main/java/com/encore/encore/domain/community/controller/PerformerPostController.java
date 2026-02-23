@@ -3,12 +3,14 @@ package com.encore.encore.domain.community.controller;
 import com.encore.encore.domain.community.dto.PerformerPostDto.*;
 import com.encore.encore.domain.community.service.PerformerPostService;
 import com.encore.encore.global.common.CommonResponse;
+import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,16 +24,18 @@ public class PerformerPostController {
     /**
      * [설명] 공연자 모집 게시글을 등록합니다.
      *
-     * @param request 게시글 등록 요청 객체
+     * @param userDetails 로그인 사용자 정보
+     * @param request     게시글 등록 요청 객체
      * @return 게시글 등록 결과
      */
     @PostMapping
     public CommonResponse<ResponseCreatePerformerPostDto> create(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody RequestCreatePerformerPostDto request) {
 
         log.info("POST /api/posts/performer - 공연자 모집 게시글 등록 요청");
 
-        ResponseCreatePerformerPostDto result = performerPostService.createPerformerPost(request);
+        ResponseCreatePerformerPostDto result = performerPostService.createPerformerPost(request, userDetails);
 
         log.info(
                 "POST /api/posts/performer - 공연자 모집 게시글 등록 완료, postId={}",
@@ -43,18 +47,20 @@ public class PerformerPostController {
     /**
      * [설명] 공연자 모집 게시글을 삭제합니다. (논리 삭제)
      *
-     * @param id 삭제할 게시글 ID
+     * @param userDetails 로그인 사용자 정보
+     * @param id          삭제할 게시글 ID
      * @return 게시글 삭제 결과
      */
     @DeleteMapping("/{id}")
     public CommonResponse<ResponseDeletePerformerPostDto> delete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("id") Long id) {
 
         log.info(
                 "DELETE /api/posts/performer/{} - 공연자 모집 게시글 삭제 요청",
                 id);
 
-        ResponseDeletePerformerPostDto result = performerPostService.deletePerformerPost(id);
+        ResponseDeletePerformerPostDto result = performerPostService.deletePerformerPost(id, userDetails);
 
         log.info(
                 "DELETE /api/posts/performer/{} - 공연자 모집 게시글 삭제 완료",
@@ -66,12 +72,14 @@ public class PerformerPostController {
     /**
      * [설명] 공연자 모집 게시글을 수정합니다.
      *
-     * @param id      게시글 ID
-     * @param request 게시글 수정 요청 객체
+     * @param userDetails 로그인 사용자 정보
+     * @param id          게시글 ID
+     * @param request     게시글 수정 요청 객체
      * @return 수정된 게시글 정보
      */
     @PutMapping("/{id}")
     public CommonResponse<ResponseUpdatePerformerPostDto> update(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("id") Long id,
             @RequestBody RequestUpdatePerformerPostDto request) {
 
@@ -79,7 +87,7 @@ public class PerformerPostController {
                 "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 요청",
                 id);
 
-        ResponseUpdatePerformerPostDto result = performerPostService.updatePerformerPost(id, request);
+        ResponseUpdatePerformerPostDto result = performerPostService.updatePerformerPost(id, request, userDetails);
 
         log.info(
                 "PUT /api/posts/performer/{} - 공연자 모집 게시글 수정 완료",
@@ -118,7 +126,8 @@ public class PerformerPostController {
 
     /**
      * [설명] 공연자 모집 게시글 단건 상세 정보를 조회합니다.
-     * 조회 시 조회수가 증가합니다.
+     *
+     * - 상세 조회 시 조회수를 증가시킵니다.
      *
      * @param id 게시글 ID
      * @return 게시글 상세 정보
@@ -131,11 +140,13 @@ public class PerformerPostController {
                 "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 요청",
                 id);
 
-        ResponseReadPerformerPostDto result = performerPostService.readPerformerPost(id);
+        // 상세 조회이므로 조회수 증가 true
+        ResponseReadPerformerPostDto result = performerPostService.readPerformerPost(id, true);
 
         log.info(
-                "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 완료",
-                id);
+                "GET /api/posts/performer/{} - 공연자 모집 게시글 단건 조회 완료, viewCount={}",
+                id,
+                result.getViewCount());
 
         return CommonResponse.ok(result, "게시글 조회 성공");
     }

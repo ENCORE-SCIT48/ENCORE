@@ -14,4 +14,6 @@ public class RequestCreatePerformancePostDto {
     private String title;
 
     private String content;
+
+    private Integer capacity;
 }

@@ -22,6 +22,8 @@ public class ResponseUpdatePerformerPostDto {
 
     private String content;
 
+    private Integer capacity;
+
     private Long performanceId;
 
     private Long performerAuthorId;

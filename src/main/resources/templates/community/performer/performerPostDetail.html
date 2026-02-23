@@ -130,6 +130,22 @@
         <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
       </div>
 
+      <!-- 모집 인원 표시 -->
+      <div style="margin-top:8px; font-size:13px; color:#E63946;">
+
+        <span th:if="${post.capacity != null}">
+          모집 인원
+          <span th:text="${post.approvedCount}"></span>
+          /
+          <span th:text="${post.capacity}"></span>
+        </span>
+
+        <span th:if="${post.capacity == null}">
+          모집 인원 제한 없음
+        </span>
+
+      </div>
+
       <div class="divider"></div>
 
       <!-- 내용 -->
@@ -139,9 +155,31 @@
 
       <!-- 수정 / 삭제 -->
       <div class="btn-group">
-        <button id="editBtn" class="btn btn-primary">수정</button>
-        <button id="deleteBtn" class="btn btn-outline-danger">삭제</button>
+
+        <!-- 로그인 + 작성자인 경우 -->
+        <th:block
+          th:if="${activeProfileId != null and post.performerId != null and activeProfileId == post.performerId}">
+          <button id="editBtn" class="btn btn-primary"
+            th:onclick="|location.href='@{/posts/performer/{id}/edit(id=${post.postId})}'|">
+            수정
+          </button>
+
+          <button id="deleteBtn" class="btn btn-outline-danger">
+            삭제
+          </button>
+        </th:block>
+
+        <!-- 로그인했지만 작성자가 아닌 경우 -->
+        <th:block
+          th:if="${activeProfileId != null and post.performerId != null and activeProfileId != post.performerId}">
+          <button id="applyBtn" class="btn btn-primary">
+            신청
+          </button>
+        </th:block>
+
       </div>
+
+
 
     </div>
 

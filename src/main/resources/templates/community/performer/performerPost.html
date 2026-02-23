@@ -189,9 +189,36 @@
 
         <div class="post-content" th:text="${post.content}"></div>
 
+        <!-- 모집 인원 + 마감 표시 -->
+        <div style="margin-top:6px; font-size:12px;">
+
+          <!-- 정원 있는 경우 -->
+          <span th:if="${post.capacity != null}">
+
+            <!-- 마감 여부 판단 -->
+            <span th:if="${post.approvedCount >= post.capacity}" style="color:#E63946; font-weight:600;">
+              모집 마감
+            </span>
+
+            <span th:if="${post.approvedCount < post.capacity}" style="color:#E63946;">
+              모집 인원
+              <span th:text="${post.approvedCount}"></span>
+              /
+              <span th:text="${post.capacity}"></span>
+            </span>
+
+          </span>
+
+          <!-- 정원 제한 없음 -->
+          <span th:if="${post.capacity == null}" style="color:#666;">
+            모집 인원 제한 없음
+          </span>
+
+        </div>
+
         <div class="post-meta">
           <span th:text="'조회수 ' + ${post.viewCount}"></span>
-          <span th:text="${#temporals.format(post.createdAt, 'MM-dd')}"></span>
+          <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
         </div>
 
       </div>

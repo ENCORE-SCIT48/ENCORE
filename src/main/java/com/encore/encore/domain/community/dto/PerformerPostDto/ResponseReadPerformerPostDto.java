@@ -20,8 +20,14 @@ public class ResponseReadPerformerPostDto {
 
     private String content;
 
+    private Integer capacity;
+
+    private Integer approvedCount;
+
     private Integer viewCount;
 
     private LocalDateTime createdAt;
+
+    private Long performerId;
 
 }

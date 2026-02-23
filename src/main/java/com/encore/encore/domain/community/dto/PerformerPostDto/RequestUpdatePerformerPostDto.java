@@ -17,4 +17,6 @@ public class RequestUpdatePerformerPostDto {
     private String content;
 
     private Long performanceId;
+
+    private Integer capacity;
 }

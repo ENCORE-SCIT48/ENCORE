@@ -19,6 +19,8 @@ public class ResponseUpdatePerformancePostDto {
 
     private String content;
 
+    private Integer capacity;
+
     private Long performanceId;
 
     private LocalDateTime updatedAt;
