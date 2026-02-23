@@ -1,5 +1,6 @@
 package com.encore.encore.domain.user.entity;
 
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,6 +19,9 @@ public class UserNotification extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ActiveMode profileMode;
 
     private Boolean performanceStartAlert;
     private Boolean dmAlert;
