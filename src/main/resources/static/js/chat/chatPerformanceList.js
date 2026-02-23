@@ -59,7 +59,7 @@ function loadChatList(page, performanceId) {
     isLoading = true;
 
     $.ajax({
-        url: `/performances/${performanceId}/chats`,
+        url: `/api/performances/${performanceId}/chats`,
         method: 'GET',
         data: {
             page: page,
@@ -119,7 +119,7 @@ function renderChatItem(chat, performanceId) {
     const updatedAt = dayjs(chat.updatedAt).format('YY.MM.DD HH:mm');
 
     return `
-        <div class="chat-item" onclick="location.href='/performance/${performanceId}/chat/${chat.id}'">
+        <div class="chat-item" onclick="location.href='/performances/${performanceId}/chat/${chat.id}'">
             <span class="status-badge ${statusClass}">${statusText}</span>
             <div class="chat-title">${chat.title}</div>
             <div class="chat-bottom">

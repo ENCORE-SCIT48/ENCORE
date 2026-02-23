@@ -1,4 +1,4 @@
-package com.encore.encore.domain.chat.dto;
+package com.encore.encore.domain.chat.dto.dm;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,19 +7,15 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 /**
- * 채팅 메시지 응답 DTO
- * <p>
- * 채팅 메시지 상세 정보를 프론트에 전달하기 위한 객체입니다.
- * 메시지 ID, 발신자 프로필 ID, 발신자 이름, 내용, 생성 일시를 포함합니다.
- * </p>
+ * 응답 보내주는 dm dto
  */
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseChatMessage {
+public class ResponseSendDmDto {
+    private Long roomId;
     private Long messageId;
     private Long profileId;
     private String profileMode;
@@ -27,6 +23,4 @@ public class ResponseChatMessage {
     private String content;
     private LocalDateTime createdAt;
 
-
 }
-

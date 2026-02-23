@@ -450,8 +450,8 @@ public class ChatService {
                     chatParticipant.getProfileId(),
                     chatParticipant.getProfileMode()
                 ))
-                .activeId(chatParticipant.getProfileId())
-                .activeMode(chatParticipant.getProfileMode().name())
+                .profileId(chatParticipant.getProfileId())
+                .profileMode(chatParticipant.getProfileMode().name())
                 .roomId(roomId)
                 .build();
             participantDtos.add(dto);

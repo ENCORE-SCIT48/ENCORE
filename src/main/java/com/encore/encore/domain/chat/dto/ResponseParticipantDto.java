@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResponseParticipantDto {
     private Long participantId;
-    private String activeMode;
-    private Long activeId;
+    private String profileMode;
+    private Long profileId;
     private Long roomId;
     private String nickName;
 }

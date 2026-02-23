@@ -31,7 +31,7 @@
             <h3 class="app-title" th:text="${performanceTitle}">공연 제목</h3>
         </div>
 
-        <a th:href="@{/performance/{id}/chat/post(id=${performanceId})}" class="write-btn" aria-label="채팅방 생성">
+        <a th:href="@{/performances/{id}/chats/new(id=${performanceId})}" class="write-btn" aria-label="채팅방 생성">
             <i class="fa-solid fa-plus"></i>
         </a>
     </header>
