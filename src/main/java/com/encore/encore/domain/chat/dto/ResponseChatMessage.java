@@ -22,9 +22,11 @@ import java.time.LocalDateTime;
 public class ResponseChatMessage {
     private Long messageId;
     private Long profileId;
+    private String profileMode;
     private String senderName;
     private String content;
     private LocalDateTime createdAt;
+    private boolean isMine;
 
 
 }

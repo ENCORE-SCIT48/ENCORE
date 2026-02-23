@@ -23,7 +23,7 @@ html, body {
   background: #fff;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* 또는 auto */
 }
 /* 상단 헤더 */
 .app-header {
@@ -221,62 +221,85 @@ position: relative;
 }
 
  /* 채팅 메시지 영역 */
-    .chat-area {
-      flex: 1 1 auto;          /* 남은 공간 모두 차지 */
-      overflow-y: auto;         /* 스크롤 가능 */
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      background: #f8f9fa;
-    }
+  /* 메시지 전체 */
+  .chat-message {
+    display: flex;
+    margin-bottom: 0.4rem;
+  }
 
-    /* 메시지 한 줄 */
-    .message-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
+  /* 내 메시지 오른쪽, 상대 왼쪽 */
+  .chat-message.mine {
+    justify-content: flex-end;
+  }
 
-    .message-row .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #ccc;
-      flex-shrink: 0;
-    }
+  .chat-message.other {
+    justify-content: flex-start;
+  }
 
-    .message-content-wrapper {
-      display: flex;
-      flex-direction: column;
-    }
+  /* 말풍선 */
+  .message-wrapper {
+    display: flex;
+    flex-direction: column;
+    max-width: 220px;       /* 최대 너비 제한 */
+    padding: 0.35rem 0.7rem;
+    border-radius: 12px;
+    position: relative;
+    font-size: 0.85rem;
+    word-break: break-word;
+  }
 
-    .message-name {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 0.2rem;
-    }
+  /* 색상 구분 */
+  .chat-message.mine .message-wrapper {
+    background-color: #dcf8c6; /* 연한 초록 */
+    border-top-right-radius: 0; /* 화살표쪽 각 */
+  }
 
-    .message-content {
-      max-width: 250px;
-      background-color: #e9ecef;
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-      word-break: break-word;
-      position: relative;
-    }
+  .chat-message.other .message-wrapper {
+    background-color: #e9ecef; /* 연한 회색 */
+    border-top-left-radius: 0;
+  }
 
-    .message-content::before {
-      content: "";
-      position: absolute;
-      top: 10px;
-      left: -10px;
-      border-top: 8px solid transparent;
-      border-right: 10px solid #e9ecef;
-      border-bottom: 8px solid transparent;
-    }
+  /* 말풍선 화살표 */
+  .chat-message.mine .message-wrapper::after {
+    content: "";
+    position: absolute;
+    right: -6px;
+    top: 8px;
+    border: 6px solid transparent;
+    border-left-color: #dcf8c6;
+  }
+
+  .chat-message.other .message-wrapper::after {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 8px;
+    border: 6px solid transparent;
+    border-right-color: #e9ecef;
+  }
+
+  /* 이름 */
+  .message-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.15rem;
+  }
+
+  /* 내용 */
+  .message-content {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  /* 시간 */
+  .message-time {
+    font-size: 0.65rem;
+    color: #888;
+    align-self: flex-end;
+    margin-top: 0.15rem;
+  }
+
 
     /* 입력 영역 */
     .chat-input-area {

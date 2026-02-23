@@ -47,7 +47,7 @@ public class ChatMessageApiController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        Long activeProfileId = userDetails.getActiveProfileId();
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseChatMessage result = chatMessageService.sendMessage(
@@ -71,11 +71,15 @@ public class ChatMessageApiController {
      */
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<CommonResponse<List<ResponseChatMessage>>> getMessages(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long roomId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size
     ) {
-        List<ResponseChatMessage> result = chatMessageService.getMessages(roomId, page, size);
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
+
+        List<ResponseChatMessage> result = chatMessageService.getMessages(roomId, page, size, activeProfileId, activeMode);
         return ResponseEntity.ok(CommonResponse.ok(result, "메시지 조회 성공"));
     }
 
@@ -98,7 +102,7 @@ public class ChatMessageApiController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        Long activeProfileId = userDetails.getActiveProfileId();
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 
         log.info("[API] 채팅방 퇴장 요청 - roomId: {}, userId: {}", roomId, activeProfileId, activeMode);
@@ -124,7 +128,7 @@ public class ChatMessageApiController {
         @PathVariable Long roomId,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long activeProfileId = userDetails.getActiveProfileId();
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 
         List<ResponseParticipantDto> result = chatMessageService.getParticipantList(roomId);

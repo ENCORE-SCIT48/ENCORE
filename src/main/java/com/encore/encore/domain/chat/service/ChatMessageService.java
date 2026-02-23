@@ -70,9 +70,11 @@ public class ChatMessageService {
         return ResponseChatMessage.builder()
             .messageId(message.getMessageId())
             .profileId(message.getProfileId())
-            .senderName(profileService.resolveSenderName(message.getMessageId(), message.getProfileMode()))
+            .profileMode(message.getProfileMode().name())
+            .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())
+            .isMine(message.getProfileId().equals(activeId) && message.getProfileMode().equals(activeMode))
             .build();
 
     }
@@ -90,7 +92,7 @@ public class ChatMessageService {
      * @param size   한 페이지당 메시지 수
      * @return {@link ResponseChatMessage} DTO로 변환된 메시지 리스트
      */
-    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size) {
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeId, ActiveMode activeMode) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
@@ -99,9 +101,11 @@ public class ChatMessageService {
             .map(message -> ResponseChatMessage.builder()
                 .messageId(message.getMessageId())
                 .profileId(message.getProfileId())
+                .profileMode(message.getProfileMode().name())
                 .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
+                .isMine(message.getProfileId().equals(activeId) && message.getProfileMode().equals(activeMode))
                 .build()
             )
             .toList();
@@ -194,8 +198,8 @@ public class ChatMessageService {
                 .nickName(profileService.resolveSenderName(
                     chatParticipant.getProfileId(),
                     chatParticipant.getProfileMode()))
-                .activeId(chatParticipant.getParticipantId())
-                .activeMode(chatParticipant.getProfileMode().name())
+                .profileId(chatParticipant.getProfileId())
+                .profileMode(chatParticipant.getProfileMode().name())
                 .build();
             responseParticipantDtoList.add(dto);
         }

@@ -1,50 +1,38 @@
 /**
  * chatRoom.js
- * 🎯 채팅 메시지 전송/조회 및 참여자 목록 확인, 퇴장 기능 관리
+ * 🎯 페이지네이션 + 중복 방지 + isMine 필드 활용 버전
  */
 
 $(document).ready(() => {
+
     const chatInput = $('#chatInput');
     const chatArea = $('#chatArea');
     const participantList = $('#participantList');
-
-    // 페이징 관련 변수
-    let currentPage = 0;
     const pageSize = 20;
+
+    let currentPage = 0;
     let loading = false;
     let allLoaded = false;
 
-    // 1. 초기 메시지 로드
+    // ========================
+    // 초기 메시지 로드
+    // ========================
     loadMessages(true);
 
-    // 2. 사이드바 오픈 시 참여자 목록 로드
-    $('#chatSidebar').on('show.bs.offcanvas', function () {
-        fetchParticipants();
+    // ========================
+    // 이벤트 바인딩
+    // ========================
+    $('#chatSidebar').on('show.bs.offcanvas', fetchParticipants);
+    $('#sendBtn').on('click', sendMessage);
+    chatInput.on('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }});
+    $('#leaveChatBtn').on('click', () => { if (confirm('정말 채팅방에서 나가시겠습니까?')) exitChat(); });
+    chatArea.on('scroll', () => {
+        if (chatArea.scrollTop() <= 10 && !loading && !allLoaded) loadMessages();
     });
 
-    // 3. 메시지 전송 (클릭)
-    $('#sendBtn').on('click', function () {
-        sendMessage();
-    });
-
-    // 4. 메시지 전송 (엔터키)
-    chatInput.on('keydown', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
-    // 5. 채팅방 퇴장
-    $('#leaveChatBtn').on('click', function () {
-        if (confirm('정말 채팅방에서 나가시겠습니까?')) {
-            exitChat();
-        }
-    });
-
-    /**
-     * 메시지 전송 API 호출
-     */
+    // ========================
+    // 메시지 전송
+    // ========================
     function sendMessage() {
         const content = chatInput.val().trim();
         if (!content) return;
@@ -54,21 +42,19 @@ $(document).ready(() => {
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ content }),
-            success: function () {
+            success: (res) => {
+                if (!res.success) return alert(res.message);
+
                 chatInput.val('');
-                loadMessages(true); // 메시지 전송 후 최신 메시지 불러오기
+                loadMessages(true); // 전송 후 전체 새로 불러오기
             },
-            error: function (xhr) {
-                console.error('메시지 전송 실패:', xhr);
-                alert('메시지를 보낼 수 없습니다.');
-            }
+            error: handleAjaxError
         });
     }
 
-    /**
-     * 메시지 목록 불러오기 및 렌더링
-     * @param reset true면 기존 메시지 초기화 후 새로 불러오기
-     */
+    // ========================
+    // 메시지 목록 조회
+    // ========================
     function loadMessages(reset = false) {
         if (loading || allLoaded) return;
         loading = true;
@@ -76,106 +62,131 @@ $(document).ready(() => {
         if (reset) {
             currentPage = 0;
             allLoaded = false;
-            chatArea.empty();
         }
 
         $.ajax({
             url: `/api/chat/room/${ROOM_ID}/messages?page=${currentPage}&size=${pageSize}`,
             method: 'GET',
-            success: function (res) {
-                if (!res.content || res.content.length === 0) {
+            success: (res) => {
+
+                if (!res.success) { alert(res.message); return; }
+
+                const messages = res.data;
+                if (!messages || messages.length === 0) {
                     allLoaded = true;
+                    if (reset) chatArea.html(`<div class="message-row system-msg"><p class="text-center text-muted small">대화가 시작되었습니다.</p></div>`);
                     return;
                 }
 
-                res.content.forEach(function (msg) {
-                    const html = `
-                        <div class="message-row mb-3">
-                            <div class="message-wrapper">
-                                <div class="message-name">${msg.senderName}</div>
-                                <div class="message-content">${msg.content}</div>
-                            </div>
-                        </div>
-                    `;
-                    chatArea.append(html);
+                // reset이면 기존 메시지 초기화
+                if (reset) chatArea.empty();
+
+                // 중복 메시지 방지 후 append
+                messages.forEach(msg => {
+                    if (chatArea.find(`[data-id="${msg.messageId}"]`).length === 0) {
+                        renderMessage(msg);
+                    }
                 });
 
+                // 스크롤 자동 하단
                 scrollToBottom();
+
                 currentPage++;
             },
-            error: function (xhr) {
-                console.error('메시지 로드 실패:', xhr);
-            },
-            complete: function () {
-                loading = false;
-            }
+            error: handleAjaxError,
+            complete: () => { loading = false; }
         });
     }
 
-    /**
-     * 참여자 목록 조회
-     */
+    // ========================
+    // 메시지 렌더링
+    // ========================
+        function renderMessage(msg) {
+            const isMine = msg.mine;
+            const html = `
+        <div class="chat-message ${isMine ? 'mine' : 'other'}" data-id="${msg.messageId}">
+            <span class="message-sender">${escapeHtml(msg.senderName)}</span>
+            <div class="message-wrapper">
+                <span class="message-content">${escapeHtml(msg.content)}</span>
+            </div>
+            <span class="message-time">${dayjs(msg.createdAt).format('HH:mm')}</span>
+        </div>`;
+            chatArea.append(html);
+        }
+    // ========================
+    // 참여자 목록 조회
+    // ========================
     function fetchParticipants() {
         $.ajax({
             url: `/api/chat/room/${ROOM_ID}/participants`,
             method: 'GET',
-            success: function (res) {
-                participantList.empty();
+            success: (res) => {
+                if (!res.success) return alert(res.message);
 
-                res.data.forEach(function (user) {
-                    participantList.append(`
-                        <li class="list-group-item d-flex align-items-center">
-                            <i class="fa-solid fa-user-circle me-2 text-secondary"></i>
-                            ${user.nickName}
-                        </li>
-                    `);
+                participantList.empty();
+                res.data.forEach(user => {
+                    const listItem = $(`
+<li class="list-group-item d-flex align-items-center" style="cursor:pointer">
+    <i class="fa-solid fa-user-circle me-2 text-secondary"></i>
+    ${escapeHtml(user.nickName)}
+</li>`);
+
+                    listItem.on('click', () => {
+                        window.location.href = `/member/profile/${user.profileId}/${user.profileMode}`;
+                    });
+
+                    participantList.append(listItem);
                 });
             },
-            error: function (xhr) {
-                console.error('참여자 목록 로드 실패:', xhr);
-            }
+            error: handleAjaxError
         });
     }
 
-    /**
-     * 채팅방 스크롤 최하단으로 이동
-     */
-    function scrollToBottom() {
-        chatArea.scrollTop(chatArea[0].scrollHeight);
-    }
-
-    /**
-     * 채팅방 퇴장 API 호출 및 목록 페이지 이동
-     */
+    // ========================
+    // 채팅방 퇴장
+    // ========================
     function exitChat() {
         $.ajax({
             url: `/api/chat/room/${ROOM_ID}/exit`,
             method: 'POST',
-            success: function (response) {
-                if (!response.exitSuccess) {
-                    if (response.isOwner) {
-                        alert('글쓴이는 퇴장할 수 없습니다.');
-                    } else {
-                        alert(response.message);
-                    }
+            success: (res) => {
+                if (!res.success) return alert(res.message);
+
+                const data = res.data;
+                if (!data.exitSuccess) {
+                    if (data.isOwner) alert('글쓴이는 퇴장할 수 없습니다.');
+                    else alert(res.message);
                     return;
                 }
 
-                alert(response.message);
+                alert(res.message);
                 location.href = '/chat/list';
             },
-            error: function () {
-                alert('퇴장 처리 중 오류가 발생했습니다.');
-            }
+            error: handleAjaxError
         });
     }
 
-    /**
-     * 무한 스크롤 (위로 올릴 때 이전 메시지 로딩)
-     */
-    chatArea.on('scroll', function () {
-        if (chatArea.scrollTop() === 0 && !loading && !allLoaded) {
-            loadMessages();
-        }
-    });
+    // ========================
+    // 공통 에러 처리
+    // ========================
+    function handleAjaxError(xhr) {
+        console.error('AJAX Error:', xhr.responseText);
+        alert('서버 오류가 발생했습니다.');
+    }
+
+    // ========================
+    // XSS 방지
+    // ========================
+    function escapeHtml(text) {
+        return $('<div>').text(text).html();
+    }
+
+    // ========================
+    // 스크롤 하단 이동
+    // ========================
+function scrollToBottom() {
+    setTimeout(() => {
+        chatArea.scrollTop(chatArea[0].scrollHeight);
+    }, 50); // 0.05초의 여유를 줌
+}
 });

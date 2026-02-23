@@ -87,8 +87,9 @@ public class ProfileService {
         if (!isInitialized) {
             log.info("[Profile Check] Mode: {} (ID: {}) is NOT initialized.", mode, profileId);
         }
-
+        
         return isInitialized;
+
     }
 
     /**
@@ -116,6 +117,8 @@ public class ProfileService {
                 .map(HostProfile::getOrganizationName)
                 .orElse("Unknown");
         };
+
     }
+
 
 }

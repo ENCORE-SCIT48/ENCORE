@@ -42,13 +42,13 @@ public class RelationApiController {
      */
     @PostMapping("/{targetProfileId}/{targetProfileMode}/follow")
     public ResponseEntity<CommonResponse<ResponseFollowDto>> follow(
+
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode
     ) {
         Long profileId = userDetails.getActiveProfileId();
         ActiveMode profileMode = userDetails.getActiveMode();
-
 
         if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 팔로우 할 수 없습니다.");
