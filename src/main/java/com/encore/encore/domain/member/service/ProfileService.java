@@ -24,7 +24,6 @@ public class ProfileService {
     private final UserProfileRepository userProfileRepository;
     private final PerformerProfileRepository performerProfileRepository;
     private final HostProfileRepository hostProfileRepository;
-
     /**
      * 사용자의 활성 모드에 따라 해당 프로필의 PK ID를 조회한다.
      * ActiveMode 값에 따라 서로 다른 프로필 테이블을 조회하며,
@@ -88,7 +87,7 @@ public class ProfileService {
             log.info("[Profile Check] Mode: {} (ID: {}) is NOT initialized.", mode, profileId);
         }
 
-        return isInitialized;
+        return isInitialized;    
     }
 
     /**
