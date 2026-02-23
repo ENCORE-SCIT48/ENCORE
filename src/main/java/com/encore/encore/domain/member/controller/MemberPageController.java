@@ -28,6 +28,7 @@ public class MemberPageController {
      * @param profileId   이동할 개인페이지의 프로필id
      * @param profileMode 이동할 개인페이지의 프로필모드
      * @param model
+     * @return
      */
     @GetMapping("member/profile/{profileId}/{profileMode}")
     public String memberProfile(

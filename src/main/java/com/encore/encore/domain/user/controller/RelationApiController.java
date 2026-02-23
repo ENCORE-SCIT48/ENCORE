@@ -42,6 +42,7 @@ public class RelationApiController {
      */
     @PostMapping("/{targetProfileId}/{targetProfileMode}/follow")
     public ResponseEntity<CommonResponse<ResponseFollowDto>> follow(
+
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode
