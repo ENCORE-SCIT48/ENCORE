@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공연자 마이페이지</title>
+
+  <!-- Bootswatch Litera -->
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      padding: 20px 16px;
+    }
+
+    /* ===== 상단 ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .top-left,
+    .top-center,
+    .top-right {
+      flex: 1;
+    }
+
+    .top-center {
+      text-align: center;
+    }
+
+    .top-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn {
+      font-size: 20px;
+      text-decoration: none;
+      color: #333333;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .switch-btn {
+      border: 1px solid #E63946;
+      background: #fff;
+      color: #E63946;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .switch-btn:hover {
+      background: #E63946;
+      color: #fff;
+    }
+
+    /* ===== 프로필 ===== */
+    .profile-section {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
+
+    .profile-image {
+      width: 100px;
+      height: 100px;
+      background: #e5e5e5;
+      border-radius: 50%;
+      margin: 0 auto 16px auto;
+    }
+
+    .nickname {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333333;
+    }
+
+    .follow-info {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* ===== 메뉴 ===== */
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .menu-item {
+      background: #f8f8f8;
+      padding: 14px;
+      text-align: center;
+      border-radius: 10px;
+      font-size: 14px;
+      text-decoration: none;
+      color: #333;
+      border: 1px solid #eee;
+      transition: 0.2s;
+    }
+
+    .menu-item:hover {
+      border-color: #E63946;
+      box-shadow: 0 4px 16px rgba(230, 57, 70, 0.1);
+      color: #E63946;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+
+    <div class="app-container">
+
+      <!-- ===== 상단 ===== -->
+      <div class="top-bar">
+
+        <div class="top-left">
+          <a th:href="@{/performer}" class="back-btn">←</a>
+        </div>
+
+        <div class="top-center">
+          <div class="page-title">공연자 마이페이지</div>
+        </div>
+
+        <div class="top-right">
+          <a th:href="@{/user/mypage}" class="switch-btn">
+            프로필 전환
+          </a>
+          <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        </div>
+
+      </div>
+
+      <!-- ===== 프로필 영역 ===== -->
+      <div class="profile-section">
+
+        <div class="profile-image"></div>
+
+        <div class="nickname">
+          <span sec:authentication="name">닉네임</span>
+        </div>
+
+        <div class="follow-info">
+          <div>XXXX 팔로잉</div>
+          <div>XXXX 팔로워</div>
+        </div>
+
+      </div>
+
+      <!-- ===== 메뉴 ===== -->
+      <div class="menu-list">
+
+        <a th:href="@{/posts/performer}" class="menu-item">
+          내가 작성한 공연자 모집글
+        </a>
+
+        <a th:href="@{/posts/performance}" class="menu-item">
+          내가 작성한 공연 모집글
+        </a>
+
+        <a href="#" class="menu-item">
+          내가 신청한 공연자 파티
+        </a>
+
+        <a href="#" class="menu-item">
+          내가 신청한 공연
+        </a>
+
+        <a href="#" class="menu-item">
+          모집 완료된 전체 공연 리스트
+        </a>
+
+        <a href="#" class="menu-item">
+          내가 모집한 공연자
+        </a>
+
+        <a th:href="@{/performer/venueList}" class="menu-item">
+          내가 대관한 공연장
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- ===== 하단 네비 ===== -->
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
+
+  </div>
+
+</body>
+
+</html>
