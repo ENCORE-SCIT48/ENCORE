@@ -36,5 +36,14 @@ public class RelationPageController {
 
         return "relation/following-follower";
     }
+    /**
+     * 알림 설정 페이지로 이동한다.
+     *
+     * @return
+     */
+    @GetMapping("user/notification")
+    public String notification() {
 
+        return "user-settings/notificationSetting";
+    }
 }

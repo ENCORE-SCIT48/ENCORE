@@ -42,7 +42,6 @@
                                data-bs-target="#reportModal">신고하기</a></li>
                     </ul>
                 </div>
-
             </div>
         </nav>
     </header>
@@ -90,7 +89,6 @@
                     <button class="btn dm-btn w-100"
                             id="btn-dm"
                             th:data-profile-id="${user.profileId}"
-
                             th:data-profile-mode="${profileMode}">
                         DM
                     </button>
@@ -101,7 +99,6 @@
 
         <!-- ===== Bio ===== -->
         <section class="mt-4">
-
             <h6 class="section-title">소개</h6>
             <div class="card-box" th:text="${user.userInfo}">
                 소개 내용

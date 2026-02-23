@@ -33,6 +33,8 @@ function activateTab(tab) {
     followingContent.classList.toggle('hidden', !isFollowingTab);
     followerContent.classList.toggle('hidden', isFollowingTab);
 
+    followingContent.classList.toggle('hidden', !isFollowingTab);
+    followerContent.classList.toggle('hidden', isFollowingTab);
 }
 
 // ==========================

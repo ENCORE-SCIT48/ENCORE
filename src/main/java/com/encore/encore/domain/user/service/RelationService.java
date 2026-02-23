@@ -223,6 +223,7 @@ public class RelationService {
         }
 
         int followerCount = userRelationRepository.countFollower(targetProfileId, ActiveMode.valueOf(targetProfileMode));
+
         // 4. 결과 반환 (현재 팔로우 중인지 여부)
         return ResponseFollowDto.builder()
             .targetId(targetProfileId)
