@@ -23,6 +23,14 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 신고 내용을 저장 합니다.
+     *
+     * @param dto              신고 내용들
+     * @param loginUserId      신고자 userId
+     * @param loginProfileMode 신고자 프로필 모드
+     * @return 신고 접수 번호, 신고 접수 상태, 신고 접수 날짜
+     */
     public ResponseCreateReportDto saveReport(RequestCreateReportDto dto, Long loginUserId, ActiveMode loginProfileMode) {
 
         User loginUser = userRepository.findById(loginUserId)
