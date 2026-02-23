@@ -195,6 +195,7 @@ public class PerformancePostService {
                         : null
                 )
                 .title(post.getTitle())
+                .content(post.getContent())
                 .viewCount(post.getViewCount())
                 .createdAt(post.getCreatedAt())
                 .build());

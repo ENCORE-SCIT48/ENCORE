@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/posts/performer")
-public class PostPageController {
+public class PerformerPostPageController {
 
     private final PerformerPostService performerPostService;
 
