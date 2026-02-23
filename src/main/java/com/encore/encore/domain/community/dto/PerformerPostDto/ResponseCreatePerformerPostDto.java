@@ -1,4 +1,4 @@
-package com.encore.encore.domain.community.dto;
+package com.encore.encore.domain.community.dto.PerformerPostDto;
 
 
 import lombok.*;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseCreatePostDto {
+public class ResponseCreatePerformerPostDto {
 
     private Long postId;
 

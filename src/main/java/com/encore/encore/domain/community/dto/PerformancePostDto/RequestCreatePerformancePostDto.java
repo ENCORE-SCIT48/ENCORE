@@ -1,4 +1,4 @@
-package com.encore.encore.domain.community.dto;
+package com.encore.encore.domain.community.dto.PerformancePostDto;
 
 import lombok.*;
 
@@ -7,14 +7,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestCreatePostDto {
+public class RequestCreatePerformancePostDto {
 
     private Long performanceId;
-
-    private String postType;
 
     private String title;
 
     private String content;
-    
 }
