@@ -222,11 +222,13 @@ public class RelationService {
             log.info("새로운 관계 생성");
         }
 
+        int followerCount = userRelationRepository.countFollower(targetProfileId, ActiveMode.valueOf(targetProfileMode));
         // 4. 결과 반환 (현재 팔로우 중인지 여부)
         return ResponseFollowDto.builder()
             .targetId(targetProfileId)
             .targetProfileMode(targetProfileMode)
             .isFollowing(!relation.isDeleted())
+            .followerCount(followerCount)
             .build();
     }
 
@@ -263,11 +265,6 @@ public class RelationService {
      * @return 로그인 사용자 기준 팔로우 여부(isFollowing)를 포함한
      * {@link ResponseFollowListDto} 리스트
      * @throws ApiException <ul>
-     *                                                                                                                                                                                                                               <li>프로필이 존재하지 않는 경우</li>
-     *                                                                                                                                                                                                                               <li>공연(PERFORMANCE)이 존재하지 않는 경우</li>
-     *                                                                                                                                                                                                                               <li>공연장(VENUE)이 존재하지 않는 경우</li>
-     *                                                                                                                                                                                                                               <li>알 수 없는 targetType이 들어온 경우</li>
-     *                                                                                                                                                                                                                           </ul>
      * @implNote 현재 구현은 각 relation마다 추가 조회가 발생할 수 있어
      * 팔로잉 수가 많을 경우 N+1 쿼리 문제가 발생할 수 있습니다.
      * 필요 시 fetch join 또는 일괄 조회 방식으로 최적화가 필요합니다.
@@ -400,5 +397,13 @@ public class RelationService {
             })
             .toList();
     }
+
+    public boolean isFollowing(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode) {
+        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(
+            loginUserId, loginProfileMode, profileId, activeMode);
+
+        return b;
+    }
+
 }
 

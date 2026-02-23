@@ -184,3 +184,111 @@
 .offcanvas-body nav {
     padding: 15px;
 }
+/* 채팅 메시지 컨테이너 */
+/* 채팅 메시지 컨테이너 */
+.chat-message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.2rem; /* 메시지 간 간격 확대 */
+    max-width: 80%; /* 전체 화면의 80%까지만 차지 */
+}
+
+/* 내 메시지는 오른쪽, 상대 메시지는 왼쪽 */
+.chat-message.mine {
+    margin-left: auto;
+    align-items: flex-end;
+}
+
+.chat-message.other {
+    margin-right: auto;
+    align-items: flex-start;
+}
+
+/* 1. 발신자 이름 (말풍선 위) */
+.message-sender {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+/* 2. 말풍선 (내용에 맞게 사이즈 조절) */
+.message-wrapper {
+    display: inline-block; /* 내용만큼만 너비 차지 */
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 상대방 말풍선 (회색) */
+.chat-message.other .message-wrapper {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #333;
+    border-top-left-radius: 2px; /* 말풍선 꼬리 느낌 */
+}
+
+/* 내 말풍선 (연한 빨강/핑크) */
+.chat-message.mine .message-wrapper {
+    background-color: #ffeded; /* Litera 빨강 계열의 아주 연한 버전 */
+    border: 1px solid #ffcccc;
+    color: #333;
+    border-top-right-radius: 2px;
+}
+
+/* 3. 시간 (말풍선 아래) */
+.message-time {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+/* 시스템 메시지 (중앙 정렬) */
+.system-msg {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+.system-msg p {
+    background-color: rgba(0,0,0,0.05);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+/* 메인 채팅 영역 배경 정리 */
+.app-content.chat-area {
+    background-color: #f4f4f4 !important; /* 초록색이 있다면 이걸로 덮어씌움 */
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    gap: 5px; /* 메시지 사이 간격 */
+}
+
+/* 혹시 모를 내부 요소의 이상한 배경색 제거 */
+#chatArea * {
+    background-color: transparent;
+}
+
+/* 하지만 말풍선은 색깔이 있어야 하므로 다시 지정 */
+.message-wrapper {
+    background-color: #ffffff !important;
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* 내 말풍선 색깔도 다시 확실히 지정 */
+.chat-message.mine .message-wrapper {
+    background-color: #ffeded !important;
+    border: 1px solid #ffcccc !important;
+}

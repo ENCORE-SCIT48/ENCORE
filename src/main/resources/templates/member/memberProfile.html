@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <!--<title th:text="${user.username}">User Profile</title>-->
+    <title th:text="${user.userName}">User Profile</title>
 
     <!-- Bootswatch Litera -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css"/>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/member/style.css}"/>
 </head>
@@ -19,31 +19,30 @@
 
     <!-- ===== Header ===== -->
     <header class="app-header">
-        <nav class="d-flex justify-content-between align-items-center w-100">
-            <span>&larr;</span>
-
-            <span>
-                    USER_PROFILE
-                </span>
-
-            <div class="dropdown">
-                <button class="btn text-white p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
-                    ⋮
+        <nav class="header-nav">
+            <div class="header-left">
+                <button class="btn-icon" onclick="history.back()" aria-label="뒤로가기">
+                    <i class="fa-solid fa-chevron-left"></i>
                 </button>
+            </div>
 
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
-                           data-bs-target="#blockModal">
-                            차단하기
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal">
-                            신고하기
-                        </a>
-                    </li>
-                </ul>
+            <div class="header-center">
+                <span class="user-name-text" th:text="${user.userName ?: '프로필'}">이름 없음</span>
+            </div>
+
+            <div class="header-right">
+                <div class="dropdown">
+                    <button class="btn-icon" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                               data-bs-target="#blockModal">차단하기</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                               data-bs-target="#reportModal">신고하기</a></li>
+                    </ul>
+                </div>
+
             </div>
         </nav>
     </header>
@@ -51,40 +50,47 @@
     <!-- ===== Main ===== -->
     <main class="profile-section">
 
-        <section class="profile-top d-flex
-                        align-items-start
-                        justify-content-between">
+        <section class="profile-top d-flex align-items-start justify-content-between">
 
             <div class="profile-avatar">
+                <img th:src="${user.profileImg}" alt="프로필 사진" class="rounded-circle">
             </div>
 
-            <div class="d-flex flex-column
-                        align-items-stretch
-                        profile-right">
 
-                <div class="d-flex
-                            justify-content-between
-                            mb-2">
-                    <strong th:text="팔로잉">
-                        팔로잉 0
-                    </strong>
-                    <strong th:text="팔로워">
-                        팔로워 0
-                    </strong>
+            <div class="d-flex flex-column align-items-stretch profile-right">
+
+                <div class="follow-stats">
+
+                    <a class="stat-item"
+                       th:href="@{/user/follow(targetId=${user.profileId}, profileMode=${user.profileMode}, tab='following')}">
+                        <span class="stat-number" th:text="${user.followingCount}">0</span>
+                        <span class="stat-label">팔로잉</span>
+                    </a>
+
+                    <a class="stat-item"
+                       th:href="@{/user/follow(targetId=${user.profileId}, profileMode=${user.profileMode}, tab='follower')}">
+                        <span id="followerCount" class="stat-number" th:text="${user.followerCount}">0</span>
+                        <span class="stat-label">팔로워</span>
+                    </a>
+
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button id="followBtn" class="btn w-100" <!--th:classappend="${isFollowing}
-                            ? 'btn-secondary'
-                            : 'follow-btn text-white'" th:text="${isFollowing}
-                            ? '팔로잉'
-                            : '팔로우'">
-                        팔로우-->
+
+                <div class="d-flex gap-2" th:if="${isOwner != true}">
+                    <!-- 팔로우 버튼 -->
+                    <button id="followBtn"
+                            class="btn w-100"
+                            th:classappend="${isFollowing} ? 'btn-outline-danger' : 'btn-danger text-white'"
+                            th:text="${isFollowing} ? '팔로잉' : '팔로우'"
+                            th:data-profile-id="${user.profileId}"
+                            th:data-profile-mode="${user.profileMode}">
                     </button>
 
+                    <!-- DM 버튼 -->
                     <button class="btn dm-btn w-100"
                             id="btn-dm"
-                            th:data-profile-id="${profileId}"
+                            th:data-profile-id="${user.profileId}"
+
                             th:data-profile-mode="${profileMode}">
                         DM
                     </button>
@@ -95,35 +101,23 @@
 
         <!-- ===== Bio ===== -->
         <section class="mt-4">
-            <h6 class="section-title">한 줄 소개</h6>
-            <!-- <div class="card-box" th:text="${user.bio}">
-                 소개 내용
-             </div>-->
+
+            <h6 class="section-title">소개</h6>
+            <div class="card-box" th:text="${user.userInfo}">
+                소개 내용
+            </div>
         </section>
 
         <!-- ===== Info ===== -->
         <section class="mt-4">
-            <h6 class="section-title">프로필 정보</h6>
-            <!--<div class="card-box">
-                <p>선호 장르: 재즈</p>
-                <p>선호 공연장: 홍대 인근</p>
-                <p>주 포지션: 보컬</p>
-                <p>주 공연장: 클럽 FF</p>
-                <p>등록 정보: 인디 레이블 소속</p>
-            </div>-->
-        </section>
-
-        <!-- ===== Activity ===== -->
-        <section class="mt-4">
-            <!--<h6 class="section-title">최근 활동</h6>
+            <h6 class="section-title">최신 활동</h6>
             <div class="card-box">
-                • 2026.02.10 - 라이브 공연<br/>
-                • 2026.02.05 - 신곡 발매<br/>
-                • 2026.01.20 - 협업 프로젝트 참여
-            </div>-->
+
+            </div>
         </section>
 
     </main>
+
 </div>
 
 <!-- ===== Modals ===== -->

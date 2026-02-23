@@ -4,26 +4,40 @@
     <meta charset="UTF-8"/>
     <title>팔로우 리스트</title>
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="/css/relation/follow.css" rel="stylesheet"/>
 </head>
 <body>
-<div class="container">
-    <div class="back-btn" onclick="history.back()">← 뒤로가기</div>
+<div class="container p-0">
+    <header class="app-header">
+        <div class="header-left">
+            <button class="btn-icon" onclick="history.back()" aria-label="뒤로가기">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+        </div>
+
+        <div class="header-center">
+        </div>
+
+        <div class="header-right fixed-width-40"></div>
+    </header>
 
     <div class="d-flex mb-3">
         <button id="tab-following" class="tab-btn">팔로잉</button>
         <button id="tab-follower" class="tab-btn">팔로워</button>
     </div>
 
-    <!-- 팔로잉 리스트 -->
-    <div id="following-content">
-        <div id="following-container" class="list-group"></div>
-    </div>
+    <main>
+        <!-- 팔로잉 리스트 -->
+        <section id="following-content">
+            <div id="following-container" class="list-group"></div>
+        </section>
 
-    <!-- 팔로워 리스트 -->
-    <div id="follower-content" style="display:none;">
-        <div id="follower-container" class="list-group"></div>
-    </div>
+        <!-- 팔로워 리스트 -->
+        <section id="follower-content" class="hidden">
+            <div id="follower-container" class="list-group"></div>
+        </section>
+    </main>
 
 
     <!-- 공용 Footer -->
@@ -35,7 +49,8 @@
     /*<![CDATA[*/
         const targetId = [[${targetId}]];
         const profileMode = [[${profileMode}]];
-        const activeTab = '[[${activeTab}]]';
+        const activeTab = /*[[${activeTab}]]*/;
+
 
         const loginProfileId = [[${loginProfileId}]];       // 로그인 유저 ID
         const loginProfileMode = '[[${loginProfileMode}]]';  // 로그인 유저 모드

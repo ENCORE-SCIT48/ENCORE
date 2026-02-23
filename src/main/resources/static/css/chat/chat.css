@@ -23,7 +23,7 @@ html, body {
   background: #fff;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* 또는 auto */
 }
 /* 상단 헤더 */
 .app-header {
