@@ -385,4 +385,58 @@ public class DmService {
             )
             .toList();
     }
+
+
+    /**
+     * [설명] DM 방 참여 요청에 대한 수락 또는 거절 처리를 수행합니다.
+     * <p>수락 시 참여 상태가 ACCEPTED로 변경되며, 거절 시 참여 상태가 REJECTED로 변경됨과 동시에 해당 채팅방이 논리 삭제됩니다.</p>
+     *
+     * @param roomId          채팅방 식별자
+     * @param dto             상태 변경 요청 데이터 (ACCEPTED/REJECTED)
+     * @param activeProfileId 현재 요청을 보낸 프로필 ID
+     * @param activeMode      현재 요청을 보낸 프로필의 모드 (USER/PARTNER 등)
+     * @return ResponseUpdateDmStatusDto 변경된 상태 및 관련 정보
+     * @throws ApiException ErrorCode.NOT_FOUND: 참여자나 채팅방이 존재하지 않을 경우
+     *                      ErrorCode.INVALID_REQUEST: 잘못된 상태 값이 전달될 경우
+     */
+    public ResponseUpdateDmStatusDto handleRoomStatus(
+        Long roomId,
+        RequestDmStatusDto dto,
+        Long activeProfileId,
+        ActiveMode activeMode) {
+
+        // 1. 참여자 조회 (Repository 메서드명 규칙 확인 필요)
+        ChatParticipant chatParticipant = chatParticipantRepository
+            .findByProfileIdAndProfileModeAndRoomRoomId(activeProfileId, activeMode, roomId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참여자가 존재하지 않습니다."));
+
+        String statusStr = dto.getStatus();
+
+        // 2. 비즈니스 로직 처리 (상태에 따른 분기)
+        if ("ACCEPTED".equalsIgnoreCase(statusStr)) {
+            log.info("[INFO] DM 참여 수락 처리 - ProfileId: {}, RoomId: {}", activeProfileId, roomId);
+            chatParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
+        } else if ("REJECTED".equalsIgnoreCase(statusStr)) {
+            log.info("[INFO] DM 참여 거절 및 방 논리 삭제 처리 - ProfileId: {}, RoomId: {}", activeProfileId, roomId);
+            chatParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.REJECTED);
+
+            // 방 조회 및 논리 삭제 (Soft Delete)
+            ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방이 존재하지 않습니다."));
+
+            // 규칙: Entity 내부에 비즈니스 로직(delete)을 캡슐화하여 호출
+            chatRoom.delete();
+        } else {
+            log.error("[ERROR] 잘못된 상태 변경 요청: {}", statusStr);
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 상태 값입니다.");
+        }
+
+        // 3. 결과 반환 (Builder 패턴 사용)
+        return ResponseUpdateDmStatusDto.builder()
+            .roomId(roomId)
+            .status(chatParticipant.getParticipantStatus().name())
+            .profileId(activeProfileId)
+            .profileMode(activeMode.name())
+            .build();
+    }
 }

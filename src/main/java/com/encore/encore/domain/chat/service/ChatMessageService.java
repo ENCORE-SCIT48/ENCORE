@@ -71,7 +71,7 @@ public class ChatMessageService {
             .messageId(message.getMessageId())
             .profileId(message.getProfileId())
             .profileMode(message.getProfileMode().name())
-            .senderName(profileService.resolveSenderName(message.getMessageId(), message.getProfileMode()))
+            .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())
             .build();
@@ -196,7 +196,7 @@ public class ChatMessageService {
                 .nickName(profileService.resolveSenderName(
                     chatParticipant.getProfileId(),
                     chatParticipant.getProfileMode()))
-                .profileId(chatParticipant.getParticipantId())
+                .profileId(chatParticipant.getProfileId())
                 .profileMode(chatParticipant.getProfileMode().name())
                 .build();
             responseParticipantDtoList.add(dto);

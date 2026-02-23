@@ -137,4 +137,27 @@ public class DmApiController {
         return ResponseEntity.ok(CommonResponse.ok(result, "메시지 조회 성공"));
     }
 
+    /**
+     * DM방에서 수락/거절에 클릭에 따라 participant의 상태를 변화 시킵니다.
+     *
+     * @param roomId      변화 시킬 방의 ID
+     * @param dto         변경 시킬 상태 DTO
+     * @param userDetails 변경 시킬 유저의 ID
+     * @return
+     */
+    @PatchMapping("/{roomId}")
+    public ResponseEntity<CommonResponse<ResponseUpdateDmStatusDto>> updateDmStatus(
+        @PathVariable Long roomId,
+        @RequestBody RequestDmStatusDto dto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
+
+        ResponseUpdateDmStatusDto result = dmService.handleRoomStatus(roomId, dto, activeProfileId, activeMode);
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "상태 변경 완료"));
+
+
+    }
 }
