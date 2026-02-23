@@ -33,36 +33,35 @@ public class PerformancePostService {
      * @return 등록된 게시글 정보
      */
     public ResponseCreatePerformancePostDto createPerformancePost(
-        RequestCreatePerformancePostDto dto
-    ) {
+            RequestCreatePerformancePostDto dto) {
         log.info("공연 모집 게시글 등록 시작");
 
         Performance performance = null;
 
         if (dto.getPerformanceId() != null) {
             performance = performanceRepository.findById(dto.getPerformanceId())
-                .orElseThrow(() -> {
-                    log.error("공연 정보 없음 - performanceId={}", dto.getPerformanceId());
-                    return new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.");
-                });
+                    .orElseThrow(() -> {
+                        log.error("공연 정보 없음 - performanceId={}", dto.getPerformanceId());
+                        return new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.");
+                    });
         }
 
         Post post = Post.builder()
-            .performance(performance)
-            .postType(PERFORMANCE_POST_TYPE)
-            .title(dto.getTitle())
-            .content(dto.getContent())
-            .viewCount(0)
-            .build();
+                .performance(performance)
+                .postType(PERFORMANCE_POST_TYPE)
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .viewCount(0)
+                .build();
 
         Post savedPost = postRepository.save(post);
 
         return ResponseCreatePerformancePostDto.builder()
-            .postId(savedPost.getPostId())
-            .postType(savedPost.getPostType())
-            .title(savedPost.getTitle())
-            .createdAt(savedPost.getCreatedAt())
-            .build();
+                .postId(savedPost.getPostId())
+                .postType(savedPost.getPostType())
+                .title(savedPost.getTitle())
+                .createdAt(savedPost.getCreatedAt())
+                .build();
     }
 
     /**
@@ -74,17 +73,15 @@ public class PerformancePostService {
     public ResponseDeletePerformancePostDto deletePerformancePost(Long postId) {
 
         Post post = postRepository
-            .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
-            .orElseThrow(() ->
-                new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.")
-            );
+                .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
         post.delete();
 
         return ResponseDeletePerformancePostDto.builder()
-            .postId(postId)
-            .deleted(true)
-            .build();
+                .postId(postId)
+                .deleted(true)
+                .build();
     }
 
     /**
@@ -97,45 +94,39 @@ public class PerformancePostService {
     public ResponseReadPerformancePostDto readPerformancePost(Long postId) {
 
         Post post = postRepository
-            .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
-            .orElseThrow(() ->
-                new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.")
-            );
+                .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
         post.setViewCount(post.getViewCount() + 1);
 
         return ResponseReadPerformancePostDto.builder()
-            .postId(post.getPostId())
-            .postType(post.getPostType())
-            .performanceId(
-                post.getPerformance() != null
-                    ? post.getPerformance().getPerformanceId()
-                    : null
-            )
-            .title(post.getTitle())
-            .content(post.getContent())
-            .viewCount(post.getViewCount())
-            .createdAt(post.getCreatedAt())
-            .build();
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .performanceId(
+                        post.getPerformance() != null
+                                ? post.getPerformance().getPerformanceId()
+                                : null)
+                .title(post.getTitle())
+                .content(post.getContent())
+                .viewCount(post.getViewCount())
+                .createdAt(post.getCreatedAt())
+                .build();
     }
 
     /**
      * [설명] 공연 모집 게시글을 수정합니다.
      *
      * @param postId 수정할 게시글 ID
-     * @param dto 수정 요청 객체
+     * @param dto    수정 요청 객체
      * @return 수정된 게시글 정보
      */
     public ResponseUpdatePerformancePostDto updatePerformancePost(
-        Long postId,
-        RequestUpdatePerformancePostDto dto
-    ) {
+            Long postId,
+            RequestUpdatePerformancePostDto dto) {
 
         Post post = postRepository
-            .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
-            .orElseThrow(() ->
-                new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.")
-            );
+                .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
         if (dto.getTitle() != null) {
             post.setTitle(dto.getTitle());
@@ -153,50 +144,68 @@ public class PerformancePostService {
             post.setPerformance(null);
         } else {
             Performance performance = performanceRepository
-                .findById(dto.getPerformanceId())
-                .orElseThrow(() ->
-                    new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.")
-                );
+                    .findById(dto.getPerformanceId())
+                    .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다."));
             post.setPerformance(performance);
         }
 
         return ResponseUpdatePerformancePostDto.builder()
-            .postId(post.getPostId())
-            .postType(post.getPostType())
-            .title(post.getTitle())
-            .content(post.getContent())
-            .performanceId(
-                post.getPerformance() != null
-                    ? post.getPerformance().getPerformanceId()
-                    : null
-            )
-            .updatedAt(post.getUpdatedAt())
-            .build();
+                .postId(post.getPostId())
+                .postType(post.getPostType())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .performanceId(
+                        post.getPerformance() != null
+                                ? post.getPerformance().getPerformanceId()
+                                : null)
+                .updatedAt(post.getUpdatedAt())
+                .build();
     }
 
     /**
      * [설명] 공연 모집 게시글 목록을 페이징 조회합니다.
-     * 삭제되지 않은 게시글만 조회 대상입니다.
+     * 검색어가 존재하면 제목 기준 부분 검색을 수행합니다.
      *
+     * @param keyword  검색어 (nullable)
      * @param pageable 페이징 정보
      * @return 게시글 페이지
      */
     @Transactional(readOnly = true)
-    public Page<ResponseListPerformancePostDto> listPerformancePosts(Pageable pageable) {
+    public Page<ResponseListPerformancePostDto> listPerformancePosts(
+            String keyword,
+            Pageable pageable) {
 
-        return postRepository
-            .findByPostTypeAndIsDeletedFalse(PERFORMANCE_POST_TYPE, pageable)
-            .map(post -> ResponseListPerformancePostDto.builder()
+        log.info(
+                "공연 모집 게시글 목록 조회 - keyword={}, page={}, size={}",
+                keyword,
+                pageable.getPageNumber(),
+                pageable.getPageSize());
+
+        Page<Post> page;
+
+        if (keyword == null || keyword.isBlank()) {
+            page = postRepository
+                    .findByPostTypeAndIsDeletedFalse(PERFORMANCE_POST_TYPE, pageable);
+        } else {
+            page = postRepository
+                    .findByPostTypeAndTitleContainingIgnoreCaseAndIsDeletedFalse(
+                            PERFORMANCE_POST_TYPE,
+                            keyword,
+                            pageable);
+        }
+
+        return page.map(post -> ResponseListPerformancePostDto.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
                 .performanceId(
-                    post.getPerformance() != null
-                        ? post.getPerformance().getPerformanceId()
-                        : null
-                )
+                        post.getPerformance() != null
+                                ? post.getPerformance().getPerformanceId()
+                                : null)
                 .title(post.getTitle())
+                .content(post.getContent())
                 .viewCount(post.getViewCount())
                 .createdAt(post.getCreatedAt())
                 .build());
     }
+
 }

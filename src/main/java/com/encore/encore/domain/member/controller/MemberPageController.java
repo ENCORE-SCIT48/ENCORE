@@ -8,6 +8,7 @@ import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Slf4j
 public class MemberPageController {
 
+
     private final MemberService memberService;
     private final RelationService relationService;
 
@@ -27,8 +29,6 @@ public class MemberPageController {
      * @param profileId   이동할 개인페이지의 프로필id
      * @param profileMode 이동할 개인페이지의 프로필모드
      * @param model
-     * @return
-     */
     @GetMapping("member/profile/{profileId}/{profileMode}")
     public String memberProfile(
         @AuthenticationPrincipal CustomUserDetails userDetails,

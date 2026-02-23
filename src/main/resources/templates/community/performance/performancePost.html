@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공연자 모집글</title>
+  <title>공연 모집글</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script th:src="@{/js/community/performerPost.js}"></script>
+  <script th:src="@{/js/community/performancePost.js}"></script>
 
   <style>
     body {
@@ -56,25 +56,6 @@
       color: #fff;
     }
 
-    .search-form {
-      margin-bottom: 16px;
-    }
-
-    .search-input {
-      height: 40px;
-      font-size: 14px;
-    }
-
-    .btn-primary {
-      background-color: #E63946;
-      border-color: #E63946;
-    }
-
-    .btn-primary:hover {
-      background-color: #c92f3a;
-      border-color: #c92f3a;
-    }
-
     .post-card {
       border: 1px solid #eee;
       border-radius: 12px;
@@ -103,6 +84,33 @@
       color: #333333;
     }
 
+    .recommend-link {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #E63946;
+      text-decoration: none;
+    }
+
+    .search-form {
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      height: 40px;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background-color: #E63946;
+      border-color: #E63946;
+    }
+
+    .btn-primary:hover {
+      background-color: #c92f3a;
+      border-color: #c92f3a;
+    }
+
     .write-btn {
       text-align: right;
       margin: 10px 0 35px 0;
@@ -115,25 +123,12 @@
       text-decoration: none;
     }
 
-    .write-btn a:hover {
-      text-decoration: underline;
-    }
-
-    .pagination .page-link {
-      color: #E63946;
-    }
-
-    .pagination .active .page-link {
-      background-color: #E63946;
-      border-color: #E63946;
-    }
-
-    /* ===== 페이징 개선 ===== */
+    /* ===== 페이징 스타일 ===== */
     .pagination {
       gap: 6px;
     }
 
-    .pagination .page-item .page-link {
+    .pagination .page-link {
       border-radius: 8px;
       border: 1px solid #E63946;
       color: #E63946;
@@ -142,18 +137,18 @@
       padding: 6px 12px;
     }
 
-    .pagination .page-item .page-link:hover {
+    .pagination .page-link:hover {
       background-color: #E63946;
       color: #fff;
     }
 
-    .pagination .page-item.active .page-link {
+    .pagination .active .page-link {
       background-color: #E63946;
       border-color: #E63946;
       color: #fff;
     }
 
-    .pagination .page-item.disabled .page-link {
+    .pagination .disabled .page-link {
       opacity: 0.4;
     }
   </style>
@@ -166,24 +161,26 @@
 
     <div class="app-container">
 
-      <div class="page-title">공연자 모집글</div>
+      <div class="page-title">공연 모집글</div>
 
       <div th:replace="~{fragments/performer/profile :: profile}"></div>
 
       <div class="tab-buttons">
-        <button class="active">공연자 모집</button>
-        <button th:onclick="|location.href='@{/posts/performance}'|">공연 모집</button>
+        <button th:onclick="|location.href='@{/posts/performer}'|">공연자 모집</button>
+        <button class="active">공연 모집</button>
       </div>
 
-      <form th:action="@{/posts/performer}" method="get" class="search-form d-flex gap-2">
+      <!-- 검색 -->
+      <form th:action="@{/posts/performance}" method="get" class="search-form d-flex gap-2">
         <input type="text" name="keyword" class="form-control search-input" placeholder="검색" th:value="${keyword}">
         <button type="submit" class="btn btn-primary btn-sm">
           검색
         </button>
       </form>
 
+      <!-- 게시글 목록 -->
       <div th:each="post : ${posts}" class="post-card"
-        th:onclick="|location.href='@{/posts/performer/{id}(id=${post.postId})}'|">
+        th:onclick="|location.href='@{/posts/performance/{id}(id=${post.postId})}'|">
 
         <div class="post-title" th:text="${post.title}"></div>
 
@@ -191,16 +188,21 @@
 
         <div class="post-meta">
           <span th:text="'조회수 ' + ${post.viewCount}"></span>
-          <span th:text="${#temporals.format(post.createdAt, 'MM-dd')}"></span>
+          <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
         </div>
+
+        <a th:href="@{/posts/performance/{id}/recommend(id=${post.postId})}" onclick="event.stopPropagation();"
+          class="recommend-link">
+          공연자 추천
+        </a>
 
       </div>
 
-      <div th:if="${#lists.isEmpty(posts)}" style="text-align:center; margin-top:30px; color:#999; font-size:14px;">
+      <div th:if="${#lists.isEmpty(posts)}" style="text-align:center; margin-top:40px; color:#999;">
         등록된 게시글이 없습니다.
       </div>
 
-      <!-- 페이징 -->
+      <!-- ===== 페이징 ===== -->
       <nav th:if="${page.totalPages > 1}" class="mt-4">
         <ul class="pagination justify-content-center">
 
@@ -209,19 +211,24 @@
             groupEnd=${T(java.lang.Math).min(groupStart + 4, page.totalPages - 1)}
           ">
 
+            <!-- 이전 그룹 -->
             <li class="page-item" th:classappend="${groupStart == 0} ? 'disabled'">
-              <a class="page-link" th:href="@{/posts/performer(page=${groupStart - 5}, keyword=${keyword})}">
+              <a class="page-link" th:href="@{/posts/performance(page=${groupStart - 5}, keyword=${keyword})}">
                 << </a>
             </li>
 
+            <!-- 번호 -->
             <li class="page-item" th:each="i : ${#numbers.sequence(groupStart, groupEnd)}"
               th:classappend="${i == page.number} ? 'active'">
-              <a class="page-link" th:text="${i + 1}" th:href="@{/posts/performer(page=${i}, keyword=${keyword})}">
+
+              <a class="page-link" th:text="${i + 1}" th:href="@{/posts/performance(page=${i}, keyword=${keyword})}">
               </a>
+
             </li>
 
+            <!-- 다음 그룹 -->
             <li class="page-item" th:classappend="${groupEnd + 1 >= page.totalPages} ? 'disabled'">
-              <a class="page-link" th:href="@{/posts/performer(page=${groupStart + 5}, keyword=${keyword})}">
+              <a class="page-link" th:href="@{/posts/performance(page=${groupStart + 5}, keyword=${keyword})}">
                 >>
               </a>
             </li>
@@ -231,8 +238,9 @@
         </ul>
       </nav>
 
+      <!-- 글 작성 -->
       <div class="write-btn">
-        <a th:href="@{/posts/performer/write}">글 작성</a>
+        <a th:href="@{/posts/performance/write}">글 작성</a>
       </div>
 
     </div>

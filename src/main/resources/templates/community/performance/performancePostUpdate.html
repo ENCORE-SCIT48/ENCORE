@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>공연자 모집글 상세</title>
+  <title>공연 모집글 수정</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script th:src="@{/js/community/performerPost.js}"></script>
+  <script th:src="@{/js/community/performancePost.js}"></script>
 
   <style>
     body {
@@ -46,19 +46,14 @@
       color: #333333;
     }
 
-    .post-title {
-      font-size: 20px;
+    .post-title-input {
+      font-size: 18px;
       font-weight: 600;
-      margin-top: 10px;
+      width: 100%;
+      border: none;
+      outline: none;
+      padding: 10px 0;
       color: #333333;
-    }
-
-    .post-meta {
-      font-size: 12px;
-      color: #666;
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
     }
 
     .divider {
@@ -66,21 +61,26 @@
       border-top: 1px solid #eee;
     }
 
-    .post-content {
+    .post-content-textarea {
       font-size: 14px;
       line-height: 1.8;
-      white-space: pre-line;
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      min-height: 300px;
       color: #333333;
     }
 
     .btn-group {
-      margin-top: 40px;
+      margin-top: 30px;
       display: flex;
-      gap: 10px;
       justify-content: flex-end;
+      gap: 10px;
     }
 
-    .btn-group button {
+    .btn-group button,
+    .btn-group a {
       width: 100px;
       font-size: 13px;
     }
@@ -95,14 +95,13 @@
       border-color: #c92f3a;
     }
 
-    .btn-outline-danger {
-      color: #E63946;
-      border-color: #E63946;
+    .btn-outline-secondary {
+      color: #333333;
+      border-color: #ccc;
     }
 
-    .btn-outline-danger:hover {
-      background-color: #E63946;
-      color: #fff;
+    .btn-outline-secondary:hover {
+      background-color: #f5f5f5;
     }
   </style>
 
@@ -112,40 +111,36 @@
 
   <div class="app-wrapper">
 
-    <div class="app-container" th:data-post-id="${post.postId}">
+    <div class="app-container">
 
       <!-- 상단 -->
       <div class="top-bar">
-        <a th:href="@{/posts/performer}" class="back-btn">←</a>
-        <div class="page-title">공연자 모집글</div>
+        <a th:href="@{/posts/performance/{id}(id=${post.postId})}" class="back-btn">←</a>
+        <div class="page-title">공연 모집글 수정</div>
         <div th:replace="~{fragments/performer/profile :: profile}"></div>
       </div>
 
-      <!-- 제목 -->
-      <div class="post-title" th:text="${post.title}">제목</div>
+      <!-- 내용 -->
+      <input type="hidden" id="postId" th:value="${post.postId}">
 
-      <!-- 조회수 / 작성일 -->
-      <div class="post-meta">
-        <span th:text="'조회수 ' + ${post.viewCount}"></span>
-        <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
-      </div>
+      <input type="text" name="title" class="post-title-input" th:value="${post.title}" required>
 
       <div class="divider"></div>
 
-      <!-- 내용 -->
-      <div class="post-content" th:text="${post.content}">
-        게시글 내용
-      </div>
+      <textarea name="content" class="post-content-textarea" required th:text="${post.content}"></textarea>
 
-      <!-- 수정 / 삭제 -->
       <div class="btn-group">
-        <button id="editBtn" class="btn btn-primary">수정</button>
-        <button id="deleteBtn" class="btn btn-outline-danger">삭제</button>
+        <button id="updateBtn" type="button" class="btn btn-primary">
+          수정 완료
+        </button>
+
+        <a th:href="@{/posts/performance/{id}(id=${post.postId})}" class="btn btn-outline-secondary">
+          취소
+        </a>
       </div>
 
     </div>
 
-    <!-- 하단 네비 -->
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>
