@@ -21,7 +21,11 @@ public class ResponseListPerformancePostDto {
 
     private String title;
 
-    private String content;
+    private String content; 
+
+    private Integer capacity;
+
+    private Integer approvedCount;
 
     private Integer viewCount;
 

@@ -15,5 +15,4 @@ public class ResponseFollowDto {
     @JsonProperty("isFollowing")
     private boolean isFollowing;    // 현재 로그인 유저 기준 팔로우 상태
     private long followerCount;
-
 }

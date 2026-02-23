@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Slf4j
 public class MemberPageController {
 
+
     private final MemberService memberService;
     private final RelationService relationService;
 

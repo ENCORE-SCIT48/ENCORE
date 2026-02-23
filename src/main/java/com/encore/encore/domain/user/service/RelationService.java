@@ -222,7 +222,6 @@ public class RelationService {
             log.info("새로운 관계 생성");
         }
 
-
         int followerCount = userRelationRepository.countFollower(targetProfileId, ActiveMode.valueOf(targetProfileMode));
 
         // 4. 결과 반환 (현재 팔로우 중인지 여부)
@@ -231,7 +230,6 @@ public class RelationService {
             .targetProfileMode(targetProfileMode)
             .isFollowing(!relation.isDeleted())
             .followerCount(followerCount)
-
             .build();
     }
 
@@ -400,7 +398,6 @@ public class RelationService {
             })
             .toList();
     }
-
 
     public boolean isFollowing(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode) {
         boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(

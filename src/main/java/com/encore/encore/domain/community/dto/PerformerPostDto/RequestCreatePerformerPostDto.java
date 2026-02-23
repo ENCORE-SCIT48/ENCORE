@@ -15,4 +15,6 @@ public class RequestCreatePerformerPostDto {
 
     private String content;
 
+    private Integer capacity;
+
 }

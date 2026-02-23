@@ -29,10 +29,12 @@ function activateTab(tab) {
 
     tabFollowing.classList.toggle('active', isFollowingTab);
     tabFollower.classList.toggle('active', !isFollowingTab);
-
+  
     followingContent.classList.toggle('hidden', !isFollowingTab);
     followerContent.classList.toggle('hidden', isFollowingTab);
 
+    followingContent.classList.toggle('hidden', !isFollowingTab);
+    followerContent.classList.toggle('hidden', isFollowingTab);
 }
 
 // ==========================
@@ -73,7 +75,6 @@ function renderUserList(containerId, data) {
                 <img src="${user.profileImageUrl || '/image/default-profile.png'}" class="rounded-circle profile-thumb">
                 <div>
                     <a href="/member/profile/${user.profileId}/${user.profileMode}" class="text-sub fw-bold">${user.userName}</a>
-
                 </div>
             </div>
         `;
