@@ -31,7 +31,7 @@ public class HostProfileService {
         // 2. Entity를 Response DTO로 변환하여 반환
         return HostProfileResponseDto.from(profile);
     }
-
+    @Transactional
     public void updateHostProfile(User user,
                                   @Valid HostProfileRequestDto dto,
                                   MultipartFile profileImage) {

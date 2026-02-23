@@ -24,6 +24,26 @@ import org.springframework.web.multipart.MultipartFile;
 public class HostProfileController {
 
     private final HostProfileService hostProfileService;
+    /**
+     * 호스트 프로필 조회 페이지 (View 전용)
+     * URL: GET /hostprofile/view
+     */
+    @GetMapping("/view")
+    public String viewHostProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                  Model model) {
+
+        log.info("[HostProfileController] 프로필 조회 요청 - User: {}", userDetails.getUsername());
+
+        // 1. 서비스에서 호스트 프로필 정보를 DTO 형태로 조회
+        // (이미 구현하신 getHostProfile 또는 별도의 ResponseDto 반환 메서드 활용)
+        HostProfileResponseDto profileDto = hostProfileService.getHostProfile(userDetails.getUser());
+
+        // 2. 모델에 담아서 뷰로 전달
+        model.addAttribute("profile", profileDto);
+
+        // 3. 조회 전용 HTML 파일명 (src/main/resources/templates/profile/host-view.html)
+        return "profile/host-view";
+    }
 
     /**
      * 호스트 프로필 설정 페이지 조회
@@ -31,7 +51,7 @@ public class HostProfileController {
      * @param model 뷰 전달용 객체
      * @return 호스트 설정 뷰 경로
      */
-    @GetMapping
+    @GetMapping("/setup")
     public String setupPage(@AuthenticationPrincipal CustomUserDetails userDetails,
                             Model model) {
         log.info("[HostProfileController] 조회 요청 - User: {}", userDetails.getUsername());
@@ -79,7 +99,7 @@ public class HostProfileController {
         log.info("[HostProfileController] 업데이트 완료 - User: {}", userDetails.getUsername());
 
         // 4. 완료 후 리다이렉트 (새로고침 중복 방지)
-        return "redirect:/hostprofile/setup?success=true";
+        return "redirect:/hostprofile/view?success=true";
     }
 
 

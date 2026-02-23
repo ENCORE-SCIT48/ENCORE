@@ -40,4 +40,6 @@ public class HostProfileRequestDto {
     @Email(message = "올바른 이메일 형식이 아닙니다.")
     @NotBlank(message = "비즈니스 이메일은 필수 입력 사항입니다.")
     private String businessEmail;
+    private boolean verified;
+    private String profileImageUrl; // 조회용 이미지 URL 필드 추가
 }

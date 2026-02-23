@@ -1,81 +1,202 @@
-/* 기본 컨테이너 (setup과 일관성 유지) */
+/* 1. 전체 컨테이너 (Setup과 동일한 폭 유지) */
 .view-container {
-    max-width: 500px;
+    width: 100%;
+    max-width: 550px;
     margin: 40px auto;
-    padding: 20px;
-}
-
-.view-card {
-    background: #fff;
     padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 15px; /* Setup보다 조금 더 부드러운 느낌 */
+    /* 조회 페이지는 카드가 떠 있는 느낌이 깔끔합니다 */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-.view-title { font-size: 1.8rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; text-align: center; }
-.view-subtitle { font-size: 0.95rem; color: #666; text-align: center; margin-bottom: 30px; }
+/* 2. 상단 타이틀 및 설명 */
+.view-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    color: #333;
+    margin-bottom: 8px;
+}
 
-/* 이미지 섹션 */
-.view-image-section { display: flex; justify-content: center; margin-bottom: 30px; }
+.view-subtitle {
+    font-size: 0.95rem;
+    color: #888;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* 3. 프로필 이미지 섹션 (Setup의 profile-upload 구조 활용) */
+.view-image-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
 .view-image-wrapper {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #4f46e5;
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
 }
-.view-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-/* 정보 그룹 */
-.view-group { margin-bottom: 20px; }
+.view-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #f8f8f8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 아티스트 정보 텍스트 */
+.artist-info {
+    text-align: center;
+}
+
+.stage-name {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.badge.bg-primary-red {
+    background-color: #ff4d4d !important;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+/* 4. 본문 내용 섹션 */
+.view-group {
+    margin-bottom: 30px;
+}
+
 .view-group label {
     display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #888;
-    margin-bottom: 6px;
-    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 4px solid #ff4d4d; /* Setup의 section-title 스타일 계승 */
 }
-.view-group p { font-size: 1.05rem; color: #333; margin: 0; font-weight: 500; }
 
-/* 태그 스타일 */
-.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-.view-tag {
-    background: #eef2ff;
-    color: #4f46e5;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: 1px solid #c7d2fe;
-}
-.view-tag.secondary { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
-
-/* 자기소개 박스 */
-.intro-box {
-    background: #f9fafb;
+/* 태그 리스트 스타일 (Setup의 체크박스 그리드 느낌) */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #fdfdfd;
     padding: 15px;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    line-height: 1.6;
-    color: #444;
-    min-height: 60px;
-    white-space: pre-wrap;
+    border-radius: 12px;
+    border: 1px solid #eee;
 }
 
-/* 버튼 */
-.view-actions { margin-top: 30px; }
-.btn-edit {ㅕ
-    display: block;
-    width: 100%;
-    padding: 14px;
-    background-color: #4f46e5;
-    color: white;
+.view-tag {
+    background-color: #fff1f1; /* 연한 레드 배경 */
+    color: #ff4d4d;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 77, 77, 0.1);
+}
+
+.view-tag.secondary {
+    background-color: #f8f9fa;
+    color: #555;
+    border: 1px solid #eee;
+}
+
+/* 소개글 박스 */
+.intro-box {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    color: #555;
+    line-height: 1.7;
+    font-size: 0.95rem;
+    white-space: pre-wrap; /* 줄바꿈 유지 */
+}
+
+/* 지역 텍스트 */
+.info-text {
+    font-size: 1rem;
+    color: #222;
+    padding-left: 10px;
+}
+
+/* 5. 하단 액션 버튼 영역 */
+.view-actions {
+    margin-top: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-edit {
+    background-color: #ff4d4d !important;
+    color: white !important;
     text-align: center;
     text-decoration: none;
-    border-radius: 10px;
-    font-weight: 600;
-    transition: background 0.2s;
+    padding: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+    transition: all 0.2s;
 }
-.btn-edit:hover { background-color: #4338ca; }
-.empty-msg { font-size: 0.9rem; color: #bbb; font-style: italic; }
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.back-link-wrapper {
+    text-align: center;
+}
+
+.back-link {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+/* 6. 모바일 최적화 (Setup과 맞춤) */
+@media (max-width: 576px) {
+    .view-container {
+        margin: 0 auto;
+        padding: 25px 15px;
+        border-radius: 0; /* 모바일은 꽉 채우기 */
+        box-shadow: none;
+    }
+
+    .view-image-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+
+    .tag-list {
+        padding: 12px;
+    }
+
+    .view-tag {
+        font-size: 0.85rem;
+        padding: 5px 12px;
+    }
+}

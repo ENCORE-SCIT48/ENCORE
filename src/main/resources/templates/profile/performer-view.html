@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아티스트 프로필 - Encore</title>
+
+     <link rel="stylesheet" th:href="@{/css/profile/user-view.css}">
+</head>
+<body>
+
+<div class="view-container">
+    <div class="view-card">
+        <h2 class="view-title">아티스트 프로필</h2>
+        <p class="view-subtitle">무대 위에서의 당신을 소개하는 공간입니다.</p>
+
+        <div class="view-image-section">
+            <div class="view-image-wrapper">
+                <img id="profile-img"
+                     th:src="${profile.profileImageUrl != null ? profile.profileImageUrl : '/image/default-profile.png'}"
+                     alt="아티스트 프로필 이미지">
+            </div>
+            <div class="artist-info">
+                <h3 class="stage-name" th:text="${profile.stageName}">아티스트명</h3>
+                <span class="badge bg-primary-red" th:text="${profile.skillLevel}">숙련도</span>
+            </div>
+        </div>
+
+        <div class="view-content">
+            <div class="view-group">
+                <label>활동 분야 / 포지션</label>
+                <div class="tag-list">
+                    <span class="view-tag" th:each="p : ${profile.part}" th:text="${p}">보컬</span>
+                </div>
+            </div>
+
+            <div class="view-group">
+                <label>주요 활동 장르</label>
+                <div class="tag-list">
+                    <span class="view-tag secondary" th:each="cat : ${profile.categories}" th:text="${cat}">밴드</span>
+                </div>
+            </div>
+
+            <div class="view-group">
+                <label>주 활동 지역</label>
+                <p class="info-text" th:text="${profile.activityArea}">서울</p>
+            </div>
+
+            <div class="view-group">
+                <label>아티스트 소개</label>
+                <div class="intro-box" th:text="${profile.description}">소개글</div>
+            </div>
+        </div>
+
+        <div class="view-actions">
+            <a th:href="@{/performerprofile/setup}" class="btn-edit">아티스트 프로필 수정</a>
+            <div class="back-link-wrapper">
+                <a th:href="@{/}" class="back-link">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -42,8 +42,8 @@ public class ProfileController {
                              Model model) {
         if (userDetails == null) return "redirect:/auth/login";
         model.addAttribute("userProfile", userProfileService.getUserProfile(userDetails.getUsername()));
-        model.addAttribute("performerProfile", hostProfileService.getHostProfile(userDetails.getUser()));
-        model.addAttribute("hostProfile", performerProfileService.getPerformerProfile(userDetails.getUser()));
+        model.addAttribute("performerProfile", performerProfileService.getPerformerProfile(userDetails.getUser()));
+        model.addAttribute("hostProfile", hostProfileService.getHostProfile(userDetails.getUser()));
         return "profile/select";
     }
 
@@ -98,11 +98,11 @@ public class ProfileController {
 
                 // PerformerProfileController의 @RequestMapping("/performerprofile") 로 이동
                 // (Performer 컨트롤러의 @GetMapping이 기본 경로이므로 /setup을 붙이지 않음)
-                case ROLE_PERFORMER -> "redirect:/performerprofile";
+                case ROLE_PERFORMER -> "redirect:/performerprofile/setup";
 
                 // HostProfileController의 @RequestMapping("/hostprofile") 로 이동
                 // (Host 컨트롤러 역시 @GetMapping이 기본 경로임)
-                case ROLE_HOST -> "redirect:/hostprofile";
+                case ROLE_HOST -> "redirect:/hostprofile/setup";
             };
         }
         return "redirect:/";

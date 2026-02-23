@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>내 프로필 상세 정보</title>
+    <title>유저 프로필 상세 정보</title>
     <link rel="stylesheet" th:href="@{/css/profile/user-setup.css}">
     <link rel="stylesheet" th:href="@{/css/profile/user-view.css}">
 </head>
@@ -10,7 +10,7 @@
 
 <div class="view-container">
     <div class="view-card">
-        <h2 class="view-title">내 프로필</h2>
+        <h2 class="view-title">유저 프로필</h2>
         <p class="view-subtitle">관람객 활동을 위한 프로필 정보입니다.</p>
 
         <div class="view-image-section">
@@ -62,7 +62,10 @@
         </div>
 
         <div class="view-actions">
-            <a th:href="@{/userprofile/setup}" class="btn-edit">프로필 수정하기</a>
+            <a th:href="@{/userprofile/setup}" class="btn-edit">유저 프로필 수정</a>
+            <div class="back-link-wrapper">
+                <a th:href="@{/}" class="back-link">홈으로 돌아가기</a>
+            </div>
         </div>
     </div>
 </div>
