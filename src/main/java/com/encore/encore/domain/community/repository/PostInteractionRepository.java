@@ -2,6 +2,9 @@ package com.encore.encore.domain.community.repository;
 
 import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.entity.PostInteraction;
+
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostInteractionRepository extends JpaRepository<PostInteraction, Long> {
@@ -31,4 +34,21 @@ public interface PostInteractionRepository extends JpaRepository<PostInteraction
             Post post,
             String interactionType,
             String status);
+
+    /**
+     * [설명] 특정 공연자가 신청(APPLY)한 공연자 모집글 내역을 조회합니다.
+     *
+     * - interactionType이 APPLY인 경우만 조회합니다.
+     * - 연관된 Post의 postType이 PERFORMER_RECRUIT인 경우만 조회합니다.
+     * - 논리 삭제되지 않은 데이터만 조회합니다.
+     *
+     * @param performerId     공연자 ID
+     * @param interactionType 상호작용 타입
+     * @param postType        게시글 타입
+     * @return 공연자 모집글 신청 내역 목록
+     */
+    List<PostInteraction> findByApplicantPerformerIdAndInteractionTypeAndPost_PostTypeAndIsDeletedFalse(
+            Long performerId,
+            String interactionType,
+            String postType);
 }
