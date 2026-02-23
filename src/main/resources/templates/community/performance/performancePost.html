@@ -161,10 +161,10 @@
 
     <div class="app-container">
 
-      <div class="page-title">공연 모집글</div>
-
-      <div th:replace="~{fragments/performer/profile :: profile}"></div>
-
+      <div class="top-header">
+        <div class="page-title">공연 모집글</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
       <div class="tab-buttons">
         <button th:onclick="|location.href='@{/posts/performer}'|">공연자 모집</button>
         <button class="active">공연 모집</button>
