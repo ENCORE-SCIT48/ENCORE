@@ -1,0 +1,102 @@
+ :root {
+     --main-red: #e63946;
+     --sub-dark: #333333;
+ }
+.app-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 10px 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 좌, 중, 우 3분할 */
+    min-height: 40px;
+}
+
+.header-left, .header-right {
+    flex: 1; /* 양옆 공간을 동일하게 차지해서 중앙 제목을 가운데로 밀어줌 */
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    justify-content: flex-end;
+}
+
+.header-center {
+    flex: 2; /* 중앙 제목은 좀 더 넓게 */
+    text-align: center;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #333;
+}
+ body {
+     background-color: #f0f2f5;
+     color: var(--sub-dark);
+     margin: 0;
+     padding: 0;
+     display: flex;
+     justify-content: center;
+ }
+
+ /* 웹앱 사이즈 고정 컨테이너 */
+ .webapp-container {
+     width: 100%;
+     max-width: 500px;
+     min-height: 100vh;
+     background-color: white;
+     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+     display: flex;
+     flex-direction: column;
+ }
+
+ /* 시맨틱 헤더 */
+ .header {
+     background-color: white;
+     padding: 15px;
+     display: flex;
+     align-items: center;
+     border-bottom: 1px solid #dee2e6;
+     position: sticky;
+     top: 0;
+     z-index: 1000;
+ }
+
+ .back-btn {
+     text-decoration: none;
+     color: var(--sub-dark);
+     font-size: 1.2rem;
+     margin-right: 15px;
+     cursor: pointer;
+ }
+
+ /* 메인 콘텐츠 영역 */
+ .main-content {
+     flex: 1;
+     padding: 24px 15px;
+ }
+
+ .btn-primary {
+     background-color: var(--main-red) !important;
+     border-color: var(--main-red) !important;
+ }
+
+ textarea {
+     resize: none;
+     /* 크기 조절 금지 */
+ }
+
+ #etcReasonWrapper {
+     display: none;
+ }

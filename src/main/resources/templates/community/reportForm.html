@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>신고하기</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/litera/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/css/community/reportForm.css" rel="stylesheet"/>
+
+</head>
+<body>
+<div class="webapp-container">
+    <header class="app-header">
+        <nav class="header-nav">
+            <div class="header-left">
+                <button type="button" class="btn-icon" onclick="history.back()" aria-label="뒤로가기">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <div class="header-center">
+                <h5 class="mb-0 fw-bold">신고하기</h5>
+            </div>
+
+            <div class="header-right"></div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <form id="reportForm">
+            <input type="hidden" id="targetId" th:value="${targetId}"/>
+            <input type="hidden" id="targetType" th:value="${targetType}"/>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">신고 타입</label>
+                <input type="text" class="form-control bg-light" th:value="${targetLabel}" readonly/>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">신고 대상</label>
+                <input type="text" class="form-control bg-light" th:value="${targetName}" readonly/>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">신고 사유</label>
+                <select class="form-select" id="reportReasonSelect" name="reason" required>
+                    <option value="" selected disabled>신고 사유를 선택해주세요</option>
+                    <option th:each="reason : ${reasons}"
+                            th:value="${reason.name()}"
+                            th:text="${reason.description}">사유
+                    </option>
+                </select>
+            </div>
+
+            <div class="mb-5" id="etcReasonWrapper">
+                <label class="form-label fw-bold" for="reasonDetail">상세 사유 작성</label>
+                <textarea class="form-control" id="reasonDetail" name="reasonDetail"
+                          rows="5" placeholder="신고 사유를 상세히 입력해주세요."></textarea>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">접수하기</button>
+            </div>
+        </form>
+    </main>
+</div>
+<script th:src="@{/js/community/reportForm.js}"></script>
+</body>
+</html>
