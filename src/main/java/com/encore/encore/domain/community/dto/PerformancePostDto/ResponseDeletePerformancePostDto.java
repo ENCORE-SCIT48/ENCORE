@@ -1,4 +1,4 @@
-package com.encore.encore.domain.community.dto;
+package com.encore.encore.domain.community.dto.PerformancePostDto;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseDeletePostDto {
+public class ResponseDeletePerformancePostDto {
 
     private Long postId;
 

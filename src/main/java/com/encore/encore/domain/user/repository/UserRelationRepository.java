@@ -26,6 +26,7 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("targetMode") ActiveMode targetMode,
         @Param("type") RelationType type
     );
+
     
     List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
     
@@ -68,4 +69,10 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
     );
     
     boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode);
+
+    List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
+
+    List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
+
+    Optional<UserRelation> findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(Long actorUserId, ActiveMode profileMode, Long targetProfileId, ActiveMode targetMode, RelationType relationType);
 }

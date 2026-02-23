@@ -36,7 +36,6 @@ public class RelationPageController {
 
         return "relation/following-follower";
     }
-
     /**
      * 알림 설정 페이지로 이동한다.
      *
@@ -47,5 +46,4 @@ public class RelationPageController {
 
         return "user-settings/notificationSetting";
     }
-
 }
