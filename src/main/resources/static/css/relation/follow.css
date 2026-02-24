@@ -1,0 +1,150 @@
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.back-btn {
+    cursor: pointer;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    user-select: none;
+}
+
+.tab-btn {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 0.5rem 0;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    color: #333;
+    transition: border-color 0.3s;
+}
+
+.tab-btn.active {
+    border-color: #E63946;
+    color: #E63946;
+}
+
+.recommend-section {
+    margin-bottom: 1rem;
+}
+
+.recommend-grid {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.user-card {
+    flex: 1;
+    min-width: 100px;
+}
+
+.list-group-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 1rem;
+}
+
+.text-sub {
+    color: #333333;
+}
+
+.btn-primary {
+    background-color: #E63946;
+    border-color: #E63946;
+}
+
+.btn-primary:hover {
+    background-color: #d6323f;
+    border-color: #d6323f;
+}
+
+.btn-outline-danger {
+    color: #E63946;
+    border-color: #E63946;
+}
+
+.btn-outline-danger:hover {
+    background-color: #E63946;
+    color: white;
+}
+/* CSS 우선순위를 강제로 높입니다 */
+.btn-primary {
+    background-color: #E63946 !important;
+    border-color: #E63946 !important;
+    color: white !important;
+}
+
+.btn-light {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+    color: #333 !important;
+}
+/* follow.css */
+.btn-unfollowed {
+    background-color: #E63946 !important; /* 빨강 */
+    color: white !important;
+    border-color: #E63946 !important;
+}
+
+.btn-following {
+    background-color: #ffffff !important; /* 하양 */
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+}
+
+/* 헤더 스타일 고정 */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 0 15px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #dc3545; /* 뒤로가기 아이콘 색상 (빨강) */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+/* 숨김 처리 */
+.hidden {
+    display: none;
+}
+
+/* 고정 너비 */
+.fixed-width-40 {
+    width: 40px;
+}
+
+/* profile-list.css */
+.profile-thumb {
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+}
+

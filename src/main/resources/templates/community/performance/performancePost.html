@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공연 모집글</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script th:src="@{/js/community/performancePost.js}"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    .app-container {
+      padding: 20px 16px;
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      color: #333333;
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons button {
+      flex: 1;
+      padding: 10px 0;
+      border-radius: 24px;
+      border: 1px solid #E63946;
+      background: #fff;
+      font-size: 14px;
+      color: #E63946;
+    }
+
+    .tab-buttons .active {
+      background: #E63946;
+      color: #fff;
+    }
+
+    .post-card {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+
+    .post-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .post-content {
+      font-size: 13px;
+      margin-top: 6px;
+      color: #666;
+    }
+
+    .post-meta {
+      font-size: 12px;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      color: #333333;
+    }
+
+    .recommend-link {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #E63946;
+      text-decoration: none;
+    }
+
+    .search-form {
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      height: 40px;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background-color: #E63946;
+      border-color: #E63946;
+    }
+
+    .btn-primary:hover {
+      background-color: #c92f3a;
+      border-color: #c92f3a;
+    }
+
+    .write-btn {
+      text-align: right;
+      margin: 10px 0 35px 0;
+    }
+
+    .write-btn a {
+      font-size: 14px;
+      color: #E63946;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* ===== 페이징 스타일 ===== */
+    .pagination {
+      gap: 6px;
+    }
+
+    .pagination .page-link {
+      border-radius: 8px;
+      border: 1px solid #E63946;
+      color: #E63946;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 12px;
+    }
+
+    .pagination .page-link:hover {
+      background-color: #E63946;
+      color: #fff;
+    }
+
+    .pagination .active .page-link {
+      background-color: #E63946;
+      border-color: #E63946;
+      color: #fff;
+    }
+
+    .pagination .disabled .page-link {
+      opacity: 0.4;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+
+    <div class="app-container">
+
+      <div class="page-title">공연 모집글</div>
+
+      <div th:replace="~{fragments/performer/profile :: profile}"></div>
+
+      <div class="tab-buttons">
+        <button th:onclick="|location.href='@{/posts/performer}'|">공연자 모집</button>
+        <button class="active">공연 모집</button>
+      </div>
+
+      <!-- 검색 -->
+      <form th:action="@{/posts/performance}" method="get" class="search-form d-flex gap-2">
+        <input type="text" name="keyword" class="form-control search-input" placeholder="검색" th:value="${keyword}">
+        <button type="submit" class="btn btn-primary btn-sm">
+          검색
+        </button>
+      </form>
+
+      <!-- 게시글 목록 -->
+      <div th:each="post : ${posts}" class="post-card"
+        th:onclick="|location.href='@{/posts/performance/{id}(id=${post.postId})}'|">
+
+        <div class="post-title" th:text="${post.title}"></div>
+
+        <div class="post-content" th:text="${post.content}"></div>
+
+        <!-- 모집 인원 + 마감 표시 -->
+        <div style="margin-top:6px; font-size:12px;">
+
+          <!-- 정원 있는 경우 -->
+          <span th:if="${post.capacity != null}">
+
+            <!-- 마감 여부 판단 -->
+            <span th:if="${post.approvedCount >= post.capacity}" style="color:#E63946; font-weight:600;">
+              모집 마감
+            </span>
+
+            <span th:if="${post.approvedCount < post.capacity}" style="color:#E63946;">
+              모집 인원
+              <span th:text="${post.approvedCount}"></span>
+              /
+              <span th:text="${post.capacity}"></span>
+            </span>
+
+          </span>
+
+          <!-- 정원 제한 없음 -->
+          <span th:if="${post.capacity == null}" style="color:#666;">
+            모집 인원 제한 없음
+          </span>
+
+        </div>
+
+        <div class="post-meta">
+          <span th:text="'조회수 ' + ${post.viewCount}"></span>
+          <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
+        </div>
+
+        <a th:href="@{/posts/performance/{id}/recommend(id=${post.postId})}" onclick="event.stopPropagation();"
+          class="recommend-link">
+          공연자 추천
+        </a>
+
+      </div>
+
+      <div th:if="${#lists.isEmpty(posts)}" style="text-align:center; margin-top:40px; color:#999;">
+        등록된 게시글이 없습니다.
+      </div>
+
+      <!-- ===== 페이징 ===== -->
+      <nav th:if="${page.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+
+          <th:block th:with="
+            groupStart=${(page.number / 5) * 5},
+            groupEnd=${T(java.lang.Math).min(groupStart + 4, page.totalPages - 1)}
+          ">
+
+            <!-- 이전 그룹 -->
+            <li class="page-item" th:classappend="${groupStart == 0} ? 'disabled'">
+              <a class="page-link" th:href="@{/posts/performance(page=${groupStart - 5}, keyword=${keyword})}">
+                << </a>
+            </li>
+
+            <!-- 번호 -->
+            <li class="page-item" th:each="i : ${#numbers.sequence(groupStart, groupEnd)}"
+              th:classappend="${i == page.number} ? 'active'">
+
+              <a class="page-link" th:text="${i + 1}" th:href="@{/posts/performance(page=${i}, keyword=${keyword})}">
+              </a>
+
+            </li>
+
+            <!-- 다음 그룹 -->
+            <li class="page-item" th:classappend="${groupEnd + 1 >= page.totalPages} ? 'disabled'">
+              <a class="page-link" th:href="@{/posts/performance(page=${groupStart + 5}, keyword=${keyword})}">
+                >>
+              </a>
+            </li>
+
+          </th:block>
+
+        </ul>
+      </nav>
+
+      <!-- 글 작성 -->
+      <div class="write-btn">
+        <a th:href="@{/posts/performance/write}">글 작성</a>
+      </div>
+
+    </div>
+
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
+
+  </div>
+
+</body>
+
+</html>

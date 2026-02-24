@@ -1,0 +1,190 @@
+/* ===== 공통 ===== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #ffffff;
+    color: #333333;
+}
+
+/* ===== 상단 네비 ===== */
+.navbar {
+    height: 56px;
+    background-color: #333333 !important;
+}
+
+.navbar-brand {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#backBtn {
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+/* ===== 컨텐츠 영역 ===== */
+.content-wrapper {
+    padding-top: 72px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 24px;
+}
+
+.chat-form {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* ===== 입력 그룹 ===== */
+.mb-3 {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333333;
+}
+
+/* ===== 입력 필드 ===== */
+.form-control {
+    height: 44px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background-color: #f8f9fa;
+}
+
+.form-control:focus {
+    border-color: #e63946;
+    box-shadow: 0 0 0 0.15rem rgba(230, 57, 70, 0.15);
+    background-color: #ffffff;
+}
+
+/* textarea */
+textarea.form-control {
+    height: auto;
+    resize: none;
+}
+
+/* ===== readonly ===== */
+input[readonly] {
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+/* ===== 버튼 (Main Color) ===== */
+button[type="submit"] {
+    height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: #e63946;
+    border-color: #e63946;
+}
+
+button[type="submit"]:hover {
+    background-color: #d62839;
+    border-color: #d62839;
+}
+
+button[type="submit"]:disabled {
+    background-color: #f1a1a8;
+    border-color: #f1a1a8;
+}
+
+/* ===== 모바일 ===== */
+@media (max-width: 480px) {
+    .content-wrapper {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+/* =========================
+   Chat Post Form (Web App)
+========================= */
+
+/* app-content 안에서 폼 정렬 보정 */
+.chat-form {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 4px 0;
+}
+
+/* 폼 자체 */
+#chatPostForm {
+    display: flex;
+    flex-direction: column;
+}
+
+/* input 그룹 간격 통일 */
+#chatPostForm .mb-3 {
+    margin-bottom: 16px;
+}
+
+/* label 간격 줄이기 */
+#chatPostForm label {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+/* form-control 높이 통일 (Litera override 최소) */
+#chatPostForm .form-control {
+    height: 42px;
+    font-size: 0.9rem;
+}
+
+/* textarea 예외 */
+#chatPostForm textarea.form-control {
+    height: auto;
+    min-height: 120px;
+}
+
+/* readonly 필드 강조 (확인용) */
+#chatPostForm input[readonly] {
+    background-color: #f1f3f5;
+    color: #6c757d;
+}
+
+/* submit 버튼 웹앱용 */
+#chatPostForm button[type="submit"] {
+    margin-top: 12px;
+    height: 46px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+/* ===== Status Toggle ===== */
+.status-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+.status-btn {
+    flex: 1;
+    height: 42px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #666666;
+    cursor: pointer;
+}
+
+.status-btn.active {
+    background-color: var(--main-red);
+    border-color: var(--main-red);
+    color: #ffffff;
+}
+
+.status-btn:not(.active):hover {
+    background-color: #f8f9fa;
+}

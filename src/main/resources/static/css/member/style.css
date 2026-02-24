@@ -1,0 +1,195 @@
+:root {
+    --main-red: #E63946;
+    --dark-grey: #333333;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #ffffff;
+    min-height: 100vh;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* 수정된 헤더 스타일 */
+.app-header {
+    background-color: #ffffff; /* 검은색에서 흰색으로 변경 */
+    color: var(--dark-grey);   /* 글자색을 다크 그레이로 */
+    padding: 8px 16px;         /* 패딩 살짝 조정 */
+    font-weight: 600;
+    border-bottom: 1px solid #eeeeee; /* 하단 구분선 추가 (깔끔함) */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* 아이콘 버튼 공통 스타일 */
+/* 헤더 전체 컨테이너 */
+.app-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 56px; /* 높이를 명시적으로 고정 */
+    display: flex;
+    align-items: center;
+}
+
+.header-nav {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    padding: 0 16px;
+}
+
+/* 좌, 우측 영역을 동일한 너비로 고정 (예: 40px) */
+.header-left, .header-right {
+    flex: 0 0 40px;
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    justify-content: flex-end;
+}
+
+/* 중앙 영역: 남은 공간을 다 차지하고 텍스트를 가운데 정렬 */
+.header-center {
+    flex: 1;
+    text-align: center;
+    overflow: hidden; /* 이름이 너무 길 때 깨짐 방지 */
+}
+
+.user-name-text {
+    font-weight: 700;
+    color: var(--dark-grey);
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 이름이 너무 길면 ... 처리 */
+    display: inline-block;
+    min-height: 1.5em; /* 이름이 비어있어도 높이를 유지 */
+}
+
+/* 아이콘 버튼 스타일 통일 */
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 8px;
+    color: var(--dark-grey);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.app-header .btn i {
+    font-size: 1.2rem; /* 아이콘 크기 적정화 */
+}
+
+.profile-section {
+    padding: 20px;
+}
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    background-color: #dddddd;
+    border-radius: 50%;
+}
+
+.profile-right {
+    width: 65%;
+}
+
+.follow-btn,
+.dm-btn {
+ padding: 10px 18px
+     font-size: 0.95rem;
+     font-weight: 600;
+     border-radius: 15px;
+     height: 42px; /* 높이를 명시적으로 맞추면 절대 안 어긋나요 */
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     transition: all 0.2s; /* 클릭 시 부드러운 효과 */
+}
+
+.follow-btn {
+    background-color: var(--main-red);
+    border: none;
+}
+
+.follow-btn:hover {
+    background-color: #c92f3c;
+}
+
+.dm-btn {
+    border: 1px solid var(--dark-grey);
+    color: var(--dark-grey);
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark-grey);
+}
+
+.card-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 120px;
+}
+/* =========================
+   Follow Stats (Instagram Style)
+========================= */
+
+.follow-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 12px;
+}
+
+.stat-item {
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease;
+}
+
+.stat-item:hover {
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+.stat-number {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.stat-label {
+    display: block;
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 2px;
+}
+/* style.css */
+.profile-avatar img {
+    width: 90px;
+    height: 90px;
+}
+.btn-following {
+    background: transparent;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+.btn-unfollowed {
+    background: #dc3545;
+    color: #fff;
+}

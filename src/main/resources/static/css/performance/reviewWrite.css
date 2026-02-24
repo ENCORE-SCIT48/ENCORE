@@ -1,0 +1,139 @@
+.review-write-page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 18px 40px;
+}
+
+.review-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 72px;
+    padding: 0 18px;
+}
+
+.back-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: #111;
+}
+
+.header-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.header-spacer {
+    width: 44px;
+    height: 44px;
+}
+
+.perf-info {
+    text-align: center;
+    padding: 14px 0 10px;
+}
+
+.perf-title {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.perf-sub {
+    margin: 6px 0 0;
+    color: #8a8a8a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rating-wrap {
+    text-align: center;
+    padding: 18px 0 10px;
+}
+
+.stars {
+    display: inline-flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+}
+
+.star {
+    border: none;
+    background: transparent;
+    font-size: 44px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    color: #111;
+}
+
+.star.is-on {
+    color: #ffb300;
+}
+
+.rating-hint {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #777;
+    font-weight: 600;
+}
+
+/* 리뷰 입력 */
+.content-wrap {
+    margin-top: 18px;
+}
+
+.content-label {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.content-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    line-height: 1.5;
+    resize: none;
+    color: #222;
+}
+
+.content-input::placeholder {
+    color: #9a9a9a;
+    white-space: pre-line;
+}
+
+/* 작성 버튼 */
+.submit-wrap {
+    margin-top: 26px;
+    display: flex;
+    justify-content: center;
+}
+
+.submit-btn {
+    width: 220px;
+    height: 70px;
+    border: none;
+    border-radius: 14px;
+    background: #6c6c6c;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.submit-btn:disabled {
+    opacity: 0.45;
+}

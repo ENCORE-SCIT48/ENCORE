@@ -1,0 +1,49 @@
+<div th:fragment="profile">
+
+  <style>
+    .profile-link {
+      text-decoration: none;
+      display: block;
+    }
+
+    .profile-circle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      background-color: #e5e5e5;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .profile-circle::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 11px;
+      height: 11px;
+      background-color: #bdbdbd;
+      border-radius: 50%;
+    }
+
+    .profile-circle::after {
+      content: "";
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 17px;
+      height: 10px;
+      background-color: #bdbdbd;
+      border-radius: 8px 8px 5px 5px;
+    }
+  </style>
+
+  <a th:href="@{/performer/mypage}" class="profile-link">
+    <div class="profile-circle"></div>
+  </a>
+
+</div>
