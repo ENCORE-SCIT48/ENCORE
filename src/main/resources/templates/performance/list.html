@@ -17,7 +17,7 @@
 <body>
 <div class="app-wrapper">
     <header class="app-header">
-        <div th:replace="fragments/profile :: profile"></div>
+        <div th:replace="~{fragments/profile :: profile(targetUrl=${targetUrl})}"></div>
     </header>
     <div class="top-slot"></div>
 
@@ -115,7 +115,7 @@
     </main>
 
     <div class="bottom-slot"></div>
-    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
