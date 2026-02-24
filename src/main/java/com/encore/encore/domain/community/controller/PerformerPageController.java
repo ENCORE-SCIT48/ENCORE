@@ -186,14 +186,21 @@ public class PerformerPageController {
     }
 
     /**
-     * [설명] 공연자 모집글 신청 관리 화면을 조회합니다.
+     * [설명] 로그인 공연자가 작성한 공연자 모집글의
+     * 신청자 관리 화면을 조회합니다.
      *
-     * @return 공연자 모집글 신청 관리 화면
+     * @param userDetails 로그인 사용자 정보
+     * @param model       View 전달 모델
+     * @return 공연자 모집글 신청자 관리 화면
      */
     @GetMapping("/manage/performer")
-    public String managePerformerPosts() {
+    public String managePerformerPosts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
 
-        log.info("[PerformerPageController] 공연자 모집글 신청 관리 화면 요청");
+        List<PerformanceManageDto> posts = performerMypageService.findMyPerformerPostsWithApplicants(userDetails);
+
+        model.addAttribute("posts", posts);
 
         return "community/mypage/performer/managePerformer";
     }
@@ -251,11 +258,12 @@ public class PerformerPageController {
     @GetMapping("/manage/performance/reject")
     public String rejectPerformanceApplicant(
             @RequestParam("postId") Long postId,
-            @RequestParam("interactionId")Long interactionId,
+            @RequestParam("interactionId") Long interactionId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         postInteractionService.rejectInteraction(postId, interactionId, userDetails);
 
         return "redirect:/mypage/performer/manage/performance";
     }
+
 }

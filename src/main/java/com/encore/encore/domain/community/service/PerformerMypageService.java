@@ -230,4 +230,38 @@ public class PerformerMypageService {
                 })
                 .toList();
     }
+
+    /**
+     * [설명] 로그인 공연자가 작성한 공연자 모집글과
+     * 해당 게시글의 신청자 목록을 조회합니다.
+     *
+     * - postType이 PERFORMER_RECRUIT인 게시글만 조회합니다.
+     * - APPLY 타입 신청만 조회합니다.
+     *
+     * @param userDetails 로그인 사용자 정보
+     * @return 공연자 모집글과 신청자 목록 DTO 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<PerformanceManageDto> findMyPerformerPostsWithApplicants(
+            CustomUserDetails userDetails) {
+
+        Long performerId = performerPostService.getActivePerformerId(userDetails);
+
+        List<Post> posts = postRepository
+                .findByPerformerAuthor_PerformerIdAndPostTypeAndIsDeletedFalse(
+                        performerId,
+                        PERFORMER_POST_TYPE);
+
+        return posts.stream()
+                .map(post -> {
+
+                    List<PostInteraction> applicants = postInteractionRepository
+                            .findByPost_PostIdAndInteractionTypeAndIsDeletedFalse(
+                                    post.getPostId(),
+                                    APPLY_TYPE);
+
+                    return new PerformanceManageDto(post, applicants);
+                })
+                .toList();
+    }
 }
