@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum ReportTargetType {
-    USER("일반 유저"),
-    PERFORMER("공연자"),
-    HOST("공연장 호스트"),
+    ROLE_USER("일반 유저"),
+    ROLE_PERFORMER("공연자"),
+    ROLE_HOST("공연장 호스트"),
     VENUE("공연장"),
     CHAT_ROOM("채팅방"),
     PERFORMER_PARTY("공연자 파티"),

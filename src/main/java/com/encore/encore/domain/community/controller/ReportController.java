@@ -39,9 +39,9 @@ public class ReportController {
         log.info("신고 페이지 요청 - 대상: {}, 타입: {}", targetName, targetType);
 
         // targetType이 프로필 타입 구분일 경우 유저로 통일
-        String targetLabel = (targetType == ReportTargetType.USER ||
-            targetType == ReportTargetType.PERFORMER ||
-            targetType == ReportTargetType.HOST)
+        String targetLabel = (targetType == ReportTargetType.ROLE_USER ||
+            targetType == ReportTargetType.ROLE_PERFORMER ||
+            targetType == ReportTargetType.ROLE_HOST)
             ? "유저" : targetType.getDescription();
 
         model.addAttribute("targetId", targetId);
@@ -70,7 +70,7 @@ public class ReportController {
         //ActiveMode loginProfileMode = userDetails.getActiveMode();
         //Long loginUserId = userDetails.getUser().getUserId();
 
-        ActiveMode loginProfileMode = ActiveMode.HOST;
+        ActiveMode loginProfileMode = ActiveMode.ROLE_USER;
         Long loginUserId = 5L;
 
         ResponseCreateReportDto result = reportService.saveReport(dto, loginUserId, loginProfileMode);

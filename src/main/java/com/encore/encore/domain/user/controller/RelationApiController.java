@@ -144,11 +144,9 @@ public class RelationApiController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestBlockDto requestBlockDto
     ) {
-        /*Long profileId = userDetails.getActiveProfileId();
+        Long profileId = userDetails.getActiveProfileId();
         ActiveMode profileMode = userDetails.getActiveMode();
-*/
-        Long profileId = 2L;
-        ActiveMode profileMode = ActiveMode.HOST;
+
 
         if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 할 수 없습니다.");
@@ -172,11 +170,9 @@ public class RelationApiController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestBlockDto requestBlockDto
     ) {
-        //Long profileId = userDetails.getActiveProfileId();
-        //ActiveMode profileMode = userDetails.getActiveMode();
+        Long profileId = userDetails.getActiveProfileId();
+        ActiveMode profileMode = userDetails.getActiveMode();
 
-        Long profileId = 2L;
-        ActiveMode profileMode = ActiveMode.HOST;
 
         if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 해제 할 수 없습니다.");
@@ -197,13 +193,10 @@ public class RelationApiController {
      */
     @GetMapping("/relations/blocks")
     public ResponseEntity<CommonResponse<List<BlockListDto>>> getBlocks(
-        // @AuthenticationPrincipal CustomUserDetails userDetails
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        /*Long userId = userDetails.getUser().getUserId();
-        ActiveMode profileMode = userDetails.getActiveMode();*/
-
-        Long userId = 5L;
-        ActiveMode profileMode = ActiveMode.HOST;
+        Long userId = userDetails.getUser().getUserId();
+        ActiveMode profileMode = userDetails.getActiveMode();
 
         List<BlockListDto> response = relationService.getBlockList(userId, profileMode);
 
