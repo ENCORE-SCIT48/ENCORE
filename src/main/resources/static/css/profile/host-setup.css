@@ -1,0 +1,179 @@
+/* ==========================================================================
+   파일명: profile-setup.css
+   작성일: 2026-02-24
+   설명: 프로필 설정(입력/수정) 페이지 전용 스타일
+   구조: 1.변수/기본 -> 2.레이아웃 -> 3.이미지업로드 -> 4.폼요소 -> 5.체크박스그리드 -> 6.버튼
+   ========================================================================== */
+
+/* [1] 공통 변수 및 기본 설정 */
+:root {
+    --primary-red: #ff4d4d;
+    --dark-grey: #333;
+    --border-color: #eee;
+    --bg-light: #f8f9fa;
+}
+
+body {
+    background-color: var(--bg-light);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* [2] 메인 컨테이너 */
+.setup-container {
+    width: 100%;
+    max-width: 550px;
+    margin: 40px auto 20px;
+    padding: 30px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* [3] 프로필 이미지 업로드 영역 */
+.profile-upload {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 30px;
+    overflow: visible !important; /* 카메라 아이콘 노출을 위해 필수 */
+}
+
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    display: block;
+}
+
+.upload-badge {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 42px;
+    height: 42px;
+    background-color: #007bff; /* 포인트 블루 */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+    transition: all 0.2s ease-in-out;
+}
+
+.upload-badge:hover {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+
+/* [4] 섹션 및 폼 컨트롤 */
+.section-title {
+    font-weight: 700;
+    margin: 30px 0 15px;
+    font-size: 1.05rem;
+    color: var(--dark-grey);
+    border-left: 4px solid var(--primary-red);
+    padding-left: 10px;
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    font-size: 0.95rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 0.2rem rgba(255, 77, 77, 0.15);
+}
+
+/* [5] 추가됨: 체크박스 그리드 스타일 (장르/공연형태 나열용) */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    background-color: #fdfdfd;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px;
+    font-size: 0.9rem;
+    color: #555;
+    transition: color 0.2s;
+}
+
+.check-item:hover {
+    color: var(--primary-red);
+}
+
+.check-item input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: var(--primary-red);
+    width: 17px;
+    height: 17px;
+}
+
+/* [6] 버튼 및 하단 링크 */
+.btn-save {
+    background-color: var(--primary-red) !important;
+    border: none !important;
+    width: 100%;
+    padding: 16px !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    border-radius: 12px !important;
+    margin-top: 40px;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+    transition: all 0.2s;
+}
+
+.btn-save:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.btn-home-link {
+    display: inline-block;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+/* [7] 반응형 모바일 최적화 */
+@media (max-width: 576px) {
+    .setup-container {
+        margin: 0 auto;
+        padding: 25px 15px;
+        border-radius: 0;
+        border: none;
+    }
+    .profile-upload {
+        width: 120px;
+        height: 120px;
+    }
+    .checkbox-grid {
+        grid-template-columns: repeat(2, 1fr); /* 모바일 2열 고정 */
+    }
+}
