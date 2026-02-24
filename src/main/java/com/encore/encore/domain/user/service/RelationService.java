@@ -63,15 +63,15 @@ public class RelationService {
      */
     public ProfileInfoDto getProfileInfo(Long profileId, ActiveMode profileMode) {
         switch (profileMode) {
-            case USER:
+            case ROLE_USER:
                 UserProfile userProfile = userProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(userProfile.getProfileId(), profileMode.name(), userProfile.getUser().getNickname(), userProfile.getProfileImageUrl());
-            case PERFORMER:
+            case ROLE_PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(performerProfile.getPerformerId(), profileMode.name(), performerProfile.getStageName(), null);
-            case HOST:
+            case ROLE_HOST:
                 HostProfile hostProfile = hostProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(hostProfile.getHostId(), profileMode.name(), hostProfile.getOrganizationName(), null);
@@ -91,15 +91,15 @@ public class RelationService {
 
     public ProfileInfoDto getProfileInfoUserId(Long userId, ActiveMode profileMode) {
         switch (profileMode) {
-            case USER:
+            case ROLE_USER:
                 UserProfile userProfile = userProfileRepository.findByUser_UserId(userId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(userProfile.getProfileId(), profileMode.name(), userProfile.getUser().getNickname(), userProfile.getProfileImageUrl());
-            case PERFORMER:
+            case ROLE_PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findByUser_UserId(userId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(performerProfile.getPerformerId(), profileMode.name(), performerProfile.getStageName(), null);
-            case HOST:
+            case ROLE_HOST:
                 HostProfile hostProfile = hostProfileRepository.findByUser_UserId(userId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트 프로필이 존재하지 않습니다."));
                 return new ProfileInfoDto(hostProfile.getHostId(), profileMode.name(), hostProfile.getOrganizationName(), null);
@@ -117,15 +117,15 @@ public class RelationService {
      */
     public User findProfileById(Long profileId, ActiveMode profileMode) {
         switch (profileMode) {
-            case USER:
+            case ROLE_USER:
                 UserProfile userProfile = userProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필이 존재하지 않습니다."));
                 return userProfile.getUser();
-            case PERFORMER:
+            case ROLE_PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필이 존재하지 않습니다."));
                 return performerProfile.getUser();
-            case HOST:
+            case ROLE_HOST:
                 HostProfile hostProfile = hostProfileRepository.findById(profileId)
                     .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트 프로필이 존재하지 않습니다."));
                 return hostProfile.getUser();
@@ -146,15 +146,15 @@ public class RelationService {
         if (profileId == null || profileMode == null) return null;
 
         return switch (profileMode) {
-            case USER -> userProfileRepository.findById(profileId)
+            case ROLE_USER -> userProfileRepository.findById(profileId)
                 .map(UserProfile::getUser)
                 .map(User::getUserId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저가 존재하지 않습니다."));
-            case PERFORMER -> performerProfileRepository.findById(profileId)
+            case ROLE_PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(PerformerProfile::getUser)
                 .map(User::getUserId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자가 존재하지 않습니다."));
-            case HOST -> hostProfileRepository.findById(profileId)
+            case ROLE_HOST -> hostProfileRepository.findById(profileId)
                 .map(HostProfile::getUser)
                 .map(User::getUserId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "호스트가 존재하지 않습니다."));

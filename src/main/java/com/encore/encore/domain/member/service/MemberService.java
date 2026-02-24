@@ -40,13 +40,13 @@ public class MemberService {
 
 
         switch (activeProfileMode) {
-            case USER:
+            case ROLE_USER:
                 return getUserProfileDto(profileId, profileMode);
 
-            case PERFORMER:
+            case ROLE_PERFORMER:
                 return getPerformerProfileDto(profileId, profileMode);
 
-            case HOST:
+            case ROLE_HOST:
                 return getHostProfileDto(profileId, profileMode);
 
             default:

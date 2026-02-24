@@ -55,11 +55,11 @@ public class DmService {
 
         switch (modeStr.toLowerCase()) { // 소문자로 통일
             case "user":
-                return ActiveMode.USER;
+                return ActiveMode.ROLE_USER;
             case "performer":
-                return ActiveMode.PERFORMER;
+                return ActiveMode.ROLE_PERFORMER;
             case "host":
-                return ActiveMode.HOST;
+                return ActiveMode.ROLE_HOST;
             default:
                 throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 ActiveMode: " + modeStr);
         }
@@ -74,11 +74,11 @@ public class DmService {
      */
     private boolean isProfileExist(Long profileId, ActiveMode mode) {
         switch (mode) {
-            case USER:
+            case ROLE_USER:
                 return userProfileRepository.existsById(profileId);
-            case PERFORMER:
+            case ROLE_PERFORMER:
                 return performerProfileRepository.existsById(profileId);
-            case HOST:
+            case ROLE_HOST:
                 return hostProfileRepository.existsById(profileId);
             default:
                 return false;
