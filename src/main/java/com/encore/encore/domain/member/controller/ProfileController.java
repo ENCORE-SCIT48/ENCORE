@@ -34,7 +34,6 @@ public class ProfileController {
 
     /**
      * [화면] 프로필 선택 메인 페이지로 이동합니다.
-     *
      * @return 프로필 선택 뷰 경로
      */
     @GetMapping("/select")
@@ -50,7 +49,6 @@ public class ProfileController {
 
     /**
      * 사용자의 활성 프로필을 전환하고 세션을 갱신합니다.
-     *
      * @param mode        변경하고자 하는 프로필 (USER, PERFORMER, HOST)
      * @param userDetails 현재 로그인한 사용자의 상세 정보
      * @param session

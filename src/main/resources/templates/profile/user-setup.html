@@ -23,7 +23,7 @@
 
         <div class="profile-upload">
             <img id="preview"
-                 th:src="${profileImageUrl != null ? profileImageUrl : '/image/default-profile.png'}"
+                 th:src="${profile.profileImageUrl != null ? profile.profileImageUrl : '/image/default-profile.png'}"
                  class="profile-img">
             <label for="fileInput" class="upload-badge">
                 <i class="bi bi-camera-fill"></i>

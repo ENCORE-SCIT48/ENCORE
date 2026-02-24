@@ -15,7 +15,7 @@
             <p class="text-muted small">필수 정보를 입력하여 인증을 완료해주세요.</p>
         </header>
 
-        <form th:action="@{/hostprofile/setup}" th:object="${profile}" method="post" enctype="multipart/form-data">
+        <form id="hostSetupForm" th:action="@{/hostprofile/setup}" th:object="${profile}" method="post" enctype="multipart/form-data">
 
             <div class="profile-upload">
                 <img id="preview" th:src="${profile.profileImageUrl != null && profile.profileImageUrl != '' ? profile.profileImageUrl : '/image/default-profile.png'}" class="profile-img">
@@ -29,13 +29,15 @@
             <div class="mb-3">
                 <label class="form-label fw-bold small">사업자 번호</label>
                 <div class="input-group">
-                    <input type="text" th:field="*{businessNumber}" id="businessNumber" class="form-control" placeholder="000-00-00000" th:readonly="${profile.verified}">
-                    <button type="button" id="btnCheckBiz" class="btn btn-dark" th:if="${!profile.verified}">조회/인증</button>
+                    <input type="text" th:field="*{businessNumber}" id="businessNumber" class="form-control" placeholder="000-00-00000">
+                    <button type="button" id="btnCheckBiz" class="btn btn-dark">조회/인증</button>
                 </div>
-                <div th:if="${profile.verified}" class="text-success small fw-bold mt-2">
+                <div th:if="${profile.verified}" id="verificationBadge" class="text-success small fw-bold mt-2">
                     <i class="bi bi-patch-check-fill"></i> 인증된 사업자입니다.
                 </div>
             </div>
+
+            <input type="hidden" th:field="*{verified}">
 
             <div class="section-title">단체 상세 정보</div>
             <div class="mb-3">
