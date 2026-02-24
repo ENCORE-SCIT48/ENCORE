@@ -15,6 +15,17 @@ import java.util.Optional;
 
 @Repository
 public interface UserRelationRepository extends JpaRepository<UserRelation, Long> {
+
+    /**
+     * 로그인 유저가 이전의 유저와 관계를 맺은 데이터가 존재하는지 조회
+     *
+     * @param actorId    로그인 유저의 유저id
+     * @param actorMode  로그인 유저의 프로필 모드
+     * @param targetId   타겟 유저의 프로필id
+     * @param targetMode 타겟 유저의 프로필 모드
+     * @param type       프로필 타입
+     * @return
+     */
     @Query("SELECT r FROM UserRelation r " +
         "WHERE r.actor.userId = :actorId " +
         "AND r.actorProfileMode = :actorMode " +
@@ -32,6 +43,7 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
     List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
 
     List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
+
 
     Optional<UserRelation> findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(Long actorUserId, ActiveMode profileMode, Long targetProfileId, ActiveMode targetMode, RelationType relationType);
 
@@ -69,6 +81,7 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("targetMode") ActiveMode targetMode
     );
 
+    // 로그인 유저가 해당 유저를 팔로우 했는가 판단
     boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode);
 
 
@@ -103,4 +116,7 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("targetType") TargetType targetType, // 파라미터 추가
         @Param("type") RelationType type
     );
+
+    // 차단 관계 조회
+    List<UserRelation> findAllByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long userId, ActiveMode profileMode, RelationType relationType);
 }

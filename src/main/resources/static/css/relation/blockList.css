@@ -114,6 +114,9 @@ body {
 }
 
 .category-tag {
+    display: flex;          /* Flexbox 활성화 */
+    align-items: center;    /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
     font-weight: 700;
     color: #333;
     width: 70px;

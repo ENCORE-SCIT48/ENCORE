@@ -37,4 +37,10 @@ public class RelationPageController {
         return "relation/following-follower";
     }
 
+    @GetMapping("/user/block")
+    public String blockList() {
+
+        return "relation/blockList";
+    }
+
 }

@@ -1,10 +1,7 @@
 package com.encore.encore.domain.user.controller;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
-import com.encore.encore.domain.user.dto.RequestBlockDto;
-import com.encore.encore.domain.user.dto.ResponseBlockDto;
-import com.encore.encore.domain.user.dto.ResponseFollowDto;
-import com.encore.encore.domain.user.dto.ResponseFollowListDto;
+import com.encore.encore.domain.user.dto.*;
 import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.service.RelationService;
 import com.encore.encore.global.common.CommonResponse;
@@ -136,7 +133,7 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(followers, "팔로워 리스트 조회 성공"));
     }
 
-    @PostMapping("/block")
+    @PostMapping("/relations/block")
     public ResponseEntity<CommonResponse<ResponseBlockDto>> block(
         //@AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestBlockDto requestBlockDto
@@ -159,7 +156,7 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(result, "차단 되었습니다."));
     }
 
-    @PostMapping("/unBlock")
+    @PostMapping("/relations/unblock")
     public ResponseEntity<CommonResponse<ResponseBlockDto>> unBlock(
         //@AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestBlockDto requestBlockDto
@@ -179,5 +176,17 @@ public class RelationApiController {
         );
 
         return ResponseEntity.ok(CommonResponse.ok(result, "차단이 해제 되었습니다."));
+    }
+
+    @GetMapping("/relations/blocks")
+    public ResponseEntity<CommonResponse<List<BlockListDto>>> getBlocks(
+        // @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = 5L; // 임시 데이터
+        ActiveMode profileMode = ActiveMode.HOST;
+
+        List<BlockListDto> response = relationService.getBlockList(userId, profileMode);
+
+        return ResponseEntity.ok(CommonResponse.ok(response, "조회 성공"));
     }
 }

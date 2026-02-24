@@ -1,5 +1,6 @@
 package com.encore.encore.domain.user.service;
 
+import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.entity.HostProfile;
 import com.encore.encore.domain.member.entity.PerformerProfile;
@@ -7,6 +8,7 @@ import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
+import com.encore.encore.domain.member.service.ProfileService;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.domain.user.dto.*;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -41,6 +44,8 @@ public class RelationService {
     private final HostProfileRepository hostProfileRepository;
     private final PerformanceRepository performanceRepository;
     private final VenueRepository venueRepository;
+    private final ProfileService profileService;
+    private final ChatPostRepository chatPostRepository;
 
     /**
      * 프로필 id, 프로필 모드로 찾을 각각의 정보를 찾을 경우(ProfileInfoDto반환)
@@ -542,6 +547,50 @@ public class RelationService {
                 dto.setTargetProfileMode(null);
             }
         }
+    }
+
+    /**
+     * 로그인 유저가 차단한 목록을 조회한다
+     *
+     * @param userId      차단한 유저의 아이디
+     * @param profileMode 차단한 유저의 프로필 모드
+     * @return 차단 리스트 목록
+     */
+    public List<BlockListDto> getBlockList(Long userId, ActiveMode profileMode) {
+        // 1. 차단 관계 조회 (isDeleted = false)
+        List<UserRelation> relations = userRelationRepository
+            .findAllByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(
+                userId, profileMode, RelationType.BLOCK
+            );
+
+        return relations.stream().map(relation -> {
+            String targetName = "알 수 없음";
+
+            // 2. 타입별 이름 조회 로직
+            switch (relation.getTargetType()) {
+                case USER:
+                    targetName = profileService.resolveSenderName(relation.getTargetId(), relation.getTargetProfileMode());
+                    break;
+                case PERFORMANCE:
+                    targetName = performanceRepository.findTitleByPerformanceId(relation.getTargetId());
+                    break;
+                case VENUE:
+                    targetName = venueRepository.findVenueNameByVenueId(relation.getTargetId());
+                    break;
+                case CHAT_POST:
+                    targetName = chatPostRepository.findTitleById(relation.getTargetId());
+                    break;
+            }
+
+            return BlockListDto.builder()
+                .targetId(relation.getTargetId())
+                .targetType(relation.getTargetType().name()) // "USER"
+                .targetProfileMode(relation.getTargetProfileMode() != null ?
+                    relation.getTargetProfileMode().name() : null)
+                .name(targetName)
+                .typeDisplayName(relation.getTargetType().getKoreanName()) // Enum에 정의된 한글명
+                .build();
+        }).collect(Collectors.toList());
     }
 }
 

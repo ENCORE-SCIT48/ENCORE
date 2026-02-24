@@ -1,8 +1,6 @@
 $(document).ready(function() {
-    // 1. 초기 데이터 로드 (로그인 유저 정보는 서버 세션에서 처리하므로 따로 안 보냄)
     loadBlockList();
 
-    // 2. 탭 필터링 이벤트
     $('#filterTab .nav-link').on('click', function(e) {
         e.preventDefault();
         $('#filterTab .nav-link').removeClass('active');
@@ -13,22 +11,31 @@ $(document).ready(function() {
     });
 });
 
-// 데이터 불러오기 함수
 function loadBlockList() {
     $.ajax({
-        url: '/api/block/list', // 서버의 API 주소
+        url: '/api/users/relations/blocks',
         method: 'GET',
-        success: function(data) {
+        success: function(response) {
+            // 서버 응답 구조가 CommonResponse라면 response.data를 사용
+            const list = response.data || response;
             let html = '';
-            if (data.length === 0) {
+
+            if (!list || list.length === 0) {
                 html = '<div class="empty-state">차단된 내역이 없습니다.</div>';
             } else {
-                data.forEach(item => {
+                list.forEach(item => {
+                    // targetType을 category로 사용 (USER, VENUE 등)
+                    // targetProfileMode가 null인 경우를 대비해 빈 문자열 처리
+                    const mode = item.targetProfileMode || '';
+
                     html += `
-                        <div class="block-card" data-category="${item.type}">
-                            <div class="category-tag">${item.type}</div>
+                        <div class="block-card" data-category="${item.targetType}">
+                            <div class="category-tag">${item.typeDisplayName}</div>
                             <div class="content-text">${item.name}</div>
-                            <button class="btn-unblock" onclick="unblockItem(${item.id})">차단 해제</button>
+                            <button class="btn-unblock"
+                                onclick="unblockItem(${item.targetId}, '${item.targetType}', '${mode}')">
+                                차단 해제
+                            </button>
                         </div>`;
                 });
             }
@@ -40,27 +47,42 @@ function loadBlockList() {
     });
 }
 
-// 차단 해제 함수 (비동기)
-function unblockItem(id) {
+function unblockItem(targetId, targetType, targetProfileMode) {
     if(!confirm('차단을 해제하시겠습니까?')) return;
 
+    const requestData = {
+        targetId: targetId,
+        targetType: targetType,
+        targetProfileMode: targetProfileMode === '' ? null : targetProfileMode
+    };
+
     $.ajax({
-        url: '/api/block/unblock',
+        url: '/api/users/relations/unblock',
         method: 'POST',
-        data: { id: id },
+        contentType: 'application/json',
+        data: JSON.stringify(requestData),
         success: function(response) {
-            // 성공 시 리스트 다시 불러오기 (혹은 해당 DOM만 제거)
+            alert('차단이 해제되었습니다.');
             loadBlockList();
+        },
+        error: function(xhr) {
+            if (xhr.status === 404) {
+                alert('이미 차단 해제되었거나 내역을 찾을 수 없습니다.');
+                loadBlockList();
+            } else {
+                alert('차단 해제 중 오류가 발생했습니다.');
+            }
         }
     });
 }
 
-// 클라이언트 사이드 필터링
 function filterItems(category) {
     if (category === 'all') {
         $('.block-card').show();
     } else {
         $('.block-card').hide();
+        // data-category에 들어간 targetType(USER, VENUE 등)과
+        // 탭의 data-filter 값이 일치해야 합니다.
         $(`.block-card[data-category="${category}"]`).show();
     }
 }
