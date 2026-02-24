@@ -9,6 +9,7 @@ import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -143,13 +144,15 @@ public class PerformanceService {
         Page<Review> page;
 
         if ("rating".equalsIgnoreCase(sort)) {
-            page = reviewRepository.findByPerformance_PerformanceIdAndSeatIsNullOrderByRatingDescCreatedAtDesc(
-                performanceId, pageable
-            );
+            page = reviewRepository
+                .findByPerformance_PerformanceIdAndSeatIsNullAndIsDeletedFalseOrderByRatingDescCreatedAtDesc(
+                    performanceId, pageable
+                );
         } else {
-            page = reviewRepository.findByPerformance_PerformanceIdAndSeatIsNullOrderByCreatedAtDesc(
-                performanceId, pageable
-            );
+            page = reviewRepository
+                .findByPerformance_PerformanceIdAndSeatIsNullAndIsDeletedFalseOrderByCreatedAtDesc(
+                    performanceId, pageable
+                );
         }
 
         return page.map(review -> new PerformanceReviewItemDto(
@@ -181,5 +184,110 @@ public class PerformanceService {
             "avgRating", avgRating,
             "reviewCount", reviewCount
         );
+    }
+
+    @Transactional
+    public Long createPerformanceReview(Long performanceId, Long userId, Integer rating, String content) {
+
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "별점은 1~5점이어야 합니다.");
+        }
+
+        String c = (content == null) ? "" : content.trim();
+        if (c.length() < 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "리뷰는 5자 이상 입력해 주세요.");
+        }
+
+        Performance performance = performanceRepository.findById(performanceId)
+            .orElseThrow(() -> new ApiException(
+                ErrorCode.NOT_FOUND,
+                "공연을 찾을 수 없습니다. performanceId=" + performanceId
+            ));
+
+        Review review = Review.builder()
+            .performance(performance)
+            .user(com.encore.encore.domain.user.entity.User.builder().userId(userId).build())
+            .seat(null)
+            .rating(rating)
+            .content(c)
+            .build();
+
+        return reviewRepository.save(review).getReviewId();
+    }
+
+    @Transactional
+    public Map<String, Object> getPerformanceReviewForEdit(Long performanceId, Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다."));
+
+        if (review.getPerformance() == null || !performanceId.equals(review.getPerformance().getPerformanceId())) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+        }
+
+        if (review.getSeat() != null) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "좌석 리뷰는 이 API 대상이 아닙니다.");
+        }
+
+        if (review.getUser() == null || !userId.equals(review.getUser().getUserId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "수정 권한이 없습니다.");
+        }
+
+        return Map.of(
+            "rating", review.getRating(),
+            "content", review.getContent()
+        );
+    }
+
+    @Transactional
+    public void updatePerformanceReview(
+        Long performanceId,
+        Long reviewId,
+        Long userId,
+        Integer rating,
+        String content
+    ) {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "별점은 1~5점이어야 합니다.");
+        }
+
+        String c = (content == null) ? "" : content.trim();
+        if (c.length() < 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "리뷰는 5자 이상 입력해 주세요.");
+        }
+
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다. reviewId=" + reviewId));
+
+        // 공연 리뷰 맞는지 검증
+        if (!review.getPerformance().getPerformanceId().equals(performanceId)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "해당 공연의 리뷰가 아닙니다.");
+        }
+
+        // 내 리뷰인지 검증
+        if (!review.getUser().getUserId().equals(userId)) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "수정 권한이 없습니다.");
+        }
+
+        review.setRating(rating);
+        review.setContent(c);
+    }
+
+    @Transactional
+    public void deletePerformanceReview(Long performanceId, Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다. reviewId=" + reviewId));
+
+        // 공연 매칭 체크
+        if (review.getPerformance() == null || !review.getPerformance().getPerformanceId().equals(performanceId)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "공연에 속한 리뷰가 아닙니다.");
+        }
+
+        // 작성자 체크
+        if (review.getUser() == null || !review.getUser().getUserId().equals(userId)) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "삭제 권한이 없습니다.");
+        }
+
+        // 논리삭제
+        review.delete(); // BaseEntity의 isDeleted=true
     }
 }
