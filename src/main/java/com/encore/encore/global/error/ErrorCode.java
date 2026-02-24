@@ -10,12 +10,8 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH-401", "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH-403", "권한이 없습니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON-404", "대상을 찾을 수 없습니다."),
-    CONFLICT(HttpStatus.CONFLICT, "COMMON-409", "요청이 충돌했습니다."),
-    // 파일 에러 코드 추가
-    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-500", "파일 업로드 중 오류가 발생했습니다."),
-    FILE_DELETE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE-501", "파일 삭제 중 오류가 발생했습니다.");
-
-
+    CONFLICT(HttpStatus.CONFLICT, "COMMON-409", "요청이 충돌했습니다.");
+        
     private final HttpStatus status;
     private final String code;
     private final String message;

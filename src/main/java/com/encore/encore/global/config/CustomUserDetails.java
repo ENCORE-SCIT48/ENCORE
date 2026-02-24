@@ -19,7 +19,7 @@ public class CustomUserDetails implements UserDetails {
 
     public CustomUserDetails(User user) {
         this.user = user;
-        this.activeMode = ActiveMode.ROLE_USER;
+        this.activeMode = ActiveMode.USER;
     }
     // 닉네임을 반환하는 커스텀 메서드 추가
     public String getNickname() {

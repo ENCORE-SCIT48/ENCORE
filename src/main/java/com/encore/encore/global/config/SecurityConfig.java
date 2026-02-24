@@ -31,9 +31,7 @@ public class SecurityConfig {
                 .usernameParameter("email")
                 .defaultSuccessUrl("/profiles/select", true)
                 .failureHandler((request, response, exception) -> {
-                    // 콘솔창(IntelliJ 하단 Log)에 에러 원인이 찍힙니다.
-                    System.out.println("### 로그인 실패 원인: " + exception.getMessage());
-                    response.sendRedirect("/auth/login?error=true");
+                    response.sendRedirect("/auth/login?error=true"); // 경로 수정 권장
                 })
                 .permitAll()
             )
@@ -49,17 +47,6 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
-
-                // 2. 인증(로그인)이 필수인 경로들 (UserDetails가 필요한 모든 곳)
-                .requestMatchers("/profiles/**").authenticated()
-                .requestMatchers("/setup/**").authenticated()
-                .requestMatchers("/user/**").authenticated() // 유저 관련 일반 경로 추가
-
-                // 3. 역할(Role)에 따른 제한
-                // [기존 정보 참고] USER("관람객"), PERFORMER("공연자"), HOST("주최자")
-
-
-                // 4. 나머지 모든 요청은 로그인 없이 허용 (개발 편의성)
                 .anyRequest().permitAll()
             );
 
@@ -69,15 +56,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-            .requestMatchers(
-                        "/favicon.ico",
-                        "/.well-known/**",
-                        "/css/**",        // CSS 허용
-                        "/js/**",         // JS 허용
-                        "/image/**",      // 기본 이미지 폴더 허용
-                        "/images/**",     // (로그에 images라고 찍혔으니 이것도 추가)
-                        "/uploads/**"     // ★ 업로드된 프로필 사진 경로 허용
-                    );
+            .requestMatchers("/favicon.ico", "/.well-known/**"); // .well-known 하위 모든 요청 무시
     }
 
     @Bean
