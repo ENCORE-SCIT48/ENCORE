@@ -67,4 +67,5 @@ public class HostApiController {
 
         return CommonResponse.ok(null, "사업자 번호 인증이 확정되었습니다. 나머지 프로필 정보를 입력해주세요.");
     }
+    // 최종 제출
 }
