@@ -15,7 +15,7 @@ public interface UserPerformanceRelationRepository extends JpaRepository<UserPer
     /**
      * 상태 존재 여부 확인
      * - 예) 본 공연 여부(WATCHED), 찜 여부(WISHED)
-     * - is_deleted=false 인 "현재 유효한" 관계만 대상으로 함
+     * - is_deleted=false인 현재 유효한 관계만 대상으로 함
      */
     boolean existsByUser_UserIdAndPerformance_PerformanceIdAndStatusAndIsDeletedFalse(
         Long userId,
@@ -25,7 +25,7 @@ public interface UserPerformanceRelationRepository extends JpaRepository<UserPer
 
     /**
      * 토글(찜 on/off) 시 사용
-     * - 현재 활성 상태(is_deleted=false)인 row 중 "가장 최신" 1건을 가져옴
+     * - 현재 활성 상태(is_deleted=false)인 row 중 가장 최신 1건을 가져옴
      * - off 처리할 때 delete()로 논리삭제(is_deleted=true) 처리
      *
      * ※ order 기준은 relationId(자동증가)로 최신 판단
@@ -38,7 +38,7 @@ public interface UserPerformanceRelationRepository extends JpaRepository<UserPer
     );
 
     /**
-     * "본 공연 리스트(WATCHED)" 조회 + 검색 지원
+     * 본 공연 리스트(WATCHED) 조회 + 검색 지원
      * - UserPerformanceRelation을 그대로 내려보내면 LAZY 직렬화 이슈가 생길 수 있어
      *   Performance만 바로 뽑아서 Service에서 DTO로 변환하는 방식
      * - watchedAt DESC: 본 날짜 기준 최신순

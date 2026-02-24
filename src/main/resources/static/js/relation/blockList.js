@@ -1,88 +1,171 @@
-$(document).ready(function() {
-    loadBlockList();
-
-    $('#filterTab .nav-link').on('click', function(e) {
-        e.preventDefault();
-        $('#filterTab .nav-link').removeClass('active');
-        $(this).addClass('active');
-
-        const filter = $(this).data('filter');
-        filterItems(filter);
-    });
+$(function () {
+    BlockManager.init();
 });
 
-function loadBlockList() {
-    $.ajax({
-        url: '/api/users/relations/blocks',
-        method: 'GET',
-        success: function(response) {
-            // 서버 응답 구조가 CommonResponse라면 response.data를 사용
-            const list = response.data || response;
-            let html = '';
+const BlockManager = (function () {
 
-            if (!list || list.length === 0) {
-                html = '<div class="empty-state">차단된 내역이 없습니다.</div>';
-            } else {
-                list.forEach(item => {
-                    // targetType을 category로 사용 (USER, VENUE 등)
-                    // targetProfileMode가 null인 경우를 대비해 빈 문자열 처리
-                    const mode = item.targetProfileMode || '';
+    function init() {
+        bindEvents();
+        loadBlockList();
+    }
 
-                    html += `
-                        <div class="block-card" data-category="${item.targetType}">
-                            <div class="category-tag">${item.typeDisplayName}</div>
-                            <div class="content-text">${item.name}</div>
-                            <button class="btn-unblock"
-                                onclick="unblockItem(${item.targetId}, '${item.targetType}', '${mode}')">
-                                차단 해제
-                            </button>
-                        </div>`;
-                });
+    function bindEvents() {
+
+        // 필터 탭 클릭
+        $('#filterTab').on('click', '.nav-link', function () {
+            $('#filterTab .nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            const filter = $(this).data('filter');
+            filterItems(filter);
+        });
+
+        // 차단 해제 버튼 (이벤트 위임)
+        $('#blockList').on('click', '.btn-unblock', function () {
+            const targetId = $(this).data('id');
+            const targetType = $(this).data('type');
+            const targetProfileMode = $(this).data('mode');
+
+            unblock(targetId, targetType, targetProfileMode);
+        });
+    }
+
+    /**
+     * 차단 목록 조회
+     */
+    function loadBlockList() {
+        $.ajax({
+            url: '/api/users/relations/blocks',
+            method: 'GET',
+            success(response) {
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+
+                renderList(response.data);
+            },
+            error(xhr) {
+                handleAjaxError(xhr);
             }
-            $('#blockList').html(html);
-        },
-        error: function() {
-            alert('데이터를 불러오는데 실패했습니다.');
+        });
+    }
+
+    /**
+     * 차단 목록 렌더링 (XSS 방지)
+     */
+    function renderList(list) {
+
+        const $container = $('#blockList');
+        $container.empty();
+
+        if (!list || list.length === 0) {
+            $container.append(
+                $('<div>')
+                    .addClass('empty-state')
+                    .text('차단된 내역이 없습니다.')
+            );
+            return;
         }
-    });
-}
 
-function unblockItem(targetId, targetType, targetProfileMode) {
-    if(!confirm('차단을 해제하시겠습니까?')) return;
+        list.forEach(item => {
 
-    const requestData = {
-        targetId: targetId,
-        targetType: targetType,
-        targetProfileMode: targetProfileMode === '' ? null : targetProfileMode
-    };
+            const mode = item.targetProfileMode || '';
 
-    $.ajax({
-        url: '/api/users/relations/unblock',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(requestData),
-        success: function(response) {
-            alert('차단이 해제되었습니다.');
-            loadBlockList();
-        },
-        error: function(xhr) {
-            if (xhr.status === 404) {
-                alert('이미 차단 해제되었거나 내역을 찾을 수 없습니다.');
+            const $card = $('<div>')
+                .addClass('block-card')
+                .attr('data-category', item.targetType);
+
+            const $tag = $('<div>')
+                .addClass('category-tag')
+                .text(item.typeDisplayName);
+
+            const $content = $('<div>')
+                .addClass('content-text')
+                .text(item.name);
+
+            const $button = $('<button>')
+                .attr('type', 'button')
+                .addClass('btn-unblock')
+                .text('차단 해제')
+                .data('id', item.targetId)
+                .data('type', item.targetType)
+                .data('mode', mode);
+
+            $card.append($tag, $content, $button);
+            $container.append($card);
+        });
+    }
+
+    /**
+     * 차단 해제 요청
+     */
+    function unblock(targetId, targetType, targetProfileMode) {
+
+        if (!confirm('차단을 해제하시겠습니까?')) {
+            return;
+        }
+
+        const requestData = {
+            targetId: targetId,
+            targetType: targetType,
+            targetProfileMode: targetProfileMode || null
+        };
+
+        $.ajax({
+            url: '/api/users/relations/unblock',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
+            success(response) {
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+
+                alert(response.message || '차단이 해제되었습니다.');
                 loadBlockList();
-            } else {
-                alert('차단 해제 중 오류가 발생했습니다.');
+            },
+            error(xhr) {
+                handleAjaxError(xhr);
             }
-        }
-    });
-}
+        });
+    }
 
-function filterItems(category) {
-    if (category === 'all') {
-        $('.block-card').show();
-    } else {
-        $('.block-card').hide();
-        // data-category에 들어간 targetType(USER, VENUE 등)과
-        // 탭의 data-filter 값이 일치해야 합니다.
+    /**
+     * 필터 처리
+     */
+    function filterItems(category) {
+
+        const $cards = $('.block-card');
+
+        if (category === 'all') {
+            $cards.show();
+            return;
+        }
+
+        $cards.hide();
         $(`.block-card[data-category="${category}"]`).show();
     }
-}
+
+    /**
+     * 공통 에러 처리
+     */
+    function handleAjaxError(xhr) {
+
+        let message = '서버 오류가 발생했습니다.';
+
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+        }
+
+        alert(message);
+    }
+
+    return {
+        init: init
+    };
+
+})();

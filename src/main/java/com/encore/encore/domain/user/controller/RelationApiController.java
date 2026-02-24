@@ -42,6 +42,7 @@ public class RelationApiController {
      */
     @PostMapping("/{targetProfileId}/{targetProfileMode}/follow")
     public ResponseEntity<CommonResponse<ResponseFollowDto>> follow(
+
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode
@@ -106,7 +107,7 @@ public class RelationApiController {
      */
     @GetMapping("/{targetProfileId}/{targetProfileMode}/follower")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> getFollowerList(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long targetProfileId,
         @PathVariable String targetProfileMode) {
 
@@ -117,11 +118,9 @@ public class RelationApiController {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 profileMode 값입니다.");
         }
 
-       /* Long loginProfileId = userDetails.getActiveProfileId();
-        ActiveMode loginProfileMode = userDetails.getActiveMode();*/
+        Long loginProfileId = userDetails.getActiveProfileId();
+        ActiveMode loginProfileMode = userDetails.getActiveMode();
 
-        Long loginProfileId = 2L;
-        ActiveMode loginProfileMode = ActiveMode.HOST;
 
         List<ResponseFollowListDto> followers = relationService.getFollowerList(
             targetProfileId,
@@ -133,17 +132,23 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(followers, "팔로워 리스트 조회 성공"));
     }
 
+    /**
+     * 선택한 타겟을 차단한다.
+     *
+     * @param userDetails     로그인 유저의 정보
+     * @param requestBlockDto 타겟의 정보
+     * @return 타겟 완료 정보
+     */
     @PostMapping("/relations/block")
     public ResponseEntity<CommonResponse<ResponseBlockDto>> block(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestBlockDto requestBlockDto
     ) {
-       /* Long profileId = userDetails.getActiveProfileId();
-        ActiveMode profileMode = userDetails.getActiveMode();*/
-
+        /*Long profileId = userDetails.getActiveProfileId();
+        ActiveMode profileMode = userDetails.getActiveMode();
+*/
         Long profileId = 2L;
         ActiveMode profileMode = ActiveMode.HOST;
-
 
         if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 할 수 없습니다.");
@@ -156,9 +161,15 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(result, "차단 되었습니다."));
     }
 
+    /**
+     * 타겟을 차단 해제 한다.
+     *
+     * @param requestBlockDto 차단 해제할 타겟의 정보
+     * @return 차단 해제 완료
+     */
     @PostMapping("/relations/unblock")
     public ResponseEntity<CommonResponse<ResponseBlockDto>> unBlock(
-        //@AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestBlockDto requestBlockDto
     ) {
         //Long profileId = userDetails.getActiveProfileId();
@@ -178,11 +189,20 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(result, "차단이 해제 되었습니다."));
     }
 
+    /**
+     * 차단한 리스트를 불러온다
+     *
+     * @param userDetails 로그인 되어있는 유저
+     * @return 로그인 되어있는 유저가 차단한 리스트 목록
+     */
     @GetMapping("/relations/blocks")
     public ResponseEntity<CommonResponse<List<BlockListDto>>> getBlocks(
         // @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = 5L; // 임시 데이터
+        /*Long userId = userDetails.getUser().getUserId();
+        ActiveMode profileMode = userDetails.getActiveMode();*/
+
+        Long userId = 5L;
         ActiveMode profileMode = ActiveMode.HOST;
 
         List<BlockListDto> response = relationService.getBlockList(userId, profileMode);

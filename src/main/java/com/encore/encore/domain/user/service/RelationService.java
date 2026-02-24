@@ -226,6 +226,7 @@ public class RelationService {
         }
 
         int followerCount = userRelationRepository.countFollower(targetProfileId, ActiveMode.valueOf(targetProfileMode));
+
         // 4. 결과 반환 (현재 팔로우 중인지 여부)
         return ResponseFollowDto.builder()
             .targetId(targetProfileId)
@@ -402,8 +403,8 @@ public class RelationService {
     }
 
     public boolean isFollowing(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode) {
-        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(
-            loginUserId, loginProfileMode, profileId, activeMode);
+        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(
+            loginUserId, loginProfileMode, profileId, activeMode, RelationType.FOLLOW);
 
         return b;
     }
@@ -411,11 +412,10 @@ public class RelationService {
     /**
      * 타겟을 차단한다.
      *
-     * @param profileId         차단하는 사람의 프로필 ID
-     * @param profileMode       차단하는 사람의 프로필 모드
-     * @param targetProfileId   차단 당할 사람의 프로필 아이디
-     * @param targetProfileMode 차단 당할 사람의 프로필 모드
-     * @return
+     * @param profileId       차단하는 사람의 프로필 ID
+     * @param profileMode     차단하는 사람의 프로필 모드
+     * @param requestBlockDto 차단 당하는 사람의 프로필 ID, 프로필 모드, 타겟타입
+     * @return 차단한 정보 반환
      */
     public ResponseBlockDto block(Long profileId, ActiveMode profileMode, RequestBlockDto requestBlockDto) {
         validateBlockRequest(requestBlockDto);
@@ -591,6 +591,22 @@ public class RelationService {
                 .typeDisplayName(relation.getTargetType().getKoreanName()) // Enum에 정의된 한글명
                 .build();
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 내가 상대를 블락하였는지 조회한다.
+     *
+     * @param loginUserId
+     * @param loginProfileMode
+     * @param profileId
+     * @param profileMode
+     * @return
+     */
+    public boolean isBlocked(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode profileMode) {
+        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(
+            loginUserId, loginProfileMode, profileId, profileMode, RelationType.BLOCK);
+
+        return b;
     }
 }
 

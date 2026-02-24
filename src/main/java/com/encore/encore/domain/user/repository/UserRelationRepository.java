@@ -44,8 +44,19 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
 
     List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
 
-
     Optional<UserRelation> findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(Long actorUserId, ActiveMode profileMode, Long targetProfileId, ActiveMode targetMode, RelationType relationType);
+
+    @Query("""
+            select r.targetId
+            from UserRelation r
+            where r.actor.userId = :userId
+              and r.relationType = :relationType
+              and r.isDeleted = false
+        """)
+    List<Long> findTargetIdsByActorAndRelationType(
+        @Param("userId") Long userId,
+        @Param("relationType") RelationType relationType
+    );
 
     /**
      * 팔로잉 수 조회
@@ -82,8 +93,13 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
     );
 
     // 로그인 유저가 해당 유저를 팔로우 했는가 판단
-    boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode);
-
+    boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(
+        Long loginUserId,
+        ActiveMode loginProfileMode,
+        Long profileId,
+        ActiveMode activeMode,
+        RelationType type  // 여기에 RelationType.FOLLOW 를 넘겨줌
+    );
 
     // 1. 내가(계정) 상대(프로필)를 팔로우한 관계 삭제
     @Modifying
@@ -119,4 +135,5 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
 
     // 차단 관계 조회
     List<UserRelation> findAllByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long userId, ActiveMode profileMode, RelationType relationType);
+
 }

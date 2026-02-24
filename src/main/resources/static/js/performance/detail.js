@@ -155,7 +155,8 @@ $(function () {
         });
 
         $("#writeReviewBtn").off("click").on("click", function () {
-            alert("리뷰 작성 (준비중)");
+            // 리뷰 작성 페이지로 이동
+            window.location.href = `/performances/${performanceId}/reviews/new`;
         });
     }
 
@@ -491,11 +492,39 @@ $(function () {
         openReviewModal(reviewId);
     });
 
-    // 액션 버튼 클릭 시: 카드 클릭 전파 막기
-    $(document).on("click", ".js-review-edit, .js-review-delete, .js-review-report", function (e) {
+    // 수정 버튼 클릭 -> 수정 화면으로 이동
+    $(document).on("click", ".js-review-edit", function (e) {
         e.stopPropagation();
+
         const reviewId = $(this).data("review-id");
-        // 여기서 수정/삭제/신고 로직 연결
+        if (!reviewId) return;
+
+       window.location.href = `/performances/${performanceId}/reviews/${reviewId}/edit`;
+    });
+
+    $(document).on("click", ".js-review-delete", function (e) {
+        e.stopPropagation();
+
+        const reviewId = $(this).data("review-id");
+        if (!reviewId) return;
+
+        if (!confirm("리뷰를 삭제할까요?")) return;
+
+        $.ajax({
+            url: `/api/performances/${performanceId}/reviews/${reviewId}`,
+            method: "DELETE",
+            dataType: "json",
+            xhrFields: { withCredentials: true }
+        }).done(function () {
+            // 1) 캐시에서도 제거
+            reviewCache.delete(String(reviewId));
+
+            // 2) 리스트/요약 다시 로드 (가장 안전)
+            loadReviews(true);
+            loadReviewSummary();
+        }).fail(function (xhr) {
+            alert(xhr?.responseJSON?.message || "삭제 실패");
+        });
     });
 
     bindTabs();

@@ -1,6 +1,7 @@
 package com.encore.encore.domain.performance.controller;
 
 import com.encore.encore.global.config.CustomUserDetails;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,11 +19,17 @@ public class PerformancePageController {
 
     /**
      * 공연 목록 페이지 반환
+     * - fragments/profile :: profile(targetUrl) 프래그먼트에서 targetUrl 파라미터를 요구하므로
+     *   현재 요청 URI를 모델에 담아 내려준다.
      * @return 공연 목록 화면 템플릿 경로
      */
     @GetMapping
-    public String listPage() {
+    public String listPage(HttpServletRequest request, Model model) { // 파라미터 추가
         log.info("[PerformancePage] list page requested");
+
+        // 현재 페이지(/performances)로 돌아오기 위한 targetUrl 전달
+        model.addAttribute("targetUrl", request.getRequestURI());
+
         return "performance/list";
     }
 
@@ -48,5 +55,45 @@ public class PerformancePageController {
         model.addAttribute("loginUserId", loginUserId);
 
         return "performance/detail";
+    }
+
+    /**
+     * 공연 리뷰 작성 페이지 반환
+     */
+    @GetMapping("/{performanceId}/reviews/new")
+    public String reviewWritePage(
+        @PathVariable Long performanceId,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("[PerformancePage] review write page requested - performanceId={}", performanceId);
+
+        Long loginUserId = (userDetails != null && userDetails.getUser() != null)
+            ? userDetails.getUser().getUserId()
+            : 0L;
+
+        model.addAttribute("performanceId", performanceId);
+        model.addAttribute("loginUserId", loginUserId);
+
+        return "performance/reviewWrite";
+    }
+
+    @GetMapping("/{performanceId}/reviews/{reviewId}/edit")
+    public String reviewEditPage(
+        @PathVariable Long performanceId,
+        @PathVariable Long reviewId,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long loginUserId = (userDetails != null && userDetails.getUser() != null)
+            ? userDetails.getUser().getUserId()
+            : 0L;
+
+        model.addAttribute("performanceId", performanceId);
+        model.addAttribute("reviewId", reviewId);
+        model.addAttribute("loginUserId", loginUserId);
+
+        // 화면은 reviewWrite 재사용
+        return "performance/reviewWrite";
     }
 }

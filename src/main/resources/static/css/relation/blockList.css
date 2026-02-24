@@ -1,10 +1,12 @@
-/* 기본 배경 및 레이아웃 규격 */
+/* 1. 기본 배경 및 레이아웃 규격 */
 body {
     background-color: #f1f1f1;
     margin: 0;
     display: flex;
     justify-content: center;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Lato', 'Pretendard', -apple-system, sans-serif;
+    /* 스크롤바 유무와 상관없이 레이아웃 위치 고정 */
+    scrollbar-gutter: stable;
 }
 
 .app-container {
@@ -18,8 +20,8 @@ body {
     position: relative;
 }
 
-/* 상단 고정 영역 */
-.sticky-top-group {
+/* 2. 상단 고정 영역 */
+header.sticky-top {
     position: sticky;
     top: 0;
     background-color: white;
@@ -27,17 +29,11 @@ body {
     border-bottom: 1px solid #eee;
 }
 
-/* 요청하신 뒤로가기 버튼 스타일 포함 헤더 */
 .header-title-bar {
     padding: 10px 15px;
     display: flex;
     align-items: center;
     height: 56px;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
 }
 
 .btn-icon {
@@ -50,57 +46,67 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.2s;
-}
-
-.btn-icon:hover {
-    opacity: 0.6;
 }
 
 .header-title {
     font-weight: 700;
-    color: #333333;
+    color: #333;
     margin: 0;
     font-size: 1.1rem;
     margin-left: 5px;
 }
 
-/* 필터 탭 (Nav) */
-.nav-pills {
+/* 3. 필터 탭 (Nav) - 흔들림 방지 핵심 로직 */
+#filterTab {
     display: flex;
+    justify-content: space-around;
     padding: 0;
-    border-bottom: 1px solid #f0f0f0;
+    margin: 0;
+    list-style: none;
+    width: 100%;
 }
 
 .nav-pills .nav-item {
     flex: 1;
+    display: flex;
 }
 
 .nav-pills .nav-link {
+    width: 100%;
     color: #888;
     border-radius: 0;
     padding: 14px 0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     text-align: center;
     border: none;
     background: none;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+
+    /* [해결] 미리 투명한 3px 선을 그려서 높이를 고정함 */
+    border-bottom: 3px solid transparent;
+    box-sizing: border-box;
 }
 
 .nav-pills .nav-link.active {
     background-color: transparent !important;
     color: #E63946 !important;
-    border-bottom: 3px solid #E63946;
+    /* [해결] 선의 색상만 바꿈으로써 아래 컨텐츠 밀림 방지 */
+    border-bottom: 3px solid #E63946 !important;
 }
 
-/* 리스트 컨텐츠 영역 */
+/* 4. 리스트 컨텐츠 영역 (중복 제거 및 높이 고정) */
 .content-area {
     flex: 1;
     padding: 20px 16px;
+    /* 데이터 로딩 시 높이 변화로 인한 흔들림 방지 */
+    min-height: calc(100vh - 110px);
+    background-color: white;
 }
 
-/* 차단 항목 카드 */
+/* 5. 차단 항목 카드 */
 .block-card {
     background: #ffffff;
     border: 1px solid #f2f2f2;
@@ -114,16 +120,17 @@ body {
 }
 
 .category-tag {
-    display: flex;          /* Flexbox 활성화 */
-    align-items: center;    /* 수직 중앙 정렬 */
-    justify-content: center; /* 수평 중앙 정렬 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 700;
     color: #333;
     width: 70px;
+    min-width: 70px;
     border-right: 2px solid #E63946;
-    /* 포인트 컬러 */
     margin-right: 15px;
     font-size: 0.85rem;
+    height: 20px;
 }
 
 .content-text {
@@ -131,9 +138,13 @@ body {
     font-weight: 500;
     color: #444;
     font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 10px;
 }
 
-/* 차단 해제 버튼 */
+/* 6. 차단 해제 버튼 */
 .btn-unblock {
     border: 1px solid #333;
     color: #333;
@@ -142,6 +153,8 @@ body {
     font-size: 0.8rem;
     border-radius: 6px;
     font-weight: 600;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
 }
 
 .btn-unblock:hover {
@@ -151,6 +164,7 @@ body {
 
 .empty-state {
     text-align: center;
-    padding: 80px 0;
+    padding: 100px 0;
     color: #bbb;
+    font-size: 0.9rem;
 }
