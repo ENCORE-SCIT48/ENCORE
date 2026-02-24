@@ -2,6 +2,7 @@ package com.encore.encore.domain.user.repository;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.user.entity.RelationType;
+import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.entity.UserRelation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -86,4 +87,20 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         "AND ur.actor.userId = :theirUserId AND ur.actorProfileMode = :theirMode " +
         "AND ur.targetId = :myProfileId AND ur.targetProfileMode = :myMode")
     void deleteTheirFollowToMe(Long theirUserId, ActiveMode theirMode, Long myProfileId, ActiveMode myMode);
+
+    @Query("SELECT r FROM UserRelation r " +
+        "WHERE r.actor.userId = :actorId " +
+        "AND r.actorProfileMode = :actorMode " +
+        "AND r.targetId = :targetId " +
+        "AND r.targetType = :targetType " + // 타겟 타입 추가
+        "AND (:targetMode IS NULL OR r.targetProfileMode = :targetMode) " + // NULL 대응
+        "AND r.relationType = :type")
+    Optional<UserRelation> findExistingRelationGeneral(
+        @Param("actorId") Long actorId,
+        @Param("actorMode") ActiveMode actorMode,
+        @Param("targetId") Long targetId,
+        @Param("targetMode") ActiveMode targetMode,
+        @Param("targetType") TargetType targetType, // 파라미터 추가
+        @Param("type") RelationType type
+    );
 }

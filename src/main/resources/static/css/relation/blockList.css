@@ -1,0 +1,153 @@
+/* 기본 배경 및 레이아웃 규격 */
+body {
+    background-color: #f1f1f1;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    font-family: 'Lato', sans-serif;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 500px;
+    min-height: 100vh;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* 상단 고정 영역 */
+.sticky-top-group {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1000;
+    border-bottom: 1px solid #eee;
+}
+
+/* 요청하신 뒤로가기 버튼 스타일 포함 헤더 */
+.header-title-bar {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    height: 56px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #333;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+.btn-icon:hover {
+    opacity: 0.6;
+}
+
+.header-title {
+    font-weight: 700;
+    color: #333333;
+    margin: 0;
+    font-size: 1.1rem;
+    margin-left: 5px;
+}
+
+/* 필터 탭 (Nav) */
+.nav-pills {
+    display: flex;
+    padding: 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.nav-pills .nav-item {
+    flex: 1;
+}
+
+.nav-pills .nav-link {
+    color: #888;
+    border-radius: 0;
+    padding: 14px 0;
+    font-size: 0.9rem;
+    text-align: center;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.nav-pills .nav-link.active {
+    background-color: transparent !important;
+    color: #E63946 !important;
+    border-bottom: 3px solid #E63946;
+}
+
+/* 리스트 컨텐츠 영역 */
+.content-area {
+    flex: 1;
+    padding: 20px 16px;
+}
+
+/* 차단 항목 카드 */
+.block-card {
+    background: #ffffff;
+    border: 1px solid #f2f2f2;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.category-tag {
+    font-weight: 700;
+    color: #333;
+    width: 70px;
+    border-right: 2px solid #E63946;
+    /* 포인트 컬러 */
+    margin-right: 15px;
+    font-size: 0.85rem;
+}
+
+.content-text {
+    flex-grow: 1;
+    font-weight: 500;
+    color: #444;
+    font-size: 0.95rem;
+}
+
+/* 차단 해제 버튼 */
+.btn-unblock {
+    border: 1px solid #333;
+    color: #333;
+    background: white;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.btn-unblock:hover {
+    background: #333;
+    color: #fff;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 0;
+    color: #bbb;
+}

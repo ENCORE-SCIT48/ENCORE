@@ -1,9 +1,11 @@
 package com.encore.encore.domain.user.controller;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.user.dto.RequestBlockDto;
 import com.encore.encore.domain.user.dto.ResponseBlockDto;
 import com.encore.encore.domain.user.dto.ResponseFollowDto;
 import com.encore.encore.domain.user.dto.ResponseFollowListDto;
+import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.service.RelationService;
 import com.encore.encore.global.common.CommonResponse;
 import com.encore.encore.global.config.CustomUserDetails;
@@ -134,12 +136,10 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(followers, "팔로워 리스트 조회 성공"));
     }
 
-    @PostMapping("/{targetProfileId}/{targetProfileMode}/block")
+    @PostMapping("/block")
     public ResponseEntity<CommonResponse<ResponseBlockDto>> block(
         //@AuthenticationPrincipal CustomUserDetails userDetails,
-
-        @PathVariable Long targetProfileId,
-        @PathVariable String targetProfileMode
+        @RequestBody RequestBlockDto requestBlockDto
     ) {
        /* Long profileId = userDetails.getActiveProfileId();
         ActiveMode profileMode = userDetails.getActiveMode();*/
@@ -148,22 +148,21 @@ public class RelationApiController {
         ActiveMode profileMode = ActiveMode.HOST;
 
 
-        if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
+        if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 할 수 없습니다.");
         }
 
-        ResponseBlockDto result = relationService.userBlock(
-            profileId, profileMode, targetProfileId, targetProfileMode
+        ResponseBlockDto result = relationService.block(
+            profileId, profileMode, requestBlockDto
         );
 
         return ResponseEntity.ok(CommonResponse.ok(result, "차단 되었습니다."));
     }
 
-    @PostMapping("/{targetProfileId}/{targetProfileMode}/unBlock")
+    @PostMapping("/unBlock")
     public ResponseEntity<CommonResponse<ResponseBlockDto>> unBlock(
         //@AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long targetProfileId,
-        @PathVariable String targetProfileMode
+        @RequestBody RequestBlockDto requestBlockDto
     ) {
         //Long profileId = userDetails.getActiveProfileId();
         //ActiveMode profileMode = userDetails.getActiveMode();
@@ -171,12 +170,12 @@ public class RelationApiController {
         Long profileId = 2L;
         ActiveMode profileMode = ActiveMode.HOST;
 
-        if (profileId.equals(targetProfileId) && profileMode.name().equals(targetProfileMode)) {
+        if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 해제 할 수 없습니다.");
         }
 
         ResponseBlockDto result = relationService.unblockUser(
-            profileId, profileMode, targetProfileId, targetProfileMode
+            profileId, profileMode, requestBlockDto
         );
 
         return ResponseEntity.ok(CommonResponse.ok(result, "차단이 해제 되었습니다."));

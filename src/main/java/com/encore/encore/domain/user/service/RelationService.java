@@ -9,10 +9,7 @@ import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
-import com.encore.encore.domain.user.dto.ProfileInfoDto;
-import com.encore.encore.domain.user.dto.ResponseBlockDto;
-import com.encore.encore.domain.user.dto.ResponseFollowDto;
-import com.encore.encore.domain.user.dto.ResponseFollowListDto;
+import com.encore.encore.domain.user.dto.*;
 import com.encore.encore.domain.user.entity.RelationType;
 import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.entity.User;
@@ -415,41 +412,57 @@ public class RelationService {
      * @param targetProfileMode 차단 당할 사람의 프로필 모드
      * @return
      */
-    public ResponseBlockDto userBlock(Long profileId, ActiveMode profileMode, Long targetProfileId, String targetProfileMode) {
+    public ResponseBlockDto block(Long profileId, ActiveMode profileMode, RequestBlockDto requestBlockDto) {
+        validateBlockRequest(requestBlockDto);
+
         User actor = findProfileById(profileId, profileMode);
-        ActiveMode targetMode = ActiveMode.valueOf(targetProfileMode);
 
-        Optional<UserRelation> optionalRelation = userRelationRepository
-            .findExistingRelation(actor.getUserId(), profileMode, targetProfileId, targetMode, RelationType.BLOCK);
+        // 1. 유저 타입일 때만 프로필 모드 파싱 (그 외에는 null)
+        ActiveMode targetMode = (requestBlockDto.getTargetType() == TargetType.USER)
+            ? ActiveMode.valueOf(requestBlockDto.getTargetProfileMode())
+            : null;
 
+        // 2. 기존 관계 조회 (targetType 조건이 들어간 새로운 쿼리 메서드 사용 권장)
+        Optional<UserRelation> optionalRelation = userRelationRepository.findExistingRelationGeneral(
+            actor.getUserId(),
+            profileMode,
+            requestBlockDto.getTargetId(),
+            targetMode,
+            requestBlockDto.getTargetType(),
+            RelationType.BLOCK
+        );
         UserRelation relation;
 
         if (optionalRelation.isPresent()) {
             relation = optionalRelation.get();
             if (relation.isDeleted()) {
-                // 과거 기록이 있으면 다시 차단(Restore)하고 팔로우 청소
                 relation.restore();
-                cleanUpFollows(actor.getUserId(), profileId, profileMode, targetProfileId, targetMode);
+                // 3. 유저 타입일 때만 팔로우 관계 청소
+                if (requestBlockDto.getTargetType() == TargetType.USER) {
+                    cleanUpFollows(actor.getUserId(), profileId, profileMode, requestBlockDto.getTargetId(), targetMode);
+                }
             }
-            // 이미 차단 상태(isDeleted = false)라면 아무 로직 없이 통과
         } else {
-            // 기록이 아예 없으면 새로 생성하고 팔로우 청소
+            // 4. 새 관계 생성 (TargetType 반영)
             relation = UserRelation.builder()
                 .actor(actor)
                 .actorProfileMode(profileMode)
-                .targetId(targetProfileId)
+                .targetId(requestBlockDto.getTargetId())
                 .targetProfileMode(targetMode)
-                .targetType(TargetType.USER)
+                .targetType(requestBlockDto.getTargetType())
                 .relationType(RelationType.BLOCK)
                 .build();
             userRelationRepository.save(relation);
-            cleanUpFollows(actor.getUserId(), profileId, profileMode, targetProfileId, targetMode);
+
+            if (requestBlockDto.getTargetType() == TargetType.USER) {
+                cleanUpFollows(actor.getUserId(), profileId, profileMode, requestBlockDto.getTargetId(), targetMode);
+            }
         }
 
         return ResponseBlockDto.builder()
-            .targetId(targetProfileId)
-            .targetProfileMode(targetProfileMode)
-            .isBlocked(true) // 이 메서드를 타면 결과는 무조건 차단 상태
+            .targetId(requestBlockDto.getTargetId())
+            .targetProfileMode(requestBlockDto.getTargetProfileMode())
+            .isBlocked(true)
             .build();
     }
 
@@ -479,26 +492,56 @@ public class RelationService {
     /**
      * 차단 해제 메소드
      *
-     * @param profileId         차단 해제를 할 유저의 아이디
-     * @param profileMode       차단 해제를 할 유저의 모드
-     * @param targetProfileId   차단 해제 당할 타겟의 프로필 아이디
-     * @param targetProfileMode 차단 해제 당할 타겟의 프로필 모드
+     * @param profileId       차단 해제를 할 유저의 아이디
+     * @param profileMode     차단 해제를 할 유저의 모드
+     * @param requestBlockDto 차단 해제를 당할 target의 정보
      */
-    public ResponseBlockDto unblockUser(Long profileId, ActiveMode profileMode, Long targetProfileId, String targetProfileMode) {
-        User actor = findProfileById(profileId, profileMode); // actor 정보를 가져오기 위함
-        ActiveMode targetMode = ActiveMode.valueOf(targetProfileMode);
+    public ResponseBlockDto unblockUser(Long profileId, ActiveMode profileMode, RequestBlockDto requestBlockDto) {
 
-        UserRelation relation = userRelationRepository
-            .findExistingRelation(actor.getUserId(), profileMode, targetProfileId, targetMode, RelationType.BLOCK)
-            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "차단 내역이 존재하지 않습니다."));
+        validateBlockRequest(requestBlockDto);
+        User actor = findProfileById(profileId, profileMode);
 
-        relation.delete(); // isDeleted = true (차단 해제)
+        ActiveMode targetMode = null;
+        if (requestBlockDto.getTargetType() == TargetType.USER) {
+            targetMode = ActiveMode.valueOf(requestBlockDto.getTargetProfileMode());
+        }
+
+        // TargetType을 포함하여 정확한 관계를 찾음
+        UserRelation relation = userRelationRepository.findExistingRelationGeneral(
+            actor.getUserId(),
+            profileMode,
+            requestBlockDto.getTargetId(),
+            targetMode,
+            requestBlockDto.getTargetType(),
+            RelationType.BLOCK
+        ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "차단 내역이 존재하지 않습니다."));
+
+        relation.delete(); // isDeleted = true
 
         return ResponseBlockDto.builder()
-            .targetId(targetProfileId)
-            .targetProfileMode(targetProfileMode)
-            .isBlocked(false) // 차단 해제니까 무조건 false
+            .targetId(requestBlockDto.getTargetId())
+            .targetProfileMode(requestBlockDto.getTargetProfileMode())
+            .isBlocked(false)
             .build();
+    }
+
+    /**
+     * 1. targetType이 유저인데 targetProfileMode가 들어있지 않을 경우 오류 발생
+     * 2. targetType이 유저가 아닌데 targetProfileMode가 들어있을 경우 null값을 넣어 DB 정합성을 맞춤
+     *
+     * @param dto
+     */
+    private void validateBlockRequest(RequestBlockDto dto) {
+        if (dto.getTargetType() == TargetType.USER) {
+            if (dto.getTargetProfileMode() == null || dto.getTargetProfileMode().isBlank()) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "유저 차단 시 프로필 모드는 필수입니다.");
+            }
+        } else {
+            // 유저가 아닌데 모드가 들어온 경우, 에러를 던지거나 null로 강제 초기화
+            if (dto.getTargetProfileMode() != null) {
+                dto.setTargetProfileMode(null);
+            }
+        }
     }
 }
 
