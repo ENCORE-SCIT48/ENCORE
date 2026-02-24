@@ -26,13 +26,25 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("targetMode") ActiveMode targetMode,
         @Param("type") RelationType type
     );
-    
+
     List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
-    
+
     List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
-    
+
     Optional<UserRelation> findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(Long actorUserId, ActiveMode profileMode, Long targetProfileId, ActiveMode targetMode, RelationType relationType);
-    
+
+    @Query("""
+            select r.targetId
+            from UserRelation r
+            where r.actor.userId = :userId
+              and r.relationType = :relationType
+              and r.isDeleted = false
+        """)
+    List<Long> findTargetIdsByActorAndRelationType(
+        @Param("userId") Long userId,
+        @Param("relationType") RelationType relationType
+    );
+
     /**
      * 팔로잉 수 조회
      *
@@ -49,7 +61,7 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("actorId") Long actorId,
         @Param("actorMode") ActiveMode actorMode
     );
-    
+
     /**
      * 팔로워 수 조회
      *
@@ -66,56 +78,6 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("targetId") Long targetId,
         @Param("targetMode") ActiveMode targetMode
     );
-    
+
     boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode);
-
-    
-    List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
-    
-    List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
-    
-    Optional<UserRelation> findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(Long actorUserId, ActiveMode profileMode, Long targetProfileId, ActiveMode targetMode, RelationType relationType);
-    
-    /**
-     * 팔로잉 수 조회
-     *
-     * @param actorId
-     * @param actorMode
-     * @return
-     */
-    @Query("SELECT COUNT(r) FROM UserRelation r " +
-        "WHERE r.actor.userId = :actorId " +
-        "AND r.actorProfileMode = :actorMode " +
-        "AND r.relationType = 'FOLLOW' " +
-        "AND r.isDeleted = false")
-    int countFollowing(
-        @Param("actorId") Long actorId,
-        @Param("actorMode") ActiveMode actorMode
-    );
-    
-    /**
-     * 팔로워 수 조회
-     *
-     * @param targetId
-     * @param targetMode
-     * @return
-     */
-    @Query("SELECT COUNT(r) FROM UserRelation r " +
-        "WHERE r.targetId = :targetId " +
-        "AND r.targetProfileMode = :targetMode " +
-        "AND r.relationType = 'FOLLOW' " +
-        "AND r.isDeleted = false")
-    int countFollower(
-        @Param("targetId") Long targetId,
-        @Param("targetMode") ActiveMode targetMode
-    );
-    
-    boolean existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode);
-
-    List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
-
-    List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
-
-    Optional<UserRelation> findByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationType(Long actorUserId, ActiveMode profileMode, Long targetProfileId, ActiveMode targetMode, RelationType relationType);
-
 }

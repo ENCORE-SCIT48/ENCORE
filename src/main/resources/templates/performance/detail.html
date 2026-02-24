@@ -106,7 +106,7 @@
     </main>
 
     <div class="footer-space"></div>
-    <div th:replace="fragments/footer :: footer"></div>
+    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
 </div>
 
 <!-- 리뷰 상세 모달 -->

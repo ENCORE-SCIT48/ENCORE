@@ -172,9 +172,27 @@ $(function () {
         fetchList(true);
     });
 
-    $(document).on("click", ".js-perf-review-btn, .js-seat-review-btn", function (e) {
+    // 공연리뷰 -> 공연 리뷰 작성 페이지로 이동
+    $(document).on("click", ".js-perf-review-btn", function (e) {
         e.preventDefault();
         e.stopPropagation();
+
+        const id = $(this).data("performance-id");
+        if (!id) return;
+
+        window.location.href = `/performances/${id}/reviews/new`;
+    });
+
+    // 좌석리뷰
+    $(document).on("click", ".js-seat-review-btn", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const id = $(this).data("performance-id");
+        if (!id) return;
+
+        // 좌석리뷰 작성 URL로 교체
+        alert("좌석리뷰 작성 페이지 URL 연결 필요");
     });
 
     resetAndLoad();
