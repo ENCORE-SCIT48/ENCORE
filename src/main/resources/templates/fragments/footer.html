@@ -1,43 +1,65 @@
-<!-- footer fragment -->
-<footer th:fragment="footer">
+<footer th:fragment="footer(items)">
 
   <style>
     .footer-wrapper {
-      position: fixed;
-      bottom: 0;
-      left: 0;
       width: 100%;
-      height: 76px;
-      background-color: #ffffff;
+      background-color: #333333;
+      /* Sub Color */
+      padding: 20px 0;
+      display: flex;
+      justify-content: center;
+      border-top: 2px solid #E63946;
+      /* Main Color 포인트 */
+    }
+
+    .footer-container {
+      width: 100%;
+      max-width: 1200px;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      border-top: 1px solid #eaeaea;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
-      z-index: 100;
     }
 
     .footer-link {
       text-decoration: none;
-      color: #3d3d3d;
-      font-size: 11px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.2s;
     }
 
-    .footer-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      width: 60px;
+    .footer-link:hover {
+      color: #E63946;
+      /* Main Color */
     }
   </style>
 
   <div class="footer-wrapper">
-    <a class="footer-link"><div class="footer-item"><span>홈</span></div></a>
-    <a class="footer-link"><div class="footer-item"><span>검색</span></div></a>
-    <a class="footer-link"><div class="footer-item"><span>작성</span></div></a>
-    <a class="footer-link"><div class="footer-item"><span>알림</span></div></a>
-    <a class="footer-link"><div class="footer-item"><span>마이</span></div></a>
+    <div class="footer-container">
+      <a th:each="item : ${items}" th:href="${item.href}" class="footer-link" th:text="${item.label}">
+      </a>
+    </div>
   </div>
 
 </footer>
+
+
+
+<!--
+
+footer 사용 예시
+
+아래와 같이 이동하는 url 넣기
+
+<div th:replace="~{fragments/footer :: footer(
+      ${ {
+          {label:'모집글', href:'/posts'},
+          {label:'공연장리스트', href:'/venueList'},
+          {label:'홈', href:'/'},
+          {label:'DM', href:'/directMessage'},
+          {label:'채팅방', href:'/chat'}
+      } }
+)}"></div>
+
+
+-->

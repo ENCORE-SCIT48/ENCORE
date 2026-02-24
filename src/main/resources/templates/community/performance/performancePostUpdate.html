@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공연 모집글 수정</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script th:src="@{/js/community/performancePost.js}"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+    }
+
+    .app-container {
+      padding: 20px 16px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .back-btn {
+      font-size: 20px;
+      text-decoration: none;
+      color: #333333;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .post-title-input {
+      font-size: 18px;
+      font-weight: 600;
+      width: 100%;
+      border: none;
+      outline: none;
+      padding: 10px 0;
+      color: #333333;
+    }
+
+    .divider {
+      margin: 20px 0;
+      border-top: 1px solid #eee;
+    }
+
+    .post-content-textarea {
+      font-size: 14px;
+      line-height: 1.8;
+      width: 100%;
+      border: none;
+      outline: none;
+      resize: none;
+      min-height: 300px;
+      color: #333333;
+    }
+
+    .btn-group {
+      margin-top: 30px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-group button,
+    .btn-group a {
+      width: 100px;
+      font-size: 13px;
+    }
+
+    .btn-primary {
+      background-color: #E63946;
+      border-color: #E63946;
+    }
+
+    .btn-primary:hover {
+      background-color: #c92f3a;
+      border-color: #c92f3a;
+    }
+
+    .btn-outline-secondary {
+      color: #333333;
+      border-color: #ccc;
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+
+    <div class="app-container">
+
+      <!-- 상단 -->
+      <div class="top-bar">
+        <a th:href="@{/posts/performance/{id}(id=${post.postId})}" class="back-btn">←</a>
+        <div class="page-title">공연 모집글 수정</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
+
+      <!-- hidden id -->
+      <input type="hidden" id="postId" th:value="${post.postId}">
+
+      <!-- 제목 -->
+      <input type="text" name="title" class="post-title-input" th:value="${post.title}" required>
+
+      <div class="divider"></div>
+
+      <!-- 정원 -->
+      <div style="margin-bottom:15px;">
+        <label style="font-size:13px; color:#666;">모집 정원</label>
+        <input type="number" name="capacity" min="1" class="form-control" th:value="${post.capacity}" required>
+      </div>
+
+      <!-- 내용 -->
+      <textarea name="content" class="post-content-textarea" required th:text="${post.content}"></textarea>
+
+      <!-- 버튼 -->
+      <div class="btn-group">
+
+        <button id="updateBtn" type="button" class="btn btn-primary">
+          수정 완료
+        </button>
+
+        <a th:href="@{/posts/performance/{id}(id=${post.postId})}" class="btn btn-outline-secondary">
+          취소
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- 하단 네비 -->
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
+
+  </div>
+
+</body>
+
+</html>
