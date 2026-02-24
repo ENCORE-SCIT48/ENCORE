@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ActiveMode {
-    USER("관람객"),
-    PERFORMER("공연자"),
-    HOST("주최자");
+    ROLE_USER("관람객"),
+    ROLE_PERFORMER("공연자"),
+    ROLE_HOST("주최자");
 
     private final String description;
+
+
 }

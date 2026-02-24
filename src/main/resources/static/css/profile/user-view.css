@@ -1,0 +1,210 @@
+/* ==========================================================================
+   파일명: view-profile.css
+   작성일: 2026-02-24
+   설명: 아티스트 및 유저 프로필 상세 조회 페이지 공통 스타일 정의
+   구조: 1.컨테이너 -> 2.헤더 -> 3.이미지섹션 -> 4.본문내용 -> 5.액션버튼 -> 6.반응형
+   ========================================================================== */
+
+/* [1] 전체 컨테이너 (Setup 페이지와 일관된 폭 유지) */
+.view-container {
+    width: 100%;
+    max-width: 550px;
+    margin: 40px auto;
+    padding: 30px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 15px; /* 시각적 안정감을 위해 Setup보다 부드러운 곡률 적용 */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 카드 형태의 플로팅 효과 */
+}
+
+/* [2] 상단 타이틀 및 설명 */
+.view-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.view-subtitle {
+    font-size: 0.95rem;
+    color: #888;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* [3] 프로필 이미지 섹션 */
+.view-image-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.view-image-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+}
+
+.view-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지 비율 유지하며 영역 채움 */
+    border-radius: 50%; /* 원형 프로필 디자인 */
+    border: 3px solid #f8f8f8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 아티스트 정보 텍스트 */
+.artist-info {
+    text-align: center;
+}
+
+.stage-name {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* 구현 주석: 브랜드 메인 컬러(#ff4d4d)를 활용한 숙련도 뱃지 스타일 */
+.badge.bg-primary-red {
+    background-color: #ff4d4d !important;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+/* [4] 본문 내용 섹션 (항목별 그룹화) */
+.view-group {
+    margin-bottom: 30px;
+}
+
+.view-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    /* 구현 주석: Setup 페이지의 section-title과 디자인 일관성 유지 */
+    border-left: 4px solid #ff4d4d;
+}
+
+/* 태그 리스트 스타일 */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #fdfdfd;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+}
+
+.view-tag {
+    background-color: #fff1f1; /* 메인 레드 컬러의 투명도 조절 버전 */
+    color: #ff4d4d;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid rgba(255, 77, 77, 0.1);
+}
+
+.view-tag.secondary {
+    background-color: #f8f9fa;
+    color: #555;
+    border: 1px solid #eee;
+}
+
+/* 소개글 박스 (멀티라인 대응) */
+.intro-box {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    color: #555;
+    line-height: 1.7;
+    font-size: 0.95rem;
+    white-space: pre-wrap; /* DB의 개행 문자를 뷰에 그대로 반영 */
+}
+
+/* 지역 정보 텍스트 */
+.info-text {
+    font-size: 1rem;
+    color: #222;
+    padding-left: 10px;
+}
+
+/* [5] 하단 버튼 영역 */
+.view-actions {
+    margin-top: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-edit {
+    background-color: #ff4d4d !important;
+    color: white !important;
+    text-align: center;
+    text-decoration: none;
+    padding: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px); /* 호버 시 위로 살짝 뜨는 효과 */
+    opacity: 0.9;
+}
+
+.back-link-wrapper {
+    text-align: center;
+}
+
+.back-link {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+/* [6] 반응형 웹 디자인 (Mobile First 대응) */
+@media (max-width: 576px) {
+    .view-container {
+        margin: 0 auto;
+        padding: 25px 15px;
+        border-radius: 0; /* 모바일 전면 배치 */
+        box-shadow: none;
+    }
+
+    .view-image-wrapper {
+        width: 120px;
+        height: 120px;
+    }
+
+    .tag-list {
+        padding: 12px;
+    }
+
+    .view-tag {
+        font-size: 0.85rem;
+        padding: 5px 12px;
+    }
+}
