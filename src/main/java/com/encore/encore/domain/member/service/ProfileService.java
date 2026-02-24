@@ -34,20 +34,21 @@ public class ProfileService {
      * @return 해당 모드에 대응되는 프로필의 PK ID
      * @throws RuntimeException 선택된 모드에 해당하는 프로필이 존재하지 않을 경우
      */
+    @Transactional(readOnly = true)
     public Long findProfileIdByMode(ActiveMode mode, User user) {
         // [중요] 어떤 유저가 무슨 모드를 찾으려 하는가 (흐름 추적용)
         log.info("[Profile Search] User: {}, Mode: {}", user.getUserId(), mode);
 
         return switch (mode) {
-            case USER -> userProfileRepository.findByUser_UserId(user.getUserId())
+            case ROLE_USER -> userProfileRepository.findByUser_UserId(user.getUserId())
                 .map(UserProfile::getProfileId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "관람객 프로필 부재"));
 
-            case PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
+            case ROLE_PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
                 .map(PerformerProfile::getPerformerId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필 부재"));
 
-            case HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
+            case ROLE_HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
                 .map(HostProfile::getHostId)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "주최자 프로필 부재"));
         };
@@ -62,6 +63,7 @@ public class ProfileService {
      * @param profileId 해당 모드의 프로필 PK ID
      * @return 초기화 완료 여부 (true: 완료, false: 미완료)
      */
+    @Transactional(readOnly = true)
     public boolean checkIfInitialized(ActiveMode mode, Long profileId) {
         // [중요] ID가 없어 초기화가 불가능한 상황 (경고성 로그)
         if (profileId == null) {
@@ -70,15 +72,15 @@ public class ProfileService {
         }
 
         boolean isInitialized = switch (mode) {
-            case USER -> userProfileRepository.findById(profileId)
+            case ROLE_USER -> userProfileRepository.findById(profileId)
                 .map(UserProfile::isInitialized)
                 .orElse(false); // 가이드라인: 없으면 false 반환하여 등록 폼 유도
 
-            case PERFORMER -> performerProfileRepository.findById(profileId)
+            case ROLE_PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(PerformerProfile::isInitialized)
                 .orElse(false);
 
-            case HOST -> hostProfileRepository.findById(profileId)
+            case ROLE_HOST -> hostProfileRepository.findById(profileId)
                 .map(HostProfile::isInitialized)
                 .orElse(false);
         };
@@ -87,7 +89,7 @@ public class ProfileService {
         if (!isInitialized) {
             log.info("[Profile Check] Mode: {} (ID: {}) is NOT initialized.", mode, profileId);
         }
-        
+
         return isInitialized;
 
     }
@@ -101,19 +103,19 @@ public class ProfileService {
      * </p>
      *
      * @param profileId   조회하려는 모드에 해당하는 프로필 엔티티의 식별자 (PK)
-     * @param profileMode 현재 사용자의 활성 모드 ({@link ActiveMode#USER}, {@link ActiveMode#PERFORMER}, {@link ActiveMode#HOST})
+     * @param profileMode 현재 사용자의 활성 모드 ({@link ActiveMode#ROLE_USER}, {@link ActiveMode#ROLE_PERFORMER}, {@link ActiveMode#ROLE_HOST})
      * @return 모드에 따른 식별 명칭 (PERFORMER: 활동명, HOST: 단체명, USER: null).
      * 조회 결과가 없을 경우 "Unknown"을 반환합니다.
      */
     public String resolveSenderName(Long profileId, ActiveMode profileMode) {
         return switch (profileMode) {
-            case USER -> userProfileRepository.findById(profileId)
+            case ROLE_USER -> userProfileRepository.findById(profileId)
                 .map(p -> p.getUser().getNickname()) // 람다 사용
                 .orElse("Unknown");
-            case PERFORMER -> performerProfileRepository.findById(profileId)
+            case ROLE_PERFORMER -> performerProfileRepository.findById(profileId)
                 .map(p -> p.getStageName()) // 람다 사용
                 .orElse("Unknown");
-            case HOST -> hostProfileRepository.findById(profileId)
+            case ROLE_HOST -> hostProfileRepository.findById(profileId)
                 .map(HostProfile::getOrganizationName)
                 .orElse("Unknown");
         };
