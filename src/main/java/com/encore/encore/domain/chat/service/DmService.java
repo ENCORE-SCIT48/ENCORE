@@ -9,6 +9,9 @@ import com.encore.encore.domain.chat.repository.ChatMessageRepository;
 import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
 import com.encore.encore.domain.chat.repository.ChatRoomRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.member.entity.HostProfile;
+import com.encore.encore.domain.member.entity.PerformerProfile;
+import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
@@ -54,11 +57,11 @@ public class DmService {
         }
 
         switch (modeStr.toLowerCase()) { // 소문자로 통일
-            case "user":
+            case "role_user":
                 return ActiveMode.ROLE_USER;
-            case "performer":
+            case "role_performer":
                 return ActiveMode.ROLE_PERFORMER;
-            case "host":
+            case "role_host":
                 return ActiveMode.ROLE_HOST;
             default:
                 throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 ActiveMode: " + modeStr);
@@ -83,6 +86,39 @@ public class DmService {
             default:
                 return false;
         }
+    }
+
+    /**
+     * 프로필 이미지를 가져온다.
+     *
+     * @param profileId
+     * @param mode
+     * @return
+     */
+    private String profileImage(Long profileId, ActiveMode mode) {
+        switch (mode) {
+            case ROLE_USER:
+                UserProfile userProfile = userProfileRepository.findById(profileId)
+                    .orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다.")
+                    );
+                return userProfile.getProfileImageUrl();
+            case ROLE_PERFORMER:
+                PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
+                    .orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다.")
+                    );
+                return performerProfile.getProfileImageUrl();
+            case ROLE_HOST:
+                HostProfile hostProfile = hostProfileRepository.findById(profileId)
+                    .orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다.")
+                    );
+                return hostProfile.getProfileImageUrl();
+            default:
+                throw new ApiException(ErrorCode.NOT_FOUND, "프로필 정보가 올바르지 않습니다.");
+        }
+
     }
 
 
@@ -130,6 +166,7 @@ public class DmService {
                 .roomId(myCp.getRoom().getRoomId())
                 .otherProfileId(other.getProfileId())
                 .otherUserNickname(nickname)
+                .otherUserProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
                 .otherProfileMode(other.getProfileMode().name())
                 .latestMessage(latest != null ? latest.getContent() : null)
                 .latestMessageAt(latest != null ? latest.getSentAt() : null)
@@ -188,6 +225,7 @@ public class DmService {
                 .otherProfileId(other.getProfileId())
                 .otherUserNickname(nickname)
                 .otherProfileMode(other.getProfileMode().name())
+                .otherUserProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
                 .latestMessage(latest != null ? latest.getContent() : null)
                 .latestMessageAt(latest != null ? latest.getSentAt() : null)
                 .status(myCp.getParticipantStatus().name())
@@ -368,7 +406,7 @@ public class DmService {
         return me.getParticipantStatus().name();
     }
 
-    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size) {
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeProfileId, ActiveMode activeMode) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
@@ -381,6 +419,7 @@ public class DmService {
                 .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
+                .isMine(message.getProfileId().equals(activeProfileId) && message.getProfileMode().equals(activeMode))
                 .build()
             )
             .toList();
@@ -437,6 +476,34 @@ public class DmService {
             .status(chatParticipant.getParticipantStatus().name())
             .profileId(activeProfileId)
             .profileMode(activeMode.name())
+            .build();
+    }
+
+    /**
+     * DM방 상대방의 정보를 가져온다.
+     *
+     * @param roomId
+     * @param myProfileId
+     * @param activeMode
+     * @return
+     */
+    public ResponseDmRoomDto getDmRoomDetail(Long roomId, Long myProfileId, ActiveMode myMode) {
+
+        List<ChatParticipant> participants = chatParticipantRepository.findAllByRoom_RoomId(roomId);
+
+        // 2. 리스트에서 '나'와 [ID와 Mode가 모두 일치하는 사람]을 제외한 '상대방' 찾기
+        ChatParticipant other = participants.stream()
+            .filter(p -> !(p.getProfileId().equals(myProfileId) && p.getProfileMode() == myMode))
+            .findFirst()
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방을 찾을 수 없습니다."));
+
+        // 3. DTO로 변환해서 반환
+        return ResponseDmRoomDto.builder()
+            .roomId(roomId)
+            .otherNickname(profileService.resolveSenderName(other.getProfileId(), other.getProfileMode()))
+            .otherProfileId(other.getProfileId())
+            .otherProfileMode(other.getProfileMode().name())
+            .otherProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
             .build();
     }
 }

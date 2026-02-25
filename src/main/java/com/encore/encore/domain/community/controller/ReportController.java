@@ -68,8 +68,11 @@ public class ReportController {
 
         log.info("신고 접수 시작 - TargetID: {}, Reason: {}", dto.getTargetId(), dto.getReason());
 
-        ActiveMode loginProfileMode = userDetails.getActiveMode();
-        Long loginUserId = userDetails.getUser().getUserId();
+//        ActiveMode loginProfileMode = userDetails.getActiveMode();
+//        Long loginUserId = userDetails.getUser().getUserId();
+
+        ActiveMode loginProfileMode = ActiveMode.ROLE_HOST;
+        Long loginUserId = 24L;
 
         ResponseCreateReportDto result = reportService.saveReport(dto, loginUserId, loginProfileMode);
 

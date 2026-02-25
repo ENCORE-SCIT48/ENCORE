@@ -38,8 +38,11 @@ public class DmApiController {
     public ResponseEntity<CommonResponse<List<ResponseListDmDto>>> pending(
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
         List<ResponseListDmDto> result = dmService.getPendingList(activeProfileId, activeMode);
 
@@ -62,8 +65,11 @@ public class DmApiController {
     public ResponseEntity<CommonResponse<List<ResponseListDmDto>>> accepted(
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
         List<ResponseListDmDto> result = dmService.getAcceptedList(activeProfileId, activeMode);
 
@@ -80,8 +86,11 @@ public class DmApiController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody RequestDmDto dto
     ) {
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
         ResponseDmRoomStatusDto result = dmService.requestDm(activeProfileId, activeMode, dto);
 
@@ -104,8 +113,11 @@ public class DmApiController {
         @RequestBody RequestSendDmDto request,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
 
         dmService.checkUserParticipantStatus(request.getRoomId(), activeProfileId, activeMode);
@@ -133,7 +145,13 @@ public class DmApiController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size
     ) {
-        List<ResponseChatMessage> result = dmService.getMessages(roomId, page, size);
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
+
+        List<ResponseChatMessage> result = dmService.getMessages(roomId, page, size, activeProfileId, activeMode);
         return ResponseEntity.ok(CommonResponse.ok(result, "메시지 조회 성공"));
     }
 
@@ -151,8 +169,11 @@ public class DmApiController {
         @RequestBody RequestDmStatusDto dto,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        //Long activeProfileId = userDetails.getActiveProfileId();
+        //ActiveMode activeMode = userDetails.getActiveMode();
+
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
         ResponseUpdateDmStatusDto result = dmService.handleRoomStatus(roomId, dto, activeProfileId, activeMode);
 
