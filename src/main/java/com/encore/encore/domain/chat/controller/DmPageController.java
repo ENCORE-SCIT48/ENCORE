@@ -47,11 +47,8 @@ public class DmPageController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
 
-        //Long activeProfileId = userDetails.getActiveProfileId();
-        //ActiveMode activeMode = userDetails.getActiveMode();
-
-        Long activeProfileId = 2L;
-        ActiveMode activeMode = ActiveMode.ROLE_HOST;
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         String participantStatus = dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);
 

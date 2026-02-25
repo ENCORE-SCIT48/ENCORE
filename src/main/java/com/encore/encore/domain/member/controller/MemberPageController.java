@@ -46,30 +46,24 @@ public class MemberPageController {
         boolean isOwner = false;
 
         if (userDetails != null) {
-            //Long loginProfileId = userDetails.getActiveProfileId();
-            //ActiveMode loginProfileMode = userDetails.getActiveMode();
-            //Long loginUserId = userDetails.getUser().getUserId();
+            Long loginProfileId = userDetails.getActiveProfileId();
+            ActiveMode loginProfileMode = userDetails.getActiveMode();
+            Long loginUserId = userDetails.getUser().getUserId();
+
+            ActiveMode targetProfileMode = ActiveMode.valueOf(profileMode);
+
+            // 로그인된 유저와 해당 유저가 차단 관계인지 상호 조회
+            iBlockedHim = relationService.isBlocked(loginUserId, loginProfileMode, profileId, targetProfileMode); // 내가 차단했나?
+
+            // 관계를 조회하기 위해 타겟의 유저 정보 반환
+            User targetUser = relationService.findProfileById(profileId, ActiveMode.valueOf(profileMode));
+
+            heBlockedMe = relationService.isBlocked(targetUser.getUserId(), targetProfileMode, loginProfileId, loginProfileMode); // 그가 나를 차단했나?
+
+            isOwner = (loginProfileId != null) && loginProfileId.equals(profileId) && loginProfileMode.name().equals(profileMode);
+
+            isFollowing = relationService.isFollowing(loginUserId, loginProfileMode, profileId, ActiveMode.valueOf(profileMode));
         }
-
-        Long loginProfileId = 2L;
-        ActiveMode loginProfileMode = ActiveMode.ROLE_HOST;
-        Long loginUserId = 24L;
-
-
-        ActiveMode targetProfileMode = ActiveMode.valueOf(profileMode);
-
-        // 로그인된 유저와 해당 유저가 차단 관계인지 상호 조회
-        iBlockedHim = relationService.isBlocked(loginUserId, loginProfileMode, profileId, targetProfileMode); // 내가 차단했나?
-
-        // 관계를 조회하기 위해 타겟의 유저 정보 반환
-        User targetUser = relationService.findProfileById(profileId, ActiveMode.valueOf(profileMode));
-
-        heBlockedMe = relationService.isBlocked(targetUser.getUserId(), targetProfileMode, loginProfileId, loginProfileMode); // 그가 나를 차단했나?
-
-        isOwner = (loginProfileId != null) && loginProfileId.equals(profileId) && loginProfileMode.name().equals(profileMode);
-
-        isFollowing = relationService.isFollowing(loginUserId, loginProfileMode, profileId, ActiveMode.valueOf(profileMode));
-
 
         model.addAttribute("isFollowing", isFollowing);
         model.addAttribute("isOwner", isOwner);
