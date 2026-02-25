@@ -33,7 +33,7 @@ $(document).ready(() => {
         }
 
         $.ajax({
-            url: "/api/users/{userId}/chats",
+            url: `/api/users/chats`,
             method: "GET",
             data: {
                 page,
