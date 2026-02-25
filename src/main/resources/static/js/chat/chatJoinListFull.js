@@ -97,7 +97,7 @@ $(document).ready(() => {
     $container.on('click', '.chat-item', function() {
         const chatId = $(this).data('chat-id');
         const perfId = $(this).data('performance-id');
-        window.location.href = `/performance/${perfId}/chat/${chatId}`;
+        window.location.href = `/performances/${perfId}/chat/${chatId}`;
     });
 
     // ==========================

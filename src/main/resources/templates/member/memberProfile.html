@@ -15,13 +15,17 @@
 
 <body>
 
+
 <div class="app-container">
 
     <!-- ===== Header ===== -->
     <header class="app-header">
         <nav class="header-nav">
             <div class="header-left">
-                <button class="btn-icon" onclick="history.back()" aria-label="뒤로가기">
+                <button type="button"
+                        class="btn-icon"
+                        onclick="history.back()"
+                        aria-label="뒤로가기">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
             </div>
@@ -30,7 +34,7 @@
                 <span class="user-name-text" th:text="${user.userName ?: '프로필'}">이름 없음</span>
             </div>
 
-            <div class="header-right">
+            <div class="header-right" th:if="${isOwner != true}">
                 <div class="dropdown">
                     <button class="btn-icon" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -55,50 +59,64 @@
                 <img th:src="${user.profileImg}" alt="프로필 사진" class="rounded-circle">
             </div>
 
-
             <div class="d-flex flex-column align-items-stretch profile-right">
 
-                <div class="follow-stats">
+                <!-- 차단 안내 메시지 -->
+                <div class="blocked-notice text-center text-danger mb-3" th:if="${iBlockedHim}">
+                    <p>차단한 사용자입니다.</p>
+                    <button class="btn btn-outline-danger w-100"
+                            id="unblockBtn"
+                            th:data-target-id="${user.profileId}"
+                            th:data-target-mode="${user.profileMode}">
+                        차단 해제
+                    </button>
+                </div>
 
-                    <a class="stat-item"
-                       th:href="@{/user/follow(targetId=${user.profileId}, profileMode=${user.profileMode}, tab='following')}">
-                        <span class="stat-number" th:text="${user.followingCount}">0</span>
-                        <span class="stat-label">팔로잉</span>
-                    </a>
-
-                    <a class="stat-item"
-                       th:href="@{/user/follow(targetId=${user.profileId}, profileMode=${user.profileMode}, tab='follower')}">
-                        <span id="followerCount" class="stat-number" th:text="${user.followerCount}">0</span>
-                        <span class="stat-label">팔로워</span>
-                    </a>
-
+                <div class="blocked-notice text-center text-danger mb-3" th:if="${!iBlockedHim and heBlockedMe}">
+                    <p>이 사용자가 나를 차단했습니다.</p>
                 </div>
 
 
-                <div class="d-flex gap-2" th:if="${isOwner != true}">
-                    <!-- 팔로우 버튼 -->
-                    <button id="followBtn"
-                            class="btn w-100"
-                            th:classappend="${isFollowing} ? 'btn-outline-danger' : 'btn-danger text-white'"
-                            th:text="${isFollowing} ? '팔로잉' : '팔로우'"
-                            th:data-profile-id="${user.profileId}"
-                            th:data-profile-mode="${user.profileMode}">
-                    </button>
+                <!-- 일반 정보 영역 (차단 시 d-none) -->
+                <div th:classappend="${iBlockedHim or heBlockedMe} ? 'd-none'">
 
-                    <!-- DM 버튼 -->
-                    <button class="btn dm-btn w-100"
-                            id="btn-dm"
-                            th:data-profile-id="${user.profileId}"
-                            th:data-profile-mode="${profileMode}">
-                        DM
-                    </button>
+                    <div class="follow-stats mb-2">
+                        <a class="stat-item"
+                           th:href="@{/user/follow(targetId=${user.profileId}, profileMode=${user.profileMode}, tab='following')}">
+                            <span class="stat-number" th:text="${user.followingCount}">0</span>
+                            <span class="stat-label">팔로잉</span>
+                        </a>
+
+                        <a class="stat-item"
+                           th:href="@{/user/follow(targetId=${user.profileId}, profileMode=${user.profileMode}, tab='follower')}">
+                            <span id="followerCount" class="stat-number" th:text="${user.followerCount}">0</span>
+                            <span class="stat-label">팔로워</span>
+                        </a>
+                    </div>
+
+                    <div class="d-flex gap-2" th:if="${isOwner != true}">
+                        <button id="followBtn"
+                                class="btn w-100"
+                                th:classappend="${isFollowing} ? 'btn-outline-danger' : 'btn-danger text-white'"
+                                th:text="${isFollowing} ? '팔로잉' : '팔로우'"
+                                th:data-profile-id="${user.profileId}"
+                                th:data-profile-mode="${user.profileMode}">
+                        </button>
+
+                        <button class="btn dm-btn w-100"
+                                id="btn-dm"
+                                th:data-profile-id="${user.profileId}"
+                                th:data-profile-mode="${profileMode}">
+                            DM
+                        </button>
+                    </div>
+
                 </div>
 
             </div>
         </section>
-
         <!-- ===== Bio ===== -->
-        <section class="mt-4">
+        <section class="mt-4" th:classappend="${iBlockedHim or heBlockedMe} ? 'd-none'">
             <h6 class="section-title">소개</h6>
             <div class="card-box" th:text="${user.userInfo}">
                 소개 내용
@@ -106,51 +124,55 @@
         </section>
 
         <!-- ===== Info ===== -->
-        <section class="mt-4">
+        <section class="mt-4" th:classappend="${iBlockedHim or heBlockedMe} ? 'd-none'">
             <h6 class="section-title">최신 활동</h6>
             <div class="card-box">
-
+                <!-- 활동 내용 -->
             </div>
         </section>
-
     </main>
-
 </div>
 
 <!-- ===== Modals ===== -->
 <!-- 차단 모달 -->
 <div class="modal fade" id="blockModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">사용자 차단</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                이 사용자를 차단하시겠습니까?
+                <strong th:text="${user.userName}">사용자</strong>님을 차단하시겠습니까?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                <button type="button" class="btn btn-danger">차단</button>
+                <button type="button" id="confirmBlockBtn" class="btn btn-danger"
+                        th:data-target-id="${user.profileId}"
+                        th:data-target-mode="${user.profileMode}">차단하기
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 신고 모달 -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">사용자 신고</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                이 사용자를 신고하시겠습니까?
+                <strong th:text="${user.userName}">사용자</strong>님을 신고하시겠습니까?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                <button type="button" class="btn btn-warning">신고</button>
+                <button type="button" id="confirmReportBtn" class="btn btn-danger"
+                        th:data-target-id="${user.profileId}"
+                        th:data-target-type="${user.profileMode}"
+                        th:data-target-name="${user.userName}">신고하기
+                </button>
             </div>
         </div>
     </div>
