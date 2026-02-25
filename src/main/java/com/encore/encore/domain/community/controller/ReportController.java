@@ -42,6 +42,7 @@ public class ReportController {
         String targetLabel = (targetType == ReportTargetType.ROLE_USER ||
             targetType == ReportTargetType.ROLE_PERFORMER ||
             targetType == ReportTargetType.ROLE_HOST)
+
             ? "유저" : targetType.getDescription();
 
         model.addAttribute("targetId", targetId);
@@ -67,11 +68,8 @@ public class ReportController {
 
         log.info("신고 접수 시작 - TargetID: {}, Reason: {}", dto.getTargetId(), dto.getReason());
 
-        //ActiveMode loginProfileMode = userDetails.getActiveMode();
-        //Long loginUserId = userDetails.getUser().getUserId();
-
-        ActiveMode loginProfileMode = ActiveMode.ROLE_USER;
-        Long loginUserId = 5L;
+        ActiveMode loginProfileMode = userDetails.getActiveMode();
+        Long loginUserId = userDetails.getUser().getUserId();
 
         ResponseCreateReportDto result = reportService.saveReport(dto, loginUserId, loginProfileMode);
 
