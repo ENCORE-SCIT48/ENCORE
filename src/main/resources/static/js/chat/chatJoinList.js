@@ -89,7 +89,7 @@ $(document).ready(() => {
         `);
 
         $chatItem.on('click', () => {
-            window.location.href = `/performance/${chat.performanceId}/chat/${chat.id}`;
+            window.location.href = `/performances/${chat.performanceId}/chat/${chat.id}`;
         });
 
         $container.append($chatItem);
