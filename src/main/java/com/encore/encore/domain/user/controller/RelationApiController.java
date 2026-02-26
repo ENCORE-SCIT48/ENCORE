@@ -202,4 +202,21 @@ public class RelationApiController {
 
         return ResponseEntity.ok(CommonResponse.ok(response, "조회 성공"));
     }
+
+    /**
+     *
+     */
+    @GetMapping("/me/recommended-friends")
+    public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> recommendedFriends(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        //Long userId = userDetails.getUser().getUserId();
+        //ActiveMode profileMode = userDetails.getActiveMode();
+        Long userId = 24L;
+        ActiveMode profileMode = ActiveMode.ROLE_HOST;
+
+        List<ResponseFollowListDto> result = relationService.getRecommendUser(userId, profileMode);
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "추천친구 조회 완료"));
+    }
 }

@@ -16,6 +16,7 @@ import com.encore.encore.domain.user.entity.RelationType;
 import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.user.entity.UserRelation;
+import com.encore.encore.domain.user.repository.UserRecommendationRepository;
 import com.encore.encore.domain.user.repository.UserRelationRepository;
 import com.encore.encore.domain.user.repository.UserRepository;
 import com.encore.encore.domain.venue.entity.Venue;
@@ -27,8 +28,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,6 +47,7 @@ public class RelationService {
     private final VenueRepository venueRepository;
     private final ProfileService profileService;
     private final ChatPostRepository chatPostRepository;
+    private final UserRecommendationRepository userRecommendationRepository;
 
     /**
      * 프로필 id, 프로필 모드로 찾을 각각의 정보를 찾을 경우(ProfileInfoDto반환)
@@ -607,6 +609,105 @@ public class RelationService {
             loginUserId, loginProfileMode, profileId, profileMode, RelationType.BLOCK);
 
         return b;
+    }
+
+    /**
+     * 같은 공연을 2번 이상 본 유저를 3명 이하 조회한다.
+     *
+     * @param userId 로그인 유저
+     * @return
+     */
+    public List<ResponseFollowListDto> getRecommendUser(Long userId, ActiveMode profileMode) {
+        // 1️⃣ 공통 공연 2개 이상인 유저 ID 조회
+        List<Long> candidateUserIds =
+            userRecommendationRepository
+                .findUserIdsWithCommonPerformance(userId, 2L);
+
+        if (candidateUserIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 2️⃣ 이미 팔로우 중인 유저 ID 조회
+        List<UserRelation> followingIds =
+            userRelationRepository.findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(userId, profileMode, RelationType.FOLLOW);
+
+        Set<Long> followingUserIds = new HashSet<>();
+
+        for (UserRelation relation : followingIds) {
+
+            Long profileId = relation.getTargetId();
+            ActiveMode mode = relation.getTargetProfileMode();
+
+            User targetUser = findProfileById(profileId, mode);
+            followingUserIds.add(targetUser.getUserId());
+        }
+        followingUserIds.add(userId);
+
+        // 3️⃣ 자기 자신 + 이미 팔로우한 유저 제거
+        List<Long> filteredUserIds = candidateUserIds.stream()
+            .filter(id -> !followingUserIds.contains(id))
+            .collect(Collectors.toList());  // mutable 리스트
+        Collections.shuffle(filteredUserIds);
+
+        // UserId가 일치하는 모드별 프로필 조회
+        List<ResponseFollowListDto> result = new ArrayList<>();
+
+        // 4️⃣ 랜덤 3명 선택
+        Collections.shuffle(filteredUserIds);
+        List<Long> selectedIds = filteredUserIds.stream()
+            .limit(3)
+            .toList();
+
+        for (Long targetUserId : selectedIds) {
+            User user = userRepository.findById(targetUserId).orElseThrow();
+
+            // 1️⃣ 사용 가능한 프로필 리스트 만들기
+            List<ActiveMode> availableProfiles = new ArrayList<>();
+
+            if (userProfileRepository.findByUser_UserId(targetUserId).isPresent())
+                availableProfiles.add(ActiveMode.ROLE_USER);
+            if (performerProfileRepository.findByUser_UserId(targetUserId).isPresent())
+                availableProfiles.add(ActiveMode.ROLE_PERFORMER);
+            if (hostProfileRepository.findByUser_UserId(targetUserId).isPresent())
+                availableProfiles.add(ActiveMode.ROLE_HOST);
+
+            if (availableProfiles.isEmpty()) continue; // 프로필 없는 경우 스킵
+
+            // 2️⃣ 랜덤으로 하나 선택
+            ActiveMode selectedMode = availableProfiles.get(ThreadLocalRandom.current().nextInt(availableProfiles.size()));
+
+            // 3️⃣ 선택된 프로필 객체 가져오기
+            Long profileId = null;
+            String profileName = null;
+            switch (selectedMode) {
+                case ROLE_USER -> {
+                    UserProfile userProfile = userProfileRepository.findByUser_UserId(targetUserId)
+                        .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "존재하지 않는 프로필 입니다."));
+                    profileId = userProfile.getProfileId();
+                    profileName = userProfile.getUser().getNickname();
+                }
+
+                case ROLE_PERFORMER -> {
+                    PerformerProfile performerProfile = performerProfileRepository.findByUser_UserId(targetUserId)
+                        .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "존재하지 않는 프로필 입니다."));
+                    profileId = performerProfile.getPerformerId();
+                    profileName = performerProfile.getStageName();
+                }
+                case ROLE_HOST -> {
+                    HostProfile hostProfile = hostProfileRepository.findByUser_UserId(targetUserId)
+                        .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "존재하지 않는 프로필 입니다."));
+                    profileId = hostProfile.getHostId();
+                    profileName = hostProfile.getOrganizationName();
+                }
+            }
+            result.add(ResponseFollowListDto.builder()
+                .userName(profileName)
+                .profileId(profileId)
+                .profileMode(selectedMode.name())
+                .isFollowing(false)
+                .build());
+        }
+        return result;
     }
 }
 

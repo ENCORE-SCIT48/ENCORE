@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activateTab(activeTab);
 
     // 초기 리스트 로드
+    fetchList('following', 'recommend-container', `/api/users/me/recommended-friends`)
     fetchList('following', 'following-container', `/api/users/${targetId}/${profileMode}/following`);
     fetchList('follower', 'follower-container', `/api/users/${targetId}/${profileMode}/follower`);
 
@@ -29,7 +30,7 @@ function activateTab(tab) {
 
     tabFollowing.classList.toggle('active', isFollowingTab);
     tabFollower.classList.toggle('active', !isFollowingTab);
-  
+
     followingContent.classList.toggle('hidden', !isFollowingTab);
     followerContent.classList.toggle('hidden', isFollowingTab);
 
