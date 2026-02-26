@@ -95,6 +95,9 @@ public class ChatPageController {
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             Long roomId = chatService.getChatRoomId(id);
 
+            boolean isWriter = chatService.canEdit(activeProfileId, activeMode, dto);
+            model.addAttribute("isWriter", isWriter);
+
             List<ResponseParticipantDto> chatParticipantList = chatService.getChatParticipants(roomId);
             model.addAttribute("currentProfileId", activeProfileId); // Long 타입으로 일치
             model.addAttribute("currentProfileMode", activeMode); // 타입 일치

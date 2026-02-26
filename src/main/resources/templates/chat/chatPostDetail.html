@@ -28,7 +28,7 @@
             <i class="fa-solid fa-chevron-left"></i>
         </button>
 
-        <h1 class="app-title" th:text="${performanceTitle}">공연 이름</h1>
+        <h1 class="app-title" th:text="${chatPost.performanceTitle}">공연 이름</h1>
 
         <div class="header-spacer"></div>
     </header>
@@ -49,9 +49,8 @@
             </div>
 
             <!-- 수정/삭제 버튼 -->
-            <div class="post-actions">
+            <div class="post-actions" th:if="${isWriter}">
                 <button
-                    id="btn-edit"
                     class="btn-action"
                     th:data-performance-id="${performanceId}"
                     th:data-id="${chatPost.id}">
@@ -59,7 +58,6 @@
                 </button>
 
                 <button
-                    id="btn-delete"
                     class="btn-action"
                     th:data-performance-id="${performanceId}"
                     th:data-id="${chatPost.id}">
@@ -78,7 +76,12 @@
             </button>
 
             <!-- 신고 버튼 -->
-            <button id="btn-report" class="btn-report">신고하기</button>
+            <button id="btn-report"
+                    class="btn-report"
+                    th:data-target-id="${chatPost.id}"
+                    th:data-target-type="CHAT_POST"
+                    th:data-target-name="${chatPost.title}">신고하기
+            </button>
 
         </article>
     </main>

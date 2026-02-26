@@ -52,6 +52,23 @@ $(document).ready(() => {
         });
     });
 
+    $('.btn-edit').on('click', function () {
+         confirmReportBtn.addEventListener("click", function () {
+                const targetId = this.dataset.targetId;
+                const targetType = this.dataset.targetType;
+                const targetName = this.dataset.targetName;
+
+                if (!targetId || !targetType || targetType === "undefined" || !targetName) {
+                    console.error("신고 데이터 누락:", { targetId, targetType, targetName });
+                    alert("신고 대상 정보가 올바르지 않아 신고를 진행할 수 없습니다.");
+                    return;
+                }
+
+                const url = `/report?targetId=${targetId}&targetType=${targetType}&targetName=${encodeURIComponent(targetName)}`;
+                window.location.href = url;
+            });
+     });
+
     // =========================
     // 채팅방 참가 버튼 클릭
     // =========================

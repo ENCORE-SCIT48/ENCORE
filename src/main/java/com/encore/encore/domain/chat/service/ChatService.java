@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -460,5 +461,17 @@ public class ChatService {
         return participantDtos;
     }
 
+    /**
+     * 로그인 한 사용자가 게시물을 수정할 수 있는지 확인한다.
+     *
+     * @param activeProfileId 로그인 되어있는 프로필 아이디
+     * @param activeMode      사용중인 프로필 모드
+     * @param dto             글에 대한 정보
+     * @return
+     */
+    public boolean canEdit(Long activeProfileId, ActiveMode activeMode, ResponseDetailChatPostDto dto) {
+        return Objects.equals(activeProfileId, dto.getWriterId()) &&
+            Objects.equals(activeMode, ActiveMode.valueOf(dto.getWriterProfileMode()));
+    }
 }
 
