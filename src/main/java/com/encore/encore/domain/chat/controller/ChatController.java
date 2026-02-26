@@ -90,9 +90,11 @@ public class ChatController {
     ) {
         log.info("게시글 수정 요청 - chatId: {}, updateDTO: {}", chatId, updateDTO);
 
-        Long activeProfileId = userDetails.getActiveProfileId();
-        ActiveMode activeMode = userDetails.getActiveMode();
+        /*Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+            ActiveMode activeMode = userDetails.getActiveMode();*/
 
+        Long activeProfileId = 2L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
         ResponseUpdateChatPostDto result = chatService.updateChatPost(chatId, updateDTO, activeProfileId, activeMode);
 
         log.info("게시글 수정 성공 - chatId: {}", chatId);

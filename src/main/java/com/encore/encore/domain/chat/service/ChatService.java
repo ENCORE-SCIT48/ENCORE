@@ -473,5 +473,17 @@ public class ChatService {
         return Objects.equals(activeProfileId, dto.getWriterId()) &&
             Objects.equals(activeMode, ActiveMode.valueOf(dto.getWriterProfileMode()));
     }
+
+    public boolean canJoin(Long activeProfileId, ActiveMode activeMode, List<ResponseParticipantDto> chatParticipantList) {
+
+        for (ResponseParticipantDto participant : chatParticipantList) {
+            if (participant.getProfileId().equals(activeProfileId)
+                && participant.getProfileMode() == activeMode.name()) {
+                // 이미 참여자이므로 버튼 보여줌
+                return true;
+            }
+        }
+        return false;
+    }
 }
 

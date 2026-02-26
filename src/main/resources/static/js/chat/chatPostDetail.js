@@ -52,22 +52,20 @@ $(document).ready(() => {
         });
     });
 
-    $('.btn-edit').on('click', function () {
-         confirmReportBtn.addEventListener("click", function () {
-                const targetId = this.dataset.targetId;
-                const targetType = this.dataset.targetType;
-                const targetName = this.dataset.targetName;
+    $('#btn-report').on('click', function () {
+        const targetId = $(this).data('target-id');
+        const targetType = $(this).data('target-type');
+        const targetName = $(this).data('target-name');
 
-                if (!targetId || !targetType || targetType === "undefined" || !targetName) {
-                    console.error("신고 데이터 누락:", { targetId, targetType, targetName });
-                    alert("신고 대상 정보가 올바르지 않아 신고를 진행할 수 없습니다.");
-                    return;
-                }
+        if (!targetId || !targetType || targetType === "undefined" || !targetName) {
+            console.error("신고 데이터 누락:", { targetId, targetType, targetName });
+            alert("신고 대상 정보가 올바르지 않아 신고를 진행할 수 없습니다.");
+            return;
+        }
 
-                const url = `/report?targetId=${targetId}&targetType=${targetType}&targetName=${encodeURIComponent(targetName)}`;
-                window.location.href = url;
-            });
-     });
+        const url = `/report?targetId=${targetId}&targetType=${targetType}&targetName=${encodeURIComponent(targetName)}`;
+        window.location.href = url;
+    });
 
     // =========================
     // 채팅방 참가 버튼 클릭
@@ -82,9 +80,24 @@ $(document).ready(() => {
                 return;
             }
 
-            if (confirm('채팅방에 입장하시겠습니까?')) {
-                window.location.href = `/chat/${roomId}`;
-            }
+            if (!confirm('채팅방에 입장하시겠습니까?')) return;
+
+            // 서버 상태 확인
+            $.ajax({
+                url: `/api/chat/${roomId}/can-join`,
+                method: 'GET',
+                success: (res) => {
+                    if (res.canJoin) {
+                        window.location.href = `/chat/${roomId}`;
+                    } else {
+                        alert(res.message || '참여 불가 상태입니다.');
+                    }
+                },
+                error: (xhr) => {
+                    const msg = xhr.responseJSON?.message || '서버 오류 발생';
+                    alert(msg);
+                }
+            });
         });
     }
 });

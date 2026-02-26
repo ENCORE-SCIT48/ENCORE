@@ -89,16 +89,27 @@ public class ChatPageController {
 
 
         try {
-            Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-            ActiveMode activeMode = userDetails.getActiveMode();
+            /*Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+            ActiveMode activeMode = userDetails.getActiveMode();*/
+
+            Long activeProfileId = 3L;
+            ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             Long roomId = chatService.getChatRoomId(id);
 
             boolean isWriter = chatService.canEdit(activeProfileId, activeMode, dto);
+
+
             model.addAttribute("isWriter", isWriter);
 
             List<ResponseParticipantDto> chatParticipantList = chatService.getChatParticipants(roomId);
+
+            boolean canJoin = true;
+            if (dto.getStatus().equals(ChatPost.Status.CLOSED.name())) {
+                canJoin = chatService.canJoin(activeProfileId, activeMode, chatParticipantList);
+            }
+            model.addAttribute("canJoin", canJoin);
             model.addAttribute("currentProfileId", activeProfileId); // Long 타입으로 일치
             model.addAttribute("currentProfileMode", activeMode); // 타입 일치
 
@@ -183,8 +194,11 @@ public class ChatPageController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        ActiveMode activeMode = userDetails.getActiveMode();
+        /*Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();*/
+
+        Long activeProfileId = 3L;
+        ActiveMode activeMode = ActiveMode.ROLE_HOST;
 
 
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
