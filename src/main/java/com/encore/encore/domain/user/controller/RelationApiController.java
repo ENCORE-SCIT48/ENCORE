@@ -204,7 +204,10 @@ public class RelationApiController {
     }
 
     /**
+     * 같은 공연(UserPerformanceRelation의 공연이 3개 이상 겹침)을 본 유저의 프로필을 랜덤으로 3개 이하 추천해준다.
      *
+     * @param userDetails 로그인 중인 유저
+     * @return 추천 친구
      */
     @GetMapping("/me/recommended-friends")
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> recommendedFriends(

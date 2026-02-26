@@ -612,7 +612,7 @@ public class RelationService {
     }
 
     /**
-     * 같은 공연을 2번 이상 본 유저를 3명 이하 조회한다.
+     * 같은 공연을 3번 이상 본 유저를 3명 이하 조회한다.
      *
      * @param userId 로그인 유저
      * @return
@@ -623,6 +623,7 @@ public class RelationService {
             userRecommendationRepository
                 .findUserIdsWithCommonPerformance(userId, 3L);
 
+        // 조건에 만족하는 유저가 없을 시 빈 리스트 return
         if (candidateUserIds.isEmpty()) {
             return List.of();
         }
@@ -633,6 +634,7 @@ public class RelationService {
 
         Set<Long> followingUserIds = new HashSet<>();
 
+        //targetId와 profileMode를 기준으로 userId를 가져옴
         for (UserRelation relation : followingIds) {
 
             Long profileId = relation.getTargetId();
@@ -649,11 +651,12 @@ public class RelationService {
             .collect(Collectors.toList());  // mutable 리스트
         Collections.shuffle(filteredUserIds);
 
+        // 남은 프로필이 없을 시 빈 리스트 return
         if (filteredUserIds == null || filteredUserIds.isEmpty()) {
             return List.of(); // 빈 리스트 반환
         }
 
-        // UserId가 일치하는 모드별 프로필 조회
+        // 추천 유저를 return하기 위한 리스트 생성
         List<ResponseFollowListDto> result = new ArrayList<>();
 
         // 4️⃣ 랜덤 3명 선택
@@ -662,6 +665,7 @@ public class RelationService {
             .limit(3)
             .toList();
 
+        // 선택된 유저 프로필 확인 및 DTO 생성
         for (Long targetUserId : selectedIds) {
             User user = userRepository.findById(targetUserId).orElseThrow();
 
@@ -711,6 +715,7 @@ public class RelationService {
                 .isFollowing(false)
                 .build());
         }
+
         if (result.isEmpty()) {
             return List.of(); // 프로필 없는 추천친구가 다 제외될 경우
         }
