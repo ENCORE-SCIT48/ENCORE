@@ -29,13 +29,54 @@
 }
 
 .recommend-section {
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+    display: none;
 }
 
+
+/* 그리드 컨테이너는 유지 */
 .recommend-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
-    justify-content: center;
+}
+
+/* 개별 카드 */
+.recommend-grid > div {
+    display: flex;             /* 내부 요소를 세로로 쌓기 위해 flex 사용 */
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #eee;
+    padding: 15px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-height: 160px;
+    width: 100%;
+    box-sizing: border-box;
+}
+/*이름*/
+.recommend-grid > div .fw-bold {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    /* 옆으로 퍼지지 않고 아래로 내려가게 함 */
+    white-space: normal;       /* 자동 줄바꿈 허용 */
+    word-break: break-all;     /* 긴 영문/숫자도 박스 안에서 줄바꿈 */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;     /* 최대 2줄까지만 보여주고 그 이상은 ... 처리 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.4em;             /* 2줄 분량의 높이를 미리 확보 (버튼 위치 고정용) */
+}
+
+/* 버튼 (이게 핵심: 부모가 flex일 때 margin-top: auto는 바닥으로 밀어냄) */
+.recommend-grid > div button {
+    margin-top: auto;          /* 이름 길이에 상관없이 무조건 바닥에 고정 */
+    width: 100%;               /* 버튼 크기도 통일하면 더 깔끔함 */
+    max-width: 80px;           /* 너무 넓어지지 않게 제한 */
 }
 
 .user-card {

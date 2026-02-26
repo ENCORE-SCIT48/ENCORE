@@ -210,10 +210,8 @@ public class RelationApiController {
     public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> recommendedFriends(
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        //Long userId = userDetails.getUser().getUserId();
-        //ActiveMode profileMode = userDetails.getActiveMode();
-        Long userId = 24L;
-        ActiveMode profileMode = ActiveMode.ROLE_HOST;
+        Long userId = userDetails.getUser().getUserId();
+        ActiveMode profileMode = userDetails.getActiveMode();
 
         List<ResponseFollowListDto> result = relationService.getRecommendUser(userId, profileMode);
 

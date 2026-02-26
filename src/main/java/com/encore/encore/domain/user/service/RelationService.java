@@ -618,10 +618,10 @@ public class RelationService {
      * @return
      */
     public List<ResponseFollowListDto> getRecommendUser(Long userId, ActiveMode profileMode) {
-        // 1️⃣ 공통 공연 2개 이상인 유저 ID 조회
+        // 1️⃣ 공통 공연 3개 이상인 유저 ID 조회
         List<Long> candidateUserIds =
             userRecommendationRepository
-                .findUserIdsWithCommonPerformance(userId, 2L);
+                .findUserIdsWithCommonPerformance(userId, 3L);
 
         if (candidateUserIds.isEmpty()) {
             return List.of();
@@ -648,6 +648,10 @@ public class RelationService {
             .filter(id -> !followingUserIds.contains(id))
             .collect(Collectors.toList());  // mutable 리스트
         Collections.shuffle(filteredUserIds);
+
+        if (filteredUserIds == null || filteredUserIds.isEmpty()) {
+            return List.of(); // 빈 리스트 반환
+        }
 
         // UserId가 일치하는 모드별 프로필 조회
         List<ResponseFollowListDto> result = new ArrayList<>();
@@ -706,6 +710,9 @@ public class RelationService {
                 .profileMode(selectedMode.name())
                 .isFollowing(false)
                 .build());
+        }
+        if (result.isEmpty()) {
+            return List.of(); // 프로필 없는 추천친구가 다 제외될 경우
         }
         return result;
     }
