@@ -2,6 +2,7 @@ package com.encore.encore.domain.venue.controller;
 
 import com.encore.encore.domain.venue.dto.VenueCreateRequestDto;
 import com.encore.encore.domain.venue.dto.VenueDetailDto;
+import com.encore.encore.domain.venue.dto.VenueFormResponseDto;
 import com.encore.encore.domain.venue.dto.VenueListItemDto;
 import com.encore.encore.domain.venue.service.VenueService;
 import com.encore.encore.global.common.CommonResponse;
@@ -132,4 +133,20 @@ public class VenueController {
         // 삭제 성공 시 별도의 데이터 반환 없이 204(No Content)를 응답하는 것이 Restful 가이드라인에 부합함
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * [설명] 공연장 등록/수정 폼 prefill용 데이터를 조회합니다.
+     *
+     * @param venueId 조회할 공연장 ID
+     * @return 공연장 폼 데이터 (좌석 정보 포함)
+     */
+    @GetMapping("/{venueId}/form")
+    public CommonResponse<VenueFormResponseDto> getVenueForm(@PathVariable Long venueId) {
+        log.info("2026-02-26, [공연장 폼 데이터 요청], venueId={}", venueId);
+        return CommonResponse.ok(
+            venueService.getVenueForm(venueId),
+            "공연장 폼 데이터 조회 성공"
+        );
+    }
+
 }

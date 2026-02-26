@@ -5,6 +5,7 @@ import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.venue.dto.VenueCreateRequestDto;
 import com.encore.encore.domain.venue.dto.VenueDetailDto;
+import com.encore.encore.domain.venue.dto.VenueFormResponseDto;
 import com.encore.encore.domain.venue.dto.VenueListItemDto;
 import com.encore.encore.domain.venue.entity.Seat;
 import com.encore.encore.domain.venue.entity.Venue;
@@ -86,6 +87,8 @@ public class VenueService {
         // 이미지 저장
         String savedImagePath = (imageFile != null && !imageFile.isEmpty())
             ? fileService.saveFile(imageFile) : null;
+        // 좌석 엔티티 먼저 만들기 (임시로 venue 없이)
+        int totalSeats = dto.getSeats() != null ? dto.getSeats().size() : 0;
 
         // Venue 엔티티 생성
         Venue venue = Venue.builder()
@@ -102,6 +105,7 @@ public class VenueService {
             .bookingUnit(dto.getBookingUnit())
             .rentalFee(dto.getRentalFee())
             .regularClosing(dto.getRegularClosingDaysAsString()) // DTO 메서드 호출
+            .totalSeats(totalSeats)
             .temporaryClosing(dto.getTemporaryClosingDatesAsString())
             .facilities(dto.getFacilitiesAsString())
             .build();
@@ -155,14 +159,15 @@ public class VenueService {
             finalImagePath = fileService.saveFile(imageFile);
             log.info("2026-02-25, [공연장 이미지 교체 완료], NewPath: {}", finalImagePath);
         }
-
+        // 좌석 수 먼저 계산
+        int totalSeats = dto.getSeats() != null ? dto.getSeats().size() : 0;
 
         // 엔티티 정보 갱신
         venue.updateVenueInfo(
             dto.getVenueName(), dto.getAddress(), dto.getContact(), dto.getDescription(),
             dto.getVenueType(), finalImagePath, dto.getOpenTime(), dto.getCloseTime(),
             dto.getBookingUnit(), dto.getRentalFee(), dto.getFacilitiesAsString(),
-            dto.getTotalSeats(), dto.getRegularClosingDaysAsString(), dto.getTemporaryClosingDatesAsString()
+            totalSeats, dto.getRegularClosingDaysAsString(), dto.getTemporaryClosingDatesAsString()
         );
 
         // 3. 좌석 정보 갱신
@@ -206,4 +211,22 @@ public class VenueService {
 
         log.info("2026-02-25, [공연장 논리 삭제 완료], VenueID: {}", venueId);
     }
+
+    /**
+     * [설명] 공연장 등록/수정 폼 데이터를 조회합니다. (좌석 정보 포함)
+     *
+     * @param venueId 공연장 ID
+     * @return 폼 prefill용 DTO (floorLayouts 포함)
+     */
+    public VenueFormResponseDto getVenueForm(Long venueId) {
+        Venue venue = venueRepository.findByVenueIdAndIsDeletedFalse(venueId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND,
+                "공연장을 찾을 수 없습니다. venueId=" + venueId));
+
+        List<Seat> seats = seatRepository.findAllByVenueAndIsDeletedFalse(venue);
+
+        log.info("2026-02-26, [공연장 폼 데이터 조회], venueId={}, seatCount={}", venueId, seats.size());
+        return new VenueFormResponseDto(venue, seats);
+    }
+
 }

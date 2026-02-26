@@ -1,88 +1,202 @@
-html, body {
+/* ==========================================================================
+   파일명: venue-form.css
+   작성일: 2026-02-26
+   설명: 공연장 등록 프로세스(Step 1~3) 및 PC/Mobile 반응형 레이아웃 정의
+   구조:
+     1. 디자인 시스템 변수
+     2. 전역 초기화 및 기본 레이아웃
+     3. 공통 컴포넌트 (스테퍼, 폼, 배지)
+     4. 하단 액션 바
+     5. PC 환경 반응형 최적화 (@media)
+   ========================================================================== */
+
+/* [1] 디자인 시스템 변수 (Design Tokens)
+   -------------------------------------------------------------------------- */
+:root {
+    --primary-red: #E63946;    /* 브랜드 메인 컬러 */
+    --dark-grey: #333333;     /* 기본 텍스트 및 강조색 */
+    --medium-grey: #adb5bd;   /* 비활성 요소 및 보조 텍스트 */
+    --border-color: #E9ECEF;  /* 선 및 구분선 */
+    --bg-white: #FFFFFF;      /* 컨테이너 배경 */
+    --body-bg: #F4F4F4;       /* 전체 바디 배경 */
+}
+
+/* [2] 전역 초기화 및 기본 레이아웃 (Layout Strategy: Mobile-First)
+   -------------------------------------------------------------------------- */
+body {
+    background-color: var(--body-bg);
     margin: 0;
     padding: 0;
-    height: 100%;
+    font-family: 'Pretendard', sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-body {
-    background: #ffffff;
-    display: flex;
-    justify-content: center;
-}
-
+/* 앱 전체를 감싸는 래퍼 (모바일 앱 뷰 규격) */
 .app-wrapper {
     width: 100%;
     max-width: 430px;
     min-height: 100vh;
-    background: #ffffff;
+    background: var(--bg-white);
+    margin: 0 auto;
     position: relative;
-}
-
-.app-header {
-    height: 50px;
-    position: relative;
-}
-
-.app-main {
-    padding: 16px;
-    box-sizing: border-box;
-}
-
-.venue-search-wrap {
-    margin-top: 32px;
-    margin-bottom: 18px;
-}
-
-.venue-search-input {
-    height: 48px;
-    border-radius: 10px;
-}
-
-.venue-list-wrap {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    padding-bottom: 24px;
 }
 
-.venue-card {
-    background: #dcdcdc;
-    border-radius: 10px;
-    padding: 22px 18px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.venue-card:active {
-    transform: scale(0.995);
-}
-
-.venue-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0 0 8px 0;
-}
-
-.venue-sub {
-    font-size: 14px;
-    margin: 0;
-    opacity: 0.9;
-}
-
-.venue-meta {
-    margin-top: 10px;
+/* 상단 고정 헤더 */
+.app-header {
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
-.venue-search-form {
-    gap: 8px;
+/* 메인 콘텐츠 영역 */
+.app-main {
+    padding: 20px 20px 120px 20px;
+    flex: 1;
 }
 
-.venue-search-btn {
-    height: 48px;
-    border-radius: 10px;
-    padding: 0 14px;
-    white-space: nowrap;
+/* [3] 공통 컴포넌트 (Components)
+   -------------------------------------------------------------------------- */
+
+/* 3-1. 프로그레스 스테퍼 (Progress Stepper) */
+.stepper-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0 30px;
+    gap: 8px;
+}
+.step {
+    width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-color);
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--medium-grey);
+}
+.step.active {
+    background: var(--primary-red);
+    border-color: var(--primary-red);
+    color: #fff;
+}
+.step-line { width: 30px; height: 2px; background: var(--border-color); }
+
+/* 3-2. 프로필/이미지 업로드 (Image Uploader) */
+.profile-upload-wrap { position: relative; width: 120px; height: 120px; margin: 0 auto 30px; }
+.profile-placeholder {
+    width: 100%; height: 100%; background: #fff; border-radius: 50%;
+    border: 2px dashed #ced4da; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+.profile-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+.upload-badge {
+    position: absolute; bottom: 2px; right: 2px; width: 36px; height: 36px;
+    background: var(--primary-red); color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; border: 3px solid #fff; cursor: pointer;
+}
+
+/* 3-3. 폼 요소 (Form Groups) */
+.section-title {
+    font-size: 0.95rem; font-weight: 800; color: var(--dark-grey);
+    margin: 32px 0 16px; padding-left: 10px; border-left: 4px solid var(--primary-red);
+}
+.form-control, .form-select {
+    border-radius: 12px; border: 1px solid #dee2e6; font-size: 0.95rem; height: 54px;
+}
+.form-control:focus { border-color: var(--primary-red); box-shadow: none; outline: none; }
+
+/* 3-4. 체크박스/태그 선택 (Choice Chips) */
+.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.check-item {
+    background: #f8f9fa; padding: 14px; border-radius: 12px;
+    display: flex; align-items: center; cursor: pointer; font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+.check-item:active { background: #e9ecef; }
+.check-item input { width: 18px; height: 18px; margin-right: 10px; accent-color: var(--primary-red); }
+
+/* 3-5. 배지 및 알림 (Badges & Notices) */
+.badge.bg-light {
+    background-color: #f8f9fa !important; color: var(--dark-grey) !important;
+    border: 1px solid #dee2e6 !important; padding: 8px 12px !important;
+    font-size: 0.85rem !important; border-radius: 20px !important;
+    display: inline-flex; align-items: center;
+}
+.badge i.bi-x { font-size: 1rem; margin-left: 4px; cursor: pointer; color: var(--primary-red); }
+
+.empty-canvas-notice {
+    background: #fafafa; height: 150px; border-radius: 15px; border: 1px dashed #eee;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--medium-grey);
+}
+
+/* [4] 하단 고정 액션 바 (Fixed Bottom Button)
+   -------------------------------------------------------------------------- */
+.fixed-bottom-btn {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px; padding: 20px; background: #fff;
+    border-top: 1px solid #eee; z-index: 1001;
+}
+.btn-primary-red {
+    background: var(--primary-red); color: #fff; width: 100%; border: none;
+    padding: 16px; border-radius: 14px; font-weight: 700; font-size: 1rem;
+    transition: opacity 0.2s ease;
+}
+.btn-primary-red:active { opacity: 0.8; }
+
+/* 기타 유틸리티 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.text-muted.small { font-size: 0.75rem; line-height: 1.4; color: var(--medium-grey); }
+
+
+/* [5] 반응형 PC 대응 (Desktop Specific)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+    body { background-color: #f0f2f5; }
+
+    .app-wrapper {
+        max-width: 900px; /* PC 최적화 너비 */
+        margin: 40px auto;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        min-height: auto;
+    }
+
+    .app-header { border-radius: 24px 24px 0 0; height: 80px; padding: 0 40px; }
+    .app-main { padding: 40px 60px 60px 60px; }
+
+    /* Step 1, 3 폼 요소를 좌우 2열 배치로 전환 */
+    #step1, #step3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 30px;
+    }
+
+    /* 2열 배치 시 한 행을 모두 사용해야 하는 요소들 */
+    .section-title, .profile-upload-wrap, .fixed-bottom-btn,
+    .mb-3:has(textarea), .mb-3:has(.checkbox-grid), .mb-3:has(#tempDateList) {
+        grid-column: span 2;
+    }
+
+    /* 하단 버튼을 고정형에서 일반 배치형으로 변경 */
+    .fixed-bottom-btn {
+        position: relative;
+        transform: none;
+        left: 0;
+        max-width: 100%;
+        margin-top: 40px;
+        border-top: none;
+        padding: 0;
+        background: transparent;
+    }
+
+    .btn-primary-red { height: 60px; font-size: 1.1rem; cursor: pointer; }
+    .btn-primary-red:hover { opacity: 0.9; }
+}
+
+/* 와이드 스크린 대응 */
+@media (min-width: 1200px) {
+    .app-wrapper { max-width: 1000px; }
 }

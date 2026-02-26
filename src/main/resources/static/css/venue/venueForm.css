@@ -1,0 +1,545 @@
+/* ==========================================================================
+   [1] DESIGN SYSTEM & VARIABLES
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+:root {
+    --primary-red: #E63946;
+    --primary-red-dark: #c82d3a;
+    --primary-red-light: rgba(230, 57, 70, 0.08);
+    --dark-grey: #1a1a2e;
+    --mid-grey: #6c757d;
+    --border-color: #eef0f3;
+    --bg-white: #FFFFFF;
+    --bg-light-grey: #fff;
+    --text-muted: #b0b8c4;
+    --text-body: #2d3748;
+
+    --vip-color: #d97706;
+    --r-color: #E63946;
+    --s-color: #2563eb;
+    --a-color: #059669;
+
+    --max-width-mobile: 430px;
+    --max-width-pc: 1100px;
+    --header-height: 60px;
+    --bottom-btn-area: 110px;
+
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+    --transition: 0.2s ease;
+}
+
+/* ==========================================================================
+   [2] BASE RESET & LAYOUT
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-light-grey);
+    margin: 0; padding: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-wrapper {
+    width: 100%;
+    max-width: var(--max-width-mobile);
+    min-height: 100vh;
+    background: var(--bg-white);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-header {
+    height: var(--header-height);
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-color) !important;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+}
+
+.app-header h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--dark-grey);
+}
+
+.btn-back {
+    width: 36px; height: 36px;
+    border: none; background: var(--bg-light-grey);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background var(--transition);
+    color: var(--dark-grey);
+}
+.btn-back:hover { background: var(--border-color); }
+
+.app-main {
+    padding: 0 20px var(--bottom-btn-area);
+    flex: 1;
+}
+
+/* ==========================================================================
+   [3] STEPPER
+   ========================================================================== */
+.stepper-container {
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px 0 24px; gap: 10px;
+}
+.step {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid var(--border-color);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--text-muted);
+    transition: all 0.3s ease;
+    background: var(--bg-white);
+}
+.step.active {
+    background: var(--primary-red);
+    border-color: var(--primary-red);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.35);
+    transform: scale(1.08);
+}
+.step.done {
+    background: var(--primary-red-light);
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+}
+.step-line {
+    flex: 1; max-width: 50px; height: 2px;
+    background: var(--border-color);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+}
+.step-line.done { background: var(--primary-red); }
+
+/* ==========================================================================
+   [4] PHOTO UPLOAD
+   ========================================================================== */
+.profile-upload-wrap {
+    position: relative;
+    width: calc(100% + 40px);
+    margin: 0 0 36px -20px;
+    cursor: pointer;
+}
+.profile-placeholder {
+    width: 100%; aspect-ratio: 16 / 9;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    transition: background var(--transition);
+}
+.profile-placeholder:hover { background: #eef0f4; }
+.profile-placeholder::before {
+    content: '공연장 대표 이미지를 등록해주세요';
+    position: absolute;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+    white-space: nowrap;
+}
+.profile-placeholder img { width: 100%; height: 100%; object-fit: cover; position: relative; z-index: 1; }
+
+.upload-badge {
+    position: absolute;
+    bottom: 14px; right: 14px;
+    z-index: 2;
+}
+.upload-badge i {
+    display: flex !important; align-items: center; justify-content: center;
+    color: white !important; background: var(--primary-red) !important;
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 2px solid #fff !important;
+    box-shadow: 0 4px 14px rgba(230, 57, 70, 0.4);
+    font-size: 1rem;
+}
+
+/* ==========================================================================
+   [5] SECTION TITLE
+   ========================================================================== */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--dark-grey);
+    margin: 32px 0 16px;
+    letter-spacing: -0.2px;
+}
+.section-title::before {
+    content: '';
+    display: block;
+    width: 4px; height: 18px;
+    background: var(--primary-red);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   [6] FORM COMPONENTS
+   ========================================================================== */
+.form-floating > .form-control,
+.form-floating > .form-select {
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-color);
+    height: 56px;
+    background: var(--bg-light-grey);
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+    background: var(--bg-white);
+    outline: none;
+}
+.form-floating > label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* 일반 input */
+.form-control {
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-light-grey);
+    font-size: 0.92rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-control:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+    background: var(--bg-white);
+    outline: none;
+}
+
+/* 주소 그룹 */
+.address-group { display: flex; gap: 8px; align-items: center; }
+.address-group .form-control { flex: 1; margin-bottom: 0 !important; height: 48px; }
+.btn-search {
+    height: 48px; padding: 0 18px;
+    border-radius: var(--radius-md);
+    background: var(--dark-grey); color: #fff;
+    border: none; font-weight: 700; font-size: 0.85rem;
+    white-space: nowrap;
+    transition: background var(--transition);
+    cursor: pointer;
+}
+.btn-search:hover { background: #0d0d1a; }
+
+/* textarea */
+textarea.form-control {
+    height: auto !important;
+    resize: none;
+    border-radius: var(--radius-md) !important;
+    padding: 14px;
+    line-height: 1.6;
+}
+
+/* 체크박스 그리드 */
+.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.check-item {
+    background: var(--bg-light-grey);
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border-color);
+    transition: all var(--transition);
+    user-select: none;
+}
+.check-item:hover { border-color: var(--primary-red); background: var(--primary-red-light); }
+.check-item input[type="checkbox"] { accent-color: var(--primary-red); width: 16px; height: 16px; }
+.check-item:has(input:checked) {
+    border-color: var(--primary-red);
+    background: var(--primary-red-light);
+    color: var(--primary-red);
+}
+
+/* ==========================================================================
+   [7] SEAT EDITOR
+   ========================================================================== */
+#floorTabs {
+    display: flex; justify-content: flex-start;
+    gap: 6px; overflow-x: auto; padding-bottom: 4px;
+}
+.floor-btn {
+    padding: 8px 18px; border-radius: 20px;
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-white); font-weight: 700;
+    font-size: 0.8rem; white-space: nowrap;
+    transition: all var(--transition); cursor: pointer;
+    color: var(--text-body);
+}
+.floor-btn:hover { border-color: var(--primary-red); color: var(--primary-red); }
+.floor-btn.active {
+    background: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 10px rgba(230, 57, 70, 0.3);
+}
+
+.mode-group { display: flex; gap: 8px; justify-content: flex-start; }
+.mode-btn {
+    flex: 1; height: 42px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-white); font-weight: 700;
+    font-size: 0.8rem;
+    transition: all var(--transition); cursor: pointer;
+    color: var(--text-body);
+}
+.mode-btn:hover { border-color: var(--dark-grey); }
+.mode-btn.active {
+    background: var(--dark-grey) !important;
+    border-color: var(--dark-grey) !important;
+    color: #fff !important;
+}
+
+/* 등급 버튼 */
+.seat-type-btn {
+    padding: 8px 16px; border-radius: 20px;
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-white); font-weight: 700;
+    font-size: 0.78rem; white-space: nowrap;
+    transition: all var(--transition); cursor: pointer;
+}
+.seat-type-btn.vip { color: var(--vip-color); border-color: var(--vip-color); }
+.seat-type-btn.r { color: var(--r-color); border-color: var(--r-color); }
+.seat-type-btn.s { color: var(--s-color); border-color: var(--s-color); }
+.seat-type-btn.a { color: var(--a-color); border-color: var(--a-color); }
+.seat-type-btn.active { color: #fff !important; }
+.seat-type-btn.vip.active { background: var(--vip-color); box-shadow: 0 3px 10px rgba(217,119,6,0.3); }
+.seat-type-btn.r.active { background: var(--r-color); box-shadow: 0 3px 10px rgba(230,57,70,0.3); }
+.seat-type-btn.s.active { background: var(--s-color); box-shadow: 0 3px 10px rgba(37,99,235,0.3); }
+.seat-type-btn.a.active { background: var(--a-color); box-shadow: 0 3px 10px rgba(5,150,105,0.3); }
+
+/* 캔버스 */
+.canvas-wrapper {
+    width: 100%; aspect-ratio: 1/1;
+    margin: 0 auto;
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden; position: relative;
+    border: 1.5px solid var(--border-color) !important;
+    background: #f8fafc !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 입력 그룹 */
+.input-group {
+    gap: 8px;
+}
+.input-group .form-control {
+    border-radius: var(--radius-md) !important;
+    height: 48px;
+}
+.input-group .input-group-text {
+    border-radius: var(--radius-md) !important;
+    background: var(--bg-light-grey);
+    border: 1.5px solid var(--border-color);
+    font-weight: 600; font-size: 0.85rem;
+    color: var(--text-body);
+}
+.input-group > :not(:first-child) { border-radius: var(--radius-md) !important; }
+
+/* 통계 그리드 */
+.seat-stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: var(--bg-light-grey);
+    padding: 16px; border-radius: var(--radius-lg);
+    margin-top: 16px;
+}
+.stat-box {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 12px 6px;
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+.stat-box .label { font-size: 0.72rem; color: var(--mid-grey); font-weight: 600; }
+.stat-box .count { font-size: 1.1rem; font-weight: 800; }
+#countVIP { color: var(--vip-color); }
+#countR { color: var(--r-color); }
+#countS { color: var(--s-color); }
+#countA { color: var(--a-color); }
+.stat-box[style*="span 2"] {
+    grid-column: span 2;
+    background: var(--dark-grey);
+    border-radius: var(--radius-md);
+}
+.stat-box[style*="span 2"] .label { color: rgba(255,255,255,0.6); }
+.stat-box[style*="span 2"] .count { color: #fff; }
+
+/* ==========================================================================
+   [8] STEP 3 - 운영/대관 설정
+   ========================================================================== */
+/* 임시 휴무일 태그 */
+#tempDateList .badge-date {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-light-grey);
+    border: 1.5px solid var(--border-color);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--text-body);
+}
+#tempDateList .badge-date .remove-btn {
+    width: 18px; height: 18px;
+    background: var(--border-color);
+    border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.7rem; color: var(--mid-grey);
+    transition: all var(--transition);
+}
+#tempDateList .badge-date .remove-btn:hover { background: var(--primary-red); color: #fff; }
+
+/* ==========================================================================
+   [9] BOTTOM FIXED BUTTON
+   ========================================================================== */
+.fixed-bottom-btn {
+    position: fixed; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: var(--max-width-mobile);
+    padding: 16px 20px 24px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border-color);
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.btn-primary-red {
+    background: var(--primary-red);
+    color: #fff; width: 100%;
+    border: none; padding: 16px;
+    border-radius: var(--radius-md);
+    font-weight: 800; font-size: 1rem;
+    letter-spacing: -0.2px;
+    transition: all var(--transition);
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.35);
+    cursor: pointer;
+}
+.btn-primary-red:hover {
+    background: var(--primary-red-dark);
+    box-shadow: 0 8px 24px rgba(230, 57, 70, 0.45);
+    transform: translateY(-1px);
+    color: #fff;
+}
+.btn-primary-red:active { transform: translateY(0); }
+
+/* ==========================================================================
+   [10] PC RESPONSIVE
+   ========================================================================== */
+@media (min-width: 768px) {
+    body { background-color: #edf0f5; padding-top: 40px; }
+    .app-wrapper {
+        max-width: var(--max-width-pc);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        min-height: auto;
+        overflow: hidden;
+    }
+    .app-header { border-radius: 24px 24px 0 0; }
+    .app-main { padding: 0 60px var(--bottom-btn-area); }
+    .profile-upload-wrap { width: calc(100% + 120px); margin-left: -60px; }
+    .profile-placeholder { aspect-ratio: 21 / 9; }
+
+    /* Step1, Step3 — 2열 그리드 */
+    #step1, #step3 { display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; }
+    .section-title, .profile-upload-wrap { grid-column: span 2; }
+
+    /* 편의시설: 그리드 → 가로 wrap flex (아이템이 늘어도 자연스럽게 줄바꿈) */
+    .checkbox-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        grid-column: span 2;
+    }
+    .check-item {
+        flex: 0 0 auto;
+        min-width: 110px;
+    }
+
+    /* 좌석 통계 그리드 — PC에서 가운데 정렬, 최대 너비 제한 */
+    .seat-stats-grid {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* 하단 버튼 영역 — 모바일 fixed 값 전부 리셋 후 full width */
+    .fixed-bottom-btn {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: calc(100% + 120px) !important;
+        max-width: none !important;
+        margin: 40px -60px 0 !important;
+        background: var(--bg-light-grey);
+        border-top: 1px solid var(--border-color);
+        border-radius: 0 0 24px 24px;
+        padding: 28px 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        z-index: 1;
+    }
+    /* 버튼: 가운데 정렬 + 더 넓게 */
+    .btn-primary-red,
+    .btn-delete {
+        max-width: 560px;
+        width: 100%;
+        display: block;
+        margin: 0;
+        padding: 18px 40px;
+        font-size: 1.05rem;
+    }
+}
+
+/* ==========================================================================
+   [11] 삭제 버튼
+   ========================================================================== */
+.btn-delete {
+    width: 100%; border: 2px solid #dee2e6;
+    background: transparent; color: var(--mid-grey);
+    padding: 13px; border-radius: var(--radius-md);
+    font-weight: 700; font-size: 0.9rem;
+    margin-top: 10px; cursor: pointer;
+    transition: all var(--transition);
+}
+.btn-delete:hover {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    background: var(--primary-red-light);
+}
+@media (min-width: 768px) {
+    .btn-delete { max-width: 560px; width: 100%; }
+}
