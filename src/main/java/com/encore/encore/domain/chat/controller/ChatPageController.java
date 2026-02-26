@@ -89,11 +89,8 @@ public class ChatPageController {
 
 
         try {
-            /*Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-            ActiveMode activeMode = userDetails.getActiveMode();*/
-
-            Long activeProfileId = 3L;
-            ActiveMode activeMode = ActiveMode.ROLE_HOST;
+            Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+            ActiveMode activeMode = userDetails.getActiveMode();
 
             ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
             Long roomId = chatService.getChatRoomId(id);
@@ -194,12 +191,8 @@ public class ChatPageController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        /*Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
-        ActiveMode activeMode = userDetails.getActiveMode();*/
-
-        Long activeProfileId = 3L;
-        ActiveMode activeMode = ActiveMode.ROLE_HOST;
-
+        Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
+        ActiveMode activeMode = userDetails.getActiveMode();
 
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
 
