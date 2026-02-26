@@ -56,7 +56,7 @@ $(document).ready(() => {
             success: (res) => {
                 if (res.data) {
                     alert('채팅방이 생성되었습니다.');
-                    window.location.href = `/performance/${performanceId}/chat/list`;
+                    window.location.href = `/performances/${performanceId}/chats`;
                 } else {
                     alert(`실패: ${res.message || '알 수 없는 이유'}`);
                 }

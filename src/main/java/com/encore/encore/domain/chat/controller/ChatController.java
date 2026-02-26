@@ -182,7 +182,7 @@ public class ChatController {
      * @return 참여 중인 채팅방 목록을 담은 {@link Slice} 형태의 응답 객체
      */
 
-    @GetMapping("/api/users/{userId}/chats")
+    @GetMapping("/api/users/chats")
     public ResponseEntity<CommonResponse<Slice<ResponseMyChatPostDto>>> getChatJoin(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
