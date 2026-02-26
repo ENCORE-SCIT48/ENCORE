@@ -92,7 +92,7 @@ public class ChatPageController {
             Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
             ActiveMode activeMode = userDetails.getActiveMode();
 
-            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id, performanceId);
             Long roomId = chatService.getChatRoomId(id);
 
             boolean isWriter = chatService.canEdit(activeProfileId, activeMode, dto);
@@ -137,7 +137,7 @@ public class ChatPageController {
         log.info("게시글 수정 폼 진입 - performanceId: {}, postId: {}", performanceId, id);
 
         try {
-            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id, performanceId);
 
             model.addAttribute("performanceTitle", chatService.getPerformanceTitle(performanceId));
             model.addAttribute("performanceId", performanceId);

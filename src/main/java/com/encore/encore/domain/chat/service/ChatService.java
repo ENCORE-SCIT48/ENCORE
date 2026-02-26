@@ -105,17 +105,19 @@ public class ChatService {
      * @return 게시글 상세 정보를 담은 {@link ResponseDetailChatPostDto}
      * @throws ApiException 게시글이 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
      */
-    public ResponseDetailChatPostDto getChatPostDetail(Long id) {
+    public ResponseDetailChatPostDto getChatPostDetail(Long id, Long performanceId) {
         ChatPost chatPost = chatPostRepository.findById(id)
             .orElseThrow(
                 () -> new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다.")
             );
-
+        String perfermanceTitle = getPerformanceTitle(performanceId);
         String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
 
         ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
             ResponseDetailChatPostDto.builder()
                 .id(chatPost.getId())
+                .performanceId(performanceId)
+                .performanceTitle(perfermanceTitle)
                 .title(chatPost.getTitle())
                 .writerName(writerName)
                 .writerId(chatPost.getProfileId())
