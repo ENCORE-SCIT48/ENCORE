@@ -10,6 +10,6 @@ public interface PerformerProfileRepository extends JpaRepository<PerformerProfi
     // UserProfileRepository.java
     Optional<PerformerProfile> findByUser_UserId(Long userId);
     Optional<PerformerProfile> findByUser(User user);
-
+    boolean existsByUser(User user);   // 공연자 프로필 존재 여부 체크 (접근 검증용)
 
 }

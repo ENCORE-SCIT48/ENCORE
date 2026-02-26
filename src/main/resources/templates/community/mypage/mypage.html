@@ -126,6 +126,13 @@
       box-shadow: 0 4px 16px rgba(230, 57, 70, 0.1);
       color: #E63946;
     }
+
+    .logout-btn {
+      width: 100%;
+      background: #f8f8f8;
+      border: 1px solid #eee;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -171,12 +178,16 @@
         <a href="#" class="menu-item">프로필 수정</a>
         <a href="#" class="menu-item">알림 설정</a>
         <a href="#" class="menu-item">차단 목록 관리</a>
-        <a th:href="@{/logout}" class="menu-item">로그아웃</a>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+          <button type="submit" class="menu-item logout-btn">
+            로그아웃
+          </button>
+        </form>
         <a href="#" class="menu-item">회원 탈퇴</a>
       </div>
 
       <!-- ===== 공연자 전용 ===== -->
-      <div sec:authorize="isAuthenticated()">
+      <div th:if="${profileMode == 'ROLE_PERFORMER'}">
 
         <div class="section-title">공연자 설정</div>
         <div class="menu-list">
@@ -195,10 +206,6 @@
 
           <a th:href="@{/mypage/performer/applied-performances}" class="menu-item">
             내가 신청한 공연
-          </a>
-
-          <a th:href="@{/mypage/performer/completed-performances}" class="menu-item">
-            모집 완료된 전체 공연 리스트
           </a>
 
           <a th:href="@{/mypage/performer/recruited-performers}" class="menu-item">

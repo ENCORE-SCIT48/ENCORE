@@ -164,12 +164,15 @@
         게시글 내용
       </div>
 
-      <!-- 수정 / 삭제 -->
+      <!-- 버튼 영역 -->
       <div class="btn-group">
 
-        <!-- 로그인 + 작성자인 경우 -->
-        <th:block
-          th:if="${activeProfileId != null and post.performerId != null and activeProfileId == post.performerId}">
+        <!-- 작성자 (공연자 본인) -->
+        <th:block th:if="${profileMode == 'ROLE_PERFORMER'
+      and activeAuthorId != null 
+      and post.performerId != null 
+      and activeAuthorId == post.performerId}">
+
           <button id="editBtn" class="btn btn-primary"
             th:onclick="|location.href='@{/posts/performer/{id}/edit(id=${post.postId})}'|">
             수정
@@ -178,14 +181,34 @@
           <button id="deleteBtn" class="btn btn-outline-danger">
             삭제
           </button>
+
         </th:block>
 
-        <!-- 로그인했지만 작성자가 아닌 경우 -->
-        <th:block
-          th:if="${activeProfileId != null and post.performerId != null and activeProfileId != post.performerId}">
-          <button id="applyBtn" class="btn btn-primary">
+        <!-- 공연자이면서 작성자가 아닌 경우 -->
+        <th:block th:if="${profileMode == 'ROLE_PERFORMER'
+      and activeAuthorId != null
+      and activeAuthorId != post.performerId}">
+
+          <!-- 마감 -->
+          <button th:if="${post.capacity != null 
+        and post.approvedCount >= post.capacity}" class="btn btn-secondary" disabled>
+            모집마감
+          </button>
+
+          <!-- 신청완료 -->
+          <button th:if="${(post.capacity == null 
+        or post.approvedCount < post.capacity) 
+        and alreadyApplied}" class="btn btn-secondary" disabled>
+            신청완료
+          </button>
+
+          <!-- 신청 -->
+          <button th:if="${(post.capacity == null 
+        or post.approvedCount < post.capacity) 
+        and !alreadyApplied}" id="applyBtn" class="btn btn-primary">
             신청
           </button>
+
         </th:block>
 
       </div>

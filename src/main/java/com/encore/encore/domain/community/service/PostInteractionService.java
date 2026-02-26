@@ -258,15 +258,13 @@ public class PostInteractionService {
     @Transactional(readOnly = true)
     public int getApprovedCount(Post post) {
 
-        log.info("[getApprovedCount] 승인 인원 조회 - postId={}", post.getPostId());
-
         long count = postInteractionRepository
                 .countByPostAndInteractionTypeAndStatusAndIsDeletedFalse(
                         post,
                         APPLY_TYPE,
                         APPROVED);
 
-        log.info("[getApprovedCount] 승인 인원 수={}", count);
+        log.info("[getApprovedCount] 승인 인원 조회 - postId={}", post.getPostId());
 
         return (int) count;
     }

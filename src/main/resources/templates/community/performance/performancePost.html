@@ -218,8 +218,8 @@
           <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
         </div>
 
-        <a th:href="@{/posts/performance/{id}/recommend(id=${post.postId})}" onclick="event.stopPropagation();"
-          class="recommend-link">
+        <a th:if="${profileMode == 'ROLE_PERFORMER'}" th:href="@{/posts/performance/{id}/recommend(id=${post.postId})}"
+          onclick="event.stopPropagation();" class="recommend-link">
           공연자 추천
         </a>
 
@@ -267,7 +267,9 @@
 
       <!-- 글 작성 -->
       <div class="write-btn">
-        <a th:href="@{/posts/performance/write}">글 작성</a>
+        <a th:href="@{/posts/performance/write}">
+          글 작성
+        </a>
       </div>
 
     </div>

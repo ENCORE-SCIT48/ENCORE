@@ -3,6 +3,7 @@ package com.encore.encore.domain.community.service;
 import com.encore.encore.domain.community.dto.PerformerPostDto.*;
 import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.repository.PostRepository;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.entity.PerformerProfile;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
@@ -32,74 +33,86 @@ public class PerformerPostService {
     private final PerformerProfileRepository performerProfileRepository;
 
     /**
-     * [설명] 로그인 사용자의 PerformerProfile을 조회합니다.
-     * 해당 사용자의 PerformerProfile이 존재하지 않는 경우
-     * 테스트용 PerformerProfile을 새로 생성하여 반환합니다.
+     * [설명] 공연자 모집 게시글의 작성 권한을 검증합니다.
      *
+     * @param post        대상 게시글
      * @param userDetails 로그인 사용자 정보
-     * @return 조회되거나 새로 생성된 PerformerProfile
      */
-    private PerformerProfile getOrCreatePerformerProfile(CustomUserDetails userDetails) {
+    private void validateOwnership(Post post, CustomUserDetails userDetails) {
 
+        if (userDetails == null) {
+            log.warn("[Ownership] 비로그인 사용자");
+            throw new ApiException(ErrorCode.FORBIDDEN, "로그인이 필요합니다.");
+        }
+
+        ActiveMode activeMode = userDetails.getActiveMode();
         Long userId = userDetails.getUser().getUserId();
-        log.info("PerformerProfile 조회 시작 - userId={}", userId);
+
+        log.info("[Ownership] 시작 - postId={}, userId={}, mode={}",
+                post.getPostId(), userId, activeMode);
+
+        if (activeMode != ActiveMode.ROLE_PERFORMER) {
+            log.warn("[Ownership] 공연자 모드 아님 - mode={}", activeMode);
+            throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 가능합니다.");
+        }
 
         PerformerProfile performer = performerProfileRepository
                 .findByUser_UserId(userId)
-                .orElse(null);
+                .orElseThrow(() -> {
+                    log.error("[Ownership] PerformerProfile 없음 - userId={}", userId);
+                    return new ApiException(ErrorCode.NOT_FOUND, "PerformerProfile이 존재하지 않습니다.");
+                });
 
-        if (performer != null) {
-            log.info("기존 PerformerProfile 사용 - performerId={}", performer.getPerformerId());
-            return performer;
+        if (post.getPerformerAuthor() == null ||
+                !post.getPerformerAuthor().getPerformerId().equals(performer.getPerformerId())) {
+
+            log.warn("[Ownership] 권한 없음 - postId={}, performerId={}",
+                    post.getPostId(), performer.getPerformerId());
+            throw new ApiException(ErrorCode.FORBIDDEN, "권한이 없습니다.");
         }
 
-        log.info("PerformerProfile 없음 → 테스트용 생성");
-
-        PerformerProfile newProfile = PerformerProfile.builder()
-                .user(userDetails.getUser())
-                .stageName(userDetails.getUser().getNickname())
-                .isInitialized(false)
-                .build();
-
-        PerformerProfile saved = performerProfileRepository.save(newProfile);
-
-        log.info("PerformerProfile 생성 완료 - performerId={}", saved.getPerformerId());
-
-        return saved;
+        log.info("[Ownership] 검증 완료 - postId={}", post.getPostId());
     }
 
     /**
      * [설명] 로그인 사용자의 활성 PerformerProfile ID를 반환합니다.
-     * 프로필이 없으면 생성 후 반환합니다.
+     * 활성 모드가 ROLE_PERFORMER일 때만 반환합니다.
      *
      * @param userDetails 로그인 사용자 정보
-     * @return performerId (비로그인 시 null)
+     * @return performerId (ROLE_PERFORMER 아닐 경우 null)
      */
     public Long getActivePerformerId(CustomUserDetails userDetails) {
 
         if (userDetails == null) {
-            log.info("activePerformerId 요청 - 비로그인 상태");
+            log.warn("[ActivePerformerId] 비로그인 사용자");
             return null;
         }
 
-        log.info("activePerformerId 조회 시작 - userId={}",
-                userDetails.getUser().getUserId());
+        ActiveMode activeMode = userDetails.getActiveMode();
+        Long userId = userDetails.getUser().getUserId();
 
-        PerformerProfile profile = getOrCreatePerformerProfile(userDetails);
+        log.info("[ActivePerformerId] 요청 - userId={}, mode={}", userId, activeMode);
 
-        log.info("activePerformerId 반환 - performerId={}",
-                profile.getPerformerId());
+        if (activeMode != ActiveMode.ROLE_PERFORMER) {
+            log.info("[ActivePerformerId] 공연자 모드 아님 - null 반환");
+            return null;
+        }
 
-        return profile.getPerformerId();
+        PerformerProfile performer = performerProfileRepository
+                .findByUser_UserId(userId)
+                .orElseThrow(() -> {
+                    log.error("[ActivePerformerId] PerformerProfile 없음 - userId={}", userId);
+                    return new ApiException(ErrorCode.NOT_FOUND, "PerformerProfile이 존재하지 않습니다.");
+                });
+
+        log.info("[ActivePerformerId] 반환 - performerId={}", performer.getPerformerId());
+
+        return performer.getPerformerId();
     }
 
     /**
      * [설명] 공연자 모집 게시글을 등록합니다.
-     *
-     * - 로그인 사용자만 등록할 수 있습니다.
-     * - 정원(capacity)은 1명 이상이어야 합니다.
-     * - 공연 정보(performanceId)가 존재하면 연관 설정합니다.
-     * - 초기 조회수는 0으로 설정합니다.
+     * 활성 모드가 ROLE_PERFORMER일 때만 가능합니다.
      *
      * @param dto         게시글 등록 요청 객체
      * @param userDetails 로그인 사용자 정보
@@ -109,26 +122,40 @@ public class PerformerPostService {
             RequestCreatePerformerPostDto dto,
             CustomUserDetails userDetails) {
 
-        log.info("공연자 모집 게시글 등록 시작");
-
         if (userDetails == null) {
-            log.info("비로그인 상태 - 등록 차단");
+            log.warn("[CreatePerformerPost] 비로그인 사용자");
             throw new ApiException(ErrorCode.FORBIDDEN, "로그인이 필요합니다.");
         }
 
-        PerformerProfile performer = getOrCreatePerformerProfile(userDetails);
-        log.info("작성자 performerId={}", performer.getPerformerId());
+        ActiveMode activeMode = userDetails.getActiveMode();
+        Long userId = userDetails.getUser().getUserId();
+
+        log.info("[CreatePerformerPost] 시작 - userId={}, mode={}", userId, activeMode);
+
+        if (activeMode != ActiveMode.ROLE_PERFORMER) {
+            log.warn("[CreatePerformerPost] 공연자 모드 아님 - mode={}", activeMode);
+            throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 작성 가능합니다.");
+        }
+
+        PerformerProfile performer = performerProfileRepository
+                .findByUser_UserId(userId)
+                .orElseThrow(() -> {
+                    log.error("[CreatePerformerPost] PerformerProfile 없음 - userId={}", userId);
+                    return new ApiException(ErrorCode.NOT_FOUND, "PerformerProfile이 존재하지 않습니다.");
+                });
+
+        if (dto.getCapacity() == null || dto.getCapacity() <= 0) {
+            log.warn("[CreatePerformerPost] 잘못된 정원 값 - userId={}", userId);
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
+        }
 
         Performance performance = null;
         if (dto.getPerformanceId() != null) {
-            log.info("Performance 조회 - performanceId={}", dto.getPerformanceId());
-
             performance = performanceRepository.findById(dto.getPerformanceId())
-                    .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다."));
-        }
-
-        if (dto.getCapacity() == null || dto.getCapacity() <= 0) {
-            throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
+                    .orElseThrow(() -> {
+                        log.error("[CreatePerformerPost] 공연 정보 없음 - performanceId={}", dto.getPerformanceId());
+                        return new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.");
+                    });
         }
 
         Post post = Post.builder()
@@ -143,8 +170,7 @@ public class PerformerPostService {
 
         Post savedPost = postRepository.save(post);
 
-        log.info("게시글 등록 완료 - postId={}, performerId={}",
-                savedPost.getPostId(), performer.getPerformerId());
+        log.info("[CreatePerformerPost] 완료 - postId={}", savedPost.getPostId());
 
         return ResponseCreatePerformerPostDto.builder()
                 .postId(savedPost.getPostId())
@@ -159,39 +185,26 @@ public class PerformerPostService {
      *
      * @param postId      삭제할 게시글 ID
      * @param userDetails 로그인 사용자 정보
-     * @return 게시글 삭제 결과
+     * @return 삭제 결과
      */
     public ResponseDeletePerformerPostDto deletePerformerPost(
             Long postId,
             CustomUserDetails userDetails) {
 
-        log.info("게시글 삭제 요청 - postId={}", postId);
-
-        if (userDetails == null) {
-            log.info("비로그인 상태 - 삭제 차단");
-            throw new ApiException(ErrorCode.FORBIDDEN, "로그인이 필요합니다.");
-        }
-
-        PerformerProfile performer = getOrCreatePerformerProfile(userDetails);
+        log.info("[DeletePerformerPost] 삭제 요청 - postId={}", postId);
 
         Post post = postRepository
                 .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMER_POST_TYPE)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.error("[DeletePerformerPost] 게시글 없음 - postId={}", postId);
+                    return new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
+                });
 
-        log.info("삭제 권한 체크 - 작성자={}, 요청자={}",
-                post.getPerformerAuthor().getPerformerId(),
-                performer.getPerformerId());
-
-        if (!post.getPerformerAuthor().getPerformerId()
-                .equals(performer.getPerformerId())) {
-
-            log.info("삭제 권한 없음");
-            throw new ApiException(ErrorCode.FORBIDDEN, "삭제 권한이 없습니다.");
-        }
+        validateOwnership(post, userDetails);
 
         post.delete();
 
-        log.info("게시글 삭제 완료 - postId={}", postId);
+        log.info("[DeletePerformerPost] 삭제 완료 - postId={}", postId);
 
         return ResponseDeletePerformerPostDto.builder()
                 .postId(postId)
@@ -201,10 +214,6 @@ public class PerformerPostService {
 
     /**
      * [설명] 공연자 모집 게시글을 수정합니다.
-     *
-     * - 로그인 사용자이면서 작성자 본인만 수정 가능합니다.
-     * - 제목, 내용, 정원(capacity)을 수정할 수 있습니다.
-     * - 정원은 1명 이상이어야 합니다.
      *
      * @param postId      수정할 게시글 ID
      * @param dto         수정 요청 객체
@@ -216,29 +225,16 @@ public class PerformerPostService {
             RequestUpdatePerformerPostDto dto,
             CustomUserDetails userDetails) {
 
-        log.info("게시글 수정 요청 - postId={}", postId);
-
-        if (userDetails == null) {
-            log.info("비로그인 상태 - 수정 차단");
-            throw new ApiException(ErrorCode.FORBIDDEN, "로그인이 필요합니다.");
-        }
-
-        PerformerProfile performer = getOrCreatePerformerProfile(userDetails);
+        log.info("[UpdatePerformerPost] 수정 요청 - postId={}", postId);
 
         Post post = postRepository
                 .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMER_POST_TYPE)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> {
+                    log.error("[UpdatePerformerPost] 게시글 없음 - postId={}", postId);
+                    return new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다.");
+                });
 
-        log.info("수정 권한 체크 - 작성자={}, 요청자={}",
-                post.getPerformerAuthor().getPerformerId(),
-                performer.getPerformerId());
-
-        if (!post.getPerformerAuthor().getPerformerId()
-                .equals(performer.getPerformerId())) {
-
-            log.info("수정 권한 없음");
-            throw new ApiException(ErrorCode.FORBIDDEN, "수정 권한이 없습니다.");
-        }
+        validateOwnership(post, userDetails);
 
         if (dto.getTitle() != null) {
             post.setTitle(dto.getTitle());
@@ -250,12 +246,13 @@ public class PerformerPostService {
 
         if (dto.getCapacity() != null) {
             if (dto.getCapacity() <= 0) {
+                log.warn("[UpdatePerformerPost] 잘못된 정원 값 - postId={}", postId);
                 throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
             }
             post.setCapacity(dto.getCapacity());
         }
 
-        log.info("게시글 수정 완료 - postId={}", postId);
+        log.info("[UpdatePerformerPost] 수정 완료 - postId={}", postId);
 
         return ResponseUpdatePerformerPostDto.builder()
                 .postId(post.getPostId())
@@ -355,7 +352,7 @@ public class PerformerPostService {
 
             int approvedCount = postInteractionService.getApprovedCount(post);
 
-            log.info("[listPerformerPosts] postId={}, approvedCount={}, capacity={}",
+            log.debug("[listPerformerPosts] postId={}, approvedCount={}, capacity={}",
                     post.getPostId(), approvedCount, post.getCapacity());
 
             return ResponseListPerformerPostDto.builder()
