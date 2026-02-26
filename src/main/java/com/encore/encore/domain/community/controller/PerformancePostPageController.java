@@ -3,11 +3,16 @@ package com.encore.encore.domain.community.controller;
 import com.encore.encore.domain.community.dto.PerformancePostDto.ResponseListPerformancePostDto;
 import com.encore.encore.domain.community.dto.PerformancePostDto.ResponseReadPerformancePostDto;
 import com.encore.encore.domain.community.service.PerformancePostService;
+import com.encore.encore.domain.community.service.PerformerRecommendationService;
 import com.encore.encore.domain.community.service.PostInteractionService;
+import com.encore.encore.domain.member.dto.ResponsePerformerRecommendDto;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -24,6 +29,7 @@ public class PerformancePostPageController {
 
     private final PerformancePostService performancePostService;
     private final PostInteractionService postInteractionService;
+    private final PerformerRecommendationService performerRecommendationService;
 
     /**
      * [설명] 공연 모집 게시글 목록 화면을 조회합니다.
@@ -39,18 +45,23 @@ public class PerformancePostPageController {
      */
     @GetMapping
     public String post(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "keyword", required = false) String keyword,
             @PageableDefault(size = 5, sort = "createdAt") Pageable pageable,
             Model model) {
 
         log.info("GET /posts/performance - 목록 페이지 요청");
 
-        Page<ResponseListPerformancePostDto> page = 
-            performancePostService.listPerformancePosts(keyword, pageable);
+        Page<ResponseListPerformancePostDto> page = performancePostService.listPerformancePosts(keyword, pageable);
 
         model.addAttribute("posts", page.getContent());
         model.addAttribute("page", page);
         model.addAttribute("keyword", keyword);
+
+        if (userDetails != null) {
+            model.addAttribute("profileMode",
+                    userDetails.getActiveMode().name());
+        }
 
         return "community/performance/performancePost";
     }
@@ -75,8 +86,7 @@ public class PerformancePostPageController {
 
         log.info("[PerformanceDetail] 요청 - postId={}", postId);
 
-        ResponseReadPerformancePostDto post = 
-            performancePostService.readPerformancePost(postId, true);
+        ResponseReadPerformancePostDto post = performancePostService.readPerformancePost(postId, true);
 
         model.addAttribute("post", post);
         model.addAttribute("approvedCount", post.getApprovedCount());
@@ -192,26 +202,46 @@ public class PerformancePostPageController {
      * [설명] 특정 공연 모집 게시글의 공연자 추천 화면을 조회합니다.
      *
      * - 로그인 사용자만 접근 가능합니다.
+     * - 로그인한 공연자를 제외한 공연자 목록을 조회합니다.
+     * - 무대명(keyword), 활동 지역(activityArea), 포지션(part) 조건을 적용합니다.
+     * - Pageable을 이용하여 페이징 처리합니다.
      *
-     * @param userDetails 로그인 사용자 정보
-     * @param postId      공연 모집 게시글 ID
-     * @param model       View 전달 객체
+     * @param userDetails  로그인 사용자 정보
+     * @param postId       공연 모집 게시글 ID
+     * @param keyword      무대명 검색 키워드 (nullable)
+     * @param activityArea 활동 지역 필터 (nullable)
+     * @param part         포지션 필터 (nullable)
+     * @param pageable     페이징 정보 (page, size)
+     * @param model        View 전달 객체
      * @return 공연자 추천 화면
      */
     @GetMapping("/{postId}/recommend")
     public String recommendPerformers(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("postId") Long postId,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "activityArea", required = false) String activityArea,
+            @RequestParam(value = "part", required = false) String part,
+            @PageableDefault(size = 2) Pageable pageable,
             Model model) {
 
-        log.info("[PerformanceRecommend] 요청 - postId={}", postId);
-
         if (userDetails == null) {
-            log.warn("[PerformanceRecommend] 비로그인 사용자 접근");
             return "redirect:/auth/login";
         }
 
+        Page<ResponsePerformerRecommendDto> performers = performerRecommendationService.getPerformerList(
+                userDetails,
+                keyword,
+                activityArea,
+                part,
+                pageable);
+
         model.addAttribute("postId", postId);
+        model.addAttribute("performers", performers.getContent());
+        model.addAttribute("page", performers);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("activityArea", activityArea);
+        model.addAttribute("part", part);
 
         return "community/performance/performerRecommend";
     }

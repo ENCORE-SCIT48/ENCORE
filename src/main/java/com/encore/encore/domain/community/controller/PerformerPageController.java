@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.encore.encore.domain.community.dto.PerformanceManageDto;
 import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseListPerformerPostDto;
-import com.encore.encore.domain.community.entity.Post;
 import com.encore.encore.domain.community.service.PerformerMypageService;
 import com.encore.encore.domain.community.service.PerformerPostService;
 import com.encore.encore.domain.community.service.PostInteractionService;

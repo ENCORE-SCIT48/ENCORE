@@ -264,7 +264,6 @@ public class PostInteractionService {
                         APPLY_TYPE,
                         APPROVED);
 
-        log.info("[getApprovedCount] 승인 인원 조회 - postId={}", post.getPostId());
 
         return (int) count;
     }
