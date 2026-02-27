@@ -79,13 +79,6 @@ public class UserService {
             userRepository.save(user);
             log.info("회원가입 완료 - 성공적으로 DB에 저장됨: {}", email);
 
-            // 6. 알림 설정 자동 생성
-            UserNotification notification = UserNotification.builder().user(user).performanceStartAlert(true) // 기본값 ON
-                .dmAlert(true)               // 기본값 ON
-                .build();
-
-            userNotificationRepository.save(notification);
-
             // 7. 프로필 생성
             userProfileRepository.save(UserProfile.builder().user(user).build());
             performerProfileRepository.save(PerformerProfile.builder().user(user).build()); // 활동명은 일단 닉네임으로!
