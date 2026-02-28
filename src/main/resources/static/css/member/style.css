@@ -3,16 +3,11 @@
     --dark-grey: #333333;
 }
 
-body {
-    background-color: #f8f9fa;
-}
-
 .app-container {
-    max-width: 480px;
+    max-width: 430px;
     margin: 0 auto;
     background: #ffffff;
     min-height: 100vh;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
 
 /* 수정된 헤더 스타일 */

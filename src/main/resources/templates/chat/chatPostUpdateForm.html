@@ -36,8 +36,9 @@
     <!-- ===== 스크롤 영역 ===== -->
     <main class="app-content">
         <section class="chat-form">
-            <form id="chatPostForm">
-                <input type="hidden" id="performanceId" th:value="${performanceId}">
+            <form id="chatUpdateForm">
+                <input type="hidden" id="chatId" name="chatId" th:value="${chatPost.id}">
+                <input type="hidden" id="perfId" name="performanceId" th:value="${performanceId}">
 
                 <!-- 공연명 -->
                 <div class="mb-3">
@@ -71,6 +72,7 @@
                 <div class="mb-3">
                     <label class="form-label">채팅방 상태</label>
                     <div class="status-toggle">
+                        <input type="hidden" id="status" name="status" th:value="${chatPost.status}">
                         <button type="button" class="status-btn active" data-status="OPEN">
                             모집중
                         </button>
@@ -81,7 +83,7 @@
                 </div>
 
                 <!-- 제출 버튼 -->
-                <button type="submit" class="btn btn-primary w-100">수정하기</button>
+                <button type="submit" class="btn btn-custom w-100">수정하기</button>
             </form>
         </section>
     </main>

@@ -72,7 +72,7 @@ public class ReportController {
 //        Long loginUserId = userDetails.getUser().getUserId();
 
         ActiveMode loginProfileMode = ActiveMode.ROLE_HOST;
-        Long loginUserId = 24L;
+        Long loginUserId = 2L;
 
         ResponseCreateReportDto result = reportService.saveReport(dto, loginUserId, loginProfileMode);
 

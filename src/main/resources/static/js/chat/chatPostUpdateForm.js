@@ -44,6 +44,16 @@ $(document).ready(() => {
             return;
         }
 
+        if (!performanceId || !title || !content || !maxMember) {
+                    alert('모든 입력값을 올바르게 입력해주세요.');
+                    return;
+                }
+
+        if (content.length > 200) {
+                alert('내용은 200자 이하로 입력해주세요.');
+                return;
+            }
+
         if (!status) {
             alert('상태를 반드시 선택해주세요.');
             return;
@@ -59,7 +69,7 @@ $(document).ready(() => {
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: (res) => {
-                if (res.data || res.success) {
+                if (res.success) {
                     alert('수정이 완료되었습니다.');
                     window.location.href = `/performances/${performanceId}/chat/${chatId}`;
                 } else {

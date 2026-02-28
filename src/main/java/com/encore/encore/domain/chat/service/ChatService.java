@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,17 +105,21 @@ public class ChatService {
      * @return 게시글 상세 정보를 담은 {@link ResponseDetailChatPostDto}
      * @throws ApiException 게시글이 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
      */
-    public ResponseDetailChatPostDto getChatPostDetail(Long id) {
+    public ResponseDetailChatPostDto getChatPostDetail(Long id, Long performanceId) {
         ChatPost chatPost = chatPostRepository.findById(id)
             .orElseThrow(
                 () -> new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다.")
             );
+        String perfermanceTitle = getPerformanceTitle(performanceId);
+        String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
 
         String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
 
         ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
             ResponseDetailChatPostDto.builder()
                 .id(chatPost.getId())
+                .performanceId(performanceId)
+                .performanceTitle(perfermanceTitle)
                 .title(chatPost.getTitle())
                 .writerName(writerName)
                 .writerId(chatPost.getProfileId())
@@ -462,5 +467,29 @@ public class ChatService {
         return participantDtos;
     }
 
+    /**
+     * 로그인 한 사용자가 게시물을 수정할 수 있는지 확인한다.
+     *
+     * @param activeProfileId 로그인 되어있는 프로필 아이디
+     * @param activeMode      사용중인 프로필 모드
+     * @param dto             글에 대한 정보
+     * @return
+     */
+    public boolean canEdit(Long activeProfileId, ActiveMode activeMode, ResponseDetailChatPostDto dto) {
+        return Objects.equals(activeProfileId, dto.getWriterId()) &&
+            Objects.equals(activeMode, ActiveMode.valueOf(dto.getWriterProfileMode()));
+    }
+
+    public boolean canJoin(Long activeProfileId, ActiveMode activeMode, List<ResponseParticipantDto> chatParticipantList) {
+
+        for (ResponseParticipantDto participant : chatParticipantList) {
+            if (participant.getProfileId().equals(activeProfileId)
+                && participant.getProfileMode() == activeMode.name()) {
+                // 이미 참여자이므로 버튼 보여줌
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
