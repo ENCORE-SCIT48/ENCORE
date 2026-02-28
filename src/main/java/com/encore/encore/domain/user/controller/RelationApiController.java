@@ -1,8 +1,8 @@
 package com.encore.encore.domain.user.controller;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
-import com.encore.encore.domain.user.dto.ResponseFollowDto;
-import com.encore.encore.domain.user.dto.ResponseFollowListDto;
+import com.encore.encore.domain.user.dto.*;
+import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.service.RelationService;
 import com.encore.encore.global.common.CommonResponse;
 import com.encore.encore.global.config.CustomUserDetails;
@@ -121,6 +121,7 @@ public class RelationApiController {
         Long loginProfileId = userDetails.getActiveProfileId();
         ActiveMode loginProfileMode = userDetails.getActiveMode();
 
+
         List<ResponseFollowListDto> followers = relationService.getFollowerList(
             targetProfileId,
             targetMode,
@@ -131,4 +132,74 @@ public class RelationApiController {
         return ResponseEntity.ok(CommonResponse.ok(followers, "팔로워 리스트 조회 성공"));
     }
 
+    /**
+     * 선택한 타겟을 차단한다.
+     *
+     * @param userDetails     로그인 유저의 정보
+     * @param requestBlockDto 타겟의 정보
+     * @return 타겟 완료 정보
+     */
+    @PostMapping("/relations/block")
+    public ResponseEntity<CommonResponse<ResponseBlockDto>> block(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody RequestBlockDto requestBlockDto
+    ) {
+        Long profileId = userDetails.getActiveProfileId();
+        ActiveMode profileMode = userDetails.getActiveMode();
+
+
+        if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 할 수 없습니다.");
+        }
+
+        ResponseBlockDto result = relationService.block(
+            profileId, profileMode, requestBlockDto
+        );
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "차단 되었습니다."));
+    }
+
+    /**
+     * 타겟을 차단 해제 한다.
+     *
+     * @param requestBlockDto 차단 해제할 타겟의 정보
+     * @return 차단 해제 완료
+     */
+    @PostMapping("/relations/unblock")
+    public ResponseEntity<CommonResponse<ResponseBlockDto>> unBlock(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody RequestBlockDto requestBlockDto
+    ) {
+        Long profileId = userDetails.getActiveProfileId();
+        ActiveMode profileMode = userDetails.getActiveMode();
+
+
+        if (requestBlockDto.getTargetType() == TargetType.USER && profileId.equals(requestBlockDto.getTargetId()) && profileMode.name().equals(requestBlockDto.getTargetProfileMode())) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신은 차단 해제 할 수 없습니다.");
+        }
+
+        ResponseBlockDto result = relationService.unblockUser(
+            profileId, profileMode, requestBlockDto
+        );
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "차단이 해제 되었습니다."));
+    }
+
+    /**
+     * 차단한 리스트를 불러온다
+     *
+     * @param userDetails 로그인 되어있는 유저
+     * @return 로그인 되어있는 유저가 차단한 리스트 목록
+     */
+    @GetMapping("/relations/blocks")
+    public ResponseEntity<CommonResponse<List<BlockListDto>>> getBlocks(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUser().getUserId();
+        ActiveMode profileMode = userDetails.getActiveMode();
+
+        List<BlockListDto> response = relationService.getBlockList(userId, profileMode);
+
+        return ResponseEntity.ok(CommonResponse.ok(response, "조회 성공"));
+    }
 }

@@ -61,7 +61,7 @@ $(document).ready(() => {
             success: (res) => {
                 if (res.data || res.success) {
                     alert('수정이 완료되었습니다.');
-                    window.location.href = `/performance/${performanceId}/chat/${chatId}`;
+                    window.location.href = `/performances/${performanceId}/chat/${chatId}`;
                 } else {
                     alert(`수정 실패: ${res.message || '알 수 없는 이유'}`);
                 }

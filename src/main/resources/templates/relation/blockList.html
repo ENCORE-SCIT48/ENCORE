@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>차단 목록 관리</title>
+
+    <!-- Bootstrap (Bootswatch Litera) -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link href="/css/relation/blockList.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <header class="sticky-top">
+        <div class="header-title-bar">
+            <div class="header-left">
+                <button type="button" class="btn-icon" onclick="history.back()">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+            </div>
+            <h1 class="header-title">차단 목록 관리</h1>
+        </div>
+
+        <nav aria-label="차단 목록 필터">
+            <ul class="nav nav-pills" id="filterTab" role="tablist">
+                <li class="nav-item">
+                    <button type="button" class="nav-link active" data-filter="all">전체</button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link" data-filter="USER">유저</button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link" data-filter="VENUE">공연장</button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link" data-filter="PERFORMANCE">공연</button>
+                </li>
+                <li class="nav-item">
+                    <button type="button" class="nav-link" data-filter="CHAT_POST">채팅방</button>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="content-area">
+        <section id="blockList" aria-live="polite">
+        </section>
+    </main>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/js/relation/blockList.js"></script>
+
+</body>
+</html>

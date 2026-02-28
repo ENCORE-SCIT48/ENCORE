@@ -180,4 +180,6 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
     );
 
 
+    @Query("SELECT cp.title FROM ChatPost cp WHERE cp.id = :id")
+    String findTitleById(@Param("id") Long id);
 }

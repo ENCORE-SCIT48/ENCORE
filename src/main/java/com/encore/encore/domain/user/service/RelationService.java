@@ -1,5 +1,6 @@
 package com.encore.encore.domain.user.service;
 
+import com.encore.encore.domain.chat.repository.ChatPostRepository;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.entity.HostProfile;
 import com.encore.encore.domain.member.entity.PerformerProfile;
@@ -7,11 +8,10 @@ import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
+import com.encore.encore.domain.member.service.ProfileService;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
-import com.encore.encore.domain.user.dto.ProfileInfoDto;
-import com.encore.encore.domain.user.dto.ResponseFollowDto;
-import com.encore.encore.domain.user.dto.ResponseFollowListDto;
+import com.encore.encore.domain.user.dto.*;
 import com.encore.encore.domain.user.entity.RelationType;
 import com.encore.encore.domain.user.entity.TargetType;
 import com.encore.encore.domain.user.entity.User;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -43,6 +44,8 @@ public class RelationService {
     private final HostProfileRepository hostProfileRepository;
     private final PerformanceRepository performanceRepository;
     private final VenueRepository venueRepository;
+    private final ProfileService profileService;
+    private final ChatPostRepository chatPostRepository;
 
     /**
      * 프로필 id, 프로필 모드로 찾을 각각의 정보를 찾을 경우(ProfileInfoDto반환)
@@ -400,11 +403,210 @@ public class RelationService {
     }
 
     public boolean isFollowing(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode activeMode) {
-        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndIsDeletedFalse(
-            loginUserId, loginProfileMode, profileId, activeMode);
+        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(
+            loginUserId, loginProfileMode, profileId, activeMode, RelationType.FOLLOW);
 
         return b;
     }
 
+    /**
+     * 타겟을 차단한다.
+     *
+     * @param profileId       차단하는 사람의 프로필 ID
+     * @param profileMode     차단하는 사람의 프로필 모드
+     * @param requestBlockDto 차단 당하는 사람의 프로필 ID, 프로필 모드, 타겟타입
+     * @return 차단한 정보 반환
+     */
+    public ResponseBlockDto block(Long profileId, ActiveMode profileMode, RequestBlockDto requestBlockDto) {
+        validateBlockRequest(requestBlockDto);
+
+        User actor = findProfileById(profileId, profileMode);
+
+        // 1. 유저 타입일 때만 프로필 모드 파싱 (그 외에는 null)
+        ActiveMode targetMode = (requestBlockDto.getTargetType() == TargetType.USER)
+            ? ActiveMode.valueOf(requestBlockDto.getTargetProfileMode())
+            : null;
+
+        // 2. 기존 관계 조회 (targetType 조건이 들어간 새로운 쿼리 메서드 사용 권장)
+        Optional<UserRelation> optionalRelation = userRelationRepository.findExistingRelationGeneral(
+            actor.getUserId(),
+            profileMode,
+            requestBlockDto.getTargetId(),
+            targetMode,
+            requestBlockDto.getTargetType(),
+            RelationType.BLOCK
+        );
+        UserRelation relation;
+
+        if (optionalRelation.isPresent()) {
+            relation = optionalRelation.get();
+            if (relation.isDeleted()) {
+                relation.restore();
+                // 3. 유저 타입일 때만 팔로우 관계 청소
+                if (requestBlockDto.getTargetType() == TargetType.USER) {
+                    cleanUpFollows(actor.getUserId(), profileId, profileMode, requestBlockDto.getTargetId(), targetMode);
+                }
+            }
+        } else {
+            // 4. 새 관계 생성 (TargetType 반영)
+            relation = UserRelation.builder()
+                .actor(actor)
+                .actorProfileMode(profileMode)
+                .targetId(requestBlockDto.getTargetId())
+                .targetProfileMode(targetMode)
+                .targetType(requestBlockDto.getTargetType())
+                .relationType(RelationType.BLOCK)
+                .build();
+            userRelationRepository.save(relation);
+
+            if (requestBlockDto.getTargetType() == TargetType.USER) {
+                cleanUpFollows(actor.getUserId(), profileId, profileMode, requestBlockDto.getTargetId(), targetMode);
+            }
+        }
+
+        return ResponseBlockDto.builder()
+            .targetId(requestBlockDto.getTargetId())
+            .targetProfileMode(requestBlockDto.getTargetProfileMode())
+            .isBlocked(true)
+            .build();
+    }
+
+    /**
+     * 차단 시 팔로우 해제 메소드
+     *
+     * @param actorUserId
+     * @param actorProfileId
+     * @param actorMode
+     * @param targetProfileId
+     * @param targetMode
+     */
+    private void cleanUpFollows(Long actorUserId, Long actorProfileId, ActiveMode actorMode,
+                                Long targetProfileId, ActiveMode targetMode) {
+
+        // 1. 내가(계정) 상대(프로필)를 팔로우한 것 삭제
+        // 조건: actor_id = actorUserId AND target_id = targetProfileId
+        userRelationRepository.deleteMyFollow(actorUserId, actorMode, targetProfileId, targetMode);
+
+        User targetUser = findProfileById(targetProfileId, targetMode);
+
+        // 2. 상대(프로필)가 나(프로필)를 팔로우한 것 삭제
+        // 조건: actor_id = (상대의 계정ID) AND target_id = actorProfileId
+        userRelationRepository.deleteTheirFollowToMe(targetUser.getUserId(), targetMode, actorProfileId, actorMode);
+    }
+
+    /**
+     * 차단 해제 메소드
+     *
+     * @param profileId       차단 해제를 할 유저의 아이디
+     * @param profileMode     차단 해제를 할 유저의 모드
+     * @param requestBlockDto 차단 해제를 당할 target의 정보
+     */
+    public ResponseBlockDto unblockUser(Long profileId, ActiveMode profileMode, RequestBlockDto requestBlockDto) {
+
+        validateBlockRequest(requestBlockDto);
+        User actor = findProfileById(profileId, profileMode);
+
+        ActiveMode targetMode = null;
+        if (requestBlockDto.getTargetType() == TargetType.USER) {
+            targetMode = ActiveMode.valueOf(requestBlockDto.getTargetProfileMode());
+        }
+
+        // TargetType을 포함하여 정확한 관계를 찾음
+        UserRelation relation = userRelationRepository.findExistingRelationGeneral(
+            actor.getUserId(),
+            profileMode,
+            requestBlockDto.getTargetId(),
+            targetMode,
+            requestBlockDto.getTargetType(),
+            RelationType.BLOCK
+        ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "차단 내역이 존재하지 않습니다."));
+
+        relation.delete(); // isDeleted = true
+
+        return ResponseBlockDto.builder()
+            .targetId(requestBlockDto.getTargetId())
+            .targetProfileMode(requestBlockDto.getTargetProfileMode())
+            .isBlocked(false)
+            .build();
+    }
+
+    /**
+     * 1. targetType이 유저인데 targetProfileMode가 들어있지 않을 경우 오류 발생
+     * 2. targetType이 유저가 아닌데 targetProfileMode가 들어있을 경우 null값을 넣어 DB 정합성을 맞춤
+     *
+     * @param dto
+     */
+    private void validateBlockRequest(RequestBlockDto dto) {
+        if (dto.getTargetType() == TargetType.USER) {
+            if (dto.getTargetProfileMode() == null || dto.getTargetProfileMode().isBlank()) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "유저 차단 시 프로필 모드는 필수입니다.");
+            }
+        } else {
+            // 유저가 아닌데 모드가 들어온 경우, 에러를 던지거나 null로 강제 초기화
+            if (dto.getTargetProfileMode() != null) {
+                dto.setTargetProfileMode(null);
+            }
+        }
+    }
+
+    /**
+     * 로그인 유저가 차단한 목록을 조회한다
+     *
+     * @param userId      차단한 유저의 아이디
+     * @param profileMode 차단한 유저의 프로필 모드
+     * @return 차단 리스트 목록
+     */
+    public List<BlockListDto> getBlockList(Long userId, ActiveMode profileMode) {
+        // 1. 차단 관계 조회 (isDeleted = false)
+        List<UserRelation> relations = userRelationRepository
+            .findAllByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(
+                userId, profileMode, RelationType.BLOCK
+            );
+
+        return relations.stream().map(relation -> {
+            String targetName = "알 수 없음";
+
+            // 2. 타입별 이름 조회 로직
+            switch (relation.getTargetType()) {
+                case USER:
+                    targetName = profileService.resolveSenderName(relation.getTargetId(), relation.getTargetProfileMode());
+                    break;
+                case PERFORMANCE:
+                    targetName = performanceRepository.findTitleByPerformanceId(relation.getTargetId());
+                    break;
+                case VENUE:
+                    targetName = venueRepository.findVenueNameByVenueId(relation.getTargetId());
+                    break;
+                case CHAT_POST:
+                    targetName = chatPostRepository.findTitleById(relation.getTargetId());
+                    break;
+            }
+
+            return BlockListDto.builder()
+                .targetId(relation.getTargetId())
+                .targetType(relation.getTargetType().name()) // "USER"
+                .targetProfileMode(relation.getTargetProfileMode() != null ?
+                    relation.getTargetProfileMode().name() : null)
+                .name(targetName)
+                .typeDisplayName(relation.getTargetType().getKoreanName()) // Enum에 정의된 한글명
+                .build();
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 내가 상대를 블락하였는지 조회한다.
+     *
+     * @param loginUserId
+     * @param loginProfileMode
+     * @param profileId
+     * @param profileMode
+     * @return
+     */
+    public boolean isBlocked(Long loginUserId, ActiveMode loginProfileMode, Long profileId, ActiveMode profileMode) {
+        boolean b = userRelationRepository.existsByActor_UserIdAndActorProfileModeAndTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(
+            loginUserId, loginProfileMode, profileId, profileMode, RelationType.BLOCK);
+
+        return b;
+    }
 }
 
