@@ -132,9 +132,8 @@ public class VenueReservationService {
         validateHostOwnership(hostId, reservation.getVenue());
 
         reservation.approve();
-        log.info("[대관 승낙 완료] reservationId={}", reservationId);
-
-        return VenueReservationResponseDto.from(reservation);
+        VenueReservation saved = reservationRepository.save(reservation); // 명시적 save
+        return VenueReservationResponseDto.from(saved);
     }
 
     /**
@@ -162,8 +161,6 @@ public class VenueReservationService {
 
         return VenueReservationResponseDto.from(reservation);
     }
-
-    // ─── private 헬퍼 ──────────────────────────────────────────────────────────
 
     /**
      * 공연장 ID로 Venue 를 조회한다.
