@@ -89,6 +89,10 @@ public class ChatPageController {
 
 
         try {
+            if (userDetails == null) {
+                // 로그인 안 됐으면 로그인 페이지로 리다이렉트
+                return "redirect:/auth/login";
+            }
             Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
             ActiveMode activeMode = userDetails.getActiveMode();
 
@@ -168,7 +172,13 @@ public class ChatPageController {
      */
 
     @GetMapping("/chats/join")
-    public String chatListJoin() {
+    public String chatListJoin(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            // 로그인 안 됐으면 로그인 페이지로 리다이렉트
+            return "redirect:/auth/login";
+        }
         return "chat/chatJoinListFull";
     }
 

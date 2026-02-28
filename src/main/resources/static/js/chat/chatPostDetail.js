@@ -68,36 +68,22 @@ $(document).ready(() => {
     });
 
     // =========================
-    // 채팅방 참가 버튼 클릭
-    // =========================
-    const $btnJoin = $('#btn-join');
-    if ($btnJoin.length) {
-        $btnJoin.on('click', function () {
-            const roomId = $(this).data('room-id');
+        // 채팅방 참가 버튼 클릭
+        // =========================
+        const $btnJoin = $('#btn-join');
+        if ($btnJoin.length) {
+            $btnJoin.on('click', function () {
+                const roomId = $(this).data('room-id');
 
-            if (!roomId) {
-                alert('채팅방 ID를 가져오지 못했습니다.');
-                return;
-            }
-
-            if (!confirm('채팅방에 입장하시겠습니까?')) return;
-
-            // 서버 상태 확인
-            $.ajax({
-                url: `/api/chat/${roomId}/can-join`,
-                method: 'GET',
-                success: (res) => {
-                    if (res.canJoin) {
-                        window.location.href = `/chat/${roomId}`;
-                    } else {
-                        alert(res.message || '참여 불가 상태입니다.');
-                    }
-                },
-                error: (xhr) => {
-                    const msg = xhr.responseJSON?.message || '서버 오류 발생';
-                    alert(msg);
+                if (!roomId) {
+                    alert('채팅방 ID를 가져오지 못했습니다.');
+                    return;
                 }
+
+                if (!confirm('채팅방에 입장하시겠습니까?')) return;
+
+                // 존재하지 않는 API 호출 대신 바로 채팅방 페이지로 이동
+                window.location.href = `/chat/${roomId}`;
             });
-        });
-    }
+        }
 });

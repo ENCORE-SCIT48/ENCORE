@@ -30,6 +30,13 @@
     <main>
         <!-- 팔로잉 리스트 -->
         <section id="following-content">
+            <!-- 추천 친구 -->
+            <div id="recommend-friend" class="recommend-section">
+                <h5>추천 친구</h5>
+                <div id="recommend-container" class="recommend-grid">
+                    <!-- 추천 친구 항목들이 여기 들어감 -->
+                </div>
+            </div>
             <div id="following-container" class="list-group"></div>
         </section>
 
@@ -40,7 +47,6 @@
     </main>
 
     <!-- 공용 Footer -->
-    <div th:replace="fragments/footer :: footer"></div>
 
     <!-- JS 변수 안전 처리 -->
 </div>
