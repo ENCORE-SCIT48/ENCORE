@@ -110,11 +110,13 @@ public class ChatService {
                 () -> new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다.")
             );
 
+        String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
+
         ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
             ResponseDetailChatPostDto.builder()
                 .id(chatPost.getId())
                 .title(chatPost.getTitle())
-                .writerName("임시")
+                .writerName(writerName)
                 .writerId(chatPost.getProfileId())
                 .writerProfileMode(chatPost.getProfileMode().name())
                 .createdAt(chatPost.getCreatedAt())
