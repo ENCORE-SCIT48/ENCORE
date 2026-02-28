@@ -417,7 +417,7 @@ public class ChatService {
                 .profileId(activeId)
                 .profileMode(activeMode)
                 .room(chatRoom)
-                .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
+                .participantStatus(ChatParticipant.ParticipantStatus.ACCEPTED)
                 .build();
 
             chatParticipantRepository.save(newParticipant);

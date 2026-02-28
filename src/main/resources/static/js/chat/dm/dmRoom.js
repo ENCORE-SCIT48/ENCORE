@@ -14,7 +14,7 @@ $(document).ready(() => {
     let currentPage = 0;
     let hasMore = true;
 
-    const participantStatus = $('#participantStatus').val();
+    const participantStatus = PARTICIPANT_STATUS;
     const ROOM_ID_VALUE = ROOM_ID; // 전역 ROOM_ID 사용
     const CURRENT_USER = CURRENT_USER_ID;
 
@@ -25,18 +25,31 @@ $(document).ready(() => {
     setupParticipantUI();
 
     // ========================
+        // XSS 방지
+        // ========================
+        function escapeHtml(text) {
+            return $('<div>').text(text).html();
+        }
+
+    // ========================
     // UI 제어
     // ========================
     function setupParticipantUI() {
-        if (participantStatus === 'PENDING') {
-            $('#chatInput, #sendBtn').hide();
-            $('#acceptBtn, #rejectBtn').show();
+        const status = PARTICIPANT_STATUS;
+
+        if (status === 'ACCEPTED' || status === 'WAITING') {
+            // 수락/거절 버튼 그룹을 강제로 숨김 (!important 효과)
+            $('#actionBtnGroup').attr('style', 'display: none !important');
+
+            // 입력창과 전송버튼 표시
+            $('#chatInput').fadeIn().css('display', 'block');
+            $('#sendBtn').fadeIn().css('display', 'inline-block');
         } else {
-            $('#chatInput, #sendBtn').show();
-            $('#acceptBtn, #rejectBtn').hide();
+            // PENDING 상태일 때 (버튼 그룹은 flex로 보여줌)
+            $('#actionBtnGroup').attr('style', 'display: flex !important');
+            $('#chatInput, #sendBtn').hide();
         }
     }
-
     // ========================
     // 메시지 로드
     // ========================
@@ -76,21 +89,16 @@ $(document).ready(() => {
     // 메시지 렌더링
     // ========================
     function renderMessage(msg) {
-        const isMine = msg.profileId === CURRENT_USER;
-
-        const messageHtml = `
-            <div class="chat-message ${isMine ? 'mine' : 'other'}">
-                <div class="message-row mb-3">
-                    <div class="message-wrapper">
-                        <span class="message-sender">${msg.senderName}</span>
-                        <span class="message-content">${msg.content}</span>
-                        <span class="message-time">${dayjs(msg.createdAt).format('HH:mm')}</span>
-                    </div>
+        const isMine = msg.mine; // 서버에서 채팅 메시지 DTO에 mine 포함 필요
+        const html = `
+            <div class="chat-message ${isMine ? 'mine' : 'other'}" data-id="${msg.messageId}">
+                <span class="message-sender">${escapeHtml(msg.senderName)}</span>
+                <div class="message-wrapper">
+                    <span class="message-content">${escapeHtml(msg.content)}</span>
                 </div>
-            </div>
-        `;
-
-        $chatContainer.append(messageHtml);
+                <span class="message-time">${dayjs(msg.createdAt).format('HH:mm')}</span>
+            </div>`;
+        $chatContainer.append(html);
     }
 
     // ========================
@@ -104,9 +112,12 @@ $(document).ready(() => {
             url: `/api/dms/${ROOM_ID_VALUE}/messages`,
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ content }),
+            data: JSON.stringify({ roomId: ROOM_ID_VALUE, content:content }),
             success: (res) => {
-                renderMessage(res.data);
+                const newMessage = res.data;
+                newMessage.mine = true;
+
+                renderMessage(newMessage);
                 $('#chatInput').val('');
                 scrollToBottom();
             },
@@ -119,9 +130,8 @@ $(document).ready(() => {
     // ========================
     // 참여 상태 처리
     // ========================
-    function handleParticipantStatus(type) {
+    function handleParticipantStatus(type) { // type은 'ACCEPTED' 또는 'REJECTED'
         const isAccept = type === 'ACCEPTED';
-        const method = isAccept ? 'PATCH' : 'DELETE';
         const actionText = isAccept ? '수락' : '거절';
 
         if (!confirm(`요청을 ${actionText}하시겠습니까?`)) return;
@@ -130,18 +140,22 @@ $(document).ready(() => {
 
         $.ajax({
             url: `/api/dms/${ROOM_ID_VALUE}`,
-            method: method,
-            success: () => {
+            method: 'PATCH', // 거절도 '상태 변경' 요청이므로 PATCH
+            contentType: 'application/json',
+            // 핵심: 여기서 type(REJECTED)을 status라는 키에 담아 보냅니다.
+            data: JSON.stringify({ status: type }),
+            success: (res) => {
                 if (isAccept) {
                     alert('수락되었습니다.');
-                    $('#acceptBtn, #rejectBtn').hide();
-                    $('#chatInput, #sendBtn').fadeIn().css('display', 'flex');
+                    PARTICIPANT_STATUS = 'ACCEPTED';
+                    setupParticipantUI();
                 } else {
                     alert('거절되어 방이 삭제되었습니다.');
                     location.href = '/dm/list';
                 }
             },
-            error: () => {
+            error: (xhr) => {
+                console.error("실패 사유:", xhr.responseText);
                 alert('처리 중 오류가 발생했습니다.');
                 $('#acceptBtn, #rejectBtn').prop('disabled', false);
             }
