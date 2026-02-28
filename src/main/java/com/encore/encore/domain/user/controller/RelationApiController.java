@@ -202,4 +202,22 @@ public class RelationApiController {
 
         return ResponseEntity.ok(CommonResponse.ok(response, "조회 성공"));
     }
+
+    /**
+     * 같은 공연(UserPerformanceRelation의 공연이 3개 이상 겹침)을 본 유저의 프로필을 랜덤으로 3개 이하 추천해준다.
+     *
+     * @param userDetails 로그인 중인 유저
+     * @return 추천 친구
+     */
+    @GetMapping("/me/recommended-friends")
+    public ResponseEntity<CommonResponse<List<ResponseFollowListDto>>> recommendedFriends(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUser().getUserId();
+        ActiveMode profileMode = userDetails.getActiveMode();
+
+        List<ResponseFollowListDto> result = relationService.getRecommendUser(userId, profileMode);
+
+        return ResponseEntity.ok(CommonResponse.ok(result, "추천친구 조회 완료"));
+    }
 }

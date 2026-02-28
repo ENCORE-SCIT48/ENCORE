@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activateTab(activeTab);
 
     // 초기 리스트 로드
+    fetchRecommendFriends();
     fetchList('following', 'following-container', `/api/users/${targetId}/${profileMode}/following`);
     fetchList('follower', 'follower-container', `/api/users/${targetId}/${profileMode}/follower`);
 
@@ -16,26 +17,78 @@ document.addEventListener('DOMContentLoaded', () => {
         .addEventListener('click', () => activateTab('follower'));
 });
 
-// ==========================
-// 탭 전환
-// ==========================
-function activateTab(tab) {
-    const tabFollowing = document.getElementById('tab-following');
-    const tabFollower = document.getElementById('tab-follower');
-    const followingContent = document.getElementById('following-content');
-    const followerContent = document.getElementById('follower-content');
+    // ==========================
+    // 탭 전환
+    // ==========================
+    function activateTab(tab) {
+        const tabFollowing = document.getElementById('tab-following');
+        const tabFollower = document.getElementById('tab-follower');
+        const followingContent = document.getElementById('following-content');
+        const followerContent = document.getElementById('follower-content');
 
-    const isFollowingTab = tab === 'following';
+        const isFollowingTab = tab === 'following';
 
-    tabFollowing.classList.toggle('active', isFollowingTab);
-    tabFollower.classList.toggle('active', !isFollowingTab);
-  
-    followingContent.classList.toggle('hidden', !isFollowingTab);
-    followerContent.classList.toggle('hidden', isFollowingTab);
+        tabFollowing.classList.toggle('active', isFollowingTab);
+        tabFollower.classList.toggle('active', !isFollowingTab);
 
-    followingContent.classList.toggle('hidden', !isFollowingTab);
-    followerContent.classList.toggle('hidden', isFollowingTab);
-}
+        followingContent.classList.toggle('hidden', !isFollowingTab);
+        followerContent.classList.toggle('hidden', isFollowingTab);
+
+        followingContent.classList.toggle('hidden', !isFollowingTab);
+        followerContent.classList.toggle('hidden', isFollowingTab);
+    }
+
+    function fetchRecommendFriends() {
+        fetch('/api/users/me/recommended-friends')
+            .then(res => res.json())
+            .then(resp => {
+                if (!resp.success) return console.error('추천 친구 조회 실패');
+                renderRecommendFriends(resp.data);
+            })
+            .catch(err => console.error('추천 친구 로드 실패:', err));
+    }
+
+    function renderRecommendFriends(friends) {
+        // 1. 추천 친구 전체를 감싸는 가장 바깥쪽 부모 요소를 찾습니다.
+            const section = document.getElementById('recommend-friend');
+            const container = document.getElementById('recommend-container');
+
+            // 2. 데이터가 없으면 영역을 아예 지워버립니다.
+            if (!friends || friends.length === 0) {
+                if (section) {
+                    section.style.display = 'none'; // 공간까지 완전히 사라지게 함
+                }
+                return;
+            }
+
+            // 3. 데이터가 있으면 다시 보이게 설정 (새로고침 없이 탭 이동 시 대비)
+            if (section) {
+                section.style.display = 'block';
+            }
+
+            container.innerHTML = '';
+
+        friends.forEach(user => {
+            const div = document.createElement('div');
+            // 기존 클래스들 유지
+            div.className = 'd-flex flex-column align-items-center text-center p-2';
+
+            div.onclick = () => {
+                location.href = `/member/profile/${user.profileId}/${user.profileMode}`;
+            };
+
+            div.innerHTML = `
+                <img src="${user.profileImageUrl || '/image/default-profile.png'}"
+                     class="rounded-circle profile-thumb">
+                <div class="fw-bold">${user.userName}</div>
+                <button class="btn ${user.isFollowing ? 'btn-following' : 'btn-unfollowed'} btn-sm"
+                        onclick="event.stopPropagation(); handleFollow(${user.profileId}, '${user.profileMode}', this)">
+                    ${user.isFollowing ? '팔로우중' : '팔로우'}
+                </button>
+            `;
+            container.appendChild(div);
+        });
+    }
 
 // ==========================
 // API 호출 공통 함수
@@ -121,3 +174,20 @@ function handleFollow(targetProfileId, targetProfileMode, buttonElement) {
         .catch(err => console.error('오류:', err))
         .finally(() => buttonElement.disabled = false);
 }
+
+function updateTabUrl(tabName) {
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.set('tab', tabName);
+    // 주소창 주소만 교체 (페이지 이동 X)
+    window.history.replaceState({}, '', newUrl);
+}
+document.getElementById('tab-following').addEventListener('click', () => {
+    // ... 화면 전환 로직 ...
+    updateTabUrl('following'); // tab=following 으로 변경
+});
+
+// 3. 팔로워 버튼 클릭 리스너
+document.getElementById('tab-follower').addEventListener('click', () => {
+    // ... 화면 전환 로직 ...
+    updateTabUrl('follower'); // tab=follower 로 변경
+});
