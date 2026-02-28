@@ -113,7 +113,6 @@ public class ChatService {
         String perfermanceTitle = getPerformanceTitle(performanceId);
         String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
 
-        String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
 
         ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
             ResponseDetailChatPostDto.builder()
