@@ -409,9 +409,12 @@ public class ChatService {
         ChatPost chatPost = chatPostRepository.findById(chatRoom.getChatPost().getId())
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글이 존재하지 않습니다."));
 
-        if ("CLOSED".equals(chatPost.getStatus().name()) ||
-            chatPost.getCurrentMember() >= chatPost.getMaxMember()) {
-            throw new ApiException(ErrorCode.INVALID_REQUEST, "참여 불가 상태");
+        if (chatParticipant == null) {
+            if ("CLOSED".equals(chatPost.getStatus().name()) ||
+                chatPost.getCurrentMember() >= chatPost.getMaxMember()) {
+
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "정원이 초과되었거나 마감된 채팅방입니다.");
+            }
         }
 
         // 1️⃣ 처음 참여

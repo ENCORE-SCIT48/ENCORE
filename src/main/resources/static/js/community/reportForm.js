@@ -61,13 +61,22 @@
             })
             .then(response => response.json())
             .then(result => {
-                if (result.status === 'SUCCESS') {
-                    alert('신고가 정상적으로 접수되었습니다.');
-                    window.history.back();
-                } else {
-                    alert('처리 중 오류가 발생했습니다: ' + result.message);
-                }
-            })
+                             // 서버의 CommonResponse 구조에 맞게 수정
+                             // result.success가 true이거나 result.code가 200인 경우 성공으로 간주
+                             if (result.success || result.code === 200) {
+                                 alert(result.message || '신고가 정상적으로 접수되었습니다.');
+
+                                 // 이전 페이지로 확실하게 이동하기
+                                 if (document.referrer) {
+                                     location.href = document.referrer;
+                                 } else {
+                                     window.history.back();
+                                 }
+                             } else {
+                                 // 실패했을 때 (예: 이미 신고한 대상 등)
+                                 alert('처리 중 오류 발생: ' + result.message);
+                             }
+                         })
             .catch(error => {
                 console.error('ERROR:', error);
                 alert('네트워크 오류가 발생했습니다.');
