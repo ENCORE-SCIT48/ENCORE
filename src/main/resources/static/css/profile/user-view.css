@@ -1,210 +1,162 @@
-/* ==========================================================================
-   파일명: view-profile.css
-   작성일: 2026-02-24
-   설명: 아티스트 및 유저 프로필 상세 조회 페이지 공통 스타일 정의
-   구조: 1.컨테이너 -> 2.헤더 -> 3.이미지섹션 -> 4.본문내용 -> 5.액션버튼 -> 6.반응형
-   ========================================================================== */
+/* [1] 공통 변수 (venueForm 시스템과 통일) */
+:root {
+    --primary-red: #E63946;    /* 브랜드 메인 레드 통일 */
+    --dark-grey: #333333;
+    --border-color: #E9ECEF;
+    --bg-white: #FFFFFF;
+    --soft-bg: #F8F9FA;
+}
 
-/* [1] 전체 컨테이너 (Setup 페이지와 일관된 폭 유지) */
+/* [2] 전체 컨테이너 (모바일 430px 규격으로 통일) */
 .view-container {
     width: 100%;
-    max-width: 550px;
-    margin: 40px auto;
-    padding: 30px;
+    max-width: 430px; /* 550px에서 430px로 변경하여 venueForm과 일치시킴 */
+    margin: 0 auto;
+    padding: 30px 20px;
     box-sizing: border-box;
-    background-color: #fff;
-    border-radius: 15px; /* 시각적 안정감을 위해 Setup보다 부드러운 곡률 적용 */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 카드 형태의 플로팅 효과 */
+    background-color: var(--bg-white);
+    min-height: 100vh; /* 모바일에서는 화면을 꽉 채우도록 설정 */
+    display: flex;
+    flex-direction: column;
 }
 
-/* [2] 상단 타이틀 및 설명 */
+/* [3] 헤더 및 이미지 섹션 */
 .view-title {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 800;
     text-align: center;
-    color: #333;
-    margin-bottom: 8px;
+    color: var(--dark-grey);
+    margin: 10px 0 8px;
 }
 
-.view-subtitle {
-    font-size: 0.95rem;
-    color: #888;
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-/* [3] 프로필 이미지 섹션 */
 .view-image-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 35px;
+    margin: 20px 0 35px;
 }
 
 .view-image-wrapper {
-    position: relative;
-    width: 150px;
-    height: 150px;
+    width: 140px;
+    height: 140px;
     margin-bottom: 20px;
 }
 
 .view-image-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 이미지 비율 유지하며 영역 채움 */
-    border-radius: 50%; /* 원형 프로필 디자인 */
-    border: 3px solid #f8f8f8;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* 아티스트 정보 텍스트 */
-.artist-info {
-    text-align: center;
-}
-
 .stage-name {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #222;
-    margin-bottom: 10px;
-    display: block;
+    color: var(--dark-grey);
 }
 
-/* 구현 주석: 브랜드 메인 컬러(#ff4d4d)를 활용한 숙련도 뱃지 스타일 */
+/* 포인트 뱃지 컬러 통일 */
 .badge.bg-primary-red {
-    background-color: #ff4d4d !important;
+    background-color: var(--primary-red) !important;
     color: white;
     padding: 6px 16px;
     border-radius: 20px;
     font-weight: 600;
-    font-size: 0.85rem;
-    display: inline-block;
 }
 
-/* [4] 본문 내용 섹션 (항목별 그룹화) */
+/* [4] 본문 내용 섹션 (디자인 가이드 통일) */
 .view-group {
     margin-bottom: 30px;
 }
 
 .view-group label {
     display: block;
-    font-weight: 700;
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 15px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--dark-grey);
+    margin-bottom: 12px;
     padding-left: 10px;
-    /* 구현 주석: Setup 페이지의 section-title과 디자인 일관성 유지 */
-    border-left: 4px solid #ff4d4d;
+    border-left: 4px solid var(--primary-red); /* 포인트 레드 적용 */
 }
 
-/* 태그 리스트 스타일 */
-.tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.tag-list, .intro-box {
     background: #fdfdfd;
-    padding: 15px;
+    padding: 16px;
     border-radius: 12px;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
 }
 
 .view-tag {
-    background-color: #fff1f1; /* 메인 레드 컬러의 투명도 조절 버전 */
-    color: #ff4d4d;
+    background-color: #fff1f1;
+    color: var(--primary-red);
     padding: 6px 14px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    border: 1px solid rgba(255, 77, 77, 0.1);
-}
-
-.view-tag.secondary {
-    background-color: #f8f9fa;
-    color: #555;
-    border: 1px solid #eee;
-}
-
-/* 소개글 박스 (멀티라인 대응) */
-.intro-box {
-    background: #fdfdfd;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    color: #555;
-    line-height: 1.7;
-    font-size: 0.95rem;
-    white-space: pre-wrap; /* DB의 개행 문자를 뷰에 그대로 반영 */
-}
-
-/* 지역 정보 텍스트 */
-.info-text {
-    font-size: 1rem;
-    color: #222;
-    padding-left: 10px;
+    border: 1px solid rgba(230, 57, 70, 0.1);
 }
 
 /* [5] 하단 버튼 영역 */
 .view-actions {
-    margin-top: 45px;
+    margin-top: auto; /* 하단 밀착 효과 */
+    padding-top: 40px;
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
 .btn-edit {
-    background-color: #ff4d4d !important;
+    background-color: var(--primary-red) !important;
     color: white !important;
     text-align: center;
     text-decoration: none;
     padding: 16px;
     font-weight: 700;
-    font-size: 1.1rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(255, 77, 77, 0.3);
-    transition: all 0.2s ease-in-out;
+    font-size: 1.05rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(230, 57, 70, 0.2);
+    transition: all 0.2s;
 }
 
-.btn-edit:hover {
-    transform: translateY(-2px); /* 호버 시 위로 살짝 뜨는 효과 */
-    opacity: 0.9;
-}
+/* ==========================================================================
+   [PC 규격 통일] 768px 이상일 때 venueForm과 동일한 레이아웃 적용
+   ========================================================================== */
+@media (min-width: 768px) {
+    body {
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        padding: 40px 0;
+    }
 
-.back-link-wrapper {
-    text-align: center;
-}
-
-.back-link {
-    color: #888;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.2s;
-}
-
-.back-link:hover {
-    color: #333;
-    text-decoration: underline;
-}
-
-/* [6] 반응형 웹 디자인 (Mobile First 대응) */
-@media (max-width: 576px) {
     .view-container {
-        margin: 0 auto;
-        padding: 25px 15px;
-        border-radius: 0; /* 모바일 전면 배치 */
-        box-shadow: none;
+        max-width: 900px !important; /* PC는 시원하게 900px */
+        min-height: auto; /* 박스 형태로 변경 */
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        padding: 60px !important;
+
+        /* 정보가 많으므로 PC에서 2열 배치 적용 */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 40px;
     }
 
-    .view-image-wrapper {
-        width: 120px;
-        height: 120px;
+    /* 2열 배치 시 중앙 혹은 전체 너비를 써야 하는 요소들 */
+    .view-image-section, .view-actions, .view-title, .view-subtitle, .view-group:has(.intro-box) {
+        grid-column: span 2;
     }
 
-    .tag-list {
-        padding: 12px;
+    .view-actions {
+        margin-top: 20px;
+        padding-top: 20px;
     }
+}
 
-    .view-tag {
-        font-size: 0.85rem;
-        padding: 5px 12px;
+@media (min-width: 1200px) {
+    .view-container {
+        max-width: 1000px !important;
     }
 }

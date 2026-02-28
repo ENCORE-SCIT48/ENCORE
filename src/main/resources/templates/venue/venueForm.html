@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>공연장 관리 | ArtHub</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/venue/venueForm.css">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+
+    <!-- ── HEADER ── -->
+    <header class="app-header d-flex align-items-center px-3 border-bottom">
+        <button type="button" class="btn-back" onclick="venueManager.prevStep()" aria-label="이전">
+            <i class="bi bi-chevron-left" style="font-size:0.9rem;"></i>
+        </button>
+        <h1 class="h6 mb-0 mx-auto fw-bold" id="headerTitle">공연장 등록 (1/3)</h1>
+        <div style="width:36px;"></div>
+    </header>
+
+    <main class="app-main">
+        <!-- Thymeleaf에서 mode, venueId 전달 -->
+        <div id="pageConfig" th:data-mode="${mode}" th:data-venue-id="${venueId}"></div>
+
+        <!-- ── STEPPER ── -->
+        <div class="stepper-container">
+            <div class="step active" id="step1-idx">1</div>
+            <div class="step-line" id="line1"></div>
+            <div class="step" id="step2-idx">2</div>
+            <div class="step-line" id="line2"></div>
+            <div class="step" id="step3-idx">3</div>
+        </div>
+
+        <form id="venueForm" autocomplete="off">
+
+            <!-- ════════════════════════════════
+                 STEP 1 — 기본 정보
+                 ════════════════════════════════ -->
+            <div id="step1" class="step-content">
+
+                <!-- 이미지 업로드 -->
+                <div class="profile-upload-wrap" onclick="document.getElementById('venueImage').click();">
+                    <div class="profile-placeholder" id="imageArea">
+                        <img id="previewImg" src="" class="d-none" alt="공연장 이미지">
+                        <div class="upload-badge">
+                            <i class="bi bi-camera-fill"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="venueImage" name="venueImage" accept="image/*" hidden
+                           onchange="venueManager.handleImgPreview(this)">
+                </div>
+
+                <div class="section-title">공연장 기본정보</div>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" name="venueName" id="vName" placeholder=" ">
+                    <label for="vName">공연장 이름 *</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" name="venueType" id="vType">
+                        <option value="CONCERT_HALL">콘서트홀</option>
+                        <option value="THEATER">극장</option>
+                        <option value="MULTIPURPOSE">다목적홀</option>
+                    </select>
+                    <label for="vType">시설 유형 *</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="tel" class="form-control" name="contact" id="vContact" placeholder=" ">
+                    <label for="vContact">대표 연락처 *</label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted mb-2">주소 *</label>
+                    <div class="address-group mb-2">
+                        <input type="text" class="form-control" name="address" id="addressInput" readonly placeholder="주소 검색">
+                        <button class="btn-search" type="button" onclick="venueManager.searchAddress()">검색</button>
+                    </div>
+                    <input type="text" class="form-control" name="addressDetail" id="addressDetail"
+                           placeholder="상세 주소" style="height:48px;">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted mb-2">공연장 상세 설명</label>
+                    <textarea class="form-control" name="description" id="vDescription" rows="4"
+                              placeholder="공연장의 특징이나 대관 시 유의사항을 입력해주세요."></textarea>
+                </div>
+
+                <div class="section-title">편의 시설</div>
+                <div class="checkbox-grid">
+                    <label class="check-item">
+                        <input type="checkbox" name="facilities" value="WIFI">
+                        <i class="bi bi-wifi"></i> WIFI
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox" name="facilities" value="PARKING">
+                        <i class="bi bi-p-square"></i> 주차
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox" name="facilities" value="CAFE">
+                        <i class="bi bi-cup-hot"></i> 카페
+                    </label>
+                    <label class="check-item">
+                        <input type="checkbox" name="facilities" value="WAITING_ROOM">
+                        <i class="bi bi-door-open"></i> 대기실
+                    </label>
+                </div>
+
+            </div><!-- /step1 -->
+
+            <!-- ════════════════════════════════
+                 STEP 2 — 좌석 배치
+                 ════════════════════════════════ -->
+            <div id="step2" class="step-content d-none">
+
+                <div class="section-title">좌석 배치 설정</div>
+
+                <!-- 층 탭 -->
+                <div class="d-flex align-items-center gap-2 mb-2 overflow-x-auto pb-1" id="floorTabs"></div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mb-3" style="border-radius:20px; font-weight:700; font-size:0.8rem;"
+                        onclick="venueManager.seatEditor.addFloor()">
+                    <i class="bi bi-plus"></i> 층 추가
+                </button>
+
+                <!-- 모드 -->
+                <div class="mode-group d-flex gap-2 mb-3">
+                    <button type="button" class="mode-btn active" id="btnModeAdd" onclick="venueManager.seatEditor.setMode('add')">
+                        <i class="bi bi-plus-circle me-1"></i>추가
+                    </button>
+                    <button type="button" class="mode-btn" id="btnModeMove" onclick="venueManager.seatEditor.setMode('move')">
+                        <i class="bi bi-arrows-move me-1"></i>이동
+                    </button>
+                    <button type="button" class="mode-btn" id="btnModeDelete" onclick="venueManager.seatEditor.setMode('delete')">
+                        <i class="bi bi-trash me-1"></i>삭제
+                    </button>
+                </div>
+
+                <!-- 등급 선택 -->
+                <div class="d-flex gap-2 mb-3 overflow-x-auto pb-1">
+                    <button type="button" class="seat-type-btn vip active" onclick="venueManager.seatEditor.setGrade('vip')">VIP석</button>
+                    <button type="button" class="seat-type-btn r" onclick="venueManager.seatEditor.setGrade('r')">R석</button>
+                    <button type="button" class="seat-type-btn s" onclick="venueManager.seatEditor.setGrade('s')">S석</button>
+                    <button type="button" class="seat-type-btn a" onclick="venueManager.seatEditor.setGrade('a')">A석</button>
+                </div>
+
+                <!-- 좌석번호 입력 -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text">좌석번호</span>
+                    <input type="text" id="seatLabelInput" class="form-control" placeholder="예: A1">
+                    <button class="btn btn-dark px-3" type="button" style="border-radius:var(--radius-md)!important; font-weight:700;"
+                            onclick="venueManager.seatEditor.addSeat()">추가</button>
+                </div>
+
+                <!-- 캔버스 -->
+                <div class="canvas-wrapper position-relative" style="height:400px;">
+                    <div class="position-absolute top-0 start-50 translate-middle-x text-white px-4 py-1 rounded-bottom small shadow-sm"
+                         style="background:var(--dark-grey); z-index:10; font-weight:700; font-size:0.75rem; letter-spacing:0.5px;">
+                        STAGE · 무대
+                    </div>
+                    <canvas id="seatCanvas"></canvas>
+                </div>
+
+                <!-- 통계 -->
+                <div class="seat-stats-grid mt-3">
+                    <div class="stat-box">
+                        <span class="label">VIP</span>
+                        <span class="count" id="countVIP">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">R석</span>
+                        <span class="count" id="countR">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">S석</span>
+                        <span class="count" id="countS">0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">A석</span>
+                        <span class="count" id="countA">0</span>
+                    </div>
+                    <div class="stat-box" style="grid-column: span 4; background: var(--dark-grey); border-radius: var(--radius-md);">
+                        <span class="label">전체 좌석</span>
+                        <span class="count" id="totalSeatsDisplay">0</span>
+                    </div>
+                </div>
+
+            </div><!-- /step2 -->
+
+            <!-- ════════════════════════════════
+                 STEP 3 — 운영 / 대관 설정
+                 ════════════════════════════════ -->
+            <div id="step3" class="step-content d-none">
+
+                <div class="section-title">운영 시간</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="form-floating">
+                            <input type="time" class="form-control" name="openTime" id="openTime">
+                            <label for="openTime">오픈 시간</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-floating">
+                            <input type="time" class="form-control" name="closeTime" id="closeTime">
+                            <label for="closeTime">마감 시간</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">대관 및 예약 설정</div>
+
+                <div class="form-floating mb-3">
+                    <input type="number" class="form-control" name="rentalFee" id="rentalFee" placeholder=" ">
+                    <label for="rentalFee">시간당 대관료 (원) *</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-select" name="bookingUnit" id="bookingUnit">
+                        <option value="30">30분 단위</option>
+                        <option value="60" selected>1시간 단위</option>
+                        <option value="120">2시간 단위</option>
+                    </select>
+                    <label for="bookingUnit">예약 시간 단위 *</label>
+                </div>
+
+                <div class="section-title">정기 휴무일</div>
+                <div class="checkbox-grid mb-4" style="grid-template-columns: repeat(4, 1fr);">
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="MONDAY"> 월</label>
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="TUESDAY"> 화</label>
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="WEDNESDAY"> 수</label>
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="THURSDAY"> 목</label>
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="FRIDAY"> 금</label>
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="SATURDAY"> 토</label>
+                    <label class="check-item"><input type="checkbox" name="regularClosingDays" value="SUNDAY"> 일</label>
+                </div>
+
+                <div class="section-title">임시 휴무일</div>
+                <p class="text-muted small mb-2" style="font-size:0.82rem;">공휴일이나 특별 점검일을 추가해주세요.</p>
+                <div class="input-group mb-3">
+                    <input type="date" id="tempDateInput" class="form-control" style="height:48px;">
+                    <button class="btn btn-dark px-3" type="button"
+                            style="border-radius:var(--radius-md)!important; font-weight:700;"
+                            onclick="venueManager.addTempDate()">추가</button>
+                </div>
+                <div id="tempDateList" class="d-flex flex-wrap gap-2 pt-1"></div>
+
+            </div><!-- /step3 -->
+
+        </form>
+
+        <!-- ── BOTTOM ACTIONS (form 밖 — grid 영향 없이 항상 full width) ── -->
+        <div class="fixed-bottom-btn">
+            <button type="button" id="btnNext" class="btn btn-primary-red"
+                    onclick="venueManager.nextStep()">다음 단계로</button>
+            <button type="button" id="btnSubmit" class="btn btn-primary-red d-none"
+                    onclick="venueManager.submitData()">공연장 등록 완료</button>
+            <button type="button" id="btnDelete" class="btn btn-delete d-none"
+                    onclick="venueManager.deleteVenue()">공연장 삭제</button>
+        </div>
+    </main>
+</div>
+
+<script src="/js/venue/venueForm.js"></script>
+</body>
+</html>
