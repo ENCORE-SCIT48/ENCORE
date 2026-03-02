@@ -1,9 +1,6 @@
 package com.encore.encore.domain.venue.controller;
 
-import com.encore.encore.domain.venue.dto.VenueCreateRequestDto;
-import com.encore.encore.domain.venue.dto.VenueDetailDto;
-import com.encore.encore.domain.venue.dto.VenueFormResponseDto;
-import com.encore.encore.domain.venue.dto.VenueListItemDto;
+import com.encore.encore.domain.venue.dto.*;
 import com.encore.encore.domain.venue.service.VenueService;
 import com.encore.encore.global.common.CommonResponse;
 import com.encore.encore.global.config.CustomUserDetails;
@@ -16,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -149,4 +148,19 @@ public class VenueController {
         );
     }
 
+    /**
+     * [호스트] 내 공연장 목록 조회.
+     * venueReservations.js 탭 렌더링 및 list.js 내 공연장 식별(버튼 분기)에 사용한다.
+     *
+     * @param userDetails 인증된 호스트 정보 (activeProfileId = hostId)
+     * @return 호스트 소유 공연장 목록
+     */
+    @GetMapping("/my")
+    public CommonResponse<List<VenueMyListItemDto>> getMyVenues(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long hostId = userDetails.getActiveProfileId();
+        log.info("[GET /api/venues/my] hostId={}", hostId);
+        return CommonResponse.ok(venueService.getMyVenues(hostId), "내 공연장 목록 조회 성공");
+    }
 }
