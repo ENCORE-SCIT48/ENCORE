@@ -189,3 +189,18 @@
     background: #dc3545;
     color: #fff;
 }
+
+.btn-following:hover,
+.btn-following:focus,
+.btn-following:active {
+    background: transparent; /* 배경 유지 */
+    color: #ccc;          /* 글자색 유지 */
+}
+
+
+.btn-unfollowed:hover,
+.btn-unfollowed:focus,
+.btn-unfollowed:active {
+    background: #ccc; /* 배경 유지 */
+    color: #fff;          /* 글자색 유지 */
+}
