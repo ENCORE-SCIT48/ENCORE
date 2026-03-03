@@ -29,13 +29,7 @@
         </div>
     </main>
 
-    <div th:replace="~{fragments/footer :: footer(
-        ${ {
-            {label:'공연장', href:'/venues'},
-            {label:'홈', href:'/'},
-            {label:'DM', href:'/dm/list'}
-        } }
-    )}"></div>
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 </div>
 
 <div class="toast-wrap" id="toastWrap" style="display:none;">

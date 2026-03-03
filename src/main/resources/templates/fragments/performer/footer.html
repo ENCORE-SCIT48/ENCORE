@@ -28,12 +28,50 @@
     }
   </style>
 
-  <div class="footer-wrapper">
-    <a th:href="@{/posts/performance}" class="footer-link">모집글</a>
-    <a th:href="@{/performer/venueList}" class="footer-link">공연장</a>
-    <a th:href="@{/}" class="footer-link">홈</a>
-    <a th:href="@{/dm/list}" class="footer-link">DM</a>
-    <a th:href="@{/chats}" class="footer-link">채팅</a>
-  </div>
+  <!-- 비로그인(게스트) 메뉴 -->
+  <th:block th:if="${#authentication == null or #authentication.principal == null}">
+    <div class="footer-wrapper">
+      <a th:href="@{/performances}" class="footer-link">공연리스트</a>
+      <a th:href="@{/venues}"      class="footer-link">공연장</a>
+      <a th:href="@{/feed}"        class="footer-link">피드</a>
+      <a th:href="@{/auth/login}"  class="footer-link">로그인</a>
+    </div>
+  </th:block>
+
+  <!-- USER 메뉴 (관람객) -->
+  <th:block th:if="${#authentication != null and #authentication.principal != null
+                    and #authentication.principal.activeMode.name() == 'ROLE_USER'}">
+    <div class="footer-wrapper">
+      <a th:href="@{/performances}" class="footer-link">공연리스트</a>
+      <a th:href="@{/venues}"       class="footer-link">공연장</a>
+      <a th:href="@{/feed}"         class="footer-link">피드</a>
+      <a th:href="@{/dm/list}"      class="footer-link">DM</a>
+      <a th:href="@{/chats}"        class="footer-link">채팅</a>
+    </div>
+  </th:block>
+
+  <!-- PERFORMER 메뉴 (공연자) -->
+  <th:block th:if="${#authentication != null and #authentication.principal != null
+                    and #authentication.principal.activeMode.name() == 'ROLE_PERFORMER'}">
+    <div class="footer-wrapper">
+      <a th:href="@{/posts/performance}" class="footer-link">모집글</a>
+      <a th:href="@{/venues/performer}"  class="footer-link">공연장</a>
+      <a th:href="@{/}"                  class="footer-link">홈</a>
+      <a th:href="@{/dm/list}"           class="footer-link">DM</a>
+      <a th:href="@{/chats}"             class="footer-link">채팅</a>
+    </div>
+  </th:block>
+
+  <!-- HOST 메뉴 (호스트) -->
+  <th:block th:if="${#authentication != null and #authentication.principal != null
+                    and #authentication.principal.activeMode.name() == 'ROLE_HOST'}">
+    <div class="footer-wrapper">
+      <a th:href="@{/venues/my}"                  class="footer-link">내 공연장</a>
+      <a th:href="@{/venues/reservations/manage}" class="footer-link">대관관리</a>
+      <a th:href="@{/}"                           class="footer-link">홈</a>
+      <a th:href="@{/dm/list}"                    class="footer-link">DM</a>
+      <a th:href="@{/chats}"                      class="footer-link">채팅</a>
+    </div>
+  </th:block>
 
 </footer>

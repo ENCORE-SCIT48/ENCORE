@@ -194,7 +194,7 @@ public class VenueReservationService {
      * @throws ApiException 공연장을 찾을 수 없을 경우 (NOT_FOUND)
      */
     private Venue findVenueById(Long venueId) {
-        return venueRepository.findById(venueId)
+        return venueRepository.findByVenueIdAndIsDeletedFalse(venueId)
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND,
                 "공연장을 찾을 수 없습니다. venueId=" + venueId));
     }
