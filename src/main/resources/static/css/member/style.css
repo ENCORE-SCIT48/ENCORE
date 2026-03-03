@@ -140,6 +140,28 @@
     min-height: 120px;
     white-space: pre-line;
 }
+
+.recent-activities-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    /* min-height 제거 */
+}
+
+.recent-activities-list {
+    list-style: none; /* 점 없애기 */
+    margin: 0;
+    padding: 0;
+}
+
+.recent-activities-list li {
+    padding: 6px 0;      /* 항목 간 간격 */
+    border-bottom: 1px solid #e0e0e0; /* 필요하면 구분선 */
+}
+
+.recent-activities-list li:last-child {
+    border-bottom: none;
+}
 /* =========================
    Follow Stats (Instagram Style)
 ========================= */
