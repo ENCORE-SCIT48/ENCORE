@@ -34,9 +34,9 @@ public class VenueController {
      */
     @GetMapping
     public CommonResponse<Page<VenueListItemDto>> getVenues(
-        @RequestParam(required = false) String keyword,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(name = "search", required = false) String keyword,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         log.info("[Venue] list request - keyword={}, page={}, size={}", keyword, page, size); // [추가] INFO 로그
 
@@ -53,7 +53,7 @@ public class VenueController {
      * @return 공연장 상세 정보
      */
     @GetMapping("/{venueId}")
-    public CommonResponse<VenueDetailDto> getVenue(@PathVariable Long venueId) {
+    public CommonResponse<VenueDetailDto> getVenue(@PathVariable("venueId") Long venueId) {
         log.info("[Venue] detail request - venueId={}", venueId); // [추가] INFO 로그
 
         return CommonResponse.ok(
@@ -95,7 +95,7 @@ public class VenueController {
      */
     @PutMapping(value = "/{venueId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public CommonResponse<Long> updateVenue(
-        @PathVariable Long venueId,
+        @PathVariable("venueId") Long venueId,
         @RequestPart("venueData") VenueCreateRequestDto dto,
         @RequestPart(value = "venueImage", required = false) MultipartFile imageFile,
         @AuthenticationPrincipal CustomUserDetails userDetails
@@ -122,7 +122,7 @@ public class VenueController {
      */
     @DeleteMapping("/{venueId}")
     public ResponseEntity<Void> deleteVenue(
-        @PathVariable Long venueId,
+        @PathVariable("venueId") Long venueId,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         log.info("2026-02-25, [공연장 삭제 요청], VenueID: {}, User: {}", venueId, userDetails.getUser().getUserId());
@@ -140,7 +140,7 @@ public class VenueController {
      * @return 공연장 폼 데이터 (좌석 정보 포함)
      */
     @GetMapping("/{venueId}/form")
-    public CommonResponse<VenueFormResponseDto> getVenueForm(@PathVariable Long venueId) {
+    public CommonResponse<VenueFormResponseDto> getVenueForm(@PathVariable("venueId") Long venueId) {
         log.info("2026-02-26, [공연장 폼 데이터 요청], venueId={}", venueId);
         return CommonResponse.ok(
             venueService.getVenueForm(venueId),

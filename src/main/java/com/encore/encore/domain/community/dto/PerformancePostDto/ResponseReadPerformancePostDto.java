@@ -15,11 +15,21 @@ public class ResponseReadPerformancePostDto {
 
     private String postType;
 
+    private Long venueId;
+
     private Long performanceId;
 
-    private Long hostId;
-
     private Long performerId;
+
+    private String venueName;
+
+    private String venueAddress;
+
+    private String venueType;
+
+    private String venueImage;
+
+    private Long hostId;
 
     private String title;
 

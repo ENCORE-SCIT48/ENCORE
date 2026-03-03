@@ -7,7 +7,13 @@ import com.encore.encore.domain.community.service.PerformerRecommendationService
 import com.encore.encore.domain.community.service.PostInteractionService;
 import com.encore.encore.domain.member.dto.ResponsePerformerRecommendDto;
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.member.entity.HostProfile;
+import com.encore.encore.domain.member.repository.HostProfileRepository;
+import com.encore.encore.domain.venue.service.VenueService;
 import com.encore.encore.global.config.CustomUserDetails;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,6 +36,9 @@ public class PerformancePostPageController {
     private final PerformancePostService performancePostService;
     private final PostInteractionService postInteractionService;
     private final PerformerRecommendationService performerRecommendationService;
+    private final VenueService venueService;
+
+    private final HostProfileRepository hostProfileRepository;
 
     /**
      * [설명] 공연 모집 게시글 목록 화면을 조회합니다.
@@ -148,7 +157,7 @@ public class PerformancePostPageController {
                 userDetails.getUser().getNickname());
         model.addAttribute("profileMode",
                 activeMode.name());
-
+        model.addAttribute("venues", venueService.getVenues(null, Pageable.unpaged()).getContent());
         log.debug("[PerformanceWrite] 접근 허용 - mode={}", activeMode);
 
         return "community/performance/performancePostWrite";
@@ -194,6 +203,8 @@ public class PerformancePostPageController {
         }
 
         model.addAttribute("post", post);
+        model.addAttribute("venues",
+                venueService.getVenues(null, Pageable.unpaged()).getContent());
 
         return "community/performance/performancePostUpdate";
     }

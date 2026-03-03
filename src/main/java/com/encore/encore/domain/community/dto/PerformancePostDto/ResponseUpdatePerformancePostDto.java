@@ -13,6 +13,8 @@ public class ResponseUpdatePerformancePostDto {
 
     private Long postId;
 
+    private Long venueId;
+
     private String postType;
 
     private String title;

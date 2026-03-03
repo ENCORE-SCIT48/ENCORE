@@ -10,6 +10,8 @@ import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
+import com.encore.encore.domain.venue.entity.Venue;
+import com.encore.encore.domain.venue.repository.VenueRepository;
 import com.encore.encore.global.config.CustomUserDetails;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
@@ -31,7 +33,7 @@ public class PerformancePostService {
     private final PostInteractionService postInteractionService;
 
     private final PostRepository postRepository;
-    private final PerformanceRepository performanceRepository;
+    private final VenueRepository venueRepository;
     private final HostProfileRepository hostProfileRepository;
     private final PerformerProfileRepository performerProfileRepository;
 
@@ -139,6 +141,7 @@ public class PerformancePostService {
             RequestCreatePerformancePostDto dto,
             CustomUserDetails userDetails) {
 
+        // 1. 로그인 체크
         if (userDetails == null) {
             log.warn("[CreatePerformancePost] 비로그인 사용자");
             throw new ApiException(ErrorCode.FORBIDDEN, "로그인이 필요합니다.");
@@ -149,59 +152,43 @@ public class PerformancePostService {
 
         log.info("[CreatePerformancePost] 시작 - userId={}, mode={}", userId, activeMode);
 
-        HostProfile host = null;
-        PerformerProfile performer = null;
-
-        switch (activeMode) {
-
-            case ROLE_PERFORMER -> performer = performerProfileRepository
-                    .findByUser_UserId(userId)
-                    .orElseThrow(() -> {
-                        log.error("[CreatePerformancePost] PerformerProfile 없음 - userId={}", userId);
-                        return new ApiException(ErrorCode.NOT_FOUND, "PerformerProfile이 존재하지 않습니다.");
-                    });
-
-            case ROLE_HOST -> host = hostProfileRepository
-                    .findByUser_UserId(userId)
-                    .orElseThrow(() -> {
-                        log.error("[CreatePerformancePost] HostProfile 없음 - userId={}", userId);
-                        return new ApiException(ErrorCode.NOT_FOUND, "HostProfile이 존재하지 않습니다.");
-                    });
-
-            case ROLE_USER -> {
-                log.warn("[CreatePerformancePost] 관람객 작성 시도 - userId={}", userId);
-                throw new ApiException(ErrorCode.FORBIDDEN, "관람객은 게시글을 작성할 수 없습니다.");
-            }
+        // 2. 공연자만 작성 가능
+        if (activeMode != ActiveMode.ROLE_PERFORMER) {
+            log.warn("[CreatePerformancePost] 공연자 아님 - userId={}", userId);
+            throw new ApiException(ErrorCode.FORBIDDEN, "공연자만 게시글을 작성할 수 있습니다.");
         }
 
-        log.info("[CreatePerformancePost] 작성자 설정 완료 - mode={}, hostId={}, performerId={}",
-                activeMode,
-                host != null ? host.getHostId() : null,
-                performer != null ? performer.getPerformerId() : null);
+        // 3. 공연자 프로필 조회
+        PerformerProfile performer = performerProfileRepository
+                .findByUser_UserId(userId)
+                .orElseThrow(() -> {
+                    log.error("[CreatePerformancePost] PerformerProfile 없음 - userId={}", userId);
+                    return new ApiException(ErrorCode.NOT_FOUND, "PerformerProfile이 존재하지 않습니다.");
+                });
 
+        // 4. 정원 검증
         if (dto.getCapacity() == null || dto.getCapacity() <= 0) {
             log.warn("[CreatePerformancePost] 잘못된 정원 값 - userId={}", userId);
             throw new ApiException(ErrorCode.INVALID_REQUEST, "정원은 1명 이상이어야 합니다.");
         }
 
-        Performance performance = null;
-        if (dto.getPerformanceId() != null) {
-            performance = performanceRepository.findById(dto.getPerformanceId())
-                    .orElseThrow(() -> {
-                        log.error("[CreatePerformancePost] 공연 정보 없음 - performanceId={}", dto.getPerformanceId());
-                        return new ApiException(ErrorCode.NOT_FOUND, "공연 정보를 찾을 수 없습니다.");
-                    });
-        }
+        // 5. 공연장 조회
+        Venue venue = venueRepository.findById(dto.getVenueId())
+                .orElseThrow(() -> {
+                    log.error("[CreatePerformancePost] 공연장 없음 - venueId={}", dto.getVenueId());
+                    return new ApiException(ErrorCode.NOT_FOUND, "공연장을 찾을 수 없습니다.");
+                });
 
+        // 6. 게시글 생성
         Post post = Post.builder()
-                .performance(performance)
+                .venue(venue)
                 .postType(PERFORMANCE_POST_TYPE)
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .viewCount(0)
                 .capacity(dto.getCapacity())
-                .hostAuthor(host)
                 .performerAuthor(performer)
+                .hostAuthor(null)
                 .build();
 
         Post savedPost = postRepository.save(post);
@@ -272,6 +259,16 @@ public class PerformancePostService {
 
         validateOwnership(post, userDetails);
 
+        if (dto.getVenueId() != null) {
+            Venue venue = venueRepository.findById(dto.getVenueId())
+                    .orElseThrow(() -> {
+                        log.error("[UpdatePerformancePost] 공연장 없음 - venueId={}", dto.getVenueId());
+                        return new ApiException(ErrorCode.NOT_FOUND, "공연장을 찾을 수 없습니다.");
+                    });
+
+            post.setVenue(venue);
+        }
+
         if (dto.getTitle() != null) {
             post.setTitle(dto.getTitle());
         }
@@ -320,27 +317,29 @@ public class PerformancePostService {
                 .findByPostIdAndPostTypeAndIsDeletedFalse(postId, PERFORMANCE_POST_TYPE)
                 .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "게시글을 찾을 수 없습니다."));
 
-        // 조회수 증가 (상세 페이지에서만 증가)
         if (increaseView) {
             post.setViewCount(post.getViewCount() + 1);
         }
 
         int approvedCount = postInteractionService.getApprovedCount(post);
 
+        Venue venue = post.getVenue();
+
         return ResponseReadPerformancePostDto.builder()
                 .postId(post.getPostId())
                 .postType(post.getPostType())
-                .performanceId(
-                        post.getPerformance() != null
-                                ? post.getPerformance().getPerformanceId()
+                .venueId(venue.getVenueId())
+                .venueName(venue.getVenueName())
+                .venueAddress(venue.getAddress())
+                .venueType(venue.getVenueType())
+                .venueImage(venue.getVenueImage())
+                .performerId(
+                        post.getPerformerAuthor() != null
+                                ? post.getPerformerAuthor().getPerformerId()
                                 : null)
                 .hostId(
                         post.getHostAuthor() != null
                                 ? post.getHostAuthor().getHostId()
-                                : null)
-                .performerId(
-                        post.getPerformerAuthor() != null
-                                ? post.getPerformerAuthor().getPerformerId()
                                 : null)
                 .title(post.getTitle())
                 .content(post.getContent())
