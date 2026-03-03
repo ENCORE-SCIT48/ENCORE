@@ -27,11 +27,11 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
      * @return
      */
     @Query("SELECT r FROM UserRelation r " +
-        "WHERE r.actor.userId = :actorId " +
-        "AND r.actorProfileMode = :actorMode " +
-        "AND r.targetId = :targetId " +
-        "AND r.targetProfileMode = :targetMode " +
-        "AND r.relationType = :type")
+            "WHERE r.actor.userId = :actorId " +
+            "AND r.actorProfileMode = :actorMode " +
+            "AND r.targetId = :targetId " +
+            "AND r.targetProfileMode = :targetMode " +
+            "AND r.relationType = :type")
     Optional<UserRelation> findExistingRelation(
         @Param("actorId") Long actorId,
         @Param("actorMode") ActiveMode actorMode,
@@ -65,10 +65,10 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
      * @return
      */
     @Query("SELECT COUNT(r) FROM UserRelation r " +
-        "WHERE r.actor.userId = :actorId " +
-        "AND r.actorProfileMode = :actorMode " +
-        "AND r.relationType = 'FOLLOW' " +
-        "AND r.isDeleted = false")
+            "WHERE r.actor.userId = :actorId " +
+            "AND r.actorProfileMode = :actorMode " +
+            "AND r.relationType = 'FOLLOW' " +
+            "AND r.isDeleted = false")
     int countFollowing(
         @Param("actorId") Long actorId,
         @Param("actorMode") ActiveMode actorMode
@@ -82,10 +82,10 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
      * @return
      */
     @Query("SELECT COUNT(r) FROM UserRelation r " +
-        "WHERE r.targetId = :targetId " +
-        "AND r.targetProfileMode = :targetMode " +
-        "AND r.relationType = 'FOLLOW' " +
-        "AND r.isDeleted = false")
+            "WHERE r.targetId = :targetId " +
+            "AND r.targetProfileMode = :targetMode " +
+            "AND r.relationType = 'FOLLOW' " +
+            "AND r.isDeleted = false")
     int countFollower(
         @Param("targetId") Long targetId,
         @Param("targetMode") ActiveMode targetMode

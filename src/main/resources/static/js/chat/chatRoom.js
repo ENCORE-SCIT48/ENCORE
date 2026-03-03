@@ -43,11 +43,20 @@ $(document).ready(() => {
             contentType: 'application/json',
             data: JSON.stringify({ content }),
             success: (res) => {
-                if (!res.success) return alert(res.message);
+                        if (!res.success) return alert(res.message);
 
-                chatInput.val('');
-                loadMessages(true); // 전송 후 전체 새로 불러오기
-            },
+                        chatInput.val('');
+
+                        // 💡 방법 A: 전체를 다시 불러오지 않고, 서버가 준 응답값으로 내 메시지만 바로 추가
+                        // res.data에 생성된 messageId, createdAt 등이 포함되어 있다고 가정합니다.
+                        if (res.data) {
+                            renderMessage(res.data);
+                            scrollToBottom();
+                        } else {
+                            // 만약 서버 응답에 데이터가 없다면 기존처럼 새로고침 호출 (단, 위 조건 수정 필수)
+                            loadMessages(true);
+                        }
+                    },
             error: handleAjaxError
         });
     }
@@ -150,17 +159,16 @@ $(document).ready(() => {
             url: `/api/chat/room/${ROOM_ID}/exit`,
             method: 'POST',
             success: (res) => {
-                if (!res.success) return alert(res.message);
+                const data = res.data; // CommonResponse.data에 서비스 결과가 들어있다고 가정
 
-                const data = res.data;
-                if (!data.exitSuccess) {
+                if (!data.exitSuccess) { // exitSuccess 기준 체크
                     if (data.isOwner) alert('글쓴이는 퇴장할 수 없습니다.');
-                    else alert(res.message);
+                    else alert(data.message);
                     return;
                 }
 
-                alert(res.message);
-                location.href = '/chat/list';
+                alert(data.message);
+                location.href = '/chats';
             },
             error: handleAjaxError
         });

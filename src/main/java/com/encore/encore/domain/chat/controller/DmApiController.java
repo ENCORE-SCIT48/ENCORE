@@ -107,7 +107,6 @@ public class DmApiController {
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
 
-
         dmService.checkUserParticipantStatus(request.getRoomId(), activeProfileId, activeMode);
 
         ResponseSendDmDto result = dmService.sendMessage(
@@ -129,11 +128,15 @@ public class DmApiController {
      */
     @GetMapping("{roomId}/messages")
     public ResponseEntity<CommonResponse<List<ResponseChatMessage>>> getMessages(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long roomId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size
     ) {
-        List<ResponseChatMessage> result = dmService.getMessages(roomId, page, size);
+        Long activeProfileId = userDetails.getActiveProfileId();
+        ActiveMode activeMode = userDetails.getActiveMode();
+
+        List<ResponseChatMessage> result = dmService.getMessages(roomId, page, size, activeProfileId, activeMode);
         return ResponseEntity.ok(CommonResponse.ok(result, "메시지 조회 성공"));
     }
 

@@ -43,7 +43,7 @@ public class PostInteractionController {
      * @param userDetails   로그인 사용자 정보
      * @return 승인 처리 결과
      */
-    @PatchMapping("/{postId}/interactions/{interactionId}/approve")
+    @PutMapping("/{postId}/interactions/{interactionId}/approve")
     public CommonResponse<Void> approve(
             @PathVariable("postId") Long postId,
             @PathVariable("interactionId") Long interactionId,
@@ -65,7 +65,7 @@ public class PostInteractionController {
      * @param userDetails   로그인 사용자 정보
      * @return 거절 처리 결과
      */
-    @PatchMapping("/{postId}/interactions/{interactionId}/reject")
+    @PutMapping("/{postId}/interactions/{interactionId}/reject")
     public CommonResponse<Void> reject(
             @PathVariable("postId") Long postId,
             @PathVariable("interactionId") Long interactionId,

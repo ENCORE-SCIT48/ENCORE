@@ -7,5 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RelationType {
     FOLLOW,
-    BLOCK
+    BLOCK, 
+    PERFORMER_RECOMMEND
 }

@@ -11,7 +11,6 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #f5f5f5;
   overflow: hidden; /* 전체 스크롤 차단 */
 }
 
@@ -220,85 +219,6 @@ position: relative;
   font-size: 1rem;
 }
 
- /* 채팅 메시지 영역 */
-  /* 메시지 전체 */
-  .chat-message {
-    display: flex;
-    margin-bottom: 0.4rem;
-  }
-
-  /* 내 메시지 오른쪽, 상대 왼쪽 */
-  .chat-message.mine {
-    justify-content: flex-end;
-  }
-
-  .chat-message.other {
-    justify-content: flex-start;
-  }
-
-  /* 말풍선 */
-  .message-wrapper {
-    display: flex;
-    flex-direction: column;
-    max-width: 220px;       /* 최대 너비 제한 */
-    padding: 0.35rem 0.7rem;
-    border-radius: 12px;
-    position: relative;
-    font-size: 0.85rem;
-    word-break: break-word;
-  }
-
-  /* 색상 구분 */
-  .chat-message.mine .message-wrapper {
-    background-color: #dcf8c6; /* 연한 초록 */
-    border-top-right-radius: 0; /* 화살표쪽 각 */
-  }
-
-  .chat-message.other .message-wrapper {
-    background-color: #e9ecef; /* 연한 회색 */
-    border-top-left-radius: 0;
-  }
-
-  /* 말풍선 화살표 */
-  .chat-message.mine .message-wrapper::after {
-    content: "";
-    position: absolute;
-    right: -6px;
-    top: 8px;
-    border: 6px solid transparent;
-    border-left-color: #dcf8c6;
-  }
-
-  .chat-message.other .message-wrapper::after {
-    content: "";
-    position: absolute;
-    left: -6px;
-    top: 8px;
-    border: 6px solid transparent;
-    border-right-color: #e9ecef;
-  }
-
-  /* 이름 */
-  .message-name {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 0.15rem;
-  }
-
-  /* 내용 */
-  .message-content {
-    font-size: 0.85rem;
-    line-height: 1.2;
-  }
-
-  /* 시간 */
-  .message-time {
-    font-size: 0.65rem;
-    color: #888;
-    align-self: flex-end;
-    margin-top: 0.15rem;
-  }
 
 
     /* 입력 영역 */
@@ -369,4 +289,77 @@ position: relative;
     flex-shrink: 0;
 }
 
+/* 버튼 그룹 컨테이너 */
+#actionBtnGroup {
+    padding: 5px;
+}
 
+/* [수락] 버튼: 빨강 -> 호버 시 흰색 바탕에 빨간 글씨 */
+.btn-dm-accept {
+    background-color: #dc3545 !important; /* 빨강 */
+    color: white !important;
+    border: 1px solid #dc3545 !important;
+    font-weight: bold;
+    height: 45px;
+    transition: all 0.3s ease;
+}
+
+.btn-dm-accept:hover {
+    background-color: white !important;
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+/* [거절] 버튼: 회색 -> 호버 시 진한 회색 */
+.btn-dm-reject {
+    background-color: #e9ecef !important; /* 연한 회색 */
+    color: #333 !important;
+    border: 1px solid #dee2e6 !important;
+    font-weight: bold;
+    height: 45px;
+    transition: all 0.3s ease;
+}
+
+.btn-dm-reject:hover {
+    background-color: #adb5bd !important; /* 조금 더 진한 회색 */
+    color: white !important;
+}
+
+/* 텍스트 입력창이 있을 때 전송 버튼도 동일한 높이로 맞춤 */
+#sendBtn {
+    background-color: #dc3545;
+    border: none;
+}
+.chat-header-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s;
+    margin-left: -23px;
+}
+
+/* 헤더 프로필 이미지 스타일 */
+.header-avatar {
+    width: 36px !important;    /* 크기 고정 */
+    height: 36px !important;   /* 크기 고정 */
+    border-radius: 50%;        /* 원형 */
+    object-fit: cover;         /* 이미지 비율 유지 */
+    margin-right: 10px;        /* 이름과의 간격 */
+    border: 1px solid #eee;    /* 미세한 테두리 */
+}
+
+/* 헤더 링크 정렬 */
+.chat-header-link {
+    display: flex;
+    align-items: center;       /* 세로 중앙 정렬 */
+    text-decoration: none;
+    color: inherit;
+}
+
+/* 제목 텍스트 위치 보정 */
+.chat-title-text {
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1;            /* 이미지와 높이 맞춤 */
+}

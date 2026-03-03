@@ -81,7 +81,7 @@ $(document).ready(() => {
         const unreadCount = chat.unreadCount > 0
             ? `<span class="unread-badge">${chat.unreadCount}</span>`
             : '';
-        const profileImg = chat.otherUserProfileImg || '/default-profile.png'; // 기본 이미지
+        const profileImg = chat.otherUserProfileImg || '/image/default-profile.png'; // 기본 이미지
 
         const $dmItem = $(`
 <div class="dm-item">

@@ -3,16 +3,11 @@
     --dark-grey: #333333;
 }
 
-body {
-    background-color: #f8f9fa;
-}
-
 .app-container {
-    max-width: 480px;
+    max-width: 430px;
     margin: 0 auto;
     background: #ffffff;
     min-height: 100vh;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
 
 /* 수정된 헤더 스타일 */
@@ -143,6 +138,7 @@ body {
     border-radius: 8px;
     padding: 15px;
     min-height: 120px;
+    white-space: pre-line;
 }
 /* =========================
    Follow Stats (Instagram Style)
@@ -192,4 +188,19 @@ body {
 .btn-unfollowed {
     background: #dc3545;
     color: #fff;
+}
+
+.btn-following:hover,
+.btn-following:focus,
+.btn-following:active {
+    background: transparent; /* 배경 유지 */
+    color: #ccc;          /* 글자색 유지 */
+}
+
+
+.btn-unfollowed:hover,
+.btn-unfollowed:focus,
+.btn-unfollowed:active {
+    background: #ccc; /* 배경 유지 */
+    color: #fff;          /* 글자색 유지 */
 }

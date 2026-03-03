@@ -161,10 +161,10 @@
 
     <div class="app-container">
 
-      <div class="page-title">공연 모집글</div>
-
-      <div th:replace="~{fragments/performer/profile :: profile}"></div>
-
+      <div class="top-header">
+        <div class="page-title">공연 모집글</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
       <div class="tab-buttons">
         <button th:onclick="|location.href='@{/posts/performer}'|">공연자 모집</button>
         <button class="active">공연 모집</button>
@@ -218,8 +218,8 @@
           <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}"></span>
         </div>
 
-        <a th:href="@{/posts/performance/{id}/recommend(id=${post.postId})}" onclick="event.stopPropagation();"
-          class="recommend-link">
+        <a th:if="${profileMode == 'ROLE_PERFORMER'}" th:href="@{/posts/performance/{id}/recommend(id=${post.postId})}"
+          onclick="event.stopPropagation();" class="recommend-link">
           공연자 추천
         </a>
 
@@ -267,7 +267,9 @@
 
       <!-- 글 작성 -->
       <div class="write-btn">
-        <a th:href="@{/posts/performance/write}">글 작성</a>
+        <a th:href="@{/posts/performance/write}">
+          글 작성
+        </a>
       </div>
 
     </div>

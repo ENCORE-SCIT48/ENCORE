@@ -130,17 +130,28 @@
         <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
       </div>
 
-      <!-- 모집 인원 표시 -->
-      <div style="margin-top:8px; font-size:13px; color:#E63946;">
+      <!-- 모집 인원 + 마감 표시 -->
+      <div style="margin-top:6px; font-size:12px;">
 
+        <!-- 정원 있는 경우 -->
         <span th:if="${post.capacity != null}">
-          모집 인원
-          <span th:text="${post.approvedCount}"></span>
-          /
-          <span th:text="${post.capacity}"></span>
+
+          <!-- 마감 여부 판단 -->
+          <span th:if="${post.approvedCount >= post.capacity}" style="color:#E63946; font-weight:600;">
+            모집 마감
+          </span>
+
+          <span th:if="${post.approvedCount < post.capacity}" style="color:#E63946;">
+            모집 인원
+            <span th:text="${post.approvedCount}"></span>
+            /
+            <span th:text="${post.capacity}"></span>
+          </span>
+
         </span>
 
-        <span th:if="${post.capacity == null}">
+        <!-- 정원 제한 없음 -->
+        <span th:if="${post.capacity == null}" style="color:#666;">
           모집 인원 제한 없음
         </span>
 
@@ -153,12 +164,15 @@
         게시글 내용
       </div>
 
-      <!-- 수정 / 삭제 -->
+      <!-- 버튼 영역 -->
       <div class="btn-group">
 
-        <!-- 로그인 + 작성자인 경우 -->
-        <th:block
-          th:if="${activeProfileId != null and post.performerId != null and activeProfileId == post.performerId}">
+        <!-- 작성자 (공연자 본인) -->
+        <th:block th:if="${profileMode == 'ROLE_PERFORMER'
+      and activeAuthorId != null 
+      and post.performerId != null 
+      and activeAuthorId == post.performerId}">
+
           <button id="editBtn" class="btn btn-primary"
             th:onclick="|location.href='@{/posts/performer/{id}/edit(id=${post.postId})}'|">
             수정
@@ -167,14 +181,34 @@
           <button id="deleteBtn" class="btn btn-outline-danger">
             삭제
           </button>
+
         </th:block>
 
-        <!-- 로그인했지만 작성자가 아닌 경우 -->
-        <th:block
-          th:if="${activeProfileId != null and post.performerId != null and activeProfileId != post.performerId}">
-          <button id="applyBtn" class="btn btn-primary">
+        <!-- 공연자이면서 작성자가 아닌 경우 -->
+        <th:block th:if="${profileMode == 'ROLE_PERFORMER'
+      and activeAuthorId != null
+      and activeAuthorId != post.performerId}">
+
+          <!-- 마감 -->
+          <button th:if="${post.capacity != null 
+        and post.approvedCount >= post.capacity}" class="btn btn-secondary" disabled>
+            모집마감
+          </button>
+
+          <!-- 신청완료 -->
+          <button th:if="${(post.capacity == null 
+        or post.approvedCount < post.capacity) 
+        and alreadyApplied}" class="btn btn-secondary" disabled>
+            신청완료
+          </button>
+
+          <!-- 신청 -->
+          <button th:if="${(post.capacity == null 
+        or post.approvedCount < post.capacity) 
+        and !alreadyApplied}" id="applyBtn" class="btn btn-primary">
             신청
           </button>
+
         </th:block>
 
       </div>

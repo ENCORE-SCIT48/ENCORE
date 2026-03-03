@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 @Transactional
@@ -62,9 +64,16 @@ public class MemberService {
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필을 찾을 수 없습니다."));
 
         // userInfo 포맷 예시: "소개 내용 (생년월일: YYYY-MM-DD)"
-        String userInfo = String.format("%s (생년월일: %s)",
-            userProfile.getIntroduction(),
-            userProfile.getBirthDate() != null ? userProfile.getBirthDate().toString() : "미등록");
+        String introduction = Optional.ofNullable(userProfile.getIntroduction()).orElse("");
+
+        String preferredGenres = Optional.ofNullable(userProfile.getPreferredGenres()).orElse("");
+        String preferredPerformanceTypes = Optional.ofNullable(userProfile.getPreferredPerformanceTypes()).orElse("");
+
+        String userInfo = String.format("%s%s%s",
+            introduction.isEmpty() ? "" : introduction + "\n\n", // introduction이 있으면 줄바꿈 포함
+            preferredGenres.isEmpty() ? "" : "선호하는 장르: " + preferredGenres + "\n",
+            preferredPerformanceTypes.isEmpty() ? "" : "선호하는 공연 타입: " + preferredPerformanceTypes
+        );
 
         int followingCount = userRelationRepository.countFollowing(userProfile.getUser().getUserId(), ActiveMode.valueOf(profileMode));
 
@@ -97,12 +106,45 @@ public class MemberService {
 
         int followerCount = userRelationRepository.countFollower(profileId, ActiveMode.valueOf(profileMode));
 
+        // 소개 정보 가져옴
+        String description = Optional.ofNullable(performerProfile.getDescription()).orElse("");
+        String category = Optional.ofNullable(performerProfile.getCategory()).orElse("");
+        String activityArea = Optional.ofNullable(performerProfile.getActivityArea()).orElse("");
+        String part = Optional.ofNullable(performerProfile.getPart()).orElse("");
+        String skil = Optional.ofNullable(performerProfile.getSkillLevel().name()).orElse("");
+
+        // null-safe + 불필요한 줄바꿈 제거
+        StringBuilder userInfoBuilder = new StringBuilder();
+
+        if (!description.isEmpty()) {
+            userInfoBuilder.append(description).append("\n\n");
+        }
+        if (!category.isEmpty()) {
+            userInfoBuilder.append("장르: ").append(category).append("\n");
+        }
+        if (!activityArea.isEmpty()) {
+            userInfoBuilder.append("주 활동 지역: ").append(activityArea).append("\n");
+        }
+        if (!part.isEmpty()) {
+            userInfoBuilder.append("담당 파트: ").append(part).append("\n");
+        }
+        if (!skil.isEmpty()) {
+            userInfoBuilder.append("스킬 : ").append(skil);
+        }
+
+        // 최종 문자열
+        String userInfo = userInfoBuilder.toString();
+
+        String profileImg = performerProfile.getProfileImageUrl();
+        if (profileImg == null || profileImg.isBlank()) {
+            profileImg = "/image/default-profile.png";
+        }
         return MemberProfileDto.builder()
             .profileId(profileId)
             .profileMode(profileMode)
             .userName(performerProfile.getStageName())
-            .profileImg(null) // TODO: 프로필 이미지 엔티티 추가 시 변경
-            .userInfo(performerProfile.getCategory())
+            .profileImg(profileImg)
+            .userInfo(userInfo)
             .followerCount(followerCount)
             .followingCount(followingCount)
             .build();
@@ -119,13 +161,41 @@ public class MemberService {
 
         int followerCount = userRelationRepository.countFollower(profileId, ActiveMode.valueOf(profileMode));
 
+        String profileImg = hostProfile.getProfileImageUrl();
+        if (profileImg == null || profileImg.isBlank()) {
+            profileImg = "/image/default-profile.png";
+        }
+
+        String orgName = Optional.ofNullable(hostProfile.getOrganizationName()).orElse("");
+        String repName = Optional.ofNullable(hostProfile.getRepresentativeName()).orElse("");
+        String bizNum = Optional.ofNullable(hostProfile.getBusinessNumber()).orElse("");
+        String verifiedText = hostProfile.isVerified() ? "인증 완료" : "인증 필요";
+
+        // null-safe + 불필요한 줄바꿈 제거
+        StringBuilder userInfoBuilder = new StringBuilder();
+
+        if (!orgName.isEmpty()) {
+            userInfoBuilder.append(orgName).append("\n");
+        }
+        if (!repName.isEmpty()) {
+            userInfoBuilder.append("대표: ").append(repName).append("\n");
+        }
+        if (!bizNum.isEmpty()) {
+            userInfoBuilder.append("사업자번호: ").append(bizNum).append(" ");
+        }
+
+        // 마지막은 인증 상태
+        userInfoBuilder.append(verifiedText);
+
+        // 최종 문자열
+        String userInfo = userInfoBuilder.toString();
 
         return MemberProfileDto.builder()
             .profileId(profileId)
             .profileMode(profileMode)
             .userName(hostProfile.getOrganizationName())
-            .profileImg(null) // TODO: 프로필 이미지 엔티티 추가 시 변경
-            .userInfo(hostProfile.getBusinessNumber())
+            .profileImg(profileImg)
+            .userInfo(userInfo)
             .followerCount(followerCount)
             .followingCount(followingCount)
             .build();

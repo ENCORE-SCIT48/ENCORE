@@ -1,7 +1,9 @@
 package com.encore.encore.domain.user.controller;
 
+import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +26,15 @@ public class UserPageController {
      */
     @GetMapping("/user/follow")
     public String follow(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestParam Long targetId,
         @RequestParam(required = false, defaultValue = "USER") String profileMode,
         @RequestParam(required = false, defaultValue = "following") String tab,
         Model model) {
 
+        
+        model.addAttribute("loginProfileId", userDetails.getActiveProfileId());
+        model.addAttribute("loginProfileMode", userDetails.getActiveMode());
 
         model.addAttribute("activeTab", tab);
         model.addAttribute("targetId", targetId);

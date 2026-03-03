@@ -52,22 +52,38 @@ $(document).ready(() => {
         });
     });
 
-    // =========================
-    // 채팅방 참가 버튼 클릭
-    // =========================
-    const $btnJoin = $('#btn-join');
-    if ($btnJoin.length) {
-        $btnJoin.on('click', function () {
-            const roomId = $(this).data('room-id');
+    $('#btn-report').on('click', function () {
+        const targetId = $(this).data('target-id');
+        const targetType = $(this).data('target-type');
+        const targetName = $(this).data('target-name');
 
-            if (!roomId) {
-                alert('채팅방 ID를 가져오지 못했습니다.');
-                return;
-            }
+        if (!targetId || !targetType || targetType === "undefined" || !targetName) {
+            console.error("신고 데이터 누락:", { targetId, targetType, targetName });
+            alert("신고 대상 정보가 올바르지 않아 신고를 진행할 수 없습니다.");
+            return;
+        }
 
-            if (confirm('채팅방에 입장하시겠습니까?')) {
+        const url = `/report?targetId=${targetId}&targetType=${targetType}&targetName=${encodeURIComponent(targetName)}`;
+        window.location.href = url;
+    });
+
+    // =========================
+        // 채팅방 참가 버튼 클릭
+        // =========================
+        const $btnJoin = $('#btn-join');
+        if ($btnJoin.length) {
+            $btnJoin.on('click', function () {
+                const roomId = $(this).data('room-id');
+
+                if (!roomId) {
+                    alert('채팅방 ID를 가져오지 못했습니다.');
+                    return;
+                }
+
+                if (!confirm('채팅방에 입장하시겠습니까?')) return;
+
+                // 존재하지 않는 API 호출 대신 바로 채팅방 페이지로 이동
                 window.location.href = `/chat/${roomId}`;
-            }
-        });
-    }
+            });
+        }
 });

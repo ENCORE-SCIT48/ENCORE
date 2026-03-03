@@ -89,13 +89,28 @@ public class ChatPageController {
 
 
         try {
+            if (userDetails == null) {
+                // 로그인 안 됐으면 로그인 페이지로 리다이렉트
+                return "redirect:/auth/login";
+            }
             Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
             ActiveMode activeMode = userDetails.getActiveMode();
 
-            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id, performanceId);
             Long roomId = chatService.getChatRoomId(id);
 
+            boolean isWriter = chatService.canEdit(activeProfileId, activeMode, dto);
+
+
+            model.addAttribute("isWriter", isWriter);
+
             List<ResponseParticipantDto> chatParticipantList = chatService.getChatParticipants(roomId);
+
+            boolean canJoin = true;
+            if (dto.getStatus().equals(ChatPost.Status.CLOSED.name())) {
+                canJoin = chatService.canJoin(activeProfileId, activeMode, chatParticipantList);
+            }
+            model.addAttribute("canJoin", canJoin);
             model.addAttribute("currentProfileId", activeProfileId); // Long 타입으로 일치
             model.addAttribute("currentProfileMode", activeMode); // 타입 일치
 
@@ -126,7 +141,7 @@ public class ChatPageController {
         log.info("게시글 수정 폼 진입 - performanceId: {}, postId: {}", performanceId, id);
 
         try {
-            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id);
+            ResponseDetailChatPostDto dto = chatService.getChatPostDetail(id, performanceId);
 
             model.addAttribute("performanceTitle", chatService.getPerformanceTitle(performanceId));
             model.addAttribute("performanceId", performanceId);
@@ -157,7 +172,13 @@ public class ChatPageController {
      */
 
     @GetMapping("/chats/join")
-    public String chatListJoin() {
+    public String chatListJoin(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            // 로그인 안 됐으면 로그인 페이지로 리다이렉트
+            return "redirect:/auth/login";
+        }
         return "chat/chatJoinListFull";
     }
 
@@ -182,7 +203,6 @@ public class ChatPageController {
 
         Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
-
 
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
 

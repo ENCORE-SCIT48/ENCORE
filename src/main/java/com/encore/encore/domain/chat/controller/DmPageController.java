@@ -1,5 +1,6 @@
 package com.encore.encore.domain.chat.controller;
 
+import com.encore.encore.domain.chat.dto.dm.ResponseDmRoomDto;
 import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.config.CustomUserDetails;
@@ -51,6 +52,9 @@ public class DmPageController {
 
         String participantStatus = dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);
 
+        ResponseDmRoomDto dto = dmService.getDmRoomDetail(roomId, activeProfileId, activeMode);
+
+        model.addAttribute("userDetail", dto);
         model.addAttribute("participantStatus", participantStatus);
         model.addAttribute("roomId", roomId);
 

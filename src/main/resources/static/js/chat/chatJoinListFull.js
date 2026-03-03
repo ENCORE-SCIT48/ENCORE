@@ -18,6 +18,7 @@ $(document).ready(() => {
     const $searchBtn = $("#searchBtn");
     const $keyword = $("#keyword");
     const $searchType = $("#searchType");
+    const $onlyMineToggle = $("#onlyMineToggle");
 
     // ==========================
     // 채팅방 조회 함수
@@ -31,6 +32,12 @@ $(document).ready(() => {
             hasNext = true;
             $container.empty();
         }
+        // ==========================
+            // 토글 이벤트 추가
+            // ==========================
+            $onlyMineToggle.on("change", () => {
+                loadChats(true);  // ✅ 토글 변경 시 페이지 리셋 후 다시 조회
+            });
 
         $.ajax({
             url: `/api/users/chats`,
@@ -39,7 +46,8 @@ $(document).ready(() => {
                 page,
                 size,
                 keyword: $keyword.val().trim(),
-                searchType: $searchType.val()
+                searchType: $searchType.val(),
+                onlyMine: $onlyMineToggle.is(":checked")
             },
             success: res => {
                 const slice = res.data;

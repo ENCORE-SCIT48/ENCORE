@@ -33,6 +33,11 @@ $(document).ready(() => {
             return;
         }
 
+        if (content.length > 200) {
+                    alert('내용은 200자 이하로 입력해주세요.');
+                    return;
+                }
+
         if (!Number.isInteger(maxMember) || maxMember < 2 || maxMember > 50) {
             alert('모집 인원은 2~50 사이의 정수로 입력해주세요.');
             return;
