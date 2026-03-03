@@ -5,25 +5,31 @@ import lombok.Getter;
 
 /**
  * GET /api/venues/my 전용 응답 DTO.
- * 호스트의 공연장 목록 조회 시 사용하며,
- * list.js 내 공연장 식별을 위해 hostId 를 포함한다.
- * 기존 VenueListItemDto 와 분리하여 독립적으로 관리한다.
+ * 호스트 내 공연장 관리 페이지(myVenues)에서 카드 렌더링에 필요한 필드를 포함한다.
  */
 @Getter
 public class VenueMyListItemDto {
-
-    /** 공연장 ID */
     private final Long venueId;
-
-    /** 공연장 명칭 */
     private final String venueName;
-
-    /** 호스트 프로필 ID (list.js 내 공연장 식별용) */
     private final Long hostId;
+    private final String address;
+    private final String venueType;
+    private final Integer totalSeats;
+    private final String openTime;
+    private final String closeTime;
+    private final Integer rentalFee;
+    private final Integer bookingUnit;
 
     public VenueMyListItemDto(Venue venue) {
-        this.venueId   = venue.getVenueId();
-        this.venueName = venue.getVenueName();
-        this.hostId    = venue.getHost() != null ? venue.getHost().getHostId() : null;
+        this.venueId     = venue.getVenueId();
+        this.venueName   = venue.getVenueName();
+        this.hostId      = venue.getHost() != null ? venue.getHost().getHostId() : null;
+        this.address     = venue.getAddress();
+        this.venueType   = venue.getVenueType();
+        this.totalSeats  = venue.getTotalSeats();
+        this.openTime    = venue.getOpenTime();
+        this.closeTime   = venue.getCloseTime();
+        this.rentalFee   = venue.getRentalFee();
+        this.bookingUnit = venue.getBookingUnit();
     }
 }
