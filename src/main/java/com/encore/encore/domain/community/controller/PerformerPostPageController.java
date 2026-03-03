@@ -4,6 +4,7 @@ import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseListPerfo
 import com.encore.encore.domain.community.dto.PerformerPostDto.ResponseReadPerformerPostDto;
 import com.encore.encore.domain.community.service.PerformerPostService;
 import com.encore.encore.domain.community.service.PostInteractionService;
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.config.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,36 +80,25 @@ public class PerformerPostPageController {
         // 1. 게시글 조회 (조회수 증가 true)
         ResponseReadPerformerPostDto post = performerPostService.readPerformerPost(postId, true);
 
-        log.info("상세 조회 완료 - postId={}, viewCount={}",
-                postId, post.getViewCount());
-
         model.addAttribute("post", post);
+        model.addAttribute("approvedCount", post.getApprovedCount());
 
-        // 2. 승인 인원 조회
-        int approvedCount = postInteractionService.getApprovedCountByPostId(postId);
-
-        log.info("모집 현황 조회 - postId={}, approvedCount={}",
-                postId, approvedCount);
-
-        model.addAttribute("approvedCount", approvedCount);
-
-        // 3. 로그인 사용자 처리
         if (userDetails != null) {
 
-            Long activeProfileId = performerPostService.getActivePerformerId(userDetails);
-
-            log.info("activeProfileId={}", activeProfileId);
-
-            model.addAttribute("activeProfileId", activeProfileId);
+            Long activeAuthorId = performerPostService.getActivePerformerId(userDetails);
 
             boolean alreadyApplied = postInteractionService.isAlreadyApplied(postId, userDetails);
 
-            log.info("alreadyApplied={}", alreadyApplied);
+            ActiveMode activeMode = userDetails.getActiveMode();
 
+            model.addAttribute("activeAuthorId", activeAuthorId);
             model.addAttribute("alreadyApplied", alreadyApplied);
+            model.addAttribute("profileMode", activeMode.name());
 
-        } else {
-            log.info("비로그인 상태 - 신청 관련 정보 미조회");
+            log.debug("[PerformerDetail] authorId={}, alreadyApplied={}, mode={}",
+                    activeAuthorId,
+                    alreadyApplied,
+                    activeMode);
         }
 
         return "community/performer/performerPostDetail";
@@ -117,21 +107,38 @@ public class PerformerPostPageController {
     /**
      * [설명] 공연자 모집 게시글 작성 화면을 조회합니다.
      *
-     * - 로그인하지 않은 경우 로그인 페이지로 리다이렉트합니다.
+     * - 로그인 사용자만 접근 가능합니다.
+     * - 활성 모드가 ROLE_PERFORMER인 경우에만 접근 가능합니다.
      *
      * @param userDetails 로그인 사용자 정보
-     * @return 게시글 작성 화면
+     * @param model       View 전달 객체
+     * @return 공연자 모집 게시글 작성 화면
      */
     @GetMapping("/write")
     public String writePostForm(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
 
-        log.info("GET /posts/performer/write - 작성 페이지 요청");
+        log.info("[PerformerWrite] 요청");
 
+        // 1. 로그인 체크
         if (userDetails == null) {
-            log.info("비로그인 사용자 - 로그인 페이지로 리다이렉트");
+            log.warn("[PerformerWrite] 비로그인 사용자 접근");
             return "redirect:/auth/login";
         }
+
+        ActiveMode activeMode = userDetails.getActiveMode();
+
+        // 2. 공연자 모드 체크
+        if (activeMode != ActiveMode.ROLE_PERFORMER) {
+            log.warn("[PerformerWrite] 공연자 모드 아님 - mode={}", activeMode);
+            return "redirect:/posts/performer";
+        }
+
+        model.addAttribute("nickname",
+                userDetails.getUser().getNickname());
+        model.addAttribute("profileMode",
+                activeMode.name());
 
         return "community/performer/performerPostWrite";
     }
@@ -140,13 +147,13 @@ public class PerformerPostPageController {
      * [설명] 공연자 모집 게시글 수정 화면을 조회합니다.
      *
      * - 로그인 사용자만 접근 가능합니다.
-     * - 작성자 본인(PerformerProfile)만 접근 가능합니다.
-     * - 수정 페이지에서는 조회수를 증가시키지 않습니다.
+     * - 활성 모드 기준 작성자(PerformerProfile)만 접근 가능합니다.
+     * - 조회수는 증가시키지 않습니다.
      *
      * @param userDetails 로그인 사용자 정보
      * @param postId      수정할 게시글 ID
      * @param model       View 전달 객체
-     * @return 게시글 수정 화면
+     * @return 공연자 모집 게시글 수정 화면
      */
     @GetMapping("/{postId}/edit")
     public String editPostForm(
@@ -154,33 +161,26 @@ public class PerformerPostPageController {
             @PathVariable("postId") Long postId,
             Model model) {
 
-        log.info("GET /posts/performer/{}/edit - 수정 페이지 요청", postId);
+        log.info("[PerformerEdit] 요청 - postId={}", postId);
 
-        // 1. 로그인 체크
         if (userDetails == null) {
-            log.info("비로그인 사용자 - 로그인 페이지로 리다이렉트");
+            log.warn("[PerformerEdit] 비로그인 사용자 접근");
             return "redirect:/auth/login";
         }
 
-        // 2. 게시글 조회 (조회수 증가 false)
         ResponseReadPerformerPostDto post = performerPostService.readPerformerPost(postId, false);
 
-        log.info("수정용 게시글 조회 완료 - postId={}", postId);
+        Long activeAuthorId = performerPostService.getActivePerformerId(userDetails);
 
-        // 3. 작성자 ID 확인
-        Long activeProfileId = performerPostService.getActivePerformerId(userDetails);
+        boolean isOwner = post.getPerformerId() != null &&
+                post.getPerformerId().equals(activeAuthorId);
 
-        log.info("수정 권한 체크 - activeProfileId={}, postPerformerId={}",
-                activeProfileId, post.getPerformerId());
-
-        if (activeProfileId == null ||
-                !activeProfileId.equals(post.getPerformerId())) {
-
-            log.info("작성자 불일치 - 수정 페이지 접근 차단");
+        if (!isOwner) {
+            log.warn("[PerformerEdit] 권한 없음 - postId={}, authorId={}",
+                    postId,
+                    activeAuthorId);
             return "redirect:/posts/performer";
         }
-
-        log.info("작성자 확인 완료 - 수정 페이지 접근 허용");
 
         model.addAttribute("post", post);
 

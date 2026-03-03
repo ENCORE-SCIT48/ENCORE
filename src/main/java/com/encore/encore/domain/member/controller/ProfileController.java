@@ -56,7 +56,7 @@ public class ProfileController {
      */
     @PostMapping("/switch")
     public String switchMode(
-        @RequestParam ActiveMode mode,
+        @RequestParam("mode") ActiveMode mode,
         @AuthenticationPrincipal CustomUserDetails userDetails,
         HttpSession session) {
         // 로그인 체크 (NPE 방지)

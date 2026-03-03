@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공연자 추천</title>
 
-  <!-- Bootswatch Litera -->
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
 
   <style>
@@ -51,21 +50,90 @@
       border-top: 1px solid #eee;
     }
 
-    .content-area {
-      min-height: 300px;
+    .performer-card {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .performer-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-img {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 12px;
+      background-color: #f2f2f2;
+    }
+
+    .performer-text {
+      font-size: 13px;
+      color: #333;
+    }
+
+    .performer-text strong {
       font-size: 14px;
-      color: #999;
-      text-align: center;
+      display: block;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #777;
     }
 
     .btn-primary {
       background-color: #E63946;
       border-color: #E63946;
+      font-size: 12px;
+      padding: 4px 10px;
     }
 
     .btn-primary:hover {
       background-color: #c92f3a;
       border-color: #c92f3a;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+      margin-top: 40px;
+    }
+
+    .pagination {
+      gap: 6px;
+    }
+
+    .pagination .page-link {
+      border-radius: 8px;
+      border: 1px solid #E63946;
+      color: #E63946;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 12px;
+    }
+
+    .pagination .page-link:hover {
+      background-color: #E63946;
+      color: #fff;
+    }
+
+    .pagination .active .page-link {
+      background-color: #E63946;
+      border-color: #E63946;
+      color: #fff;
+    }
+
+    .pagination .disabled .page-link {
+      opacity: 0.4;
     }
   </style>
 </head>
@@ -85,18 +153,152 @@
 
       <div class="divider"></div>
 
-      <!-- 내용 영역 -->
-      <div class="content-area">
-        추천 공연자가 표시될 영역입니다.
+      <!-- 검색 & 필터 영역 -->
+      <div class="mb-3">
+
+        <form method="get" th:action="@{/posts/performance/{postId}/recommend(postId=${postId})}">
+
+          <div class="input-group mb-2">
+            <input type="text" name="keyword" class="form-control" placeholder="공연자 이름 검색" th:value="${param.keyword}">
+            <button class="btn btn-outline-secondary" type="submit">
+              검색
+            </button>
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button type="button" id="filterToggleBtn" class="btn btn-outline-secondary btn-sm">
+              필터
+            </button>
+          </div>
+
+          <div id="filterArea" class="mt-2" style="display: none;">
+
+            <div class="card card-body">
+
+              <!-- 활동 지역 -->
+              <div class="mb-2">
+                <label class="form-label">활동 지역</label>
+                <input type="text" name="activityArea" class="form-control" placeholder="예: 서울"
+                  th:value="${activityArea}">
+              </div>
+
+              <!-- 포지션 -->
+              <div class="mb-2">
+                <label class="form-label">포지션</label>
+                <input type="text" name="part" class="form-control" placeholder="예: 보컬" th:value="${part}">
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm">
+                적용
+              </button>
+
+            </div>
+
+          </div>
+
+        </form>
+
       </div>
 
+      <!-- 공연자 리스트 -->
+      <div th:if="${#lists.isEmpty(performers)}" class="empty-message">
+        추천할 공연자가 없습니다.
+      </div>
+
+      <div th:each="performer : ${performers}" class="performer-card">
+
+        <div class="performer-info">
+
+          <img th:if="${performer.profileImageUrl != null}" th:src="${performer.profileImageUrl}" class="profile-img">
+
+          <img th:if="${performer.profileImageUrl == null}" src="/images/default-profile.png" class="profile-img">
+
+          <div class="performer-text">
+            <strong th:text="${performer.stageName}">무대명</strong>
+            <div class="meta" th:text="${performer.part}">포지션</div>
+            <div class="meta" th:text="${performer.category}">장르</div>
+            <div class="meta" th:text="${performer.skillLevel}">실력</div>
+            <div class="meta" th:text="${performer.activityArea}">활동지역</div>
+          </div>
+
+        </div>
+
+        <button class="btn btn-primary">
+          모집
+        </button>
+
+      </div>
+
+      <!-- 공연자 카드 반복 끝난 아래 -->
+      <nav th:if="${page.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+
+          <th:block th:with="
+            groupStart=${(page.number / 5) * 5},
+            groupEnd=${T(java.lang.Math).min(groupStart + 4, page.totalPages - 1)}
+          ">
+
+            <!-- 이전 그룹 -->
+            <li class="page-item" th:classappend="${groupStart == 0} ? 'disabled'">
+              <a class="page-link" th:if="${groupStart > 0}" th:href="@{/posts/performance/{postId}/recommend(
+                    postId=${postId},
+                    page=${groupStart - 5},
+                    keyword=${keyword},
+                    activityArea=${activityArea},
+                    part=${part}
+                )}">
+                &lt;&lt;
+              </a>
+              <span class="page-link" th:if="${groupStart == 0}">&lt;&lt;</span>
+            </li>
+
+            <!-- 번호 -->
+            <li class="page-item" th:each="i : ${#numbers.sequence(groupStart, groupEnd)}"
+              th:classappend="${i == page.number} ? 'active'">
+
+              <a class="page-link" th:text="${i + 1}" 
+                th:href="@{/posts/performance/{postId}/recommend(
+                  postId=${postId},
+                  page=${i},
+                  keyword=${keyword},
+                  activityArea=${activityArea},
+                  part=${part}
+                )}">
+              </a>
+
+            </li>
+
+            <!-- 다음 그룹 -->
+            <li class="page-item" th:classappend="${groupEnd + 1 >= page.totalPages} ? 'disabled'">
+              <a class="page-link" th:if="${groupEnd + 1 < page.totalPages}" 
+                th:href="@{/posts/performance/{postId}/recommend(
+                    postId=${postId},
+                    page=${groupStart + 5},
+                    keyword=${keyword},
+                    activityArea=${activityArea},
+                    part=${part}
+                )}">
+                &gt;&gt;
+              </a>
+              <span class="page-link" th:if="${groupEnd + 1 >= page.totalPages}">&gt;&gt;</span>
+            </li>
+
+          </th:block>
+
+        </ul>
+      </nav>
+
     </div>
+
+
 
     <!-- 하단 네비 -->
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
   </div>
 
+
+  <script th:src="@{/js/community/performerRecommend.js}"></script>
 </body>
 
 </html>

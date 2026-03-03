@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>신청자 관리</title>
+
+  <!-- Bootswatch Litera -->
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #ffffff;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      padding: 20px 16px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .back-btn {
+      font-size: 20px;
+      text-decoration: none;
+      color: #333333;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .content-area {
+      margin-top: 10px;
+      min-height: 300px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .divider {
+      margin: 20px 0;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-wrapper">
+
+    <div class="app-container">
+
+      <!-- 상단 바 -->
+      <div class="top-bar">
+        <a th:href="@{/mypage}" class="back-btn">←</a>
+        <div class="page-title">신청자 관리</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 내용 영역 -->
+      <div class="content-area" style="text-align:left;">
+
+        <!-- 공연자 모집글 신청 관리 -->
+        <a th:href="@{/mypage/performer/manage/performer}" style="display:block;
+            background:#f8f8f8;
+            padding:16px;
+            border-radius:12px;
+            margin-bottom:16px;
+            text-decoration:none;
+            color:#333;
+            border:1px solid #eee;">
+
+          <div style="font-weight:600; margin-bottom:4px;">
+            공연자 모집글 신청 관리
+          </div>
+
+          <div style="font-size:12px; color:#666;">
+            내가 작성한 공연자 모집글의 신청자 목록 관리
+          </div>
+
+        </a>
+
+        <!-- 공연 모집글 신청 관리 -->
+        <a th:href="@{/mypage/performer/manage/performance}" style="display:block;
+            background:#f8f8f8;
+            padding:16px;
+            border-radius:12px;
+            text-decoration:none;
+            color:#333;
+            border:1px solid #eee;">
+
+          <div style="font-weight:600; margin-bottom:4px;">
+            공연 모집글 신청 관리
+          </div>
+
+          <div style="font-size:12px; color:#666;">
+            내가 작성한 공연 모집글의 신청자 목록 관리
+          </div>
+
+        </a>
+
+      </div>
+
+    </div>
+
+    <!-- 하단 네비 -->
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
+
+  </div>
+
+</body>
+
+</html>
