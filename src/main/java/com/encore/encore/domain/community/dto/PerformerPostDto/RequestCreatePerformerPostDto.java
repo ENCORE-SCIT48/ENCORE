@@ -1,5 +1,7 @@
 package com.encore.encore.domain.community.dto.PerformerPostDto;
 
+import java.util.List;
+
 import lombok.*;
 
 @Getter
@@ -16,5 +18,11 @@ public class RequestCreatePerformerPostDto {
     private String content;
 
     private Integer capacity;
+
+    private List<String> recruitCategory;
+
+    private List<String> recruitPart;
+
+    private String recruitArea;
 
 }

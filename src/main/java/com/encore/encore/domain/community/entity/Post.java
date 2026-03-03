@@ -25,8 +25,17 @@ public class Post extends BaseEntity {
     private Performance performance;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venue_id", nullable = false)
+    @JoinColumn(name = "venue_id")
     private Venue venue;
+
+    @Column(length = 255)
+    private String recruitCategory; // 모집 장르 (콤마 구분)
+
+    @Column(length = 255)
+    private String recruitPart; // 모집 파트 (콤마 구분)
+
+    @Column(length = 100)
+    private String recruitArea; // 모집 활동 지역
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_author_id")

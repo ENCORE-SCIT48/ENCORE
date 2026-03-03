@@ -1,6 +1,5 @@
 package com.encore.encore.domain.community.dto.PerformerPostDto;
 
-
 import java.time.LocalDateTime;
 
 import lombok.*;
@@ -29,5 +28,11 @@ public class ResponseReadPerformerPostDto {
     private LocalDateTime createdAt;
 
     private Long performerId;
+
+    private String recruitCategory;
+
+    private String recruitPart;
+    
+    private String recruitArea;
 
 }
