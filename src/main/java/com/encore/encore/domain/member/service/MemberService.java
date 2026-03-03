@@ -1,13 +1,17 @@
 package com.encore.encore.domain.member.service;
 
 import com.encore.encore.domain.member.dto.MemberProfileDto;
+import com.encore.encore.domain.member.dto.RecentActivitiesDto;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.entity.HostProfile;
 import com.encore.encore.domain.member.entity.PerformerProfile;
 import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
+import com.encore.encore.domain.member.repository.UserPerformanceRelationInfoRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
+import com.encore.encore.domain.performance.entity.UserPerformanceRelation;
+import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.user.repository.UserRelationRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
@@ -16,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +34,7 @@ public class MemberService {
     private final PerformerProfileRepository performerProfileRepository;
     private final HostProfileRepository hostProfileRepository;
     private final UserRelationRepository userRelationRepository;
+    private final UserPerformanceRelationInfoRepository userPerformanceRelationInfoRepository;
 
     /**
      * 유저의 개인페이지에 출력할 정보를 불러옵니다.
@@ -199,5 +206,56 @@ public class MemberService {
             .followerCount(followerCount)
             .followingCount(followingCount)
             .build();
+    }
+
+    /**
+     * 프로필 id와 모드로 user객체를 가져온다
+     *
+     * @param profileId
+     * @param profileMode
+     * @return
+     */
+    public User getUser(Long profileId, String profileMode) {
+
+        ActiveMode activeProfileMode = ActiveMode.valueOf(profileMode);
+
+
+        switch (activeProfileMode) {
+            case ROLE_USER:
+                return userProfileRepository.findById(profileId).get().getUser();
+
+            case ROLE_PERFORMER:
+                return performerProfileRepository.findById(profileId).get().getUser();
+
+            case ROLE_HOST:
+                return hostProfileRepository.findById(profileId).get().getUser();
+
+            default:
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 프로필 모드입니다.");
+        }
+    }
+
+    /**
+     * profileId, profileMode의 관람 정보를 가져온다
+     *
+     * @param profileId
+     * @param profileMode
+     * @return
+     */
+    public List<RecentActivitiesDto> getRecentActivities(Long profileId, String profileMode) {
+
+        User user = getUser(profileId, profileMode);
+        List<UserPerformanceRelation> userPerformanceRelationList = userPerformanceRelationInfoRepository.findTop5ByUser_UserIdOrderByCreatedAtDesc(user.getUserId());
+
+        List<RecentActivitiesDto> recentActivitiesDtoList = new ArrayList<>();
+        for (UserPerformanceRelation performanceRelation : userPerformanceRelationList) {
+            RecentActivitiesDto dto = RecentActivitiesDto.builder()
+                .performanceTitle(performanceRelation.getPerformance().getTitle()).build();
+
+            recentActivitiesDtoList.add(dto);
+        }
+
+        return recentActivitiesDtoList;
+
     }
 }
