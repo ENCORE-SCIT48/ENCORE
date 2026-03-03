@@ -1,6 +1,5 @@
 /* 기본 배경 및 폰트 설정 */
 body {
-    background-color: #f8f9fa;
     color: #333333;
     /* Sub Color */
     display: flex;
@@ -12,11 +11,10 @@ body {
 
 .settings-container {
     width: 100%;
-    max-width: 480px;
+    max-width: 430px;
     /* 모바일 뷰 최적화 */
     background-color: #ffffff;
     min-height: 100vh;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 /* 헤더 영역 */

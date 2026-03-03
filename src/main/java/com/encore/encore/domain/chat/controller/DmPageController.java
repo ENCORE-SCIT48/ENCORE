@@ -25,8 +25,12 @@ public class DmPageController {
      * @return
      */
     @GetMapping("/dm/list")
-    public String dmList() {
-
+    public String dmList(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
         return "chat/dm/dmList";
     }
 

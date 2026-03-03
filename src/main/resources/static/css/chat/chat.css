@@ -168,17 +168,6 @@ position: relative;
   gap: 0.5rem; /* 아이콘과 제목 간격 */
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  color: #dc3545;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  transition: background 0.2s;
-  border-radius: 5px;
-}
-
 .app-title {
  position: absolute;
   left: 50%;
@@ -263,7 +252,6 @@ position: relative;
 .back-btn {
     background: none;
     border: none;
-    color: #dc3545;
     font-size: 1.2rem;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
