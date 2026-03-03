@@ -88,12 +88,12 @@
 
         $list.insertAdjacentHTML("beforeend", html);
 
-        // 카드 클릭 시 상세 페이지 이동
+        // 카드 클릭 시 공연자용 대관 신청 페이지로 이동
         document.querySelectorAll(".venue-card").forEach((el) => {
             el.addEventListener("click", () => {
                 const venueId = el.getAttribute("data-id");
                 if (!venueId) return;
-                window.location.href = `/venues/${venueId}`; // Page Controller 기준
+                window.location.href = `/venues/${venueId}/reservation`;
             });
         });
     }

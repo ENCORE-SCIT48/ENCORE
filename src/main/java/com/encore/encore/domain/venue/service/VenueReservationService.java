@@ -6,10 +6,11 @@ import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.venue.dto.ReservationRejectRequestDto;
 import com.encore.encore.domain.venue.dto.VenueReservationRequestDto;
 import com.encore.encore.domain.venue.dto.VenueReservationResponseDto;
-import com.encore.encore.domain.venue.entity.VenueReservation;
-import com.encore.encore.domain.venue.repository.VenueReservationRepository;
+import com.encore.encore.domain.venue.entity.ReservationStatus;
 import com.encore.encore.domain.venue.entity.Venue;
+import com.encore.encore.domain.venue.entity.VenueReservation;
 import com.encore.encore.domain.venue.repository.VenueRepository;
+import com.encore.encore.domain.venue.repository.VenueReservationRepository;
 import com.encore.encore.global.config.CustomUserDetails;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
@@ -18,7 +19,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 대관 예약 비즈니스 로직 서비스.
@@ -55,6 +64,21 @@ public class VenueReservationService {
         }
 
         Venue venue = findVenueById(dto.getVenueId());
+
+        // 운영 시간 및 휴무일, 예약 단위 검증
+        validateReservationTimeAndBusinessRules(venue, dto.getStartAt(), dto.getEndAt());
+
+        // 일정 중복(충돌) 체크 - PENDING/APPROVED 상태만 고려
+        boolean hasConflict = reservationRepository.existsByVenueAndStatusInAndEndAtGreaterThanAndStartAtLessThan(
+            venue,
+            List.of(ReservationStatus.PENDING, ReservationStatus.APPROVED),
+            dto.getStartAt(),
+            dto.getEndAt()
+        );
+        if (hasConflict) {
+            throw new ApiException(ErrorCode.CONFLICT, "이미 해당 시간에 대관 예약이 존재합니다.");
+        }
+
         HostProfile host = venue.getHost(); // Venue → HostProfile 직접 참조
 
         PerformerProfile performer = performerProfileRepository.findById(performerId)
@@ -200,5 +224,81 @@ public class VenueReservationService {
         if (!venue.getHost().getHostId().equals(hostId)) {
             throw new ApiException(ErrorCode.FORBIDDEN, "해당 공연장에 대한 권한이 없습니다. hostId=" + hostId);
         }
+    }
+
+    /**
+     * 공연장 운영 시간, 휴무일, 예약 단위 관점에서 대관 가능 여부를 검증한다.
+     *
+     * @param venue   공연장
+     * @param startAt 시작 일시
+     * @param endAt   종료 일시
+     */
+    private void validateReservationTimeAndBusinessRules(Venue venue, LocalDateTime startAt, LocalDateTime endAt) {
+        LocalDate date = startAt.toLocalDate();
+        if (!date.equals(endAt.toLocalDate())) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "대관은 하루 단위로만 신청할 수 있습니다.");
+        }
+
+        // 정기 휴무일 검증
+        String regularClosing = venue.getRegularClosing();
+        if (regularClosing != null && !regularClosing.isBlank()) {
+            Set<String> closingDays = Arrays.stream(regularClosing.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toSet());
+
+            DayOfWeek dayOfWeek = date.getDayOfWeek(); // MONDAY ...
+            if (closingDays.contains(dayOfWeek.name())) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "정기 휴무일에는 대관을 신청할 수 없습니다.");
+            }
+        }
+
+        // 임시 휴무일 검증 (yyyy-MM-dd 문자열 비교)
+        String temporaryClosing = venue.getTemporaryClosing();
+        if (temporaryClosing != null && !temporaryClosing.isBlank()) {
+            Set<String> tempDates = Arrays.stream(temporaryClosing.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toSet());
+
+            String target = date.toString(); // ISO-8601, 예: 2026-03-01
+            if (tempDates.contains(target)) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "임시 휴무일에는 대관을 신청할 수 없습니다.");
+            }
+        }
+
+        // 운영 시간 범위 및 예약 단위 검증
+        String open = venue.getOpenTime();
+        String close = venue.getCloseTime();
+        Integer unit = venue.getBookingUnit();
+
+        if (open != null && close != null) {
+            LocalTime openTime = parseTime(open);
+            LocalTime closeTime = parseTime(close);
+
+            LocalTime startTime = startAt.toLocalTime();
+            LocalTime endTime = endAt.toLocalTime();
+
+            if (startTime.isBefore(openTime) || endTime.isAfter(closeTime)) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "공연장 운영 시간 범위 내에서만 대관을 신청할 수 있습니다.");
+            }
+
+            if (unit != null && unit > 0) {
+                long minutes = Duration.between(startTime, endTime).toMinutes();
+                if (minutes <= 0 || minutes % unit != 0) {
+                    throw new ApiException(ErrorCode.INVALID_REQUEST, "대관 시간은 예약 단위(" + unit + "분) 에 맞게 선택해야 합니다.");
+                }
+            }
+        }
+    }
+
+    private LocalTime parseTime(String hhmm) {
+        String[] parts = hhmm.split(":");
+        if (parts.length != 2) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 시간 형식입니다: " + hhmm);
+        }
+        int h = Integer.parseInt(parts[0]);
+        int m = Integer.parseInt(parts[1]);
+        return LocalTime.of(h, m);
     }
 }
