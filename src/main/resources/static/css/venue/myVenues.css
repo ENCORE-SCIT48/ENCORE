@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+:root {
+    --primary-red: #E63946;
+    --primary-red-dark: #c82d3a;
+    --primary-red-light: rgba(230, 57, 70, 0.08);
+    --dark-grey: #1a1a2e;
+    --border-color: #eef0f3;
+    --bg-white: #FFFFFF;
+    --text-muted: #b0b8c4;
+    --text-body: #2d3748;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+    --transition: 0.2s ease;
+    --max-width-mobile: 430px;
+    --header-height: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0; padding: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-body); background: #fff;
+}
+
+/* ── 레이아웃 ── */
+.app-wrapper {
+    width: 100%; max-width: var(--max-width-mobile);
+    min-height: 100vh; background: var(--bg-white);
+    margin: 0 auto; display: flex; flex-direction: column;
+}
+
+/* ── 헤더 ── */
+.app-header {
+    height: var(--header-height);
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 12px;
+}
+
+.btn-back {
+    width: 36px; height: 36px;
+    border: none; background: #f4f5f7;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--dark-grey);
+    font-size: 1rem; text-decoration: none;
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+.btn-back:hover { background: var(--border-color); }
+
+.header-title {
+    font-size: 1rem; font-weight: 700;
+    color: var(--dark-grey); letter-spacing: -0.3px;
+    flex: 1;
+}
+
+/* 공연장 등록 버튼 */
+.btn-add {
+    width: 36px; height: 36px;
+    background: var(--primary-red); color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+.btn-add:hover { background: var(--primary-red-dark); color: #fff; }
+
+.app-main { padding: 20px 20px 100px; flex: 1; }
+
+/* ── 공연장 카드 ── */
+.venue-card {
+    background: var(--bg-white);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition), transform var(--transition);
+}
+.venue-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.venue-name {
+    font-size: 1rem; font-weight: 800;
+    color: var(--dark-grey); letter-spacing: -0.3px;
+    flex: 1;
+}
+
+/* 공연장 타입 뱃지 */
+.venue-type-badge {
+    font-size: 0.72rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+    background: var(--primary-red-light);
+    color: var(--primary-red);
+    white-space: nowrap; flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.card-info {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 14px;
+}
+
+.info-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.83rem; color: #5a6478;
+}
+.info-row i { color: var(--primary-red); font-size: 0.88rem; width: 16px; }
+
+/* ── 카드 하단 버튼 영역 ── */
+.card-actions {
+    display: flex; gap: 8px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+    margin-top: 4px;
+}
+
+.btn-action {
+    flex: 1; padding: 9px 0;
+    border-radius: var(--radius-md);
+    border: none; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 5px;
+    transition: opacity var(--transition);
+}
+.btn-action:active { opacity: 0.75; }
+
+.btn-manage {
+    background: var(--primary-red);
+    color: #fff;
+}
+.btn-manage:hover { background: var(--primary-red-dark); }
+
+.btn-edit {
+    background: #f4f5f7;
+    color: var(--dark-grey);
+}
+.btn-edit:hover { background: var(--border-color); }
+
+/* ── 빈 상태 ── */
+.empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--text-muted);
+}
+.empty-state i { font-size: 3rem; margin-bottom: 16px; display: block; }
+.empty-state p { font-size: 0.9rem; font-weight: 500; margin: 0 0 20px; }
+
+.btn-register {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--primary-red); color: #fff;
+    border: none; border-radius: var(--radius-md);
+    padding: 12px 24px; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; text-decoration: none;
+    transition: background var(--transition);
+}
+.btn-register:hover { background: var(--primary-red-dark); color: #fff; }
+
+/* ── 로딩 ── */
+.loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+
+/* ── 토스트 ── */
+.toast-wrap {
+    position: fixed; bottom: 80px;
+    left: 50%; transform: translateX(-50%);
+    z-index: 9999;
+}
+.toast-msg {
+    background: rgba(26,26,46,0.92);
+    color: #fff; padding: 10px 20px;
+    border-radius: 20px; font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* ── 반응형 ── */
+@media (min-width: 768px) {
+    body { background: #edf0f5; padding-top: 40px; }
+    .app-wrapper {
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        min-height: auto; overflow: hidden;
+    }
+    .app-header { border-radius: 24px 24px 0 0; }
+    .app-main { padding: 20px 40px 100px; }
+}

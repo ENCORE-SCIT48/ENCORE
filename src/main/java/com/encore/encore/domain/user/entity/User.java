@@ -1,5 +1,8 @@
 package com.encore.encore.domain.user.entity;
 
+import com.encore.encore.domain.member.entity.HostProfile;
+import com.encore.encore.domain.member.entity.PerformerProfile;
+import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,4 +51,5 @@ public class User extends BaseEntity {
 
     @Column
     private LocalDateTime agreedAt;  // 동의한 시간 (가입 시간과 동일할 수도 있지만 명시적으로 관리)
+
 }

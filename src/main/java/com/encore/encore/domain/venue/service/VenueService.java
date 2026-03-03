@@ -3,10 +3,7 @@ package com.encore.encore.domain.venue.service;
 import com.encore.encore.domain.member.entity.HostProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.user.entity.User;
-import com.encore.encore.domain.venue.dto.VenueCreateRequestDto;
-import com.encore.encore.domain.venue.dto.VenueDetailDto;
-import com.encore.encore.domain.venue.dto.VenueFormResponseDto;
-import com.encore.encore.domain.venue.dto.VenueListItemDto;
+import com.encore.encore.domain.venue.dto.*;
 import com.encore.encore.domain.venue.entity.Seat;
 import com.encore.encore.domain.venue.entity.Venue;
 import com.encore.encore.domain.venue.repository.SeatRepository;
@@ -229,4 +226,19 @@ public class VenueService {
         return new VenueFormResponseDto(venue, seats);
     }
 
+    /**
+     * [호스트] 내 공연장 목록 조회.
+     * GET /api/venues/my 전용. 삭제되지 않은 공연장만 반환한다.
+     *
+     * @param hostId 호스트 프로필 ID (CustomUserDetails.activeProfileId)
+     * @return 호스트 소유 공연장 목록 (VenueMyListItemDto)
+     */
+    public List<VenueMyListItemDto> getMyVenues(Long hostId) {
+        List<VenueMyListItemDto> result = venueRepository.findByHost_HostIdAndIsDeletedFalse(hostId)
+            .stream()
+            .map(VenueMyListItemDto::new)
+            .toList();
+        log.info("[Venue] my venues - hostId={}, count={}", hostId, result.size());
+        return result;
+    }
 }

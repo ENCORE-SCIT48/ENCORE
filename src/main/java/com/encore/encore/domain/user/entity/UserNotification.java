@@ -17,8 +17,9 @@ public class UserNotification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long settingId;
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     @Enumerated(EnumType.STRING)
     private ActiveMode profileMode;
 

@@ -4,13 +4,14 @@ import com.encore.encore.domain.venue.entity.Venue;
 import lombok.Getter;
 
 /**
- * GET /api/venues 목록 조회 응답 DTO.
- * 공연자 전용 목록(performerVenueList)에서 카드 렌더링에 필요한 필드를 포함한다.
+ * GET /api/venues/my 전용 응답 DTO.
+ * 호스트 내 공연장 관리 페이지(myVenues)에서 카드 렌더링에 필요한 필드를 포함한다.
  */
 @Getter
-public class VenueListItemDto {
+public class VenueMyListItemDto {
     private final Long venueId;
     private final String venueName;
+    private final Long hostId;
     private final String address;
     private final String venueType;
     private final Integer totalSeats;
@@ -19,9 +20,10 @@ public class VenueListItemDto {
     private final Integer rentalFee;
     private final Integer bookingUnit;
 
-    public VenueListItemDto(Venue venue) {
+    public VenueMyListItemDto(Venue venue) {
         this.venueId     = venue.getVenueId();
         this.venueName   = venue.getVenueName();
+        this.hostId      = venue.getHost() != null ? venue.getHost().getHostId() : null;
         this.address     = venue.getAddress();
         this.venueType   = venue.getVenueType();
         this.totalSeats  = venue.getTotalSeats();

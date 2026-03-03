@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 대관 신청 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/venue/myReservations.css}">
+</head>
+<body>
+<div class="app-wrapper">
+
+    <header class="app-header">
+        <a href="javascript:history.back()" class="btn-back">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <span class="header-title">내 대관 신청 목록</span>
+    </header>
+
+    <main class="app-main">
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-status="ALL">전체</button>
+            <button class="filter-tab" data-status="PENDING">대기중</button>
+            <button class="filter-tab" data-status="APPROVED">승인</button>
+            <button class="filter-tab" data-status="REJECTED">거절</button>
+        </div>
+
+        <div id="reservationList">
+            <div class="loading">
+                <div class="spinner-border text-danger" role="status" style="width:2rem;height:2rem;"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="footer-wrapper">
+        <a th:href="@{/posts/performance}" class="footer-link">모집글</a>
+        <a th:href="@{/venues}" class="footer-link">공연장</a>
+        <a th:href="@{/}" class="footer-link">홈</a>
+        <a th:href="@{/dm/list}" class="footer-link">DM</a>
+        <a th:href="@{/chats}" class="footer-link">채팅</a>
+    </div>
+
+</div>
+<script th:src="@{/js/venue/myReservations.js}" defer></script>
+</body>
+</html>
