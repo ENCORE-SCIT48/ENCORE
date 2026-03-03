@@ -28,6 +28,7 @@ function switchProfileMode(mode) {
             // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
         },
         body: formData,
+        credentials: "include",
     })
         .then((response) => {
             // 컨트롤러가 "redirect:..."를 반환하면 response.redirected가 true가 됩니다.

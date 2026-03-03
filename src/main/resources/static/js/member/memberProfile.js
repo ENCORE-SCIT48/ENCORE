@@ -12,7 +12,7 @@
      */
     function showToast(message) {
         // 예: 부트스트랩 Toast 또는 사용자 정의 UI
-        console.log("Toast:", message);
+        console.log(message);
     }
 
     /**
@@ -34,7 +34,8 @@
 
             fetch(`/api/users/${profileId}/${profileMode}/follow`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" }
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
             })
             .then(res => {
                 if (!res.ok) throw new Error("네트워크 응답에 문제가 있습니다.");
@@ -77,6 +78,7 @@
             fetch("/api/dms", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",
                 body: JSON.stringify({
                     targetProfileId: profileId,
                     targetProfileMode: profileMode
@@ -107,6 +109,7 @@
             fetch('/api/users/relations/block', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     targetId: targetId,
                     targetType: targetType,
@@ -169,6 +172,7 @@
             fetch('/api/users/relations/unblock', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     targetId: targetId,
                     targetProfileMode: targetMode,

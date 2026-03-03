@@ -23,7 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadNotificationSettings() {
         try {
-            const response = await fetch(API_URL);
+            const response = await fetch(API_URL, {
+                credentials: 'include',
+            });
 
             if (!response.ok) {
                 throw new Error('알림 설정 조회 실패');
@@ -53,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     performanceStartAlert: perfStartNoti.checked,
                     dmAlert: dmNoti.checked
@@ -68,8 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!result.success) {
                 throw new Error(result.message);
             }
-
-            console.log(result.message);
 
         } catch (error) {
             console.error('저장 오류:', error.message);

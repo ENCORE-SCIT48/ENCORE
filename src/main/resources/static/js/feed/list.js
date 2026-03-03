@@ -24,7 +24,7 @@ async function loadFeed(url) {
     const res = await fetch(url, {
         method: "GET",
         headers: { "Accept": "application/json" },
-        credentials: "same-origin",
+        credentials: "include",
     });
 
     if (!res.ok) {

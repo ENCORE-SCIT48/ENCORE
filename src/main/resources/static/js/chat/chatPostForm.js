@@ -50,8 +50,6 @@ $(document).ready(() => {
             maxMember
         };
 
-        console.log('전송 데이터:', data);
-
         // ===== Ajax 요청 =====
         $.ajax({
             url: `/api/performances/${performanceId}/chats`,

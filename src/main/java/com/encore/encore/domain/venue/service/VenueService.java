@@ -43,7 +43,7 @@ public class VenueService {
         // 컨트롤러가 아니라 서비스에서 "검색/전체조회 분기"를 처리해야
         // 다른 API에서도 재사용 가능하고, 컨트롤러가 얇아져 유지보수성이 좋아짐
         Page<Venue> venues = StringUtils.hasText(keyword)
-            ? venueRepository.findByVenueNameContainingIgnoreCaseAndIsDeletedFalseOrAddressContainingIgnoreCaseAndIsDeletedFalse(keyword, keyword, pageable)
+            ? venueRepository.searchByKeyword(keyword, pageable)
             : venueRepository.findByIsDeletedFalse(pageable);
 
         log.info("[Venue] list result - keyword={}, totalElements={}", keyword, venues.getTotalElements());

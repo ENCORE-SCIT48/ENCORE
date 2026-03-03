@@ -116,7 +116,10 @@
         const url = `/api/venues?${params.toString()}`;
 
         try {
-            const res = await fetch(url, { headers: { Accept: "application/json" } });
+            const res = await fetch(url, {
+                headers: { Accept: "application/json" },
+                credentials: "include",
+            });
 
             if (!res.ok) {
                 console.error("[VenueList] fetch failed", res.status);
