@@ -2,7 +2,9 @@ package com.encore.encore.domain.feed.service;
 
 import com.encore.encore.domain.feed.dto.FeedItemDto;
 import com.encore.encore.domain.feed.dto.FeedResponseDto;
+import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.entity.PerformanceSchedule;
+import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.domain.performance.repository.PerformanceScheduleRepository;
 import com.encore.encore.domain.user.entity.RelationType;
 import com.encore.encore.domain.user.repository.UserRelationRepository;
@@ -20,6 +22,7 @@ public class FeedService {
 
     private final PerformanceScheduleRepository performanceScheduleRepository;
     private final UserRelationRepository userRelationRepository;
+    private final PerformanceRepository performanceRepository;
 
     // 시작 30분 전 알림
     private static final int NOTIFY_BEFORE_MINUTES = 30;
@@ -36,6 +39,33 @@ public class FeedService {
 
         return FeedResponseDto.builder()
             .items(result)
+            .build();
+    }
+
+    /**
+     * 비로그인(게스트)용 피드.
+     * - 로그인 정보가 없을 때 기본으로 보여줄 추천/랜덤 공연 피드를 구성한다.
+     * - 현재는 단순히 "다가오는 찜한 공연" / "팔로우 기반" 없이 빈 리스트를 반환하고,
+     *   추후 HOT 공연/랜덤 공연 기반으로 확장할 수 있다.
+     */
+    public FeedResponseDto getGuestFeed() {
+        // 임시 구현: OPEN 상태 공연 중 createdAt 최신순 Top10을 HOT 피드로 노출
+        List<Performance> hotPerformances = performanceRepository
+            .findTop10ByStatusOrderByCreatedAtDesc("OPEN");
+
+        List<FeedItemDto> items = new ArrayList<>();
+        for (Performance p : hotPerformances) {
+            items.add(FeedItemDto.builder()
+                .type("HOT_PERFORMANCE")
+                .performanceId(p.getPerformanceId())
+                .title(p.getTitle())
+                .startTime(null) // 게스트용 HOT은 시작시간 없이 제목/카드로만 사용
+                .message("지금 인기 있는 공연이에요")
+                .build());
+        }
+
+        return FeedResponseDto.builder()
+            .items(items)
             .build();
     }
 

@@ -16,16 +16,14 @@ public class FeedApiController {
 
     @GetMapping
     public FeedResponseDto getFeed(
-        @RequestParam(required = false) Long userId,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // 개발용 우선순위: ?userId=8 이 있으면 그걸로 조회
-        if (userId != null) {
-            return feedService.getFeed(userId);
+        // 비로그인/세션 없음 → 게스트용 피드
+        if (userDetails == null || userDetails.getUser() == null) {
+            return feedService.getGuestFeed();
         }
 
-        // 로그인 연동 전이면 기본값
-        Long loginUserId = 8L;
+        Long loginUserId = userDetails.getUser().getUserId();
         return feedService.getFeed(loginUserId);
     }
 }
