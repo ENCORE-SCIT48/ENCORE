@@ -169,7 +169,6 @@
     background: none;
     border: none;
     font-size: 1.2rem;
-    color: #dc3545; /* 뒤로가기 아이콘 색상 (빨강) */
     cursor: pointer;
     display: flex;
     align-items: center;
