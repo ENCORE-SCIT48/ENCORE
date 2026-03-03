@@ -101,12 +101,38 @@ $(document).ready(() => {
         $chatContainer.append(html);
     }
 
+
+    // ----------------------
+        // WebSocket 연결
+        // ----------------------
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+
+            // 1:1 DM 수신
+            stompClient.subscribe('/user/queue/dm/' + ROOM_ID, function(message) {
+                const msg = JSON.parse(message.body);
+                renderMessage(msg);   // 기존 renderMessage 재사용
+                scrollToBottom();     // 기존 scrollToBottom 재사용
+            });
+        });
     // ========================
     // 메시지 전송
     // ========================
     function sendMessage() {
         const content = $('#chatInput').val().trim();
         if (!content) return;
+
+        const message = {
+            roomId: ROOM_ID_VALUE,
+            content: content
+        };
+
+        stompClient.send('/app/dm/' + ROOM_ID_VALUE, {}, JSON.stringify(message));
+        $('#chatInput').val('');
+    }
 
         $.ajax({
             url: `/api/dms/${ROOM_ID_VALUE}/messages`,

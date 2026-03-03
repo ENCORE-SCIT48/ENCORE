@@ -506,4 +506,9 @@ public class DmService {
             .otherProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
             .build();
     }
+
+
+    public ChatParticipant getOtherParticipantForWebSocket(Long roomId, Long activeProfileId, ActiveMode activeMode) {
+        return findOtherParticipant(roomId, activeProfileId, activeMode);
+    }
 }
