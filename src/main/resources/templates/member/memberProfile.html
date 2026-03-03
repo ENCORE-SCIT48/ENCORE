@@ -97,7 +97,7 @@
                     <div class="d-flex gap-2" th:if="${isOwner != true}">
                         <button id="followBtn"
                                 class="btn w-100"
-                                th:classappend="${isFollowing} ? 'btn-outline-danger' : 'btn-danger text-white'"
+                                th:classappend="${isFollowing} ? 'btn-following' : 'btn-unfollowed'"
                                 th:text="${isFollowing} ? '팔로잉' : '팔로우'"
                                 th:data-profile-id="${user.profileId}"
                                 th:data-profile-mode="${user.profileMode}">

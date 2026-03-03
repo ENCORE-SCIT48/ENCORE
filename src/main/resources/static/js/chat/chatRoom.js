@@ -159,17 +159,16 @@ $(document).ready(() => {
             url: `/api/chat/room/${ROOM_ID}/exit`,
             method: 'POST',
             success: (res) => {
-                if (!res.success) return alert(res.message);
+                const data = res.data; // CommonResponse.data에 서비스 결과가 들어있다고 가정
 
-                const data = res.data;
-                if (!data.exitSuccess) {
+                if (!data.exitSuccess) { // exitSuccess 기준 체크
                     if (data.isOwner) alert('글쓴이는 퇴장할 수 없습니다.');
-                    else alert(res.message);
+                    else alert(data.message);
                     return;
                 }
 
-                alert(res.message);
-                location.href = '/chat/list';
+                alert(data.message);
+                location.href = '/chats';
             },
             error: handleAjaxError
         });
