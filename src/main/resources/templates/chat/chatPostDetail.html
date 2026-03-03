@@ -25,11 +25,13 @@
     <!-- ===== 상단 헤더 ===== -->
     <header class="app-header">
         <button type="button" onclick="history.back();" class="back-btn" aria-label="뒤로가기">
-            <i class="fa-solid fa-chevron-left"></i>
+            <i class="fa-solid fa-arrow-left"></i>
         </button>
 
-        <h1 class="app-title" th:text="${chatPost.performanceTitle}">공연 이름</h1>
-
+        <a th:href="@{/performances/{id}/chats(id=${performanceId})}" class="app-title"
+           th:text="${chatPost.performanceTitle}">
+            공연 이름
+        </a>
         <div class="header-spacer"></div>
     </header>
 
@@ -93,6 +95,7 @@
 
         </article>
     </main>
+    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
 </div>
 
 <!-- 커스텀 JS -->

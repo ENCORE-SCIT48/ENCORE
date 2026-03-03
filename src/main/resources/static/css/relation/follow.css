@@ -1,7 +1,10 @@
 .container {
-    max-width: 500px;
+    max-width: 430px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 0 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .back-btn {
@@ -189,3 +192,6 @@
     margin-right: 10px;
 }
 
+main {
+    flex: 1;                /* 남은 공간을 main이 채우도록 */
+}
