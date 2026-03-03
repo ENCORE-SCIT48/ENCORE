@@ -1,6 +1,7 @@
 package com.encore.encore.domain.member.controller;
 
 import com.encore.encore.domain.member.dto.MemberProfileDto;
+import com.encore.encore.domain.member.dto.RecentActivitiesDto;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.member.service.MemberService;
 import com.encore.encore.domain.user.entity.User;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -39,11 +42,13 @@ public class MemberPageController {
         Model model
     ) {
         MemberProfileDto dto = memberService.getMemberProfileInfo(profileId, profileMode);
+        List<RecentActivitiesDto> recentActivitiesDto = memberService.getRecentActivities(profileId, profileMode);
 
         boolean isFollowing = false;
         boolean iBlockedHim = false;
         boolean heBlockedMe = false;
         boolean isOwner = false;
+
 
         if (userDetails != null) {
             Long loginProfileId = userDetails.getActiveProfileId();
@@ -63,6 +68,8 @@ public class MemberPageController {
             isOwner = (loginProfileId != null) && loginProfileId.equals(profileId) && loginProfileMode.name().equals(profileMode);
 
             isFollowing = relationService.isFollowing(loginUserId, loginProfileMode, profileId, ActiveMode.valueOf(profileMode));
+
+
         }
 
         model.addAttribute("isFollowing", isFollowing);
@@ -72,6 +79,7 @@ public class MemberPageController {
         model.addAttribute("profileMode", profileMode);
         model.addAttribute("iBlockedHim", iBlockedHim);
         model.addAttribute("heBlockedMe", heBlockedMe);
+        model.addAttribute("recentActivities", recentActivitiesDto);
 
         return "member/memberProfile";
     }
