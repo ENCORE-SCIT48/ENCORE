@@ -9,13 +9,17 @@ import com.encore.encore.domain.chat.service.ChatMessageService;
 import com.encore.encore.domain.chat.service.ChatService;
 import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.config.CustomUserDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
+@Slf4j
 @Controller
 public class ChatWebSocketController {
 
@@ -51,21 +55,27 @@ public class ChatWebSocketController {
     @MessageMapping("/dm/{roomId}")
     public void sendDm(
         @DestinationVariable Long roomId,
-        RequestSendDmDto request,
+        @Payload RequestSendDmDto request,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+
+        if (userDetails == null) {
+            log.warn("상대 userDetail 없음!");
+        }
+
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
 
         // 기존 서비스 재사용
-        dmService.checkUserParticipantStatus(roomId, activeProfileId, activeMode);
         ResponseSendDmDto result = dmService.sendMessage(activeProfileId, activeMode, request);
 
         ChatParticipant other = dmService.getOtherParticipantForWebSocket(roomId, activeProfileId, activeMode);
 
+        User otherUser = dmService.getUser(other.getProfileId(), other.getProfileMode());
+
         // WebSocket 전송
         messagingTemplate.convertAndSendToUser(
-            other.getProfileId().toString(),
+            otherUser.getEmail(),
             "/queue/dm/" + roomId,
             result
         );

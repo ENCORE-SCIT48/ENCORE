@@ -51,6 +51,10 @@ public class DmPageController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
 
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
+
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
 

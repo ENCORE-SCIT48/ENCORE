@@ -16,6 +16,7 @@ import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.member.service.ProfileService;
+import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -352,6 +353,11 @@ public class DmService {
 
         boolean isFirstMessage = chatMessageRepository.countByRoom_RoomId(room.getRoomId()) == 0;
 
+        if (activeProfileId == null) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "프로필 ID가 설정되지 않음");
+        }
+
+        // 메시지 저장
         ChatMessage message = ChatMessage.builder()
             .room(room)
             .profileId(activeProfileId)
@@ -359,33 +365,30 @@ public class DmService {
             .content(request.getContent())
             .sentAt(LocalDateTime.now())
             .build();
-
         chatMessageRepository.save(message);
 
+        // 첫 메시지이면 participant 상태 변경
         if (isFirstMessage) {
-            // 1. 송신자 상태 변경 (WAITING → ACCEPTED)
             ChatParticipant senderParticipant = chatParticipantRepository
-                .findByRoom_RoomIdAndProfileIdAndProfileMode(
-                    room.getRoomId(), activeProfileId, activeMode
-                ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참가자 정보 없음"));
+                .findByRoom_RoomIdAndProfileIdAndProfileMode(room.getRoomId(), activeProfileId, activeMode)
+                .orElse(null);
 
-            senderParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
-            chatParticipantRepository.save(senderParticipant);
+            if (senderParticipant != null) {
+                senderParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
+                chatParticipantRepository.save(senderParticipant);
+            }
 
-            // 2. 상대방 상태 변경 (WAITING → PENDING)
             ChatParticipant recipientParticipant = chatParticipantRepository
-                .findWaitingParticipantExcludingSelf(
-                    room.getRoomId(),
-                    activeProfileId,
-                    activeMode,
-                    ChatParticipant.ParticipantStatus.WAITING
-                ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자 정보 없음"));
+                .findWaitingParticipantExcludingSelf(room.getRoomId(), activeProfileId, activeMode, ChatParticipant.ParticipantStatus.WAITING)
+                .orElse(null);
 
-            recipientParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.PENDING);
-            chatParticipantRepository.save(recipientParticipant);
+            if (recipientParticipant != null) {
+                recipientParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.PENDING);
+                chatParticipantRepository.save(recipientParticipant);
+            }
         }
 
-
+        // Response DTO 반환
         return ResponseSendDmDto.builder()
             .roomId(message.getRoom().getRoomId())
             .messageId(message.getMessageId())
@@ -510,5 +513,29 @@ public class DmService {
 
     public ChatParticipant getOtherParticipantForWebSocket(Long roomId, Long activeProfileId, ActiveMode activeMode) {
         return findOtherParticipant(roomId, activeProfileId, activeMode);
+    }
+
+    /**
+     * 유저 정보를 가져옵니다
+     *
+     * @param profileId
+     * @param profileMode
+     * @return
+     */
+    public User getUser(Long profileId, ActiveMode profileMode) {
+
+        switch (profileMode) {
+            case ROLE_USER:
+                return userProfileRepository.findById(profileId).get().getUser();
+
+            case ROLE_PERFORMER:
+                return performerProfileRepository.findById(profileId).get().getUser();
+
+            case ROLE_HOST:
+                return hostProfileRepository.findById(profileId).get().getUser();
+
+            default:
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 프로필 모드입니다.");
+        }
     }
 }

@@ -101,10 +101,9 @@ $(document).ready(() => {
         $chatContainer.append(html);
     }
 
-
     // ----------------------
-        // WebSocket 연결
-        // ----------------------
+    // WebSocket 연결
+    // ----------------------
         const socket = new SockJS('/ws');
         const stompClient = Stomp.over(socket);
 
@@ -125,32 +124,12 @@ $(document).ready(() => {
         const content = $('#chatInput').val().trim();
         if (!content) return;
 
-        const message = {
+        stompClient.send('/app/dm/' + ROOM_ID_VALUE, {}, JSON.stringify({
             roomId: ROOM_ID_VALUE,
             content: content
-        };
+        }));
 
-        stompClient.send('/app/dm/' + ROOM_ID_VALUE, {}, JSON.stringify(message));
         $('#chatInput').val('');
-    }
-
-        $.ajax({
-            url: `/api/dms/${ROOM_ID_VALUE}/messages`,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ roomId: ROOM_ID_VALUE, content:content }),
-            success: (res) => {
-                const newMessage = res.data;
-                newMessage.mine = true;
-
-                renderMessage(newMessage);
-                $('#chatInput').val('');
-                scrollToBottom();
-            },
-            error: (xhr) => {
-                alert('메시지 전송 실패: ' + xhr.statusText);
-            }
-        });
     }
 
     // ========================
