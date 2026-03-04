@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html xmlns:th="thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
 
 <div class="settings-container">
     <header class="settings-header">
-        <button class="back-btn" onclick="history.back()">
+        <button class="back-btn" th:onclick="'location.href=\'@{/mypage}\' '">
             <i class="bi bi-arrow-left"></i>
         </button>
         <h1 class="header-title">알림 설정</h1>

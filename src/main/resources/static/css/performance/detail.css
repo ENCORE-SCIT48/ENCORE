@@ -109,7 +109,12 @@ body {
 .tab-btn.active {
     border-bottom: 2px solid #222;
 }
-
+a.tab-btn {
+     display: inline-block;
+     text-align: center;
+     text-decoration: none;
+     line-height: normal;
+}
 .rating {
     color: #e53935;
     font-weight: 800;
