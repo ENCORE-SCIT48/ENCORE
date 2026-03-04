@@ -129,9 +129,9 @@ public class DmApiController {
     @GetMapping("{roomId}/messages")
     public ResponseEntity<CommonResponse<List<ResponseChatMessage>>> getMessages(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long roomId,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
+        @PathVariable("roomId") Long roomId,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size
     ) {
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
@@ -150,7 +150,7 @@ public class DmApiController {
      */
     @PatchMapping("/{roomId}")
     public ResponseEntity<CommonResponse<ResponseUpdateDmStatusDto>> updateDmStatus(
-        @PathVariable Long roomId,
+        @PathVariable("roomId") Long roomId,
         @RequestBody RequestDmStatusDto dto,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {

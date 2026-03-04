@@ -43,7 +43,7 @@ public class DmPageController {
      */
     @GetMapping("/dm/{roomId}")
     public String dmRoomPage(
-        @PathVariable Long roomId,
+        @PathVariable("roomId") Long roomId,
         @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
 

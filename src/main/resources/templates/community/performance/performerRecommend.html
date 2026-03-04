@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공연자 추천</title>
 
+
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+
 
   <style>
     body {
@@ -223,9 +225,8 @@
 
         </div>
 
-        <button class="btn btn-primary recruit-btn" 
-                th:data-profile-id="${performer.profileId}"
-                th:data-profile-mode="${performer.profileMode}">
+        <button class="btn btn-primary recruit-btn" th:data-profile-id="${performer.profileId}"
+          th:data-profile-mode="${performer.profileMode}">
           모집
         </button>
 
@@ -298,7 +299,9 @@
   </div>
 
 
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script th:src="@{/js/community/performerRecommend.js}"></script>
+
 </body>
 
 </html>
