@@ -12,6 +12,8 @@ import lombok.*;
 public class ResponsePerformerRecommendDto {
 
     private Long userId;
+    private Long profileId;
+    private String profileMode;
     private String stageName;
     private String profileImageUrl;
     private String part;

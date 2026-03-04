@@ -159,6 +159,36 @@
 
       <div class="divider"></div>
 
+      <!-- 모집 조건 -->
+      <div style="margin-bottom:15px; font-size:13px;">
+
+        <div>
+          <b>모집 장르</b> :
+          <span th:if="${post.recruitCategory != null}"
+                th:each="cat : ${post.recruitCategory.split(',')}"
+            style="background:#f5f5f5; padding:4px 8px; border-radius:12px; margin-right:5px;">
+            <span th:text="${cat}"></span>
+          </span>
+        </div>
+
+        <div style="margin-top:6px;">
+          <b>모집 파트</b> :
+          <span th:if="${post.recruitPart != null}"
+                th:each="part : ${post.recruitPart.split(',')}"
+            style="background:#f5f5f5; padding:4px 8px; border-radius:12px; margin-right:5px;">
+            <span th:text="${part}"></span>
+          </span>
+        </div>
+
+        <div style="margin-top:6px;">
+          <b>모집 지역</b> :
+          <span th:text="${post.recruitArea}"></span>
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+
       <!-- 내용 -->
       <div class="post-content" th:text="${post.content}">
         게시글 내용

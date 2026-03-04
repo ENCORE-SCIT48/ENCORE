@@ -15,5 +15,7 @@ public class RequestUpdatePerformancePostDto {
 
     private Long performanceId;
 
+    private Long venueId;
+
     private Integer capacity;
 }

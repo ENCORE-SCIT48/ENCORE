@@ -27,12 +27,18 @@
       padding: 20px 16px;
     }
 
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
     .page-title {
       font-size: 20px;
       font-weight: 600;
       text-align: center;
       color: #333333;
-      margin-bottom: 20px;
     }
 
     .tab-buttons {
@@ -166,10 +172,11 @@
 
     <div class="app-container">
 
-      <div class="page-title">공연자 모집글</div>
-
-      <div th:replace="~{fragments/performer/profile :: profile}"></div>
-
+      <div class="top-header">
+        <div class="page-title">공연자 모집글</div>
+        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+      </div>
+      
       <div class="tab-buttons">
         <button class="active">공연자 모집</button>
         <button th:onclick="|location.href='@{/posts/performance}'|">공연 모집</button>

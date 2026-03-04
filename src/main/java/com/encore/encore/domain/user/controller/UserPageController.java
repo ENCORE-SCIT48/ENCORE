@@ -27,9 +27,9 @@ public class UserPageController {
     @GetMapping("/user/follow")
     public String follow(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @RequestParam Long targetId,
-        @RequestParam(required = false, defaultValue = "USER") String profileMode,
-        @RequestParam(required = false, defaultValue = "following") String tab,
+        @RequestParam("targetId") Long targetId,
+        @RequestParam(name = "profileMode", required = false, defaultValue = "USER") String profileMode,
+        @RequestParam(name = "tab", required = false, defaultValue = "following") String tab,
         Model model) {
 
         

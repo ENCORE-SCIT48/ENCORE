@@ -50,6 +50,7 @@ public class MypageController {
 
         model.addAttribute("nickname", userDetails.getUser().getNickname());
         model.addAttribute("profileMode", activeMode.name());
+        model.addAttribute("loginProfileId", userDetails.getActiveProfileId());
         model.addAttribute("profileId", profileId);
         model.addAttribute("followingCount", followingCount);
         model.addAttribute("followerCount", followerCount);

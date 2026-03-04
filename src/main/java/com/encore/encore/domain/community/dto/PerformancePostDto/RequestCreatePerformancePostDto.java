@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class RequestCreatePerformancePostDto {
 
-    private Long performanceId;
+    private Long venueId;
 
     private String title;
 
