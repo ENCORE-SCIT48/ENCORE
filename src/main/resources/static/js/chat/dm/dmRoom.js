@@ -88,6 +88,7 @@ $(document).ready(() => {
     // 메시지 렌더링
     // ========================
     function renderMessage(msg) {
+    console.log("렌더링 시도 중인 메시지:", msg); // <-- 이거 확인!
         // 1. 서버에서 준 mine 값이 있으면 쓰고, 없으면 현재 유저 ID와 비교 (안전장치)
         const isMine = msg.mine || (msg.profileId === CURRENT_PROFILE_ID && msg.profileMode === CURRENT_MODE);
         // 중복 렌더링 방지 (이미 화면에 있는 메시지 ID인지 확인)
@@ -117,20 +118,26 @@ $(document).ready(() => {
         // stompClient.debug = null;
 
         stompClient.connect({}, function(frame) {
-            console.log('Connected: ' + frame);
+            console.log('소켓 연결 성공: ' + frame);
 
-            // /user 접두사는 서버의 convertAndSendToUser와 매칭됩니다.
-            // 사용자가 로그인한 'email' 혹은 'username'을 기반으로 서버가 전송합니다.
-            stompClient.subscribe('/user/queue/dm/' + ROOM_ID_VALUE, function(message) {
-                const res = JSON.parse(message.body);
+            // 구독 경로를 변수에 담아 로그 출력
+            const subscribePath = '/user/queue/dm/' + ROOM_ID_VALUE;
+            console.log('구독 시도 경로: ' + subscribePath);
 
-                // 서버 응답 DTO(ResponseSendDmDto) 구조에 맞춰 호출
-                renderMessage(res);
-                scrollToBottom();
+            stompClient.subscribe(subscribePath, function(message) {
+                console.log('!!! 실시간 메시지 수신됨 !!!'); // <-- 이게 뜨는지 보세요
+                console.log('수신 데이터:', message.body);
+
+                try {
+                    const res = JSON.parse(message.body);
+                    renderMessage(res);
+                    scrollToBottom();
+                } catch (e) {
+                    console.error("메시지 처리 중 에러 발생:", e);
+                }
             });
         }, function(error) {
-            console.error('STOMP error: ' + error);
-            // 연결 끊겼을 때 재연결 로직을 여기에 추가할 수 있습니다.
+            console.error('STOMP 연결 에러:', error);
         });
     // ========================
     // 메시지 전송

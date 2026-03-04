@@ -2,6 +2,7 @@ package com.encore.encore.domain.chat.controller;
 
 import com.encore.encore.domain.chat.dto.RequestChatMessage;
 import com.encore.encore.domain.chat.dto.ResponseChatMessage;
+import com.encore.encore.domain.chat.dto.UserDto;
 import com.encore.encore.domain.chat.dto.dm.RequestSendDmDto;
 import com.encore.encore.domain.chat.dto.dm.ResponseSendDmDto;
 import com.encore.encore.domain.chat.entity.ChatParticipant;
@@ -9,7 +10,6 @@ import com.encore.encore.domain.chat.service.ChatMessageService;
 import com.encore.encore.domain.chat.service.ChatService;
 import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
-import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.config.CustomUserDetails;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
@@ -63,6 +63,8 @@ public class ChatWebSocketController {
         @Payload RequestSendDmDto request,
         Principal principal
     ) {
+        log.info("🔥 sendDm 진입");
+        log.info("principal: {}", principal);
 
         if (principal == null) {
             log.error("인증된 사용자 정보가 없습니다.");
@@ -80,11 +82,11 @@ public class ChatWebSocketController {
 
         ChatParticipant other = dmService.getOtherParticipantForWebSocket(roomId, activeProfileId, activeMode);
 
-        User otherUser = dmService.getUser(other.getProfileId(), other.getProfileMode());
+        UserDto otherUser = dmService.getUserDto(other.getProfileId(), other.getProfileMode());
 
         // 상대방에게 WebSocket 전송
         messagingTemplate.convertAndSendToUser(
-            otherUser.getEmail(),
+            otherUser.email(),
             "/queue/dm/" + roomId,
             result
         );
@@ -94,11 +96,16 @@ public class ChatWebSocketController {
         // 컨트롤러 내부
         log.info("나의 Username (Principal): {}", principal.getName());
         log.info("UserDetails Username: {}", userDetails.getUsername());
-        log.info("상대방 Email: {}", otherUser.getEmail());
+        log.info("상대방 Email: {}", otherUser.email());
 
 // 나에게 전송 시 principal.getName()을 사용해 보세요.
         messagingTemplate.convertAndSendToUser(
             principal.getName(), "/queue/dm/" + roomId,
             result);
+        log.info("==== DM WebSocket 전송 시작 ====");
+        log.info("보내는 대상 username: {}", principal.getName());
+        log.info("roomId: {}", roomId);
+        log.info("================================");
     }
+
 }

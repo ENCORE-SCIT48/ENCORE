@@ -1,6 +1,7 @@
 package com.encore.encore.domain.chat.service;
 
 import com.encore.encore.domain.chat.dto.ResponseChatMessage;
+import com.encore.encore.domain.chat.dto.UserDto;
 import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.entity.ChatMessage;
 import com.encore.encore.domain.chat.entity.ChatParticipant;
@@ -537,5 +538,19 @@ public class DmService {
             default:
                 throw new ApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 프로필 모드입니다.");
         }
+    }
+
+    public UserDto getUserDto(Long profileId, ActiveMode profileMode) {
+        User user = getUser(profileId, profileMode);
+
+        String userName = profileService.resolveSenderName(profileId, profileMode);
+
+        return new UserDto(
+            profileId,
+            profileMode.name(),
+            user.getEmail(),
+            userName
+        );
+
     }
 }
