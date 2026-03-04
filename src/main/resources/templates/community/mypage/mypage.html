@@ -165,8 +165,17 @@
         </div>
 
         <div class="follow-info">
-          <div>팔로잉 0</div>
-          <div>팔로워 0</div>
+
+          <a th:href="@{/user/follow(targetId=${loginProfileId}, tab='following', profileMode=${profileMode})}"
+            class="follow-btn">
+            팔로잉
+          </a>
+
+          <a th:href="@{/user/follow(targetId=${loginProfileId}, tab='follower', profileMode=${profileMode})}"
+            class="follow-btn">
+            팔로워
+          </a>
+
         </div>
 
       </div>
@@ -175,15 +184,13 @@
       <div class="section-title">공통 설정</div>
       <div class="menu-list">
         <a href="#" class="menu-item">회원정보 수정</a>
-        <a href="#" class="menu-item">프로필 수정</a>
-        <a href="#" class="menu-item">알림 설정</a>
-        <a href="#" class="menu-item">차단 목록 관리</a>
+        <a th:href="@{/user/notification}" class="menu-item">알림 설정</a>
+        <a th:href="@{/user/block}" class="menu-item">차단 목록 관리</a>
         <form th:action="@{/logout}" method="post" style="margin:0;">
           <button type="submit" class="menu-item logout-btn">
             로그아웃
           </button>
         </form>
-        <a href="#" class="menu-item">회원 탈퇴</a>
       </div>
 
       <!-- ===== 공연자 전용 ===== -->
@@ -191,6 +198,8 @@
 
         <div class="section-title">공연자 설정</div>
         <div class="menu-list">
+
+          <a th:href="@{/performerprofile/setup}" class="menu-item">프로필 수정</a>
 
           <a th:href="@{/mypage/performer/posts}" class="menu-item">
             내가 작성한 공연자 모집글
@@ -206,14 +215,6 @@
 
           <a th:href="@{/mypage/performer/applied-performances}" class="menu-item">
             내가 신청한 공연
-          </a>
-
-          <a th:href="@{/mypage/performer/recruited-performers}" class="menu-item">
-            내가 모집한 공연자
-          </a>
-
-          <a th:href="@{/mypage/performer/venues}" class="menu-item">
-            내가 대관한 공연장
           </a>
 
           <a th:href="@{/mypage/performer/manage}" class="menu-item">

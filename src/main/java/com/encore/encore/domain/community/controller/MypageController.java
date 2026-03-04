@@ -44,7 +44,9 @@ public class MypageController {
 
         model.addAttribute("nickname", userDetails.getUser().getNickname());
         model.addAttribute("profileMode", activeMode.name());
+        model.addAttribute("loginProfileId", userDetails.getActiveProfileId());
 
         return "community/mypage/mypage";
     }
+
 }
