@@ -223,7 +223,9 @@
 
         </div>
 
-        <button class="btn btn-primary">
+        <button class="btn btn-primary recruit-btn" 
+                th:data-profile-id="${performer.profileId}"
+                th:data-profile-mode="${performer.profileMode}">
           모집
         </button>
 
@@ -256,8 +258,7 @@
             <li class="page-item" th:each="i : ${#numbers.sequence(groupStart, groupEnd)}"
               th:classappend="${i == page.number} ? 'active'">
 
-              <a class="page-link" th:text="${i + 1}" 
-                th:href="@{/posts/performance/{postId}/recommend(
+              <a class="page-link" th:text="${i + 1}" th:href="@{/posts/performance/{postId}/recommend(
                   postId=${postId},
                   page=${i},
                   keyword=${keyword},
@@ -270,8 +271,7 @@
 
             <!-- 다음 그룹 -->
             <li class="page-item" th:classappend="${groupEnd + 1 >= page.totalPages} ? 'disabled'">
-              <a class="page-link" th:if="${groupEnd + 1 < page.totalPages}" 
-                th:href="@{/posts/performance/{postId}/recommend(
+              <a class="page-link" th:if="${groupEnd + 1 < page.totalPages}" th:href="@{/posts/performance/{postId}/recommend(
                     postId=${postId},
                     page=${groupStart + 5},
                     keyword=${keyword},

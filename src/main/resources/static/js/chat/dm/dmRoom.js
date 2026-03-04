@@ -16,7 +16,6 @@ $(document).ready(() => {
 
     const participantStatus = PARTICIPANT_STATUS;
     const ROOM_ID_VALUE = ROOM_ID; // 전역 ROOM_ID 사용
-    const CURRENT_USER = CURRENT_USER_ID;
 
     // ========================
     // 초기 세팅
