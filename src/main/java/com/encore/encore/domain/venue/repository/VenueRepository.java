@@ -33,4 +33,8 @@ public interface VenueRepository extends JpaRepository<Venue, Long> {
 
     // [추가] GET /api/venues/my 용 — 호스트 소유 공연장 목록 (삭제 제외)
     List<Venue> findByHost_HostIdAndIsDeletedFalse(Long hostId);
+
+    boolean existsByVenueNameAndIsDeletedFalse(String venueName);
+
+    Optional<Venue> findFirstByIsDeletedFalse();
 }

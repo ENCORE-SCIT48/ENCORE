@@ -5,6 +5,8 @@ import com.encore.encore.domain.chat.service.ChatService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.common.CommonResponse;
 import com.encore.encore.global.config.CustomUserDetails;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -140,6 +142,9 @@ public class ChatController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("참여 채팅방 목록 조회 시작");
+        if (userDetails == null) {
+            return ResponseEntity.ok(CommonResponse.ok(Collections.emptyList(), "로그인이 필요합니다."));
+        }
         Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 
@@ -191,6 +196,9 @@ public class ChatController {
         @RequestParam(defaultValue = "false") boolean onlyMine,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        if (userDetails == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
         Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 

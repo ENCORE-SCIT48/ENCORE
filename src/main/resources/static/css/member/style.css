@@ -8,32 +8,25 @@
     margin: 0 auto;
     background: #ffffff;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* 수정된 헤더 스타일 */
 .app-header {
-    background-color: #ffffff; /* 검은색에서 흰색으로 변경 */
-    color: var(--dark-grey);   /* 글자색을 다크 그레이로 */
-    padding: 8px 16px;         /* 패딩 살짝 조정 */
-    font-weight: 600;
-    border-bottom: 1px solid #eeeeee; /* 하단 구분선 추가 (깔끔함) */
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    position: relative;
+      height: 56px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+      z-index: 10;
 }
 
 /* 아이콘 버튼 공통 스타일 */
-/* 헤더 전체 컨테이너 */
-.app-header {
-    background-color: #ffffff;
-    border-bottom: 1px solid #eeeeee;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    height: 56px; /* 높이를 명시적으로 고정 */
-    display: flex;
-    align-items: center;
-}
 
 .header-nav {
     display: flex;
@@ -86,6 +79,7 @@
 }
 
 .profile-section {
+    flex: 1;
     padding: 20px;
 }
 
@@ -139,6 +133,28 @@
     padding: 15px;
     min-height: 120px;
     white-space: pre-line;
+}
+
+.recent-activities-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    /* min-height 제거 */
+}
+
+.recent-activities-list {
+    list-style: none; /* 점 없애기 */
+    margin: 0;
+    padding: 0;
+}
+
+.recent-activities-list li {
+    padding: 6px 0;      /* 항목 간 간격 */
+    border-bottom: 1px solid #e0e0e0; /* 필요하면 구분선 */
+}
+
+.recent-activities-list li:last-child {
+    border-bottom: none;
 }
 /* =========================
    Follow Stats (Instagram Style)

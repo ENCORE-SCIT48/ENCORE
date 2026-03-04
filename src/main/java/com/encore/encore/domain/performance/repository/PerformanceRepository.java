@@ -59,4 +59,6 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
     // 공연의 이름을 가져옴
     @Query("SELECT p.title FROM Performance p WHERE p.performanceId = :performanceId")
     String findTitleByPerformanceId(Long performanceId);
+
+    boolean existsByTitleAndIsDeletedFalse(String title);
 }

@@ -21,28 +21,20 @@
     z-index: 1000;
 }
 
-.back-icon {
-    background: none;
-    border: none;
-    color: #e63946; /* Main Red */
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 5px;
-}
-
 .app-title {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    margin: 0;
     font-weight: 700;
-    font-size: 1.2rem;
-    color: #333333; /* Sub Dark */
+    font-size: 1.25rem;
+    color: #333333;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: calc(100% - 100px);
-    text-align: center;
+    max-width: calc(100% - 120px);
+    text-decoration: none;
 }
 
 .header-spacer {

@@ -26,7 +26,7 @@
                         class="btn-icon"
                         onclick="history.back()"
                         aria-label="뒤로가기">
-                    <i class="fa-solid fa-chevron-left"></i>
+                    <i class="fa-solid fa-arrow-left"></i>
                 </button>
             </div>
 
@@ -125,12 +125,25 @@
 
         <!-- ===== Info ===== -->
         <section class="mt-4" th:classappend="${iBlockedHim or heBlockedMe} ? 'd-none'">
-            <h6 class="section-title">최신 활동</h6>
-            <div class="card-box">
-                <!-- 활동 내용 -->
+            <h6 class="section-title">최근 북마크한 공연</h6>
+
+            <div class="recent-activities-box">
+
+                <!-- 리스트가 비어있을 때 -->
+                <div th:if="${#lists.isEmpty(recentActivities)}">
+                    최근 활동이 없습니다.
+                </div>
+
+                <ul th:if="${!#lists.isEmpty(recentActivities)}" class="recent-activities-list">
+                    <li th:each="activity : ${recentActivities}"
+                        th:text="${activity.performanceTitle}">
+                    </li>
+                </ul>
+
             </div>
         </section>
     </main>
+    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
 </div>
 
 <!-- ===== Modals ===== -->

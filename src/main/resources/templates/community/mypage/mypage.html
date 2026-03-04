@@ -8,132 +8,7 @@
 
   <!-- Bootswatch Litera -->
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    body {
-      margin: 0;
-      background: #ffffff;
-    }
-
-    .app-wrapper {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      background: #ffffff;
-      min-height: 100vh;
-    }
-
-    .app-container {
-      padding: 20px 16px 100px 16px;
-    }
-
-    /* ===== 상단 ===== */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-
-    .top-left,
-    .top-center,
-    .top-right {
-      flex: 1;
-    }
-
-    .top-center {
-      text-align: center;
-    }
-
-    .top-right {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .back-btn {
-      font-size: 20px;
-      text-decoration: none;
-      color: #333333;
-    }
-
-    .page-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333333;
-    }
-
-    /* ===== 프로필 ===== */
-    .profile-section {
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 40px;
-    }
-
-    .profile-image {
-      width: 100px;
-      height: 100px;
-      background: #e5e5e5;
-      border-radius: 50%;
-      margin: 0 auto 16px auto;
-    }
-
-    .nickname {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: #333333;
-    }
-
-    .follow-info {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    /* ===== 섹션 제목 ===== */
-    .section-title {
-      margin-top: 30px;
-      margin-bottom: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #E63946;
-    }
-
-    /* ===== 메뉴 ===== */
-    .menu-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .menu-item {
-      background: #f8f8f8;
-      padding: 14px;
-      text-align: center;
-      border-radius: 10px;
-      font-size: 14px;
-      text-decoration: none;
-      color: #333;
-      border: 1px solid #eee;
-      transition: 0.2s;
-    }
-
-    .menu-item:hover {
-      border-color: #E63946;
-      box-shadow: 0 4px 16px rgba(230, 57, 70, 0.1);
-      color: #E63946;
-    }
-
-    .logout-btn {
-      width: 100%;
-      background: #f8f8f8;
-      border: 1px solid #eee;
-      cursor: pointer;
-    }
-  </style>
+  <link rel="stylesheet" th:href="@{/css/community/mypage.css}">
 </head>
 
 <body>
@@ -165,17 +40,17 @@
         </div>
 
         <div class="follow-info">
-
-          <a th:href="@{/user/follow(targetId=${loginProfileId}, tab='following', profileMode=${profileMode})}"
-            class="follow-btn">
-            팔로잉
+          <a class="stat-item"
+            th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='following')}">
+            <span>팔로잉</span>
+            <span th:text="${followingCount}">0</span>
           </a>
 
-          <a th:href="@{/user/follow(targetId=${loginProfileId}, tab='follower', profileMode=${profileMode})}"
-            class="follow-btn">
-            팔로워
+          <a class="stat-item"
+            th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='follower')}">
+            <span>팔로워</span>
+            <span th:text="${followerCount}">0</span>
           </a>
-
         </div>
 
       </div>
@@ -184,6 +59,7 @@
       <div class="section-title">공통 설정</div>
       <div class="menu-list">
         <a href="#" class="menu-item">회원정보 수정</a>
+        <a href="#" class="menu-item">프로필 수정</a>
         <a th:href="@{/user/notification}" class="menu-item">알림 설정</a>
         <a th:href="@{/user/block}" class="menu-item">차단 목록 관리</a>
         <form th:action="@{/logout}" method="post" style="margin:0;">
@@ -191,6 +67,7 @@
             로그아웃
           </button>
         </form>
+        <a href="#" class="menu-item">회원 탈퇴</a>
       </div>
 
       <!-- ===== 공연자 전용 ===== -->
@@ -198,8 +75,6 @@
 
         <div class="section-title">공연자 설정</div>
         <div class="menu-list">
-
-          <a th:href="@{/performerprofile/setup}" class="menu-item">프로필 수정</a>
 
           <a th:href="@{/mypage/performer/posts}" class="menu-item">
             내가 작성한 공연자 모집글
@@ -217,8 +92,42 @@
             내가 신청한 공연
           </a>
 
+          <a th:href="@{/mypage/performer/recruited-performers}" class="menu-item">
+            내가 모집한 공연자
+          </a>
+
+          <a th:href="@{/mypage/performer/venues}" class="menu-item">
+            내가 대관한 공연장
+          </a>
+
           <a th:href="@{/mypage/performer/manage}" class="menu-item">
             신청자 관리
+          </a>
+
+        </div>
+
+      </div>
+
+      <!-- ===== 호스트 전용 ===== -->
+      <div th:if="${profileMode == 'ROLE_HOST'}">
+
+        <div class="section-title">호스트 설정</div>
+        <div class="menu-list">
+
+          <a th:href="@{/hostprofile/view}" class="menu-item">
+            호스트 프로필 보기
+          </a>
+
+          <a th:href="@{/hostprofile/setup}" class="menu-item">
+            호스트 프로필 설정
+          </a>
+
+          <a th:href="@{/venues/my}" class="menu-item">
+            내 공연장 관리
+          </a>
+
+          <a th:href="@{/venues/reservations/manage}" class="menu-item">
+            대관 요청 관리
           </a>
 
         </div>
