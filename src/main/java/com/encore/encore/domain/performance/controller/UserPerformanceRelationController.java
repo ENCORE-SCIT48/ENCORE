@@ -206,4 +206,22 @@ public class UserPerformanceRelationController {
             "북마크(찜) 공연 목록 조회 성공"
         );
     }
+
+    @GetMapping("/{performanceId}/reported")
+    public CommonResponse<Map<String, Object>> isReported(
+        @PathVariable Long performanceId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            log.info("[UserPerformanceRelation] controller isReported - anonymous, performanceId={}", performanceId);
+            return CommonResponse.ok(Map.of("reported", false), "비로그인: 신고 여부 false");
+        }
+
+        Long userId = userDetails.getUser().getUserId();
+        log.info("[UserPerformanceRelation] controller isReported - anonymous, performanceId={}", performanceId);
+
+        boolean reported = userPerformanceRelationService.isReported(userId, performanceId);
+
+        return CommonResponse.ok(Map.of("reported", reported), "신고 여부 조회 성공");
+    }
 }

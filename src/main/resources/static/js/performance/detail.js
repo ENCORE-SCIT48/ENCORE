@@ -7,6 +7,7 @@ $(function () {
     let isReported = false;
     let watchedChecked = false;
     let wishedChecked = false;
+    let reportedChecked = false;
 
     let reviewLoaded = false;
     let reviewPage = 0;
@@ -151,7 +152,16 @@ $(function () {
         });
 
         $("#reportedBtn").off("click").on("click", function () {
-            setReportedUI(!isReported);
+            const targetId = performanceId;
+            const targetType = "PERFORMANCE";
+            const targetName = $("#perfTitle").text() || "공연";
+
+            const url =
+                `/report?targetId=${encodeURIComponent(targetId)}` +
+                `&targetType=${encodeURIComponent(targetType)}` +
+                `&targetName=${encodeURIComponent(targetName)}`;
+
+            window.location.href = url;
         });
 
         $("#writeReviewBtn").off("click").on("click", function () {
@@ -278,6 +288,26 @@ $(function () {
             .fail(function () {
                 setWatchedUI(false);
                 watchedChecked = true;
+            });
+    }
+
+    function ensureReportedStatus() {
+        if (reportedChecked) return;
+
+        $.ajax({
+            url: `/api/performances/${performanceId}/reported`,
+            method: "GET",
+            dataType: "json",
+            xhrFields: { withCredentials: true }
+        })
+            .done(function (res) {
+                const reported = !!res?.data?.reported;
+                setReportedUI(reported);
+                reportedChecked = true;
+            })
+            .fail(function () {
+                setReportedUI(false);
+                reportedChecked = true;
             });
     }
 
@@ -529,6 +559,7 @@ $(function () {
 
     bindTabs();
     loadDetail();
+    ensureReportedStatus();
 
     // 탭의 평균 평점은 "전체 평균"으로 고정 표시
     loadReviewSummary();
