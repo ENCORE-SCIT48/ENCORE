@@ -11,13 +11,18 @@ import com.encore.encore.domain.chat.service.DmService;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.config.CustomUserDetails;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+
+import java.security.Principal;
 
 @Slf4j
 @Controller
@@ -56,12 +61,16 @@ public class ChatWebSocketController {
     public void sendDm(
         @DestinationVariable Long roomId,
         @Payload RequestSendDmDto request,
-        @AuthenticationPrincipal CustomUserDetails userDetails
+        Principal principal
     ) {
 
-        if (userDetails == null) {
-            log.warn("상대 userDetail 없음!");
+        if (principal == null) {
+            log.error("인증된 사용자 정보가 없습니다.");
+            throw new ApiException(ErrorCode.NOT_FOUND, "인증 정보가 없습니다.");
         }
+
+        Authentication auth = (Authentication) principal;
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
 
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
@@ -73,11 +82,23 @@ public class ChatWebSocketController {
 
         User otherUser = dmService.getUser(other.getProfileId(), other.getProfileMode());
 
-        // WebSocket 전송
+        // 상대방에게 WebSocket 전송
         messagingTemplate.convertAndSendToUser(
             otherUser.getEmail(),
             "/queue/dm/" + roomId,
             result
         );
+
+        // 나에게 전송
+        result.setMine(true);
+        // 컨트롤러 내부
+        log.info("나의 Username (Principal): {}", principal.getName());
+        log.info("UserDetails Username: {}", userDetails.getUsername());
+        log.info("상대방 Email: {}", otherUser.getEmail());
+
+// 나에게 전송 시 principal.getName()을 사용해 보세요.
+        messagingTemplate.convertAndSendToUser(
+            principal.getName(), "/queue/dm/" + roomId,
+            result);
     }
 }

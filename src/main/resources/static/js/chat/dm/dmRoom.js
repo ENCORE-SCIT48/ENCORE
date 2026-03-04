@@ -16,7 +16,6 @@ $(document).ready(() => {
 
     const participantStatus = PARTICIPANT_STATUS;
     const ROOM_ID_VALUE = ROOM_ID; // 전역 ROOM_ID 사용
-    const CURRENT_USER = CURRENT_USER_ID;
 
     // ========================
     // 초기 세팅
@@ -89,7 +88,11 @@ $(document).ready(() => {
     // 메시지 렌더링
     // ========================
     function renderMessage(msg) {
-        const isMine = msg.mine; // 서버에서 채팅 메시지 DTO에 mine 포함 필요
+        // 1. 서버에서 준 mine 값이 있으면 쓰고, 없으면 현재 유저 ID와 비교 (안전장치)
+        const isMine = msg.mine || (msg.profileId === CURRENT_PROFILE_ID && msg.profileMode === CURRENT_MODE);
+        // 중복 렌더링 방지 (이미 화면에 있는 메시지 ID인지 확인)
+        if ($(`.chat-message[data-id="${msg.messageId}"]`).length > 0) return;
+
         const html = `
             <div class="chat-message ${isMine ? 'mine' : 'other'}" data-id="${msg.messageId}">
                 <span class="message-sender">${escapeHtml(msg.senderName)}</span>
@@ -98,6 +101,9 @@ $(document).ready(() => {
                 </div>
                 <span class="message-time">${dayjs(msg.createdAt).format('HH:mm')}</span>
             </div>`;
+
+        // 로드 방식에 따라 위로 붙일지 아래로 붙일지 결정
+        // 초기 로딩이나 페이징은 prepend가 필요할 수 있지만, 실시간은 append입니다.
         $chatContainer.append(html);
     }
 
@@ -107,29 +113,41 @@ $(document).ready(() => {
         const socket = new SockJS('/ws');
         const stompClient = Stomp.over(socket);
 
+        // 디버그 로그가 너무 많으면 아래 주석 해제
+        // stompClient.debug = null;
+
         stompClient.connect({}, function(frame) {
             console.log('Connected: ' + frame);
 
-            // 1:1 DM 수신
-            stompClient.subscribe('/user/queue/dm/' + ROOM_ID, function(message) {
-                const msg = JSON.parse(message.body);
-                renderMessage(msg);   // 기존 renderMessage 재사용
-                scrollToBottom();     // 기존 scrollToBottom 재사용
+            // /user 접두사는 서버의 convertAndSendToUser와 매칭됩니다.
+            // 사용자가 로그인한 'email' 혹은 'username'을 기반으로 서버가 전송합니다.
+            stompClient.subscribe('/user/queue/dm/' + ROOM_ID_VALUE, function(message) {
+                const res = JSON.parse(message.body);
+
+                // 서버 응답 DTO(ResponseSendDmDto) 구조에 맞춰 호출
+                renderMessage(res);
+                scrollToBottom();
             });
+        }, function(error) {
+            console.error('STOMP error: ' + error);
+            // 연결 끊겼을 때 재연결 로직을 여기에 추가할 수 있습니다.
         });
     // ========================
     // 메시지 전송
     // ========================
     function sendMessage() {
-        const content = $('#chatInput').val().trim();
-        if (!content) return;
+        const $input = $('#chatInput');
+            const content = $input.val().trim();
+            if (!content || !stompClient.connected) return; // 연결 확인 추가
 
-        stompClient.send('/app/dm/' + ROOM_ID_VALUE, {}, JSON.stringify({
-            roomId: ROOM_ID_VALUE,
-            content: content
-        }));
+            // 서버의 @MessageMapping("/dm/{roomId}")와 매칭
+            stompClient.send('/app/dm/' + ROOM_ID_VALUE, {}, JSON.stringify({
+                roomId: ROOM_ID_VALUE,
+                content: content
+            }));
 
-        $('#chatInput').val('');
+            $input.val(''); // 입력창 비우기
+            $input.focus();
     }
 
     // ========================
