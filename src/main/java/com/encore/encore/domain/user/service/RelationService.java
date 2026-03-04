@@ -721,5 +721,29 @@ public class RelationService {
         }
         return result;
     }
+
+    /**
+     * 팔로잉 중인 인원수를 센다
+     *
+     * @param userId
+     * @param activeMode
+     * @return
+     */
+    public int countFollowing(Long userId, ActiveMode activeMode) {
+        int following = userRelationRepository.countFollowing(userId, activeMode);
+        return following;
+    }
+
+    /**
+     * 팔로워 수를 센다.
+     *
+     * @param profileId
+     * @param activeMode
+     * @return
+     */
+    public int countFollower(Long profileId, ActiveMode activeMode) {
+        int follower = userRelationRepository.countFollower(profileId, activeMode);
+        return follower;
+    }
 }
 
