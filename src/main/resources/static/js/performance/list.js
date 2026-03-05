@@ -121,6 +121,10 @@ $(function () {
                 renderCards(items, append);
 
                 if (!state.last) state.page += 1;
+
+                // 더보기 버튼: 마지막 페이지면 숨김, 아니면 표시
+                var $loadMore = $("#loadMoreBtn");
+                if ($loadMore.length) $loadMore.toggle(!state.last);
             })
             .fail(function (xhr) {
                 const status = xhr.status;
@@ -140,6 +144,7 @@ $(function () {
     function resetAndLoad() {
         state.page = 0;
         state.last = false;
+        $("#loadMoreBtn").show(); // 탭/검색 바꿀 때 다시 보이게
         fetchList(false);
     }
 
