@@ -165,20 +165,41 @@
 
         <div>
           <b>모집 장르</b> :
-          <span th:if="${post.recruitCategory != null}"
-                th:each="cat : ${post.recruitCategory.split(',')}"
-            style="background:#f5f5f5; padding:4px 8px; border-radius:12px; margin-right:5px;">
-            <span th:text="${cat}"></span>
-          </span>
+
+          <th:block th:if="${post.recruitCategory != null}">
+            <span th:each="cat : ${#strings.arraySplit(post.recruitCategory, ',')}"
+              style="background:#f5f5f5; padding:4px 8px; border-radius:12px; margin-right:5px;">
+              <span th:text="${cat == 'BUSKING' ? '버스킹' :
+                    cat == 'BAND' ? '밴드' :
+                    cat == 'DANCE' ? '댄스' :
+                    cat == 'CLASSIC' ? '클래식' :
+                    cat == 'GUKACK' ? '국악' :
+                    cat == 'MASIC' ? '마술/퍼포먼스' :
+                    cat}">
+              </span>
+            </span>
+          </th:block>
+
         </div>
 
         <div style="margin-top:6px;">
-          <b>모집 파트</b> :
-          <span th:if="${post.recruitPart != null}"
-                th:each="part : ${post.recruitPart.split(',')}"
-            style="background:#f5f5f5; padding:4px 8px; border-radius:12px; margin-right:5px;">
-            <span th:text="${part}"></span>
-          </span>
+          <b>모집 포지션</b> :
+
+          <th:block th:if="${post.recruitPart != null}">
+            <span th:each="part : ${#strings.arraySplit(post.recruitPart, ',')}"
+              style="background:#f5f5f5; padding:4px 8px; border-radius:12px; margin-right:5px;">
+              <span th:text="${part == 'VOCAL' ? '보컬' :
+                    part == 'GUITAR' ? '기타' :
+                    part == 'DRUM' ? '드럼' :
+                    part == 'BASS' ? '베이스' :
+                    part == 'KEYBOARD' ? '키보드' :
+                    part == 'DANCER' ? '댄서' :
+                    part == 'EXTRA' ? '기타악기' :
+                    part}">
+              </span>
+            </span>
+          </th:block>
+
         </div>
 
         <div style="margin-top:6px;">

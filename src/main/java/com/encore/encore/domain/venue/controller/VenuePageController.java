@@ -22,13 +22,12 @@ public class VenuePageController {
      */
     @GetMapping
     public String listPage(
-        Model model,
-        jakarta.servlet.http.HttpServletRequest request,
-        @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
+            Model model,
+            jakarta.servlet.http.HttpServletRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         String activeMode = (userDetails != null && userDetails.getActiveMode() != null)
-            ? userDetails.getActiveMode().name()
-            : ActiveMode.ROLE_USER.name();
+                ? userDetails.getActiveMode().name()
+                : ActiveMode.ROLE_USER.name();
         log.info("[VenuePage] list page requested, activeMode={}", activeMode);
 
         model.addAttribute("targetUrl", request != null ? request.getRequestURI() : "/venues");
@@ -54,12 +53,18 @@ public class VenuePageController {
      */
     @GetMapping("/{venueId}")
     public String detailPage(
-        @PathVariable Long venueId,
-        Model model,
-        jakarta.servlet.http.HttpServletRequest request
-    ) {
+            @PathVariable("venueId") Long venueId,
+            Model model,
+            jakarta.servlet.http.HttpServletRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        String activeMode = (userDetails != null && userDetails.getActiveMode() != null)
+                ? userDetails.getActiveMode().name()
+                : ActiveMode.ROLE_USER.name();
+
         log.info("[VenuePage] detail page requested - venueId={}", venueId);
         model.addAttribute("venueId", venueId);
+        model.addAttribute("activeMode", activeMode);
         model.addAttribute("targetUrl", request != null ? request.getRequestURI() : ("/venues/" + venueId));
         return "venue/detail";
     }
@@ -101,7 +106,8 @@ public class VenuePageController {
         return "venue/reservationForm";
     }
 
-    // [호스트] 대관 요청 관리 (탭 방식 — venueId 불필요, venueReservations.js 가 /api/venues/my 로 탭 구성)
+    // [호스트] 대관 요청 관리 (탭 방식 — venueId 불필요, venueReservations.js 가 /api/venues/my 로 탭
+    // 구성)
     @GetMapping("/reservations/manage")
     public String venueReservationsPage() {
         log.info("[VenuePage] venue reservations manage page requested");
