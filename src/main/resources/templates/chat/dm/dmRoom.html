@@ -21,14 +21,14 @@
     <!-- 헤더 -->
     <header class="app-header">
         <button type="button" onclick="history.back();" class="btn-icon">
-            <i class="fa-solid fa-arrow-left"></i>
+            <i class="fa-solid fa-chevron-left"></i>
         </button>
 
         <a th:href="@{/member/profile/{id}/{mode}(id=${userDetail.otherProfileId}, mode=${userDetail.otherProfileMode})}"
            class="chat-header-link">
-            <img
-                th:src="${userDetail.otherProfileImg != null ? userDetail.otherProfileImg : '/image/default-profile.png'}"
-                class="header-avatar">
+            <img th:src="${userDetail.otherProfileImg} != null
+        ? @{${userDetail.otherProfileImg}}
+        : @{/image/default-profile.png}" class="header-avatar">
             <h1 class="chat-title-text" th:text="${userDetail.otherNickname}">상대방 이름</h1>
         </a>
         <div class="header-right-empty"></div>
@@ -54,11 +54,10 @@
     <!-- 입력 영역 -->
     <footer class="chat-input-area border-top p-2 bg-white">
         <div class="input-group">
-            <input type="text" id="chatInput" class="form-control border-0"
-                   placeholder="메시지를 입력하세요." style="display:none;"/>
+            <input type="text" id="chatInput" class="form-control border-0" placeholder="메시지를 입력하세요."
+                   style="display:none;"/>
 
-            <button type="button" id="sendBtn" class="btn btn-danger px-4"
-                    style="display:none;">전송
+            <button type="button" id="sendBtn" class="btn btn-danger px-4" style="display:none;">전송
             </button>
 
             <div id="actionBtnGroup" class="w-100 d-flex gap-2">
@@ -89,4 +88,5 @@
 <script th:src="@{/js/chat/dm/dmRoom.js}"></script>
 
 </body>
+
 </html>

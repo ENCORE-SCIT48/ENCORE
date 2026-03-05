@@ -102,20 +102,17 @@ public class DmService {
             case ROLE_USER:
                 UserProfile userProfile = userProfileRepository.findById(profileId)
                     .orElseThrow(
-                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다.")
-                    );
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
                 return userProfile.getProfileImageUrl();
             case ROLE_PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
                     .orElseThrow(
-                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다.")
-                    );
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
                 return performerProfile.getProfileImageUrl();
             case ROLE_HOST:
                 HostProfile hostProfile = hostProfileRepository.findById(profileId)
                     .orElseThrow(
-                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다.")
-                    );
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
                 return hostProfile.getProfileImageUrl();
             default:
                 throw new ApiException(ErrorCode.NOT_FOUND, "프로필 정보가 올바르지 않습니다.");
@@ -123,16 +120,16 @@ public class DmService {
 
     }
 
-
     /**
      * 로그인한 사용자의 Pending 상태인 DM 참여 내역을 조회합니다.
      *
-     * <p>메서드 동작:
+     * <p>
+     * 메서드 동작:
      * <ul>
-     *     <li>로그인한 사용자의 프로필 ID와 프로필 모드에 해당하는 Pending DM 참여 목록을 조회합니다.</li>
-     *     <li>각 참여 채팅방에서 상대방 참가자를 조회합니다 (본인 제외).</li>
-     *     <li>상대방의 닉네임은 ProfileService를 통해 조회합니다.</li>
-     *     <li>각 채팅방에서 최신 메시지를 조회하여 DTO에 포함합니다.</li>
+     * <li>로그인한 사용자의 프로필 ID와 프로필 모드에 해당하는 Pending DM 참여 목록을 조회합니다.</li>
+     * <li>각 참여 채팅방에서 상대방 참가자를 조회합니다 (본인 제외).</li>
+     * <li>상대방의 닉네임은 ProfileService를 통해 조회합니다.</li>
+     * <li>각 채팅방에서 최신 메시지를 조회하여 DTO에 포함합니다.</li>
      * </ul>
      *
      * @param activeProfileId 로그인한 사용자의 프로필 ID
@@ -146,8 +143,7 @@ public class DmService {
                 activeProfileId,
                 activeMode,
                 ChatParticipant.ParticipantStatus.PENDING,
-                ChatRoom.RoomType.DM
-            );
+                ChatRoom.RoomType.DM);
 
         List<ResponseListDmDto> dtoList = new ArrayList<>();
 
@@ -155,8 +151,7 @@ public class DmService {
             ChatParticipant other = chatParticipantRepository.findOtherParticipantInRoom(
                 myCp.getRoom().getRoomId(),
                 activeProfileId,
-                activeMode
-            ).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자가 없습니다."));
+                activeMode).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자가 없습니다."));
 
             String nickname = profileService.resolveSenderName(other.getProfileId(), other.getProfileMode());
 
@@ -179,7 +174,6 @@ public class DmService {
         return dtoList;
     }
 
-
     /**
      * 로그인한 사용자의 참여 중(ACCEPTED) DM 목록을 조회합니다.
      *
@@ -194,9 +188,8 @@ public class DmService {
             .findAcceptedDm(
                 activeProfileId,
                 activeMode,
-                ChatParticipant.ParticipantStatus.ACCEPTED,  // pending -> accepted
-                ChatRoom.RoomType.DM
-            );
+                ChatParticipant.ParticipantStatus.ACCEPTED, // pending -> accepted
+                ChatRoom.RoomType.DM);
 
         List<ResponseListDmDto> dtoList = new ArrayList<>();
 
@@ -206,8 +199,7 @@ public class DmService {
             Optional<ChatParticipant> otherOpt = chatParticipantRepository.findOtherParticipantInRoom(
                 myCp.getRoom().getRoomId(),
                 activeProfileId,
-                activeMode
-            );
+                activeMode);
 
             if (otherOpt.isEmpty()) {
                 log.warn("상대방 참가자가 없는 DM 방입니다. roomId={}", myCp.getRoom().getRoomId());
@@ -246,6 +238,13 @@ public class DmService {
      * @return DM 방 상태 DTO
      */
     public ResponseDmRoomStatusDto requestDm(Long myProfileId, ActiveMode myMode, RequestDmDto dto) {
+
+        log.info(
+            "[DM 요청] fromProfileId={}, fromMode={}, targetProfileId={}, targetMode={}",
+            myProfileId,
+            myMode,
+            dto.getTargetProfileId(),
+            dto.getTargetProfileMode());
 
         ActiveMode targetProfileMode = mapToActiveMode(dto.getTargetProfileMode());
 
@@ -366,13 +365,16 @@ public class DmService {
             .content(request.getContent())
             .sentAt(LocalDateTime.now())
             .build();
+
         chatMessageRepository.save(message);
 
         // 첫 메시지이면 participant 상태 변경
         if (isFirstMessage) {
             ChatParticipant senderParticipant = chatParticipantRepository
-                .findByRoom_RoomIdAndProfileIdAndProfileMode(room.getRoomId(), activeProfileId, activeMode)
-                .orElse(null);
+                .findByRoom_RoomIdAndProfileIdAndProfileMode(
+                    room.getRoomId(), activeProfileId, activeMode)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참가자 정보 없음"));
+
 
             if (senderParticipant != null) {
                 senderParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
@@ -380,8 +382,12 @@ public class DmService {
             }
 
             ChatParticipant recipientParticipant = chatParticipantRepository
-                .findWaitingParticipantExcludingSelf(room.getRoomId(), activeProfileId, activeMode, ChatParticipant.ParticipantStatus.WAITING)
-                .orElse(null);
+                .findWaitingParticipantExcludingSelf(
+                    room.getRoomId(),
+                    activeProfileId,
+                    activeMode,
+                    ChatParticipant.ParticipantStatus.WAITING)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자 정보 없음"));
 
             if (recipientParticipant != null) {
                 recipientParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.PENDING);
@@ -401,16 +407,17 @@ public class DmService {
             .build();
     }
 
-
     public String checkUserParticipantStatus(Long roomId, Long activeProfileId, ActiveMode activeMode) {
         ChatParticipant me = chatParticipantRepository
-            .RoomRoomIdAndProfileIdAndProfileModeAndParticipantStatusNot(roomId, activeProfileId, activeMode, ChatParticipant.ParticipantStatus.REJECTED)
+            .RoomRoomIdAndProfileIdAndProfileModeAndParticipantStatusNot(roomId, activeProfileId, activeMode,
+                ChatParticipant.ParticipantStatus.REJECTED)
             .orElseThrow(() -> new ApiException(ErrorCode.FORBIDDEN, "채팅방 접근 불가"));
 
         return me.getParticipantStatus().name();
     }
 
-    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeProfileId, ActiveMode activeMode) {
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeProfileId,
+                                                 ActiveMode activeMode) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
 
@@ -423,16 +430,17 @@ public class DmService {
                 .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
-                .isMine(message.getProfileId().equals(activeProfileId) && message.getProfileMode().equals(activeMode))
-                .build()
-            )
+                .isMine(message.getProfileId().equals(activeProfileId)
+                    && message.getProfileMode().equals(activeMode))
+                .build())
             .toList();
     }
 
-
     /**
      * [설명] DM 방 참여 요청에 대한 수락 또는 거절 처리를 수행합니다.
-     * <p>수락 시 참여 상태가 ACCEPTED로 변경되며, 거절 시 참여 상태가 REJECTED로 변경됨과 동시에 해당 채팅방이 논리 삭제됩니다.</p>
+     * <p>
+     * 수락 시 참여 상태가 ACCEPTED로 변경되며, 거절 시 참여 상태가 REJECTED로 변경됨과 동시에 해당 채팅방이 논리 삭제됩니다.
+     * </p>
      *
      * @param roomId          채팅방 식별자
      * @param dto             상태 변경 요청 데이터 (ACCEPTED/REJECTED)

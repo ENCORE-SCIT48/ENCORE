@@ -1,5 +1,6 @@
 package com.encore.encore.domain.community.dto.PerformerPostDto;
 
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +20,10 @@ public class RequestUpdatePerformerPostDto {
     private Long performanceId;
 
     private Integer capacity;
+
+    private List<String> recruitCategory;
+
+    private List<String> recruitPart;
+    
+    private String recruitArea;
 }

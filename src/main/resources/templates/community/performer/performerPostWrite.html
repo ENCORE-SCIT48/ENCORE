@@ -84,6 +84,7 @@
     .btn-group a {
       width: 100px;
       font-size: 13px;
+      margin-bottom: 40px;
     }
 
     .btn-primary {
@@ -131,6 +132,52 @@
         <div style="margin-bottom:15px;">
           <label style="font-size:13px; color:#666;">모집 정원</label>
           <input type="number" name="capacity" min="1" class="form-control" placeholder="모집 인원을 입력하세요" required>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- 모집 장르 -->
+        <div style="margin-bottom:15px;">
+          <label style="font-size:13px; color:#666;">모집 장르</label>
+          <div style="margin-top:6px;">
+            <label style="margin-right:10px;">
+              <input type="checkbox" name="recruitCategory" value="ROCK"> ROCK
+            </label>
+            <label style="margin-right:10px;">
+              <input type="checkbox" name="recruitCategory" value="JAZZ"> JAZZ
+            </label>
+            <label style="margin-right:10px;">
+              <input type="checkbox" name="recruitCategory" value="KPOP"> KPOP
+            </label>
+            <label>
+              <input type="checkbox" name="recruitCategory" value="BALLAD"> BALLAD
+            </label>
+          </div>
+        </div>
+
+        <!-- 모집 파트 -->
+        <div style="margin-bottom:15px;">
+          <label style="font-size:13px; color:#666;">모집 파트</label>
+          <div style="margin-top:6px;">
+            <label style="margin-right:10px;">
+              <input type="checkbox" name="recruitPart" value="VOCAL"> VOCAL
+            </label>
+            <label style="margin-right:10px;">
+              <input type="checkbox" name="recruitPart" value="GUITAR"> GUITAR
+            </label>
+            <label style="margin-right:10px;">
+              <input type="checkbox" name="recruitPart" value="DRUM"> DRUM
+            </label>
+            <label>
+              <input type="checkbox" name="recruitPart" value="BASS"> BASS
+            </label>
+          </div>
+        </div>
+
+        <!-- 모집 지역 -->
+        <div style="margin-bottom:15px;">
+          <label style="font-size:13px; color:#666;">모집 지역</label>
+          <input type="text" name="recruitArea" class="form-control" placeholder="예: 서울, 부산" required>
         </div>
 
         <textarea name="content" class="post-content-textarea" placeholder="내용을 입력하세요" required></textarea>

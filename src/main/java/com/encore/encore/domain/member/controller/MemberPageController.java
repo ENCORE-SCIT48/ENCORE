@@ -83,4 +83,17 @@ public class MemberPageController {
 
         return "member/memberProfile";
     }
+
+    @GetMapping("member/profile/u/{userId}")
+    public String memberProfileByUserId(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable Long userId,
+        Model model
+    ) {
+        Long profileId = memberService.getDefaultProfileIdByUserId(userId);
+
+        String profileMode = ActiveMode.ROLE_USER.name();
+
+        return memberProfile(userDetails, profileId, profileMode, model);
+    }
 }

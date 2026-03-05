@@ -1,5 +1,7 @@
 package com.encore.encore.domain.performance.service;
 
+import com.encore.encore.domain.community.entity.ReportTargetType;
+import com.encore.encore.domain.community.repository.ReportRepository;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.entity.UserPerformanceRelation;
@@ -25,6 +27,7 @@ public class UserPerformanceRelationService {
 
     private final UserPerformanceRelationRepository userPerformanceRelationRepository;
     private final PerformanceRepository performanceRepository;
+    private final ReportRepository reportRepository;
 
     public boolean isWatched(Long userId, Long performanceId) {
         log.info("[UserPerformanceRelation] isWatched request - userId={}, performanceId={}", userId, performanceId);
@@ -131,5 +134,14 @@ public class UserPerformanceRelationService {
             .findPerformancesByUserIdAndStatusAndKeywordOrderByCreatedAtDesc(userId, WISHED, keyword, pageable);
 
         return page.map(PerformanceListItemDto::new);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isReported(Long userId, Long performanceId) {
+        return reportRepository.existsByReporter_UserIdAndTargetIdAndTargetTypeAndIsDeletedFalse(
+            userId,
+            performanceId,
+            ReportTargetType.PERFORMANCE
+        );
     }
 }

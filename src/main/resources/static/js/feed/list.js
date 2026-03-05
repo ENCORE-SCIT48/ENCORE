@@ -69,7 +69,6 @@ function createFeedCard(item) {
     const startDate = parseIsoLocalDateTime(startTime);
     const timeText = startDate ? formatKoreanDateTime(startDate) : "시간 정보 없음";
 
-    // type에 따라 뱃지/서브텍스트 다르게
     const { badgeText, subText } = buildLabels(item);
 
     const card = document.createElement("div");
@@ -79,10 +78,12 @@ function createFeedCard(item) {
     badge.className = "feed-badge";
     badge.textContent = badgeText;
 
+    // 공연 제목
     const titleEl = document.createElement("div");
     titleEl.className = "feed-card-title";
     titleEl.textContent = title;
 
+    // 팔로우 프로필 페이지 이동 영역
     const subEl = document.createElement("div");
     subEl.className = "feed-card-sub";
     subEl.textContent = subText;
@@ -103,22 +104,34 @@ function createFeedCard(item) {
     left.appendChild(badge);
     left.appendChild(titleEl);
     left.appendChild(subEl);
-    // FOLLOW_WISHED는 subText가 이미 메시지 역할이라 중복 방지
-    if (type !== "FOLLOW_WISHED" && message) {
-        left.appendChild(msgEl);
-    }
+
+    if (type !== "FOLLOW_WISHED" && message) left.appendChild(msgEl);
     left.appendChild(timeEl);
 
     card.appendChild(left);
     card.appendChild(right);
 
-    // 클릭 시 공연 상세로 이동
     const performanceId = item?.performanceId;
+
     if (performanceId) {
         card.style.cursor = "pointer";
         card.addEventListener("click", () => {
             window.location.href = `/performances/${performanceId}`;
-    });
+        });
+    }
+
+    if (type === "FOLLOW_WISHED") {
+        const actorUserId = item?.actorUserId;
+
+        subEl.style.cursor = "pointer";
+
+        subEl.addEventListener("click", (e) => {
+            e.stopPropagation(); // 카드 클릭 막기
+
+            if (!actorUserId) return;
+
+            window.location.href = `/member/profile/u/${actorUserId}`;
+        });
     }
 
     return card;

@@ -4,6 +4,7 @@ import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.member.entity.ActiveMode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -42,10 +43,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             AND r.isDeleted = false
         """)
     Optional<ChatRoom> findDmRoomWithParticipants(
-        Long myId,
-        ActiveMode myMode,
-        Long targetId,
-        ActiveMode targetMode
+        @Param("myId") Long myId,
+        @Param("myMode") ActiveMode myMode,
+        @Param("targetId") Long targetId,
+        @Param("targetMode") ActiveMode targetMode
     );
 
 

@@ -56,6 +56,7 @@ function createPerformancePost() {
   const title = $('input[name="title"]').val().trim();
   const content = $('textarea[name="content"]').val().trim();
   const capacity = Number($('input[name="capacity"]').val());
+  const venueId = $("select[name='venueId']").val();
 
   if (!title || !content) {
     alert('제목과 내용을 입력하세요.');
@@ -74,7 +75,8 @@ function createPerformancePost() {
     data: JSON.stringify({
       title: title,
       content: content,
-      capacity: capacity
+      capacity: capacity,
+      venueId: venueId
     }),
     success: function (res) {
       if (res.success) {
@@ -113,6 +115,8 @@ function updatePerformancePost(postId) {
   const title = $('input[name="title"]').val().trim();
   const content = $('textarea[name="content"]').val().trim();
   const capacity = Number($('input[name="capacity"]').val());
+  const venueId = $("select[name='venueId']").val();
+
 
   if (!title || !content) {
     alert('제목과 내용을 입력하세요.');
@@ -131,7 +135,8 @@ function updatePerformancePost(postId) {
     data: JSON.stringify({
       title: title,
       content: content,
-      capacity: capacity
+      capacity: capacity,
+      venueId: venueId
     }),
     success: function (res) {
       if (res.success) {

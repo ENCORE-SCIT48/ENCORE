@@ -158,6 +158,16 @@ public class PerformerPostService {
                     });
         }
 
+        String categoryString = null;
+        if (dto.getRecruitCategory() != null && !dto.getRecruitCategory().isEmpty()) {
+            categoryString = String.join(",", dto.getRecruitCategory());
+        }
+
+        String partString = null;
+        if (dto.getRecruitPart() != null && !dto.getRecruitPart().isEmpty()) {
+            partString = String.join(",", dto.getRecruitPart());
+        }
+
         Post post = Post.builder()
                 .performance(performance)
                 .postType(PERFORMER_POST_TYPE)
@@ -166,6 +176,9 @@ public class PerformerPostService {
                 .viewCount(0)
                 .capacity(dto.getCapacity())
                 .performerAuthor(performer)
+                .recruitCategory(categoryString)
+                .recruitPart(partString)
+                .recruitArea(dto.getRecruitArea())
                 .build();
 
         Post savedPost = postRepository.save(post);
@@ -252,6 +265,18 @@ public class PerformerPostService {
             post.setCapacity(dto.getCapacity());
         }
 
+        if (dto.getRecruitCategory() != null) {
+            post.setRecruitCategory(String.join(",", dto.getRecruitCategory()));
+        }
+
+        if (dto.getRecruitPart() != null) {
+            post.setRecruitPart(String.join(",", dto.getRecruitPart()));
+        }
+
+        if (dto.getRecruitArea() != null) {
+            post.setRecruitArea(dto.getRecruitArea());
+        }
+
         log.info("[UpdatePerformerPost] 수정 완료 - postId={}", postId);
 
         return ResponseUpdatePerformerPostDto.builder()
@@ -310,6 +335,9 @@ public class PerformerPostService {
                 .approvedCount(approvedCount)
                 .createdAt(post.getCreatedAt())
                 .performerId(post.getPerformerAuthor().getPerformerId())
+                .recruitCategory(post.getRecruitCategory())
+                .recruitPart(post.getRecruitPart())
+                .recruitArea(post.getRecruitArea())
                 .build();
     }
 

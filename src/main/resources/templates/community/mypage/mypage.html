@@ -2,144 +2,149 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이페이지</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마이페이지</title>
 
-    <!-- Bootswatch Litera -->
-    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/community/mypage.css}">
+  <!-- Bootswatch Litera -->
+  <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/community/mypage.css}">
 </head>
 
 <body>
 
-<div class="app-wrapper">
+  <div class="app-wrapper">
 
     <div class="app-container">
 
-        <!-- ===== 상단 ===== -->
-        <div class="top-bar">
-            <div class="top-left">
-                <a th:href="@{/}" class="back-btn">←</a>
-            </div>
-            <div class="top-center">
-                <div class="page-title">마이페이지</div>
-            </div>
-            <div class="top-right">
-                <div th:replace="~{fragments/performer/profile :: profile}"></div>
-            </div>
+      <!-- ===== 상단 ===== -->
+      <div class="top-bar">
+        <div class="top-left">
+          <a th:href="@{/}" class="back-btn">←</a>
+        </div>
+        <div class="top-center">
+          <div class="page-title">마이페이지</div>
+        </div>
+        <div class="top-right">
+          <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        </div>
+      </div>
+
+      <!-- ===== 프로필 영역 ===== -->
+      <div class="profile-section">
+
+        <div class="profile-image"></div>
+
+        <div class="nickname">
+          <span sec:authentication="name">닉네임</span>
         </div>
 
-        <!-- ===== 프로필 영역 ===== -->
-        <div class="profile-section">
+        <div class="follow-info">
+          <a class="stat-item"
+            th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='following')}">
+            <span>팔로잉</span>
+            <span th:text="${followingCount}">0</span>
+          </a>
 
-            <div class="profile-image"></div>
-
-            <div class="nickname">
-                <span sec:authentication="name">닉네임</span>
-            </div>
-
-            <div class="follow-info">
-                <a class="stat-item"
-                   th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='following')}">
-                    <span>팔로잉</span>
-                    <span th:text="${followingCount}">0</span>
-                </a>
-
-                <a class="stat-item"
-                   th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='follower')}">
-                    <span>팔로워</span>
-                    <span th:text="${followerCount}">0</span>
-                </a>
-            </div>
-
+          <a class="stat-item"
+            th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='follower')}">
+            <span>팔로워</span>
+            <span th:text="${followerCount}">0</span>
+          </a>
         </div>
 
-        <!-- ===== 공통 설정 ===== -->
-        <div class="section-title">공통 설정</div>
+      </div>
+
+      <!-- ===== 공통 설정 ===== -->
+      <div class="section-title">공통 설정</div>
+      <div class="menu-list">
+        <a href="#" class="menu-item">회원정보 수정</a>
+        <a th:href="@{/userprofile/setup}" class="menu-item">
+            프로필 설정
+        </a>
+        <a th:href="@{/user/notification}" class="menu-item">알림 설정</a>
+        <a th:href="@{/user/block}" class="menu-item">차단 목록 관리</a>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+          <button type="submit" class="menu-item logout-btn">
+            로그아웃
+          </button>
+        </form>
+      </div>
+
+      <!-- ===== 공연자 전용 ===== -->
+      <div th:if="${profileMode == 'ROLE_PERFORMER'}">
+
+        <div class="section-title">공연자 설정</div>
         <div class="menu-list">
-            <a href="#" class="menu-item">회원정보 수정</a>
-            <a href="#" class="menu-item">프로필 수정</a>
-            <a th:href="@{/user/notification}" class="menu-item">알림 설정</a>
-            <a th:href="@{/user/block}" class="menu-item">차단 목록 관리</a>
-            <form th:action="@{/logout}" method="post" style="margin:0;">
-                <button type="submit" class="menu-item logout-btn">
-                    로그아웃
-                </button>
-            </form>
-            <a href="#" class="menu-item">회원 탈퇴</a>
-        </div>
 
-        <!-- ===== 공연자 전용 ===== -->
-        <div th:if="${profileMode == 'ROLE_PERFORMER'}">
+          <a th:href="@{/performerprofile/setup}" class="menu-item">
+            공연자 프로필 설정
+          </a>
 
-            <div class="section-title">공연자 설정</div>
-            <div class="menu-list">
+          <a th:href="@{/mypage/performer/posts}" class="menu-item">
+            내가 작성한 공연자 모집글
+          </a>
 
-                <a th:href="@{/mypage/performer/posts}" class="menu-item">
-                    내가 작성한 공연자 모집글
-                </a>
+          <a th:href="@{/mypage/performer/performances}" class="menu-item">
+            내가 작성한 공연 모집글
+          </a>
 
-                <a th:href="@{/mypage/performer/performances}" class="menu-item">
-                    내가 작성한 공연 모집글
-                </a>
+          <a th:href="@{/mypage/performer/applied-posts}" class="menu-item">
+            내가 신청한 공연자 모집글
+          </a>
 
-                <a th:href="@{/mypage/performer/applied-posts}" class="menu-item">
-                    내가 신청한 공연자 모집글
-                </a>
+          <a th:href="@{/mypage/performer/applied-performances}" class="menu-item">
+            내가 신청한 공연
+          </a>
 
-                <a th:href="@{/mypage/performer/applied-performances}" class="menu-item">
-                    내가 신청한 공연
-                </a>
+          <a th:href="@{/mypage/performer/recruited-performers}" class="menu-item">
+            내가 모집한 공연자
+          </a>
 
-                <a th:href="@{/mypage/performer/recruited-performers}" class="menu-item">
-                    내가 모집한 공연자
-                </a>
+          <a th:href="@{/mypage/performer/venues}" class="menu-item">
+            내가 대관한 공연장
+          </a>
 
-                <a th:href="@{/mypage/performer/venues}" class="menu-item">
-                    내가 대관한 공연장
-                </a>
-
-                <a th:href="@{/mypage/performer/manage}" class="menu-item">
-                    신청자 관리
-                </a>
-
-            </div>
+          <a th:href="@{/mypage/performer/manage}" class="menu-item">
+            신청자 관리
+          </a>
 
         </div>
 
-        <!-- ===== 호스트 전용 ===== -->
-        <div th:if="${profileMode == 'ROLE_HOST'}">
+      </div>
 
-            <div class="section-title">호스트 설정</div>
-            <div class="menu-list">
+      <!-- ===== 호스트 전용 ===== -->
+      <div th:if="${profileMode == 'ROLE_HOST'}">
 
-                <a th:href="@{/hostprofile/view}" class="menu-item">
-                    호스트 프로필 보기
-                </a>
+        <div class="section-title">호스트 설정</div>
+        <div class="menu-list">
 
-                <a th:href="@{/hostprofile/setup}" class="menu-item">
-                    호스트 프로필 설정
-                </a>
+          <a th:href="@{/hostprofile/view}" class="menu-item">
+            호스트 프로필 보기
+          </a>
 
-                <a th:href="@{/venues/my}" class="menu-item">
-                    내 공연장 관리
-                </a>
+          <a th:href="@{/hostprofile/setup}" class="menu-item">
+            호스트 프로필 설정
+          </a>
 
-                <a th:href="@{/venues/reservations/manage}" class="menu-item">
-                    대관 요청 관리
-                </a>
+          <a th:href="@{/venues/my}" class="menu-item">
+            내 공연장 관리
+          </a>
 
-            </div>
+          <a th:href="@{/venues/reservations/manage}" class="menu-item">
+            대관 요청 관리
+          </a>
 
         </div>
+
+      </div>
 
     </div>
 
     <!-- ===== 하단 네비 ===== -->
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
-</div>
+  </div>
 
 </body>
 
