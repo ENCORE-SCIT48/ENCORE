@@ -22,5 +22,5 @@ public class ResponseSendDmDto {
     private String senderName;
     private String content;
     private LocalDateTime createdAt;
-
+    private boolean mine;
 }

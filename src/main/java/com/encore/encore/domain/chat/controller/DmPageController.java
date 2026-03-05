@@ -25,8 +25,12 @@ public class DmPageController {
      * @return
      */
     @GetMapping("/dm/list")
-    public String dmList() {
-
+    public String dmList(
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
         return "chat/dm/dmList";
     }
 
@@ -43,9 +47,13 @@ public class DmPageController {
      */
     @GetMapping("/dm/{roomId}")
     public String dmRoomPage(
-        @PathVariable Long roomId,
+        @PathVariable("roomId") Long roomId,
         @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
+
         if (userDetails == null) {
             return "redirect:/auth/login";
         }
@@ -60,6 +68,8 @@ public class DmPageController {
         model.addAttribute("userDetail", dto);
         model.addAttribute("participantStatus", participantStatus);
         model.addAttribute("roomId", roomId);
+        model.addAttribute("activeProfileId", activeProfileId);
+        model.addAttribute("activeMode", activeMode.name());
 
         return "chat/dm/dmRoom";
     }

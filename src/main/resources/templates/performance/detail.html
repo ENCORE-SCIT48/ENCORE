@@ -10,11 +10,13 @@
 
 <body>
 <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <main class="app-main">
         <!-- 상단 큰 포스터 영역 (Encore pick 클릭 시 스크롤 대상) -->
         <section class="poster-area" id="performanceHeader">
-            <div class="poster-placeholder">
-                <span>공연 대표 이미지 (포스터 같은?)</span>
+            <img id="posterImage" class="poster-image" src="" alt="공연 포스터" style="display:none;"/>
+            <div class="poster-placeholder" id="posterPlaceholder">
+                <span>공연 대표 이미지</span>
             </div>
         </section>
 
@@ -29,10 +31,12 @@
                         <img id="wishIcon" th:src="@{/image/wish_off.png}" src="/image/wish_off.png" alt="볼 공연 찜"/>
                     </button>
                     <button type="button" class="watched-btn" id="watchedBtn" aria-label="본 공연">
-                        <img id="watchedIcon" th:src="@{/image/watched_off.png}" src="/image/watched_off.png" alt="본 공연"/>
+                        <img id="watchedIcon" th:src="@{/image/watched_off.png}" src="/image/watched_off.png"
+                             alt="본 공연"/>
                     </button>
                     <button type="button" class="reported-btn" id="reportedBtn" aria-label="신고">
-                        <img id="reportedIcon" th:src="@{/image/reported_off.png}" src="/image/reported_off.png" alt="신고"/>
+                        <img id="reportedIcon" th:src="@{/image/reported_off.png}" src="/image/reported_off.png"
+                             alt="신고"/>
                     </button>
                 </div>
             </div>
@@ -50,7 +54,7 @@
             <!-- 탭 -->
             <div class="tab-row">
                 <button type="button" class="tab-btn active" data-tab="desc">공연상세설명</button>
-                <button type="button" class="tab-btn" data-tab="chat">공연채팅이동</button>
+                <a th:href="@{/performances/{id}/chats(id=${performanceId})}" class="tab-btn" data-tab="chat">공연채팅이동</a>
                 <button type="button" class="tab-btn" data-tab="review">
                     공연후기 <span class="rating" id="ratingText">-</span>
                 </button>
@@ -60,13 +64,6 @@
             <div class="tab-content-wrap">
                 <div id="tab-desc" class="tab-content active">
                     <div class="desc-text" id="descText">공연상세설명</div>
-                </div>
-
-                <div id="tab-chat" class="tab-content">
-                    <div class="placeholder-center">
-                        <div class="placeholder-title">공연채팅이동</div>
-                        <div class="placeholder-sub">여기서 채팅방으로 이동하는 버튼/링크를 붙이면 됨</div>
-                    </div>
                 </div>
 
                 <div id="tab-review" class="tab-content">

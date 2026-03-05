@@ -14,9 +14,9 @@
 
 <body>
 <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <main class="app-main">
         <header class="app-header">
-            <div th:replace="~{fragments/profile :: profile(targetUrl=${targetUrl})}"></div>
         </header>
         <!-- 검색창 -->
         <div class="venue-search-wrap">

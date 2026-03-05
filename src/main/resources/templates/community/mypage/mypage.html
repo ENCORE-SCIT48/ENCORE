@@ -14,6 +14,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -25,23 +26,32 @@
         <div class="top-center">
           <div class="page-title">마이페이지</div>
         </div>
-        <div class="top-right">
-          <div th:replace="~{fragments/performer/profile :: profile}"></div>
-        </div>
+        <div class="top-right"></div>
       </div>
 
       <!-- ===== 프로필 영역 ===== -->
       <div class="profile-section">
 
-        <div class="profile-image"></div>
+        <div class="profile-image">
+          <img th:if="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()}" th:src="${currentProfileImageUrl}" alt="프로필" class="profile-image-img"/>
+        </div>
 
         <div class="nickname">
-          <span sec:authentication="name">닉네임</span>
+          <span th:text="${nickname} ?: '닉네임'">닉네임</span>
         </div>
 
         <div class="follow-info">
-          <div>팔로잉 0</div>
-          <div>팔로워 0</div>
+          <a class="stat-item"
+            th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='following')}">
+            <span>팔로잉</span>
+            <span th:text="${followingCount}">0</span>
+          </a>
+
+          <a class="stat-item"
+            th:href="@{/user/follow(targetId=${profileId}, profileMode=${profileMode}, tab='follower')}">
+            <span>팔로워</span>
+            <span th:text="${followerCount}">0</span>
+          </a>
         </div>
 
       </div>
@@ -49,8 +59,7 @@
       <!-- ===== 공통 설정 ===== -->
       <div class="section-title">공통 설정</div>
       <div class="menu-list">
-        <a th:href="@{/userprofile}" class="menu-item">관람객 프로필 보기</a>
-        <a th:href="@{/userprofile/setup}" class="menu-item">관람객 프로필 설정</a>
+        <a th:href="@{/profiles/select}" class="menu-item">프로필 변경</a>
         <a th:href="@{/user/notification}" class="menu-item">알림 설정</a>
         <a th:href="@{/user/block}" class="menu-item">차단 목록 관리</a>
         <form th:action="@{/logout}" method="post" style="margin:0;">
@@ -58,11 +67,15 @@
             로그아웃
           </button>
         </form>
-        <a href="#" class="menu-item">회원 탈퇴</a>
       </div>
 
-      <!-- ===== 관람객 전용: 내가 본 공연 / 찜한 공연 ===== -->
+      <!-- ===== 관람객 전용: 프로필 보기/설정 + 활동 ===== -->
       <div th:if="${profileMode == 'ROLE_USER'}">
+        <div class="section-title">관람객 프로필</div>
+        <div class="menu-list">
+          <a th:href="@{/userprofile}" class="menu-item">관람객 프로필 보기</a>
+          <a th:href="@{/userprofile/setup}" class="menu-item">관람객 프로필 설정</a>
+        </div>
         <div class="section-title">관람객 활동</div>
         <div class="menu-list">
           <a th:href="@{/performances/watched}" class="menu-item">
@@ -79,6 +92,10 @@
 
         <div class="section-title">공연자 설정</div>
         <div class="menu-list">
+
+          <a th:href="@{/performerprofile/setup}" class="menu-item">
+            공연자 프로필 설정
+          </a>
 
           <a th:href="@{/mypage/performer/posts}" class="menu-item">
             내가 작성한 공연자 모집글

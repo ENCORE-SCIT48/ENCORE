@@ -5,6 +5,19 @@
 
 ---
 
+## ✅ CSS/JS 외부 파일 (프래그먼트)
+
+| 파일 | 용도 |
+|------|------|
+| `static/css/fragments/profile.css` | 프로필 드롭다운 스타일 (profile, performer/profile 공통) |
+| `static/js/fragments/profile.js` | 프로필 드롭다운 토글 (동일) |
+| `static/css/fragments/footer.css` | fragments/footer (items 전달용) |
+| `static/css/fragments/performer-footer.css` | fragments/performer/footer (하단 고정 네비) |
+
+프래그먼트에서 인라인 `<style>`/`<script>` 제거 후 위 외부 파일 참조로 통일됨. 페이지는 프래그먼트 포함 시 자동으로 해당 CSS/JS 로드.
+
+---
+
 ## ✅ 지금 할 일 체크리스트 (체크하면서 진행)
 
 | 체크 | 할 일 |
@@ -12,10 +25,11 @@
 | ☐ | **빌드** — `.\gradlew clean build` |
 | ☐ | **테스트** — `.\gradlew test` |
 | ☐ | **프로필 드롭다운** — 오른쪽 위 아이콘 클릭 시 로그인/마이페이지/로그아웃 노출 확인 |
+| ☐ | **프로필 CSS/JS** — 프로필 포함 페이지에서 드롭다운 스타일·토글 정상 동작 (외부 파일 로드 확인) |
 | ☐ | **로그인 시 프로필 사진** — 프로필 이미지 있으면 헤더에 원형으로 표시되는지 확인 |
 | ☐ | **스모크** — 로그인 → 프로필 선택 → 피드 → 공연 상세 → 찜/리뷰 → 채팅/DM |
 | ☐ | **마이페이지** — 내가 본 공연, 찜한 공연, 알림 설정, 차단 목록 링크 동작 |
-| ☐ | **푸터** — 공연리스트 / 홈 / DM / 채팅방 이동 |
+| ☐ | **푸터** — 공연리스트 / 홈 / DM / 채팅방 이동 (역할별 메뉴: 비로그인·USER·PERFORMER·HOST) |
 | ☐ | **DB 테스트 데이터** — 필요 시 `data-test-insert.sql` 실행 |
 | ☐ | **테스트 로그인** — password123 안 되면 앱 실행 → `/dev/bcrypt-password123` 에서 해시 복사 → `UPDATE users SET password_hash = '...'` 실행 |
 | ☐ | **푸시** — 위 다 확인 후 커밋 & 푸시 |
@@ -42,6 +56,22 @@
 
 ---
 
+## ✅ 전체 기능 점검 (주요 경로)
+
+| 구분 | 경로/기능 | 비고 |
+|------|-----------|------|
+| **진입** | `/` → 홈, `/auth/login`, `/auth/join`, `/profiles/select`, `/profiles/switch` | 로그인·프로필 전환 |
+| **피드** | `/feed`, `/api/feed` | 피드 목록 |
+| **공연** | `/performances`, `/performances/{id}`, `/api/performances`, 리뷰/좌석리뷰, 찜/본공연 | 공연 목록·상세·리뷰·wish |
+| **공연장** | `/venues`, `/venues/performer`, `/venues/{id}`, `/venues/my`, `/venues/{id}/reservation`, `/venues/reservations/my`, `/venues/reservations/manage` | 공연장 목록·상세·대관 |
+| **모집** | `/posts/performance`, `/posts/performer`, 공연/공연자 모집글 CRUD | 모집글·신청 |
+| **마이페이지** | `/mypage`, `/userprofile`, `/userprofile/setup`, `/performerprofile/*`, `/hostprofile/*`, `/user/notification`, `/user/block`, `/user/follow`, `/performances/watched`, `/performances/wished` | 관람객·공연자·호스트 |
+| **공연자 전용** | `/mypage/performer/*` (posts, performances, applied-*, recruited-performers, venues, manage) | 공연자 마이페이지 |
+| **채팅/DM** | `/chats`, `/chats/join`, `/chat/{roomId}`, `/dm/list`, `/dm/{roomId}`, 관련 API | 채팅방·DM |
+| **기타** | `/report`, `/api/community/reports`, `/dev/bcrypt-password123` | 신고·개발용 |
+
+---
+
 ## ✅ 서비스·프론트 정합성 점검 요약 (참고)
 
 - **빌드**: `clean build` (-x test) 및 `test` 실행 시 **성공** 확인됨.
@@ -60,6 +90,8 @@
 |------|------|
 | **피드 푸터 링크** | "DM" → `/dm/list`, "채팅방" → `/chats`, "좌석리뷰"(잘못된 `/seats`) 제거. 공연리스트·홈·DM·채팅방 4개로 정리. |
 | **마이페이지 링크** | "알림 설정" `#` → `/user/notification`, "차단 목록 관리" `/relations/blocks` → `/user/block` |
+| **userprofile 흐름** | 관람객 프로필 보기(user-view) → "관람객 프로필 설정"·"프로필 변경"·"마이페이지로" 링크 정리. userprofile 기능은 /userprofile, /userprofile/setup 쪽으로 유지. |
+| **프로필 변경** | 마이페이지 공통 설정에 "프로필 변경" → `/profiles/select` 추가. 상단바 드롭다운에도 "프로필 변경" 추가. |
 
 ---
 
@@ -90,6 +122,7 @@
 |----|------|------|
 | **V-C-10-14** | 채팅방 나가기 후 이동 | 현재 `/chats` → 동작함. 테스트케이스는 `/chat/list` 기대. URL 통일 여부만 결정 |
 | **V-U-4-2** | 알림 설정 저장 후 새로고침 시 유지 | API 있음. 저장 주체(계정 vs 프로필) 정한 뒤 GET/PUT 일치시키기. 발표에서 제외 가능 |
+| **유저 계정 정보** | 닉네임·비밀번호·이메일 등 **유저(users) 자체 수정** 전용 페이지 없음. 관람객 프로필(user_profile)은 /userprofile·/userprofile/setup 에서 처리. | 필요 시 `/user/account` 또는 "회원정보 수정" 페이지·API 추가 |
 
 ---
 
@@ -98,10 +131,11 @@
 - [ ] `.\gradlew clean build` 성공
 - [ ] `.\gradlew test` 성공
 - [ ] DB 스키마 적용 후 `data-test-insert.sql` 실행
+- [ ] **프래그먼트** — 프로필·푸터 페이지에서 외부 CSS/JS 로드 시 스타일·드롭다운 동작 확인
 - [ ] 로그인 → 프로필 선택 → 피드 → 공연 상세 → 찜/리뷰(Encore pick) → 채팅 목록/참가 → DM 목록/방 진입
 - [ ] 마이페이지 → 관람객 시 "내가 본 공연"/"찜한 공연", "알림 설정", "차단 목록" 링크 동작 확인
-- [ ] 피드 푸터에서 "공연리스트"/"홈"/"DM"/"채팅방" 클릭 시 해당 페이지 이동 확인
-- [ ] (선택) 호스트: 공연장 등록/내 공연장/대관 관리. 공연자: 대관 신청/내 대관
+- [ ] 피드 푸터에서 "공연리스트"/"홈"/"DM"/"채팅방" 클릭 시 해당 페이지 이동 확인 (역할별 메뉴)
+- [ ] (선택) 호스트: 공연장 등록/내 공연장/대관 관리. 공연자: 대관 신청/내 대관, `/venues/performer`
 
 ---
 

@@ -14,10 +14,31 @@ $(document).ready(() => {
     let loading = false;
     let allLoaded = false;
 
-    // ========================
-    // 초기 메시지 로드
-    // ========================
     loadMessages(true);
+    // ===========================
+    // WebSocket 관련 전역 선언
+    // ===========================
+    let stompClient = null;
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    // stompClient.debug = null;
+
+    stompClient.connect({}, function(frame) {
+        console.log('채팅방 WebSocket 연결 성공:', frame);
+
+        const subscribePath = '/topic/chat/' + ROOM_ID;
+        stompClient.subscribe(subscribePath, function(message) {
+            try {
+                const res = JSON.parse(message.body);
+                renderMessage(res);
+                scrollToBottom();
+            } catch (e) {
+                console.error("실시간 메시지 처리 중 오류:", e);
+            }
+        });
+    }, function(error) {
+        console.error('STOMP 연결 에러:', error);
+    });
 
     // ========================
     // 이벤트 바인딩
@@ -30,35 +51,16 @@ $(document).ready(() => {
         if (chatArea.scrollTop() <= 10 && !loading && !allLoaded) loadMessages();
     });
 
-    // ========================
+// ========================
     // 메시지 전송
     // ========================
     function sendMessage() {
         const content = chatInput.val().trim();
-        if (!content) return;
+        if (!content || !stompClient.connected) return;
 
-        $.ajax({
-            url: `/api/chat/room/${ROOM_ID}/messages`,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ content }),
-            success: (res) => {
-                        if (!res.success) return alert(res.message);
-
-                        chatInput.val('');
-
-                        // 💡 방법 A: 전체를 다시 불러오지 않고, 서버가 준 응답값으로 내 메시지만 바로 추가
-                        // res.data에 생성된 messageId, createdAt 등이 포함되어 있다고 가정합니다.
-                        if (res.data) {
-                            renderMessage(res.data);
-                            scrollToBottom();
-                        } else {
-                            // 만약 서버 응답에 데이터가 없다면 기존처럼 새로고침 호출 (단, 위 조건 수정 필수)
-                            loadMessages(true);
-                        }
-                    },
-            error: handleAjaxError
-        });
+        stompClient.send('/app/chat/' + ROOM_ID, {}, JSON.stringify({ roomId: ROOM_ID, content }));
+            chatInput.val('');
+            chatInput.focus();
     }
 
     // ========================
@@ -111,8 +113,12 @@ $(document).ready(() => {
     // 메시지 렌더링
     // ========================
         function renderMessage(msg) {
-            const isMine = msg.mine;
-            const html = `
+        const isMine = Number(msg.profileId) === Number(CURRENT_PROFILE_ID)
+                       && String(msg.profileMode) === String(CURRENT_MODE);
+        // 중복 메시지 방지
+        if (chatArea.find(`[data-id="${msg.messageId}"]`).length > 0) return;
+
+        const html = `
         <div class="chat-message ${isMine ? 'mine' : 'other'}" data-id="${msg.messageId}">
             <span class="message-sender">${escapeHtml(msg.senderName)}</span>
             <div class="message-wrapper">

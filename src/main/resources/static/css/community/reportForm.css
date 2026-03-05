@@ -52,10 +52,9 @@
  /* 웹앱 사이즈 고정 컨테이너 */
  .webapp-container {
      width: 100%;
-     max-width: 500px;
+     max-width: 430px;
      min-height: 100vh;
      background-color: white;
-     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
      display: flex;
      flex-direction: column;
  }

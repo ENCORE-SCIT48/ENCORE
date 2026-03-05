@@ -53,6 +53,7 @@ public class PerformancePageController {
 
         model.addAttribute("performanceId", performanceId);
         model.addAttribute("loginUserId", loginUserId);
+        model.addAttribute("targetUrl", "/performances");
 
         return "performance/detail";
     }

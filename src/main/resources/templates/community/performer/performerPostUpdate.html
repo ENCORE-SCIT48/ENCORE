@@ -83,6 +83,7 @@
     .btn-group a {
       width: 100px;
       font-size: 13px;
+      margin-bottom: 40px;
     }
 
     .btn-primary {
@@ -110,6 +111,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -117,15 +119,58 @@
       <div class="top-bar">
         <a th:href="@{/posts/performer/{id}(id=${post.postId})}" class="back-btn">←</a>
         <div class="page-title">공연자 모집글 수정</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <!-- 내용 -->
       <input type="hidden" id="postId" th:value="${post.postId}">
 
+      <div class="divider"></div>
+
       <input type="text" name="title" class="post-title-input" th:value="${post.title}" required>
 
       <div class="divider"></div>
+
+      <!-- 모집 조건 -->
+      <div style="margin-bottom:15px; font-size:13px;">
+
+        <div style="font-weight:600; margin-bottom:6px;">
+          모집 조건
+        </div>
+
+        <!-- 모집 장르 -->
+        <div style="margin-bottom:10px;">
+          <label style="color:#666;">모집 장르</label><br>
+
+          <label th:each="genre : ${T(java.util.List).of('ROCK','JAZZ','BALLAD','KPOP')}" style="margin-right:10px;">
+            <input type="checkbox" name="recruitCategory" th:value="${genre}" th:checked="${post.recruitCategory != null 
+              and #strings.contains(post.recruitCategory, genre)}">
+            <span th:text="${genre}"></span>
+          </label>
+        </div>
+
+        <!-- 모집 파트 -->
+        <div style="margin-bottom:10px;">
+          <label style="color:#666;">모집 파트</label><br>
+
+          <label th:each="part : ${T(java.util.List).of('VOCAL','GUITAR','BASS','DRUM','KEYBOARD')}"
+            style="margin-right:10px;">
+            <input type="checkbox" name="recruitPart" th:value="${part}" th:checked="${post.recruitPart != null 
+              and #strings.contains(post.recruitPart, part)}">
+            <span th:text="${part}"></span>
+          </label>
+        </div>
+
+        <!-- 모집 지역 -->
+        <div>
+          <label style="color:#666;">모집 지역</label>
+          <input type="text" name="recruitArea" class="form-control" th:value="${post.recruitArea}">
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+
 
       <!-- 정원 -->
       <div style="margin-bottom:15px;">

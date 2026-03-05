@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/profiles/**").authenticated()
                 .requestMatchers("/setup/**").authenticated()
                 .requestMatchers("/user/**").authenticated() // 유저 관련 일반 경로 추가
-
+                .requestMatchers("/ws/**", "/ws").authenticated()
                 // 3. 역할(Role)에 따른 제한
                 // [기존 정보 참고] USER("관람객"), PERFORMER("공연자"), HOST("주최자")
 
@@ -70,14 +70,14 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
             .requestMatchers(
-                        "/favicon.ico",
-                        "/.well-known/**",
-                        "/css/**",        // CSS 허용
-                        "/js/**",         // JS 허용
-                        "/image/**",      // 기본 이미지 폴더 허용
-                        "/images/**",     // (로그에 images라고 찍혔으니 이것도 추가)
-                        "/uploads/**"     // ★ 업로드된 프로필 사진 경로 허용
-                    );
+                "/favicon.ico",
+                "/.well-known/**",
+                "/css/**",        // CSS 허용
+                "/js/**",         // JS 허용
+                "/image/**",      // 기본 이미지 폴더 허용
+                "/images/**",     // (로그에 images라고 찍혔으니 이것도 추가)
+                "/uploads/**"     // ★ 업로드된 프로필 사진 경로 허용
+            );
     }
 
     @Bean

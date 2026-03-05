@@ -205,12 +205,18 @@ public class ChatPageController {
             return "redirect:/auth/login";
         }
 
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
+
         Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 
         chatService.getChatAlreadJoin(roomId, activeProfileId, activeMode);
 
         model.addAttribute("roomId", roomId);
+        model.addAttribute("currentProfileId", activeProfileId);
+        model.addAttribute("currentMode", activeMode.name());
         return "chat/chatRoom";
     }
 }

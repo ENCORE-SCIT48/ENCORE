@@ -75,7 +75,7 @@ public class VenueReservationController {
     @GetMapping("/api/venues/{venueId}/reservations")
     public CommonResponse<List<VenueReservationResponseDto>> getReservationsByVenue(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long venueId
+        @PathVariable("venueId") Long venueId
     ) {
         log.info("[GET /api/venues/{}/reservations] activeProfileId={}", venueId, userDetails.getActiveProfileId());
         List<VenueReservationResponseDto> response = reservationService.getReservationsByVenue(userDetails, venueId);
@@ -92,7 +92,7 @@ public class VenueReservationController {
     @PatchMapping("/api/reservations/{id}/approve")
     public CommonResponse<VenueReservationResponseDto> approveReservation(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable("id") Long reservationId
+        @PathVariable("reservationId") Long reservationId
     ) {
         log.info("[PATCH /api/reservations/{}/approve] activeProfileId={}", reservationId, userDetails.getActiveProfileId());
         VenueReservationResponseDto response = reservationService.approveReservation(userDetails, reservationId);
@@ -110,7 +110,7 @@ public class VenueReservationController {
     @PatchMapping("/api/reservations/{id}/reject")
     public CommonResponse<VenueReservationResponseDto> rejectReservation(
         @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable("id") Long reservationId,
+        @PathVariable("reservationId") Long reservationId,
         @RequestBody @Valid ReservationRejectRequestDto dto
     ) {
         log.info("[PATCH /api/reservations/{}/reject] activeProfileId={}", reservationId, userDetails.getActiveProfileId());

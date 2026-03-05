@@ -1,38 +1,5 @@
 <footer th:fragment="footer(items)">
-
-    <style>
-        .footer-wrapper {
-          width: 100%;
-          background-color: #333333;
-          /* Sub Color */
-          padding: 20px 0;
-          display: flex;
-          justify-content: center;
-          border-top: 2px solid #E63946;
-          /* Main Color 포인트 */
-        }
-
-        .footer-container {
-          width: 100%;
-          max-width: 1200px;
-          display: flex;
-          justify-content: space-around;
-          align-items: center;
-        }
-
-        .footer-link {
-          text-decoration: none;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 500;
-          transition: 0.2s;
-        }
-
-        .footer-link:hover {
-          color: #E63946;
-          /* Main Color */
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
 
     <div class="footer-wrapper">
         <div class="footer-container">

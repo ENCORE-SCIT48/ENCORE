@@ -63,6 +63,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -70,7 +71,7 @@
       <div class="top-bar">
         <a th:href="@{/mypage/performer/manage}" class="back-btn">←</a>
         <div class="page-title">신청자 관리</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <div class="divider"></div>

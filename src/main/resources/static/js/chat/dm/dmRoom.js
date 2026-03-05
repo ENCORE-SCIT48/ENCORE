@@ -16,7 +16,6 @@ $(document).ready(() => {
 
     const participantStatus = PARTICIPANT_STATUS;
     const ROOM_ID_VALUE = ROOM_ID; // 전역 ROOM_ID 사용
-    const CURRENT_USER = CURRENT_USER_ID;
 
     // ========================
     // 초기 세팅
@@ -89,7 +88,12 @@ $(document).ready(() => {
     // 메시지 렌더링
     // ========================
     function renderMessage(msg) {
-        const isMine = msg.mine; // 서버에서 채팅 메시지 DTO에 mine 포함 필요
+    console.log("렌더링 시도 중인 메시지:", msg); // <-- 이거 확인!
+        // 1. 서버에서 준 mine 값이 있으면 쓰고, 없으면 현재 유저 ID와 비교 (안전장치)
+        const isMine = msg.mine || (msg.profileId === CURRENT_PROFILE_ID && msg.profileMode === CURRENT_MODE);
+        // 중복 렌더링 방지 (이미 화면에 있는 메시지 ID인지 확인)
+        if ($(`.chat-message[data-id="${msg.messageId}"]`).length > 0) return;
+
         const html = `
             <div class="chat-message ${isMine ? 'mine' : 'other'}" data-id="${msg.messageId}">
                 <span class="message-sender">${escapeHtml(msg.senderName)}</span>
@@ -98,33 +102,59 @@ $(document).ready(() => {
                 </div>
                 <span class="message-time">${dayjs(msg.createdAt).format('HH:mm')}</span>
             </div>`;
+
+        // 로드 방식에 따라 위로 붙일지 아래로 붙일지 결정
+        // 초기 로딩이나 페이징은 prepend가 필요할 수 있지만, 실시간은 append입니다.
         $chatContainer.append(html);
     }
 
+    // ----------------------
+    // WebSocket 연결
+    // ----------------------
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+
+        // 디버그 로그가 너무 많으면 아래 주석 해제
+        // stompClient.debug = null;
+
+        stompClient.connect({}, function(frame) {
+            console.log('소켓 연결 성공: ' + frame);
+
+            // 구독 경로를 변수에 담아 로그 출력
+            const subscribePath = '/user/queue/dm/' + ROOM_ID_VALUE;
+            console.log('구독 시도 경로: ' + subscribePath);
+
+            stompClient.subscribe(subscribePath, function(message) {
+                console.log('!!! 실시간 메시지 수신됨 !!!'); // <-- 이게 뜨는지 보세요
+                console.log('수신 데이터:', message.body);
+
+                try {
+                    const res = JSON.parse(message.body);
+                    renderMessage(res);
+                    scrollToBottom();
+                } catch (e) {
+                    console.error("메시지 처리 중 에러 발생:", e);
+                }
+            });
+        }, function(error) {
+            console.error('STOMP 연결 에러:', error);
+        });
     // ========================
     // 메시지 전송
     // ========================
     function sendMessage() {
-        const content = $('#chatInput').val().trim();
-        if (!content) return;
+        const $input = $('#chatInput');
+            const content = $input.val().trim();
+            if (!content || !stompClient.connected) return; // 연결 확인 추가
 
-        $.ajax({
-            url: `/api/dms/${ROOM_ID_VALUE}/messages`,
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ roomId: ROOM_ID_VALUE, content:content }),
-            success: (res) => {
-                const newMessage = res.data;
-                newMessage.mine = true;
+            // 서버의 @MessageMapping("/dm/{roomId}")와 매칭
+            stompClient.send('/app/dm/' + ROOM_ID_VALUE, {}, JSON.stringify({
+                roomId: ROOM_ID_VALUE,
+                content: content
+            }));
 
-                renderMessage(newMessage);
-                $('#chatInput').val('');
-                scrollToBottom();
-            },
-            error: (xhr) => {
-                alert('메시지 전송 실패: ' + xhr.statusText);
-            }
-        });
+            $input.val(''); // 입력창 비우기
+            $input.focus();
     }
 
     // ========================

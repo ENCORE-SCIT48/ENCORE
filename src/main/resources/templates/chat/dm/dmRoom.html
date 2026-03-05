@@ -26,9 +26,9 @@
 
         <a th:href="@{/member/profile/{id}/{mode}(id=${userDetail.otherProfileId}, mode=${userDetail.otherProfileMode})}"
            class="chat-header-link">
-            <img
-                th:src="${userDetail.otherProfileImg != null ? userDetail.otherProfileImg : '/image/default-profile.png'}"
-                class="header-avatar">
+            <img th:src="${userDetail.otherProfileImg} != null
+        ? @{${userDetail.otherProfileImg}}
+        : @{/image/default-profile.png}" class="header-avatar">
             <h1 class="chat-title-text" th:text="${userDetail.otherNickname}">상대방 이름</h1>
         </a>
         <div class="header-right-empty"></div>
@@ -54,11 +54,10 @@
     <!-- 입력 영역 -->
     <footer class="chat-input-area border-top p-2 bg-white">
         <div class="input-group">
-            <input type="text" id="chatInput" class="form-control border-0"
-                   placeholder="메시지를 입력하세요." style="display:none;"/>
+            <input type="text" id="chatInput" class="form-control border-0" placeholder="메시지를 입력하세요."
+                   style="display:none;"/>
 
-            <button type="button" id="sendBtn" class="btn btn-danger px-4"
-                    style="display:none;">전송
+            <button type="button" id="sendBtn" class="btn btn-danger px-4" style="display:none;">전송
             </button>
 
             <div id="actionBtnGroup" class="w-100 d-flex gap-2">
@@ -75,16 +74,19 @@
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <!-- Thymeleaf 변수 -->
 <script th:inline="javascript">
     const ROOM_ID = [[${roomId}]];
     let PARTICIPANT_STATUS = [[${participantStatus}]];
-    const CURRENT_USER_ID = [[${currentUserId}]];
+    const CURRENT_PROFILE_ID = [[${activeProfileId}]];
+    const CURRENT_MODE = [[${activeMode}]];
 </script>
 
 <!-- Custom JS -->
 <script th:src="@{/js/chat/dm/dmRoom.js}"></script>
 
 </body>
+
 </html>

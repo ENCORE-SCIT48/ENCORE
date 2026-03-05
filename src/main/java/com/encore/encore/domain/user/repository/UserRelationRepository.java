@@ -27,11 +27,11 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
      * @return
      */
     @Query("SELECT r FROM UserRelation r " +
-            "WHERE r.actor.userId = :actorId " +
-            "AND r.actorProfileMode = :actorMode " +
-            "AND r.targetId = :targetId " +
-            "AND r.targetProfileMode = :targetMode " +
-            "AND r.relationType = :type")
+        "WHERE r.actor.userId = :actorId " +
+        "AND r.actorProfileMode = :actorMode " +
+        "AND r.targetId = :targetId " +
+        "AND r.targetProfileMode = :targetMode " +
+        "AND r.relationType = :type")
     Optional<UserRelation> findExistingRelation(
         @Param("actorId") Long actorId,
         @Param("actorMode") ActiveMode actorMode,
@@ -39,6 +39,7 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
         @Param("targetMode") ActiveMode targetMode,
         @Param("type") RelationType type
     );
+
     List<UserRelation> findByActor_UserIdAndActorProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
 
     List<UserRelation> findByTargetIdAndTargetProfileModeAndRelationTypeAndIsDeletedFalse(Long targetId, ActiveMode targetMode, RelationType relationType);
@@ -60,15 +61,15 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
     /**
      * 팔로잉 수 조회
      *
-     * @param actorId
-     * @param actorMode
+     * @param actorId   유저Id
+     * @param actorMode 프로필모드
      * @return
      */
     @Query("SELECT COUNT(r) FROM UserRelation r " +
-            "WHERE r.actor.userId = :actorId " +
-            "AND r.actorProfileMode = :actorMode " +
-            "AND r.relationType = 'FOLLOW' " +
-            "AND r.isDeleted = false")
+        "WHERE r.actor.userId = :actorId " +
+        "AND r.actorProfileMode = :actorMode " +
+        "AND r.relationType = 'FOLLOW' " +
+        "AND r.isDeleted = false")
     int countFollowing(
         @Param("actorId") Long actorId,
         @Param("actorMode") ActiveMode actorMode
@@ -77,15 +78,15 @@ public interface UserRelationRepository extends JpaRepository<UserRelation, Long
     /**
      * 팔로워 수 조회
      *
-     * @param targetId
-     * @param targetMode
+     * @param targetId   프로필Id
+     * @param targetMode 프로필모드
      * @return
      */
     @Query("SELECT COUNT(r) FROM UserRelation r " +
-            "WHERE r.targetId = :targetId " +
-            "AND r.targetProfileMode = :targetMode " +
-            "AND r.relationType = 'FOLLOW' " +
-            "AND r.isDeleted = false")
+        "WHERE r.targetId = :targetId " +
+        "AND r.targetProfileMode = :targetMode " +
+        "AND r.relationType = 'FOLLOW' " +
+        "AND r.isDeleted = false")
     int countFollower(
         @Param("targetId") Long targetId,
         @Param("targetMode") ActiveMode targetMode

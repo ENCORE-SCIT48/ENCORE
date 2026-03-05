@@ -1,0 +1,52 @@
+/* 고정 상단바: 왼쪽 문구+ENCORE, 오른쪽 프로필 */
+.encore-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 999;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+}
+
+.encore-topbar-brand {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.encore-topbar-brand:hover {
+  color: #E63946;
+}
+
+.encore-topbar-brand .encore {
+  color: #E63946;
+}
+
+.encore-topbar-right {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1001;
+}
+
+/* 상단바 안의 프로필: fixed 해제해서 클릭 영역 확실히 */
+.encore-topbar .profile-dropdown-wrap {
+  position: relative;
+  top: auto;
+  right: auto;
+}
+
+/* 상단바 사용 시 본문이 가려지지 않도록 */
+.encore-topbar ~ main,
+.encore-topbar ~ .app-main,
+.encore-topbar ~ .app-container {
+  padding-top: 56px;
+}

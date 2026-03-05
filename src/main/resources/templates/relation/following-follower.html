@@ -12,7 +12,7 @@
     <header class="app-header">
         <div class="header-left">
             <button class="btn-icon" onclick="history.back()" aria-label="뒤로가기">
-                <i class="fa-solid fa-chevron-left"></i>
+                <i class="fa-solid fa-arrow-left"></i>
             </button>
         </div>
 
@@ -47,7 +47,7 @@
     </main>
 
     <!-- 공용 Footer -->
-
+    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
     <!-- JS 변수 안전 처리 -->
 </div>
 <script th:inline="javascript">

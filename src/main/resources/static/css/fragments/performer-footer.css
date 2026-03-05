@@ -1,0 +1,26 @@
+/* fragments/performer/footer.html - 하단 고정 네비 */
+.footer-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  background-color: #333333;
+  border-top: 2px solid #E63946;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  z-index: 1000;
+}
+
+.footer-link {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.footer-link:hover {
+  color: #E63946;
+}

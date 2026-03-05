@@ -1,6 +1,5 @@
 /* 1. 기본 배경 및 레이아웃 규격 */
 body {
-    background-color: #f1f1f1;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -11,10 +10,9 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 500px;
+    max-width: 430px;
     min-height: 100vh;
     background-color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -39,10 +37,10 @@ header.sticky-top {
 .btn-icon {
     background: none;
     border: none;
-    padding: 8px 12px;
+    padding: 6px 10px; /* 기존 8px 12px → 6px 10px */
     cursor: pointer;
     color: #333;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -99,10 +97,10 @@ header.sticky-top {
 
 /* 4. 리스트 컨텐츠 영역 (중복 제거 및 높이 고정) */
 .content-area {
-    flex: 1;
-    padding: 20px 16px;
-    /* 데이터 로딩 시 높이 변화로 인한 흔들림 방지 */
-    min-height: calc(100vh - 110px);
+    flex: 1; /* 남은 공간 모두 차지 */
+    display: flex;
+    flex-direction: column; /* 카드들이 세로로 쌓이도록 */
+    padding: 16px;
     background-color: white;
 }
 
@@ -137,7 +135,7 @@ header.sticky-top {
     flex-grow: 1;
     font-weight: 500;
     color: #444;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

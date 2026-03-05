@@ -7,6 +7,7 @@ $(function () {
     let isReported = false;
     let watchedChecked = false;
     let wishedChecked = false;
+    let reportedChecked = false;
 
     let reviewLoaded = false;
     let reviewPage = 0;
@@ -151,7 +152,16 @@ $(function () {
         });
 
         $("#reportedBtn").off("click").on("click", function () {
-            setReportedUI(!isReported);
+            const targetId = performanceId;
+            const targetType = "PERFORMANCE";
+            const targetName = $("#perfTitle").text() || "공연";
+
+            const url =
+                `/report?targetId=${encodeURIComponent(targetId)}` +
+                `&targetType=${encodeURIComponent(targetType)}` +
+                `&targetName=${encodeURIComponent(targetName)}`;
+
+            window.location.href = url;
         });
 
         $("#writeReviewBtn").off("click").on("click", function () {
@@ -168,6 +178,16 @@ $(function () {
         const venueName = d?.venueName ?? "-";
         const address = d?.address ?? "-";
         $("#metaText").text(`${address} · ${venueName}`);
+
+        // 공연 대표 이미지(포스터): 있으면 표시, 없으면 플레이스홀더
+        const imageUrl = d?.performanceImageUrl;
+        if (imageUrl) {
+            $("#posterImage").attr("src", imageUrl).show();
+            $("#posterPlaceholder").hide();
+        } else {
+            $("#posterImage").hide().attr("src", "");
+            $("#posterPlaceholder").show();
+        }
 
         // 평점은 "summary API"로만 세팅(정렬/페이지에 따라 흔들리지 않게)
         $("#descText").text(escapeHtml(d?.description ?? "공연상세설명"));
@@ -279,6 +299,26 @@ $(function () {
             .fail(function () {
                 setWatchedUI(false);
                 watchedChecked = true;
+            });
+    }
+
+    function ensureReportedStatus() {
+        if (reportedChecked) return;
+
+        $.ajax({
+            url: `/api/performances/${performanceId}/reported`,
+            method: "GET",
+            dataType: "json",
+            xhrFields: { withCredentials: true }
+        })
+            .done(function (res) {
+                const reported = !!res?.data?.reported;
+                setReportedUI(reported);
+                reportedChecked = true;
+            })
+            .fail(function () {
+                setReportedUI(false);
+                reportedChecked = true;
             });
     }
 
@@ -564,6 +604,7 @@ $(function () {
 
     bindTabs();
     loadDetail();
+    ensureReportedStatus();
 
     // 탭의 평균 평점은 "전체 평균"으로 고정 표시
     loadReviewSummary();

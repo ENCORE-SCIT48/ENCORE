@@ -1,34 +1,7 @@
 <footer th:fragment="footer">
+  <link rel="stylesheet" th:href="@{/css/fragments/performer-footer.css}">
 
-  <style>
-    .footer-wrapper {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 420px;
-      background-color: #333333;
-      border-top: 2px solid #E63946;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      z-index: 1000;
-    }
-
-    .footer-link {
-      text-decoration: none;
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .footer-link:hover {
-      color: #E63946;
-    }
-  </style>
-
-  <!-- 비로그인(게스트) 메뉴 - principal이 없거나 CustomUserDetails가 아닐 때(예: String) -->
+  <!-- 비로그인(게스트) -->
   <th:block th:if="${#authentication == null or #authentication.principal == null
                     or !(#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))}">
     <div class="footer-wrapper">
@@ -39,7 +12,7 @@
     </div>
   </th:block>
 
-  <!-- USER 메뉴 (관람객) - principal이 CustomUserDetails일 때만 activeMode 접근 -->
+  <!-- USER (관람객) -->
   <th:block th:if="${#authentication != null and #authentication.principal != null
                     and (#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))
                     and #authentication.principal.activeMode.name() == 'ROLE_USER'}">
@@ -52,20 +25,20 @@
     </div>
   </th:block>
 
-  <!-- PERFORMER 메뉴 (공연자) - principal이 CustomUserDetails일 때만 activeMode 접근 -->
+  <!-- PERFORMER (공연자) - 공연장 링크는 develop 구현 /venues/performer 반영 -->
   <th:block th:if="${#authentication != null and #authentication.principal != null
                     and (#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))
                     and #authentication.principal.activeMode.name() == 'ROLE_PERFORMER'}">
     <div class="footer-wrapper">
       <a th:href="@{/posts/performance}" class="footer-link">모집글</a>
-      <a th:href="@{/venues}"           class="footer-link">공연장</a>
-      <a th:href="@{/feed}"             class="footer-link">홈</a>
-      <a th:href="@{/dm/list}"          class="footer-link">DM</a>
-      <a th:href="@{/chats}"            class="footer-link">채팅</a>
+      <a th:href="@{/venues/performer}"  class="footer-link">공연장</a>
+      <a th:href="@{/feed}"               class="footer-link">홈</a>
+      <a th:href="@{/dm/list}"            class="footer-link">DM</a>
+      <a th:href="@{/chats}"              class="footer-link">채팅</a>
     </div>
   </th:block>
 
-  <!-- HOST 메뉴 (호스트) - principal이 CustomUserDetails일 때만 activeMode 접근 -->
+  <!-- HOST (호스트) -->
   <th:block th:if="${#authentication != null and #authentication.principal != null
                     and (#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))
                     and #authentication.principal.activeMode.name() == 'ROLE_HOST'}">

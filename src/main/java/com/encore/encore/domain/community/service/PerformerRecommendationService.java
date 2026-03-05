@@ -15,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +61,8 @@ public class PerformerRecommendationService {
 
         return page.map(profile -> ResponsePerformerRecommendDto.builder()
                 .userId(profile.getUser().getUserId())
+                .profileId(profile.getPerformerId())
+                .profileMode(ActiveMode.ROLE_PERFORMER.name())
                 .stageName(profile.getStageName())
                 .profileImageUrl(profile.getProfileImageUrl())
                 .part(profile.getPart())

@@ -11,10 +11,9 @@
 
 <body>
 <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <main class="app-main">
-        <header class="app-header">
-            <div th:replace="~{fragments/profile :: profile(targetUrl=${targetUrl})}"></div>
-        </header>
+        <header class="app-header"></header>
 
         <div id="venueDetailWrap" class="venue-detail-header">
             <h1 class="venue-detail-name" id="venueName">공연장명</h1>

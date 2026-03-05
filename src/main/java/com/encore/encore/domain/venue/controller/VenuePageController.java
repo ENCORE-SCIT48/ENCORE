@@ -73,7 +73,7 @@ public class VenuePageController {
 
     // 수정 및 삭제 모드
     @GetMapping("/{venueId}/edit")
-    public String editForm(@PathVariable Long venueId, Model model) {
+    public String editForm(@PathVariable("venueId") Long venueId, Model model) {
         model.addAttribute("venueId", venueId);
         model.addAttribute("mode", "UPDATE");
         return "venue/venueForm";
@@ -95,7 +95,7 @@ public class VenuePageController {
 
     // [공연자] 대관 신청 폼
     @GetMapping("/{venueId}/reservation")
-    public String reservationFormPage(@PathVariable Long venueId, Model model) {
+    public String reservationFormPage(@PathVariable("venueId") Long venueId, Model model) {
         log.info("[VenuePage] reservation form requested - venueId={}", venueId);
         model.addAttribute("venueId", venueId);
         return "venue/reservationForm";

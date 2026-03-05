@@ -16,9 +16,7 @@
 </head>
 <body>
 <div class="app-wrapper">
-    <header class="app-header">
-        <div th:replace="~{fragments/profile :: profile(targetUrl=${targetUrl})}"></div>
-    </header>
+    <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <div class="top-slot"></div>
 
     <main class="app-main">

@@ -111,6 +111,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -118,11 +119,21 @@
       <div class="top-bar">
         <a id="backBtn" th:href="@{/posts/performance}" class="back-btn">←</a>
         <div class="page-title">공연 모집글 작성</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <!-- 입력 폼 -->
       <form id="postForm">
+
+        <!-- 공연장 선택 -->
+        <div style="margin-bottom:15px;">
+          <label style="font-size:13px; color:#666;">공연장 선택</label>
+          <select name="venueId" class="form-control" required>
+            <option value="">공연장을 선택하세요</option>
+            <option th:each="venue : ${venues}" th:value="${venue.venueId}" th:text="${venue.venueName}">
+            </option>
+          </select>
+        </div>
 
         <input type="text" name="title" class="post-title-input" placeholder="제목을 입력하세요" required>
 

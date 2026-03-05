@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>공연자 추천</title>
 
+
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+
 
   <style>
     body {
@@ -141,6 +143,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -148,7 +151,7 @@
       <div class="top-bar">
         <a th:href="@{/posts/performance}" class="back-btn">←</a>
         <div class="page-title">공연자 추천</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <div class="divider"></div>
@@ -223,7 +226,8 @@
 
         </div>
 
-        <button class="btn btn-primary">
+        <button class="btn btn-primary recruit-btn" th:data-profile-id="${performer.profileId}"
+          th:data-profile-mode="${performer.profileMode}">
           모집
         </button>
 
@@ -256,8 +260,7 @@
             <li class="page-item" th:each="i : ${#numbers.sequence(groupStart, groupEnd)}"
               th:classappend="${i == page.number} ? 'active'">
 
-              <a class="page-link" th:text="${i + 1}" 
-                th:href="@{/posts/performance/{postId}/recommend(
+              <a class="page-link" th:text="${i + 1}" th:href="@{/posts/performance/{postId}/recommend(
                   postId=${postId},
                   page=${i},
                   keyword=${keyword},
@@ -270,8 +273,7 @@
 
             <!-- 다음 그룹 -->
             <li class="page-item" th:classappend="${groupEnd + 1 >= page.totalPages} ? 'disabled'">
-              <a class="page-link" th:if="${groupEnd + 1 < page.totalPages}" 
-                th:href="@{/posts/performance/{postId}/recommend(
+              <a class="page-link" th:if="${groupEnd + 1 < page.totalPages}" th:href="@{/posts/performance/{postId}/recommend(
                     postId=${postId},
                     page=${groupStart + 5},
                     keyword=${keyword},
@@ -298,7 +300,9 @@
   </div>
 
 
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script th:src="@{/js/community/performerRecommend.js}"></script>
+
 </body>
 
 </html>
