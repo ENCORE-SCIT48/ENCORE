@@ -74,7 +74,6 @@ public class ChatMessageService {
             .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
             .content(message.getContent())
             .createdAt(message.getCreatedAt())
-            .isMine(message.getProfileId().equals(activeId) && message.getProfileMode().equals(activeMode))
             .build();
 
     }

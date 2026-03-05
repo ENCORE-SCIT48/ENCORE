@@ -1,6 +1,7 @@
 package com.encore.encore.domain.chat.service;
 
 import com.encore.encore.domain.chat.dto.ResponseChatMessage;
+import com.encore.encore.domain.chat.dto.UserDto;
 import com.encore.encore.domain.chat.dto.dm.*;
 import com.encore.encore.domain.chat.entity.ChatMessage;
 import com.encore.encore.domain.chat.entity.ChatParticipant;
@@ -16,6 +17,7 @@ import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
 import com.encore.encore.domain.member.service.ProfileService;
+import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -99,18 +101,18 @@ public class DmService {
         switch (mode) {
             case ROLE_USER:
                 UserProfile userProfile = userProfileRepository.findById(profileId)
-                        .orElseThrow(
-                                () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
+                    .orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
                 return userProfile.getProfileImageUrl();
             case ROLE_PERFORMER:
                 PerformerProfile performerProfile = performerProfileRepository.findById(profileId)
-                        .orElseThrow(
-                                () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
+                    .orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
                 return performerProfile.getProfileImageUrl();
             case ROLE_HOST:
                 HostProfile hostProfile = hostProfileRepository.findById(profileId)
-                        .orElseThrow(
-                                () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
+                    .orElseThrow(
+                        () -> new ApiException(ErrorCode.NOT_FOUND, "유저 프로필 정보가 없습니다."));
                 return hostProfile.getProfileImageUrl();
             default:
                 throw new ApiException(ErrorCode.NOT_FOUND, "프로필 정보가 올바르지 않습니다.");
@@ -137,36 +139,36 @@ public class DmService {
      */
     public List<ResponseListDmDto> getPendingList(Long activeProfileId, ActiveMode activeMode) {
         List<ChatParticipant> myPendingList = chatParticipantRepository
-                .findAcceptedDm(
-                        activeProfileId,
-                        activeMode,
-                        ChatParticipant.ParticipantStatus.PENDING,
-                        ChatRoom.RoomType.DM);
+            .findAcceptedDm(
+                activeProfileId,
+                activeMode,
+                ChatParticipant.ParticipantStatus.PENDING,
+                ChatRoom.RoomType.DM);
 
         List<ResponseListDmDto> dtoList = new ArrayList<>();
 
         for (ChatParticipant myCp : myPendingList) {
             ChatParticipant other = chatParticipantRepository.findOtherParticipantInRoom(
-                    myCp.getRoom().getRoomId(),
-                    activeProfileId,
-                    activeMode).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자가 없습니다."));
+                myCp.getRoom().getRoomId(),
+                activeProfileId,
+                activeMode).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자가 없습니다."));
 
             String nickname = profileService.resolveSenderName(other.getProfileId(), other.getProfileMode());
 
             ChatMessage latest = chatMessageRepository
-                    .findTopByRoom_RoomIdOrderBySentAtDesc(myCp.getRoom().getRoomId())
-                    .orElse(null);
+                .findTopByRoom_RoomIdOrderBySentAtDesc(myCp.getRoom().getRoomId())
+                .orElse(null);
 
             dtoList.add(ResponseListDmDto.builder()
-                    .roomId(myCp.getRoom().getRoomId())
-                    .otherProfileId(other.getProfileId())
-                    .otherUserNickname(nickname)
-                    .otherUserProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
-                    .otherProfileMode(other.getProfileMode().name())
-                    .latestMessage(latest != null ? latest.getContent() : null)
-                    .latestMessageAt(latest != null ? latest.getSentAt() : null)
-                    .status(myCp.getParticipantStatus().name())
-                    .build());
+                .roomId(myCp.getRoom().getRoomId())
+                .otherProfileId(other.getProfileId())
+                .otherUserNickname(nickname)
+                .otherUserProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
+                .otherProfileMode(other.getProfileMode().name())
+                .latestMessage(latest != null ? latest.getContent() : null)
+                .latestMessageAt(latest != null ? latest.getSentAt() : null)
+                .status(myCp.getParticipantStatus().name())
+                .build());
         }
 
         return dtoList;
@@ -183,11 +185,11 @@ public class DmService {
 
         // 나의 ACCEPTED 상태 DM 참여 내역 조회
         List<ChatParticipant> myAcceptedList = chatParticipantRepository
-                .findAcceptedDm(
-                        activeProfileId,
-                        activeMode,
-                        ChatParticipant.ParticipantStatus.ACCEPTED, // pending -> accepted
-                        ChatRoom.RoomType.DM);
+            .findAcceptedDm(
+                activeProfileId,
+                activeMode,
+                ChatParticipant.ParticipantStatus.ACCEPTED, // pending -> accepted
+                ChatRoom.RoomType.DM);
 
         List<ResponseListDmDto> dtoList = new ArrayList<>();
 
@@ -195,9 +197,9 @@ public class DmService {
 
             // 상대방 조회: 나와 profileId, profileMode 모두 다른 사람
             Optional<ChatParticipant> otherOpt = chatParticipantRepository.findOtherParticipantInRoom(
-                    myCp.getRoom().getRoomId(),
-                    activeProfileId,
-                    activeMode);
+                myCp.getRoom().getRoomId(),
+                activeProfileId,
+                activeMode);
 
             if (otherOpt.isEmpty()) {
                 log.warn("상대방 참가자가 없는 DM 방입니다. roomId={}", myCp.getRoom().getRoomId());
@@ -209,19 +211,19 @@ public class DmService {
             String nickname = profileService.resolveSenderName(other.getProfileId(), other.getProfileMode());
 
             ChatMessage latest = chatMessageRepository
-                    .findTopByRoom_RoomIdOrderBySentAtDesc(myCp.getRoom().getRoomId())
-                    .orElse(null);
+                .findTopByRoom_RoomIdOrderBySentAtDesc(myCp.getRoom().getRoomId())
+                .orElse(null);
 
             dtoList.add(ResponseListDmDto.builder()
-                    .roomId(myCp.getRoom().getRoomId())
-                    .otherProfileId(other.getProfileId())
-                    .otherUserNickname(nickname)
-                    .otherProfileMode(other.getProfileMode().name())
-                    .otherUserProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
-                    .latestMessage(latest != null ? latest.getContent() : null)
-                    .latestMessageAt(latest != null ? latest.getSentAt() : null)
-                    .status(myCp.getParticipantStatus().name())
-                    .build());
+                .roomId(myCp.getRoom().getRoomId())
+                .otherProfileId(other.getProfileId())
+                .otherUserNickname(nickname)
+                .otherProfileMode(other.getProfileMode().name())
+                .otherUserProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
+                .latestMessage(latest != null ? latest.getContent() : null)
+                .latestMessageAt(latest != null ? latest.getSentAt() : null)
+                .status(myCp.getParticipantStatus().name())
+                .build());
         }
 
         return dtoList;
@@ -238,16 +240,16 @@ public class DmService {
     public ResponseDmRoomStatusDto requestDm(Long myProfileId, ActiveMode myMode, RequestDmDto dto) {
 
         log.info(
-                "[DM 요청] fromProfileId={}, fromMode={}, targetProfileId={}, targetMode={}",
-                myProfileId,
-                myMode,
-                dto.getTargetProfileId(),
-                dto.getTargetProfileMode());
+            "[DM 요청] fromProfileId={}, fromMode={}, targetProfileId={}, targetMode={}",
+            myProfileId,
+            myMode,
+            dto.getTargetProfileId(),
+            dto.getTargetProfileMode());
 
         ActiveMode targetProfileMode = mapToActiveMode(dto.getTargetProfileMode());
 
         if (myProfileId.equals(dto.getTargetProfileId()) &&
-                myMode == targetProfileMode) {
+            myMode == targetProfileMode) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "자기 자신에게 DM을 보낼 수 없습니다.");
         }
 
@@ -257,7 +259,7 @@ public class DmService {
 
         // 1. 기존 DM 방 조회 (이미 존재하는지 확인)
         Optional<ChatRoom> existingRoomOpt = chatRoomRepository
-                .findDmRoomWithParticipants(myProfileId, myMode, dto.getTargetProfileId(), targetProfileMode);
+            .findDmRoomWithParticipants(myProfileId, myMode, dto.getTargetProfileId(), targetProfileMode);
 
         // 2. 기존 방이 있으면 그대로 사용
         if (existingRoomOpt.isPresent()) {
@@ -287,40 +289,40 @@ public class DmService {
     private ChatParticipant findOtherParticipant(Long roomId, Long myProfileId, ActiveMode myMode) {
         List<ChatParticipant> participants = chatParticipantRepository.findByRoom_RoomId(roomId);
         return participants.stream()
-                .filter(p -> !(p.getProfileId().equals(myProfileId) && p.getProfileMode().equals(myMode)))
-                .findFirst()
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+            .filter(p -> !(p.getProfileId().equals(myProfileId) && p.getProfileMode().equals(myMode)))
+            .findFirst()
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
     private ChatParticipant findMyParticipant(Long roomId, Long myProfileId, ActiveMode myMode) {
         List<ChatParticipant> participants = chatParticipantRepository.findByRoom_RoomId(roomId);
         return participants.stream()
-                .filter(p -> p.getProfileId().equals(myProfileId) && p.getProfileMode().equals(myMode))
-                .findFirst()
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+            .filter(p -> p.getProfileId().equals(myProfileId) && p.getProfileMode().equals(myMode))
+            .findFirst()
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
     }
 
     // 새 DM 방 생성
     private ResponseDmRoomStatusDto createNewDmRoom(Long myProfileId, ActiveMode myMode, RequestDmDto dto) {
         ChatRoom room = ChatRoom.builder()
-                .roomType(ChatRoom.RoomType.DM)
-                .build();
+            .roomType(ChatRoom.RoomType.DM)
+            .build();
         chatRoomRepository.save(room);
 
         ChatParticipant me = ChatParticipant.builder()
-                .room(room)
-                .profileId(myProfileId)
-                .profileMode(myMode)
-                .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
-                .build();
+            .room(room)
+            .profileId(myProfileId)
+            .profileMode(myMode)
+            .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
+            .build();
 
         ActiveMode targetProfileMode = mapToActiveMode(dto.getTargetProfileMode());
         ChatParticipant other = ChatParticipant.builder()
-                .room(room)
-                .profileId(dto.getTargetProfileId())
-                .profileMode(targetProfileMode)
-                .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
-                .build();
+            .room(room)
+            .profileId(dto.getTargetProfileId())
+            .profileMode(targetProfileMode)
+            .participantStatus(ChatParticipant.ParticipantStatus.WAITING)
+            .build();
 
         chatParticipantRepository.save(me);
         chatParticipantRepository.save(other);
@@ -330,11 +332,11 @@ public class DmService {
 
     private ResponseDmRoomStatusDto buildResponseDto(Long roomId, ChatParticipant me, ChatParticipant other) {
         return ResponseDmRoomStatusDto.builder()
-                .roomId(roomId)
-                .otherProfileId(other.getProfileId())
-                .otherProfileMode(other.getProfileMode().name())
-                .myParticipantStatus(me.getParticipantStatus().name())
-                .build();
+            .roomId(roomId)
+            .otherProfileId(other.getProfileId())
+            .otherProfileMode(other.getProfileMode().name())
+            .myParticipantStatus(me.getParticipantStatus().name())
+            .build();
     }
 
     /**
@@ -347,81 +349,91 @@ public class DmService {
      */
     public ResponseSendDmDto sendMessage(Long activeProfileId, ActiveMode activeMode, RequestSendDmDto request) {
         ChatRoom room = chatRoomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방 없음"));
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방 없음"));
 
         boolean isFirstMessage = chatMessageRepository.countByRoom_RoomId(room.getRoomId()) == 0;
 
+        if (activeProfileId == null) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "프로필 ID가 설정되지 않음");
+        }
+
+        // 메시지 저장
         ChatMessage message = ChatMessage.builder()
-                .room(room)
-                .profileId(activeProfileId)
-                .profileMode(activeMode)
-                .content(request.getContent())
-                .sentAt(LocalDateTime.now())
-                .build();
+            .room(room)
+            .profileId(activeProfileId)
+            .profileMode(activeMode)
+            .content(request.getContent())
+            .sentAt(LocalDateTime.now())
+            .build();
 
         chatMessageRepository.save(message);
 
+        // 첫 메시지이면 participant 상태 변경
         if (isFirstMessage) {
-            // 1. 송신자 상태 변경 (WAITING → ACCEPTED)
             ChatParticipant senderParticipant = chatParticipantRepository
-                    .findByRoom_RoomIdAndProfileIdAndProfileMode(
-                            room.getRoomId(), activeProfileId, activeMode)
-                    .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참가자 정보 없음"));
+                .findByRoom_RoomIdAndProfileIdAndProfileMode(
+                    room.getRoomId(), activeProfileId, activeMode)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참가자 정보 없음"));
 
-            senderParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
-            chatParticipantRepository.save(senderParticipant);
 
-            // 2. 상대방 상태 변경 (WAITING → PENDING)
+            if (senderParticipant != null) {
+                senderParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.ACCEPTED);
+                chatParticipantRepository.save(senderParticipant);
+            }
+
             ChatParticipant recipientParticipant = chatParticipantRepository
-                    .findWaitingParticipantExcludingSelf(
-                            room.getRoomId(),
-                            activeProfileId,
-                            activeMode,
-                            ChatParticipant.ParticipantStatus.WAITING)
-                    .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자 정보 없음"));
+                .findWaitingParticipantExcludingSelf(
+                    room.getRoomId(),
+                    activeProfileId,
+                    activeMode,
+                    ChatParticipant.ParticipantStatus.WAITING)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방 참가자 정보 없음"));
 
-            recipientParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.PENDING);
-            chatParticipantRepository.save(recipientParticipant);
+            if (recipientParticipant != null) {
+                recipientParticipant.setParticipantStatus(ChatParticipant.ParticipantStatus.PENDING);
+                chatParticipantRepository.save(recipientParticipant);
+            }
         }
 
+        // Response DTO 반환
         return ResponseSendDmDto.builder()
-                .roomId(message.getRoom().getRoomId())
+            .roomId(message.getRoom().getRoomId())
+            .messageId(message.getMessageId())
+            .profileId(message.getProfileId())
+            .profileMode(message.getProfileMode().name())
+            .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
+            .content(message.getContent())
+            .createdAt(message.getCreatedAt())
+            .build();
+    }
+
+    public String checkUserParticipantStatus(Long roomId, Long activeProfileId, ActiveMode activeMode) {
+        ChatParticipant me = chatParticipantRepository
+            .RoomRoomIdAndProfileIdAndProfileModeAndParticipantStatusNot(roomId, activeProfileId, activeMode,
+                ChatParticipant.ParticipantStatus.REJECTED)
+            .orElseThrow(() -> new ApiException(ErrorCode.FORBIDDEN, "채팅방 접근 불가"));
+
+        return me.getParticipantStatus().name();
+    }
+
+    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeProfileId,
+                                                 ActiveMode activeMode) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+
+        return chatMessageRepository.findByRoomRoomId(roomId, pageable)
+            .stream()
+            .map(message -> ResponseChatMessage.builder()
                 .messageId(message.getMessageId())
                 .profileId(message.getProfileId())
                 .profileMode(message.getProfileMode().name())
                 .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
-                .build();
-    }
-
-    public String checkUserParticipantStatus(Long roomId, Long activeProfileId, ActiveMode activeMode) {
-        ChatParticipant me = chatParticipantRepository
-                .RoomRoomIdAndProfileIdAndProfileModeAndParticipantStatusNot(roomId, activeProfileId, activeMode,
-                        ChatParticipant.ParticipantStatus.REJECTED)
-                .orElseThrow(() -> new ApiException(ErrorCode.FORBIDDEN, "채팅방 접근 불가"));
-
-        return me.getParticipantStatus().name();
-    }
-
-    public List<ResponseChatMessage> getMessages(Long roomId, int page, int size, Long activeProfileId,
-            ActiveMode activeMode) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
-
-        return chatMessageRepository.findByRoomRoomId(roomId, pageable)
-                .stream()
-                .map(message -> ResponseChatMessage.builder()
-                        .messageId(message.getMessageId())
-                        .profileId(message.getProfileId())
-                        .profileMode(message.getProfileMode().name())
-                        .senderName(profileService.resolveSenderName(message.getProfileId(), message.getProfileMode()))
-                        .content(message.getContent())
-                        .createdAt(message.getCreatedAt())
-                        .isMine(message.getProfileId().equals(activeProfileId)
-                                && message.getProfileMode().equals(activeMode))
-                        .build())
-                .toList();
+                .isMine(message.getProfileId().equals(activeProfileId)
+                    && message.getProfileMode().equals(activeMode))
+                .build())
+            .toList();
     }
 
     /**
@@ -439,15 +451,15 @@ public class DmService {
      *                      ErrorCode.INVALID_REQUEST: 잘못된 상태 값이 전달될 경우
      */
     public ResponseUpdateDmStatusDto handleRoomStatus(
-            Long roomId,
-            RequestDmStatusDto dto,
-            Long activeProfileId,
-            ActiveMode activeMode) {
+        Long roomId,
+        RequestDmStatusDto dto,
+        Long activeProfileId,
+        ActiveMode activeMode) {
 
         // 1. 참여자 조회 (Repository 메서드명 규칙 확인 필요)
         ChatParticipant chatParticipant = chatParticipantRepository
-                .findByProfileIdAndProfileModeAndRoomRoomId(activeProfileId, activeMode, roomId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참여자가 존재하지 않습니다."));
+            .findByProfileIdAndProfileModeAndRoomRoomId(activeProfileId, activeMode, roomId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "참여자가 존재하지 않습니다."));
 
         String statusStr = dto.getStatus();
 
@@ -461,7 +473,7 @@ public class DmService {
 
             // 방 조회 및 논리 삭제 (Soft Delete)
             ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                    .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방이 존재하지 않습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "채팅방이 존재하지 않습니다."));
 
             // 규칙: Entity 내부에 비즈니스 로직(delete)을 캡슐화하여 호출
             chatRoom.delete();
@@ -472,11 +484,11 @@ public class DmService {
 
         // 3. 결과 반환 (Builder 패턴 사용)
         return ResponseUpdateDmStatusDto.builder()
-                .roomId(roomId)
-                .status(chatParticipant.getParticipantStatus().name())
-                .profileId(activeProfileId)
-                .profileMode(activeMode.name())
-                .build();
+            .roomId(roomId)
+            .status(chatParticipant.getParticipantStatus().name())
+            .profileId(activeProfileId)
+            .profileMode(activeMode.name())
+            .build();
     }
 
     /**
@@ -493,17 +505,60 @@ public class DmService {
 
         // 2. 리스트에서 '나'와 [ID와 Mode가 모두 일치하는 사람]을 제외한 '상대방' 찾기
         ChatParticipant other = participants.stream()
-                .filter(p -> !(p.getProfileId().equals(myProfileId) && p.getProfileMode() == myMode))
-                .findFirst()
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방을 찾을 수 없습니다."));
+            .filter(p -> !(p.getProfileId().equals(myProfileId) && p.getProfileMode() == myMode))
+            .findFirst()
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "상대방을 찾을 수 없습니다."));
 
         // 3. DTO로 변환해서 반환
         return ResponseDmRoomDto.builder()
-                .roomId(roomId)
-                .otherNickname(profileService.resolveSenderName(other.getProfileId(), other.getProfileMode()))
-                .otherProfileId(other.getProfileId())
-                .otherProfileMode(other.getProfileMode().name())
-                .otherProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
-                .build();
+            .roomId(roomId)
+            .otherNickname(profileService.resolveSenderName(other.getProfileId(), other.getProfileMode()))
+            .otherProfileId(other.getProfileId())
+            .otherProfileMode(other.getProfileMode().name())
+            .otherProfileImg(profileImage(other.getProfileId(), other.getProfileMode()))
+            .build();
+    }
+
+
+    public ChatParticipant getOtherParticipantForWebSocket(Long roomId, Long activeProfileId, ActiveMode activeMode) {
+        return findOtherParticipant(roomId, activeProfileId, activeMode);
+    }
+
+    /**
+     * 유저 정보를 가져옵니다
+     *
+     * @param profileId
+     * @param profileMode
+     * @return
+     */
+    public User getUser(Long profileId, ActiveMode profileMode) {
+
+        switch (profileMode) {
+            case ROLE_USER:
+                return userProfileRepository.findById(profileId).get().getUser();
+
+            case ROLE_PERFORMER:
+                return performerProfileRepository.findById(profileId).get().getUser();
+
+            case ROLE_HOST:
+                return hostProfileRepository.findById(profileId).get().getUser();
+
+            default:
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 프로필 모드입니다.");
+        }
+    }
+
+    public UserDto getUserDto(Long profileId, ActiveMode profileMode) {
+        User user = getUser(profileId, profileMode);
+
+        String userName = profileService.resolveSenderName(profileId, profileMode);
+
+        return new UserDto(
+            profileId,
+            profileMode.name(),
+            user.getEmail(),
+            userName
+        );
+
     }
 }

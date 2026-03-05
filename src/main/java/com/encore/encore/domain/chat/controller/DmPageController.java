@@ -51,6 +51,10 @@ public class DmPageController {
         @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
 
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
+
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
 
@@ -61,6 +65,8 @@ public class DmPageController {
         model.addAttribute("userDetail", dto);
         model.addAttribute("participantStatus", participantStatus);
         model.addAttribute("roomId", roomId);
+        model.addAttribute("activeProfileId", activeProfileId);
+        model.addAttribute("activeMode", activeMode.name());
 
         return "chat/dm/dmRoom";
     }

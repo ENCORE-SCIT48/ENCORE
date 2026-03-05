@@ -112,6 +112,8 @@ public class DmApiController {
         ResponseSendDmDto result = dmService.sendMessage(
             activeProfileId, activeMode, request
         );
+
+
         return ResponseEntity.ok(CommonResponse.ok(result, "DM 전송 완료"));
     }
 
