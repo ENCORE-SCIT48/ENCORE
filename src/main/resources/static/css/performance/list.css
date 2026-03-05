@@ -79,6 +79,7 @@ body {
     background: #dcdcdc;
     border-radius: 8px;
     aspect-ratio: 3 / 4;
+    overflow: hidden;
 }
 
 .review-actions {
