@@ -35,6 +35,8 @@ $(function () {
 
             const title = p.title ?? "공연";
 
+            const imageUrl = escapeHtml(p.performanceImageUrl || "");
+
             const reviewButtons = (state.filter === "VIEWED")
                 ? `
                     <div class="review-actions">
@@ -59,7 +61,8 @@ $(function () {
             const card = `
                 <div class="col-4">
                     <a class="d-block text-decoration-none" href="/performances/${id}">
-                        <div class="perf-card"></div>
+                        <div class="perf-card">
+                        <img src="${imageUrl}" alt="${escapeHtml(title)}" class="perf-card__img"></div>
                         <div class="mt-2 small text-dark text-truncate">${escapeHtml(title)}</div>
                     </a>
                     ${reviewButtons}
