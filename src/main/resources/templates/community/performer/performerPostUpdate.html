@@ -142,8 +142,12 @@
         <div style="margin-bottom:10px;">
           <label style="color:#666;">모집 장르</label><br>
 
-          <label th:each="genre : ${T(java.util.List).of('ROCK','JAZZ','BALLAD','KPOP')}" style="margin-right:10px;">
-            <input type="checkbox" name="recruitCategory" th:value="${genre}" th:checked="${post.recruitCategory != null 
+          <label th:each="genre : ${T(java.util.List).of('BUSKING','BAND','DANCE','CLASSIC','GUKACK','MASIC')}" 
+                style="margin-right:10px;">
+            <input type="checkbox" 
+                  name="recruitCategory" 
+                  th:value="${genre}" 
+                  th:checked="${post.recruitCategory != null 
               and #strings.contains(post.recruitCategory, genre)}">
             <span th:text="${genre}"></span>
           </label>
@@ -151,11 +155,14 @@
 
         <!-- 모집 파트 -->
         <div style="margin-bottom:10px;">
-          <label style="color:#666;">모집 파트</label><br>
+          <label style="color:#666;">모집 포지션</label><br>
 
-          <label th:each="part : ${T(java.util.List).of('VOCAL','GUITAR','BASS','DRUM','KEYBOARD')}"
+          <label th:each="part : ${T(java.util.List).of('VOCAL','GUITAR','DRUM','BASS','KEYBOARD','DANCER','EXTRA')}"
             style="margin-right:10px;">
-            <input type="checkbox" name="recruitPart" th:value="${part}" th:checked="${post.recruitPart != null 
+            <input type="checkbox" 
+                    name="recruitPart" 
+                    th:value="${part}" 
+                    th:checked="${post.recruitPart != null 
               and #strings.contains(post.recruitPart, part)}">
             <span th:text="${part}"></span>
           </label>
