@@ -122,7 +122,7 @@
 |----|------|------|
 | **V-C-10-14** | 채팅방 나가기 후 이동 | 현재 `/chats` → 동작함. 테스트케이스는 `/chat/list` 기대. URL 통일 여부만 결정 |
 | **V-U-4-2** | 알림 설정 저장 후 새로고침 시 유지 | API 있음. 저장 주체(계정 vs 프로필) 정한 뒤 GET/PUT 일치시키기. 발표에서 제외 가능 |
-| **유저 계정 정보** | 닉네임·비밀번호·이메일 등 **유저(users) 자체 수정** 전용 페이지 없음. 관람객 프로필(user_profile)은 /userprofile·/userprofile/setup 에서 처리. | 필요 시 `/user/account` 또는 "회원정보 수정" 페이지·API 추가 |
+| **유저 계정 정보** | 닉네임·비밀번호 수정: `/user/account` (GET/POST) 구현됨. 이메일 변경은 미지원(동일 계정 유지). | 완료 |
 
 ---
 
@@ -146,6 +146,21 @@
 - **선택**: 호스트/공연자 전용 페이지 비로그인 리다이렉트, V-C-10-14 URL 통일, V-U-4-2 알림 저장 정책.
 
 이 체크리스트까지 확인한 뒤 머지하면 됩니다.
+
+---
+
+## 📋 develop 머지 후 점검 (origin/develop 기준)
+
+머지 후 아래만 한 번 확인하면 됨.
+
+| 항목 | 확인 |
+|------|------|
+| **푸터** | develop에서 `footer(items=${null})` 쓰던 페이지(채팅·DM·신고·관계·회원프로필) → `performer/footer` 로 통일했는지 (빈 푸터/오류 방지) |
+| **채팅** | `chatPerformanceList`, `chatJoinList`, `chatJoinListFull`, `chatPostForm`, `chatPostUpdateForm`, `chatPostDetail`, `dmList` 하단 네비 동작 |
+| **기타** | `reportForm`, `memberProfile`, `following-follower`, `blockList` 푸터 |
+| **fragments/footer** | `items`가 null이면 빈 링크로 렌더되도록 방어 처리됨. 기본은 역할별 푸터는 `performer/footer` 사용 권장 |
+
+- develop 최근 머지: PR #109 (chat-test), `chatPerformanceList.html` 링크 수정 등 반영됨.
 
 ---
 

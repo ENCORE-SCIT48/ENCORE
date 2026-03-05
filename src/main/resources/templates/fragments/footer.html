@@ -3,7 +3,7 @@
 
     <div class="footer-wrapper">
         <div class="footer-container">
-            <a th:each="item : ${items}" th:href="${item.href}" class="footer-link" th:text="${item.label}">
+            <a th:each="item : ${items != null ? items : {}}" th:href="${item.href}" class="footer-link" th:text="${item.label}">
             </a>
         </div>
     </div>
