@@ -1,0 +1,21 @@
+.perf-form-wrapper {
+    padding: 16px;
+}
+
+.perf-form-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.perf-form-group + .perf-form-group {
+    margin-top: 12px;
+}
+
+.perf-form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+

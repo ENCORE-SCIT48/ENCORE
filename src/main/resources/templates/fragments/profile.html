@@ -1,6 +1,4 @@
 <div th:fragment="profile(targetUrl)" class="profile-dropdown-wrap">
-  <link rel="stylesheet" th:href="@{/css/fragments/profile.css}">
-
   <button type="button" class="profile-circle" th:classappend="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()} ? 'profile-circle--has-img'" aria-label="프로필 메뉴" data-profile-toggle>
     <img th:if="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()}" th:src="${currentProfileImageUrl}" alt="프로필" class="profile-circle-img" />
   </button>
@@ -22,8 +20,6 @@
       </form>
     </li>
   </ul>
-
-  <script th:src="@{/js/fragments/profile.js}" defer></script>
 </div>
 
 <!-- 사용 예: <div th:replace="~{fragments/profile :: profile('/mypage')}"></div> -->
