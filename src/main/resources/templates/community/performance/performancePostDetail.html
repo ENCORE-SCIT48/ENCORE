@@ -165,8 +165,13 @@
           공연 정보
         </div>
 
-        <div th:unless="${post.venueImage != null and post.venueImage != ''}" style="width:100%; height:200px; display:flex; align-items:center; justify-content:center;
-            background:#f1f3f5; border-radius:8px; margin-top:10px; color:#999; font-size:14px;">
+        <!-- 공연장 이미지 -->
+        <img th:if="${!#strings.isEmpty(post.venueImage)}" th:src="@{${post.venueImage}}"
+          style="width:100%; height:200px; object-fit:cover; border-radius:8px; margin-top:10px;" />
+
+        <!-- 이미지 없는 경우 -->
+        <div th:if="${#strings.isEmpty(post.venueImage)}" style="width:100%; height:200px; display:flex; align-items:center; justify-content:center;
+        background:#f1f3f5; border-radius:8px; margin-top:10px; color:#999; font-size:14px;">
           이미지 없음
         </div>
 
