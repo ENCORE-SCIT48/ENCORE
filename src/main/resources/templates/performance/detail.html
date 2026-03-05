@@ -10,11 +10,13 @@
 
 <body>
 <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <main class="app-main">
-        <!-- 상단 큰 포스터 영역 -->
-        <section class="poster-area">
-            <div class="poster-placeholder">
-                <span>공연 대표 이미지 (포스터 같은?)</span>
+        <!-- 상단 큰 포스터 영역 (Encore pick 클릭 시 스크롤 대상) -->
+        <section class="poster-area" id="performanceHeader">
+            <img id="posterImage" class="poster-image" src="" alt="공연 포스터" style="display:none;"/>
+            <div class="poster-placeholder" id="posterPlaceholder">
+                <span>공연 대표 이미지</span>
             </div>
         </section>
 
@@ -101,7 +103,7 @@
     </main>
 
     <div class="footer-space"></div>
-    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 </div>
 
 <!-- 리뷰 상세 모달 -->
@@ -117,6 +119,7 @@
             </div>
 
             <div class="modal-body">
+                <div class="modal-encore-pick text-muted small mb-2" id="modalEncorePick" style="display:none;"></div>
                 <div class="modal-content-text" id="modalContent"></div>
             </div>
         </div>

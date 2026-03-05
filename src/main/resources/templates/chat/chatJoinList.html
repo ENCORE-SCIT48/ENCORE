@@ -47,6 +47,9 @@
             <div id="joined-chat-container" th:attr="data-performance-id=${performanceId}">
                 <!-- JS에서 렌더링 -->
             </div>
+            <p class="text-muted small mt-2">
+                로그인 후 공연 상세에서 채팅방을 생성하거나 참여할 수 있습니다.
+            </p>
         </section>
 
         <!-- HOT 채팅방 섹션 -->
@@ -60,7 +63,7 @@
     </main>
 
     <!-- ===== 푸터 ===== -->
-    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 
 </div>
 

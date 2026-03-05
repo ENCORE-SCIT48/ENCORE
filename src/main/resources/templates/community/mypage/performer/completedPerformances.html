@@ -74,6 +74,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -81,7 +82,7 @@
       <div class="top-bar">
         <a th:href="@{/mypage}" class="back-btn">←</a>
         <div class="page-title">모집 완료된 공연 리스트</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <div class="divider"></div>

@@ -58,7 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/host/check-status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ businessNumber: bizNum })
+                body: JSON.stringify({ businessNumber: bizNum }),
+                credentials: 'include',
             });
 
             const res = await response.json();
@@ -73,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const confirmRes = await fetch('/api/host/verify-confirm', {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ businessNumber: bizNum })
+                        body: JSON.stringify({ businessNumber: bizNum }),
+                        credentials: 'include',
                     });
 
                     if (confirmRes.ok) {

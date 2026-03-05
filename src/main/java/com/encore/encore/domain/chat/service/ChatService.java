@@ -13,7 +13,7 @@ import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -400,8 +400,9 @@ public class ChatService {
      */
     public void getChatAlreadJoin(Long roomId, Long activeId, ActiveMode activeMode) {
 
+        // isDeleted 여부 무관하게 조회 → 재입장(소프트삭제 복구) 분기 처리 가능
         ChatParticipant chatParticipant = chatParticipantRepository
-            .findByRoom_RoomIdAndProfileIdAndProfileModeAndIsDeletedFalse(roomId, activeId, activeMode)
+            .findByRoom_RoomIdAndProfileIdAndProfileMode(roomId, activeId, activeMode)
             .orElse(null);
 
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)

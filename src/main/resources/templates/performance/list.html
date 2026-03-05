@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,9 +16,7 @@
 </head>
 <body>
 <div class="app-wrapper">
-    <header class="app-header">
-        <div th:replace="~{fragments/profile :: profile(targetUrl=${targetUrl})}"></div>
-    </header>
+    <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <div class="top-slot"></div>
 
     <main class="app-main">
@@ -115,7 +113,7 @@
     </main>
 
     <div class="bottom-slot"></div>
-    <div th:replace="~{fragments/footer :: footer(items=${null})}"></div>
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

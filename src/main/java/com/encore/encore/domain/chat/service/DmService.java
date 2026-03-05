@@ -20,7 +20,7 @@ import com.encore.encore.domain.member.service.ProfileService;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -261,27 +261,16 @@ public class DmService {
         Optional<ChatRoom> existingRoomOpt = chatRoomRepository
             .findDmRoomWithParticipants(myProfileId, myMode, dto.getTargetProfileId(), targetProfileMode);
 
-        // 2. 기존 방이 있으면 그대로 사용
+        // 2. 기존 방이 있으면 그대로 사용 (상대방 상태에 상관없이 동일 응답)
         if (existingRoomOpt.isPresent()) {
             ChatRoom room = existingRoomOpt.get();
             ChatParticipant me = findMyParticipant(room.getRoomId(), myProfileId, myMode);
             ChatParticipant other = findOtherParticipant(room.getRoomId(), myProfileId, myMode);
 
-            // 3. 상대방이 WAITING 상태일 경우
-            if (other.getParticipantStatus() == ChatParticipant.ParticipantStatus.WAITING) {
-                return buildResponseDto(room.getRoomId(), me, other);
-            }
-
-            // 4. 상대방이 PENDING 상태일 경우 (수신자가 수락/거절 대기 중)
-            if (other.getParticipantStatus() == ChatParticipant.ParticipantStatus.PENDING) {
-                return buildResponseDto(room.getRoomId(), me, other);
-            }
-
-            // 5. 상대방이 ACCEPTED 상태일 경우 (채팅 가능 상태)
             return buildResponseDto(room.getRoomId(), me, other);
         }
 
-        // 6. 기존 DM 방이 없으면 새 방을 생성
+        // 3. 기존 DM 방이 없으면 새 방을 생성
         return createNewDmRoom(myProfileId, myMode, dto);
     }
 

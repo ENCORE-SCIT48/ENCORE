@@ -39,7 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchRecommendFriends() {
-        fetch('/api/users/me/recommended-friends')
+        fetch('/api/users/me/recommended-friends', {
+            credentials: 'include',
+        })
             .then(res => res.json())
             .then(resp => {
                 if (!resp.success) return console.error('추천 친구 조회 실패');
@@ -94,7 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // API 호출 공통 함수
 // ==========================
 function fetchList(type, containerId, url) {
-    fetch(url)
+    fetch(url, {
+        credentials: 'include',
+    })
         .then(res => res.json())
         .then(commonResponse => {
             if (!commonResponse.success) {
@@ -157,7 +161,10 @@ function handleFollow(targetProfileId, targetProfileMode, buttonElement) {
     if (!buttonElement) return;
     buttonElement.disabled = true;
 
-    fetch(`/api/users/${targetProfileId}/${targetProfileMode}/follow`, { method: 'POST' })
+    fetch(`/api/users/${targetProfileId}/${targetProfileMode}/follow`, {
+        method: 'POST',
+        credentials: 'include',
+    })
         .then(res => res.json())
         .then(result => {
             if (!result.success || !result.data) {

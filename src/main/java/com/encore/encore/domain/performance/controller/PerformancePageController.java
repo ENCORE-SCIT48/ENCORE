@@ -53,6 +53,7 @@ public class PerformancePageController {
 
         model.addAttribute("performanceId", performanceId);
         model.addAttribute("loginUserId", loginUserId);
+        model.addAttribute("targetUrl", "/performances");
 
         return "performance/detail";
     }
@@ -95,5 +96,50 @@ public class PerformancePageController {
 
         // 화면은 reviewWrite 재사용
         return "performance/reviewWrite";
+    }
+
+    /**
+     * 좌석 리뷰 작성 페이지 (관람객 전용 — API에서 ROLE_USER 검증)
+     */
+    @GetMapping("/{performanceId}/reviews/seats/new")
+    public String seatReviewWritePage(
+        @PathVariable Long performanceId,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("[PerformancePage] seat review write page - performanceId={}", performanceId);
+
+        Long loginUserId = (userDetails != null && userDetails.getUser() != null)
+            ? userDetails.getUser().getUserId()
+            : 0L;
+
+        model.addAttribute("performanceId", performanceId);
+        model.addAttribute("loginUserId", loginUserId);
+        model.addAttribute("reviewId", 0L);
+
+        return "performance/seatReviewWrite";
+    }
+
+    /**
+     * 좌석 리뷰 수정 페이지 (관람객 본인만 — API에서 검증)
+     */
+    @GetMapping("/{performanceId}/reviews/seats/{reviewId}/edit")
+    public String seatReviewEditPage(
+        @PathVariable Long performanceId,
+        @PathVariable Long reviewId,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("[PerformancePage] seat review edit page - performanceId={}, reviewId={}", performanceId, reviewId);
+
+        Long loginUserId = (userDetails != null && userDetails.getUser() != null)
+            ? userDetails.getUser().getUserId()
+            : 0L;
+
+        model.addAttribute("performanceId", performanceId);
+        model.addAttribute("reviewId", reviewId);
+        model.addAttribute("loginUserId", loginUserId);
+
+        return "performance/seatReviewWrite";
     }
 }

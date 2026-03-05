@@ -1,61 +1,29 @@
-<div th:fragment="profile(targetUrl)">
-  <style>
-    .profile-link {
-      text-decoration: none;
-      display: block;
-    }
+<div th:fragment="profile(targetUrl)" class="profile-dropdown-wrap">
+  <link rel="stylesheet" th:href="@{/css/fragments/profile.css}">
 
-    .profile-circle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 48px;
-      height: 48px;
-      background-color: #e5e5e5;
-      border-radius: 50%;
-      cursor: pointer;
-    }
+  <button type="button" class="profile-circle" th:classappend="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()} ? 'profile-circle--has-img'" aria-label="프로필 메뉴" data-profile-toggle>
+    <img th:if="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()}" th:src="${currentProfileImageUrl}" alt="프로필" class="profile-circle-img" />
+  </button>
+  <ul class="profile-dropdown-menu" data-profile-menu>
+    <!-- 비로그인: 로그인 -->
+    <li sec:authorize="!isAuthenticated()">
+      <a th:href="@{/auth/login}">로그인</a>
+    </li>
+    <!-- 로그인: 마이페이지, 프로필 변경, 로그아웃 -->
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/mypage}">마이페이지</a>
+    </li>
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/profiles/select}">프로필 변경</a>
+    </li>
+    <li sec:authorize="isAuthenticated()">
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit">로그아웃</button>
+      </form>
+    </li>
+  </ul>
 
-    .profile-circle::before {
-      content: "";
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 14px;
-      height: 14px;
-      background-color: #bdbdbd;
-      border-radius: 50%;
-    }
-
-    .profile-circle::after {
-      content: "";
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 22px;
-      height: 14px;
-      background-color: #bdbdbd;
-      border-radius: 10px 10px 6px 6px;
-    }
-  </style>
-
-  <a th:href="${targetUrl}" class="profile-link">
-    <div class="profile-circle"></div>
-  </a>
-
-
+  <script th:src="@{/js/fragments/profile.js}" defer></script>
 </div>
 
-
-<!--
-
-profile 사용 예시
-
-아래와 같이 마이 페이지로 가는 url 넣기
-
-<div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
-
-
--->
+<!-- 사용 예: <div th:replace="~{fragments/profile :: profile('/mypage')}"></div> -->

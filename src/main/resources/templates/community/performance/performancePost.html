@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -165,12 +165,13 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
       <div class="top-header">
         <div class="page-title">공연 모집글</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <div class="tab-buttons">

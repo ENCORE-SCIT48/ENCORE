@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원정보 수정</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/litera/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/auth/join.css}">
+    <script th:src="@{/js/user-settings/account.js}" defer></script>
+    <script th:inline="javascript">
+        const message = /*[[${message}]]*/ null;
+        if (message) alert(message);
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <button type="button" class="btn-back" onclick="location.href='/mypage'">
+                                <i class="bi bi-arrow-left-short"></i> 마이페이지로
+                            </button>
+                        </div>
+
+                        <form id="accountForm" method="post" th:action="@{/user/account}" novalidate th:object="${userAccountUpdate}">
+                            <div class="join-header mb-5">
+                                <h1 class="join-title">회원정보 수정</h1>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">이메일</label>
+                                <input id="email" type="email" class="form-control" th:value="${email}" readonly disabled>
+                                <small class="text-muted">이메일은 변경할 수 없습니다.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nickname" class="form-label">닉네임</label>
+                                <input id="nickname" name="nickname" type="text" class="form-control"
+                                    placeholder="2~10자 이내" th:value="*{nickname}" required>
+                                <div class="invalid-feedback">닉네임은 2~10자 이내로 입력해주세요.</div>
+                            </div>
+
+                            <hr class="my-4">
+                            <p class="text-muted small mb-3">비밀번호를 변경할 때만 입력하세요. 비워두면 기존 비밀번호가 유지됩니다.</p>
+
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">현재 비밀번호</label>
+                                <input id="currentPassword" name="currentPassword" type="password" class="form-control"
+                                    placeholder="비밀번호 변경 시 입력">
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">새 비밀번호</label>
+                                <input id="newPassword" name="newPassword" type="password" class="form-control"
+                                    placeholder="8자 이상, 영문/숫자 조합">
+                                <div class="invalid-feedback">비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPasswordConfirm" class="form-label">새 비밀번호 확인</label>
+                                <input id="newPasswordConfirm" name="newPasswordConfirm" type="password" class="form-control"
+                                    placeholder="새 비밀번호 다시 입력">
+                                <div class="invalid-feedback">비밀번호가 일치하지 않습니다.</div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-danger btn-lg">저장</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -22,12 +22,25 @@ body {
 }
 
 .poster-area {
+    position: relative;
     width: 100%;
     height: 360px;
     background: #dcdcdc;
+    overflow: hidden;
+}
+
+.poster-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .poster-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
@@ -313,6 +326,24 @@ a.tab-btn {
 .review-dot {
     color: #999;
     font-weight: 700;
+}
+
+.review-encore-pick {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    word-break: break-word;
+    cursor: pointer;
+}
+.review-encore-pick:hover {
+    color: #333;
+    text-decoration: underline;
+}
+.modal-encore-pick {
+    cursor: pointer;
+}
+.modal-encore-pick:hover {
+    text-decoration: underline;
 }
 
 .review-content {

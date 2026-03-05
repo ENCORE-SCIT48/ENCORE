@@ -1,0 +1,51 @@
+/**
+ * venue/detail.css
+ * 공연장 상세 페이지 전용 스타일 (유저/관람객용, 좌석 리뷰 진입)
+ * - 공연장 정보 헤더, 좌석 리뷰 섹션(공연 선택 + 작성 버튼)
+ */
+
+/* 공연장 정보 상단 영역 */
+.venue-detail-header {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color, #E9ECEF);
+}
+
+.venue-detail-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.venue-detail-meta {
+    color: var(--medium-grey, #6c757d);
+    font-size: 0.9rem;
+}
+
+/* 좌석 리뷰 섹션 (공연 선택 + 작성 버튼) */
+.seat-review-section {
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color, #E9ECEF);
+}
+
+.seat-review-section h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.seat-review-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.seat-review-actions .form-select {
+    max-width: 220px;
+}
+
+.btn-seat-review {
+    white-space: nowrap;
+}

@@ -31,7 +31,8 @@ import java.util.stream.Collectors;
 
 /**
  * 대관 예약 비즈니스 로직 서비스.
- * 공연자의 신청, 호스트의 승낙/거절, 목록 조회를 담당한다.
+ * 대관은 공연(Performance)과 별개이며, 공연자가 필요 시 공연장을 대관하는 흐름만 담당한다.
+ * 공연자의 신청, 호스트의 승낙/거절, 목록 조회를 담당하며,
  * 인증 정보는 CustomUserDetails 의 activeProfileId 를 사용한다.
  */
 @Slf4j
@@ -194,7 +195,7 @@ public class VenueReservationService {
      * @throws ApiException 공연장을 찾을 수 없을 경우 (NOT_FOUND)
      */
     private Venue findVenueById(Long venueId) {
-        return venueRepository.findById(venueId)
+        return venueRepository.findByVenueIdAndIsDeletedFalse(venueId)
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND,
                 "공연장을 찾을 수 없습니다. venueId=" + venueId));
     }

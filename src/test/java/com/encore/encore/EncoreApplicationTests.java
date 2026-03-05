@@ -9,5 +9,4 @@ class EncoreApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

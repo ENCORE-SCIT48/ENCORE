@@ -1,0 +1,115 @@
+/* 프로필 드롭다운 - fragments/profile, fragments/performer/profile 공통
+   푸터와 같이 항상 보이도록 우측 상단 고정 */
+.profile-dropdown-wrap {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
+.profile-circle {
+  width: 48px;
+  height: 48px;
+  background-color: #e5e5e5;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  display: block;
+}
+
+.profile-circle::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background-color: #bdbdbd;
+  border-radius: 50%;
+}
+
+.profile-circle::after {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 14px;
+  background-color: #bdbdbd;
+  border-radius: 10px 10px 6px 6px;
+}
+
+.profile-circle--has-img::before,
+.profile-circle--has-img::after {
+  display: none;
+}
+
+.profile-circle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* performer profile 작은 버전 */
+.profile-dropdown-wrap--sm .profile-circle {
+  width: 38px;
+  height: 38px;
+}
+
+.profile-dropdown-wrap--sm .profile-circle::before {
+  width: 11px;
+  height: 11px;
+  top: 8px;
+}
+
+.profile-dropdown-wrap--sm .profile-circle::after {
+  width: 17px;
+  height: 10px;
+  bottom: 6px;
+  border-radius: 8px 8px 5px 5px;
+}
+
+.profile-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+  list-style: none;
+  margin-bottom: 0;
+  z-index: 1100;
+}
+
+.profile-dropdown-wrap.is-open .profile-dropdown-menu {
+  display: block;
+}
+
+.profile-dropdown-menu a,
+.profile-dropdown-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+}
+
+.profile-dropdown-menu a:hover,
+.profile-dropdown-menu button:hover {
+  background-color: #f8f9fa;
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
   <meta charset="UTF-8">
@@ -109,6 +109,7 @@
 <body>
 
   <div class="app-wrapper">
+    <div th:replace="~{fragments/topbar :: topbarPerformer}"></div>
 
     <div class="app-container">
 
@@ -116,7 +117,7 @@
       <div class="top-bar">
         <a th:href="@{/posts/performance/{id}(id=${post.postId})}" class="back-btn">←</a>
         <div class="page-title">공연 모집글 수정</div>
-        <div th:replace="~{fragments/performer/profile :: profile}"></div>
+        <div></div>
       </div>
 
       <!-- hidden id -->

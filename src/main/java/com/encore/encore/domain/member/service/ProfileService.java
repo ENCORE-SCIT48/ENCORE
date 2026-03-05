@@ -119,8 +119,29 @@ public class ProfileService {
                 .map(HostProfile::getOrganizationName)
                 .orElse("Unknown");
         };
-
     }
 
-
+    /**
+     * 현재 활성 모드에 해당하는 프로필의 이미지 URL을 조회한다.
+     * 헤더 프로필 아이콘에 표시할 때 사용.
+     *
+     * @param user 로그인한 사용자
+     * @param mode 활성 모드 (ROLE_USER, ROLE_PERFORMER, ROLE_HOST)
+     * @return 프로필 이미지 URL (없으면 null)
+     */
+    @Transactional(readOnly = true)
+    public String getProfileImageUrl(User user, ActiveMode mode) {
+        if (user == null || mode == null) return null;
+        return switch (mode) {
+            case ROLE_USER -> userProfileRepository.findByUser_UserId(user.getUserId())
+                .map(UserProfile::getProfileImageUrl)
+                .orElse(null);
+            case ROLE_PERFORMER -> performerProfileRepository.findByUser_UserId(user.getUserId())
+                .map(PerformerProfile::getProfileImageUrl)
+                .orElse(null);
+            case ROLE_HOST -> hostProfileRepository.findByUser_UserId(user.getUserId())
+                .map(HostProfile::getProfileImageUrl)
+                .orElse(null);
+        };
+    }
 }

@@ -50,6 +50,9 @@ public class DmPageController {
         @PathVariable("roomId") Long roomId,
         @AuthenticationPrincipal CustomUserDetails userDetails,
         Model model) {
+        if (userDetails == null) {
+            return "redirect:/auth/login";
+        }
 
         if (userDetails == null) {
             return "redirect:/auth/login";

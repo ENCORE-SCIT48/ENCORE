@@ -101,7 +101,9 @@ const venueManager = (() => {
      */
     const prefill = async () => {
         try {
-            const res = await fetch(`/api/venues/${venueId}/form`);
+            const res = await fetch(`/api/venues/${venueId}/form`, {
+                credentials: 'include',
+            });
             if (!res.ok) { await handleApiError(res, '데이터 로드'); return; }
             const json = await res.json();
             const v    = json.data ?? json;
@@ -143,7 +145,6 @@ const venueManager = (() => {
                     name: `${f}층`,
                     seats: grouped[f]
                 }));
-                console.log('[prefill] floors:', JSON.stringify(floors));
             }
 
             // prefill 완료 표시 — 이미 step2 열려있으면 즉시 재렌더링
@@ -251,7 +252,11 @@ const venueManager = (() => {
             try {
                 const res = await fetch(
                     isEdit ? `/api/venues/${venueId}` : '/api/venues',
-                    { method: isEdit ? 'PUT' : 'POST', body: buildFormData() }
+                    {
+                        method: isEdit ? 'PUT' : 'POST',
+                        body: buildFormData(),
+                        credentials: 'include',
+                    }
                 );
                 if (res.ok) { alert(`공연장이 성공적으로 ${action}되었습니다!`); location.href = '/venues'; }
                 else await handleApiError(res, action);
@@ -273,7 +278,10 @@ const venueManager = (() => {
             btnDelete.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>삭제 중...`;
 
             try {
-                const res = await fetch(`/api/venues/${venueId}`, { method: 'DELETE' });
+                const res = await fetch(`/api/venues/${venueId}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                });
                 if (res.ok) { alert("공연장이 삭제되었습니다."); location.href = '/venues'; }
                 else await handleApiError(res, '삭제');
             } catch (e) {

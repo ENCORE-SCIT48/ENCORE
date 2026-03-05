@@ -60,7 +60,6 @@ $(document).ready(() => {
         }
 
         const data = { title, content, status };
-        console.log('전송 데이터:', data);
 
         // ===== AJAX 요청 =====
         $.ajax({

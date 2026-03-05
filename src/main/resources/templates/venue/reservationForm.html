@@ -71,13 +71,7 @@
         <button class="btn-submit" id="btnSubmit" disabled>대관 신청하기</button>
     </div>
 
-    <div th:replace="~{fragments/footer :: footer(
-        ${ {
-            {label:'공연장', href:'/venues'},
-            {label:'홈', href:'/'},
-            {label:'내 대관', href:'/venues/reservations/my'}
-        } }
-    )}"></div>
+    <div th:replace="~{fragments/performer/footer :: footer}"></div>
 </div>
 
 <script th:src="@{/js/venue/reservationForm.js}" defer></script>

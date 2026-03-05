@@ -7,16 +7,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const userId = params.get("userId") || "8"; // 개발용 기본 8
-
-    const apiUrl = userId ? `/api/feed?userId=${encodeURIComponent(userId)}` : "/api/feed";
-
-    loadFeed(apiUrl)
+    // 로그인 정보는 서버에서 가져오므로 별도 userId 쿼리 파라미터 없이 사용
+    loadFeed("/api/feed")
     .then((items) => renderFeed(items, feedListEl, feedEmptyEl))
     .catch((err) => {
         console.error("[feed] load error:", err);
-        renderFeed([], feedListEl, feedEmptyEl); // 에러여도 빈화면/빈문구는 보여주기
+        renderFeed([], feedListEl, feedEmptyEl);
+        // API 실패 시 사용자에게 안내 (빈 목록과 구분)
+        if (feedEmptyEl) {
+            feedEmptyEl.textContent = "피드를 불러오지 못했습니다. 서버 로그와 DB 설정·테스트 데이터(data-test-insert.sql)를 확인하세요.";
+        }
     });
 });
 
@@ -24,7 +24,7 @@ async function loadFeed(url) {
     const res = await fetch(url, {
         method: "GET",
         headers: { "Accept": "application/json" },
-        credentials: "same-origin",
+        credentials: "include",
     });
 
     if (!res.ok) {
@@ -71,8 +71,27 @@ function createFeedCard(item) {
 
     const { badgeText, subText } = buildLabels(item);
 
+    const performanceId = item?.performanceId;
+    const hasPerformance = !!performanceId;
+    const rawImageUrl = item?.performanceImageUrl;
+
     const card = document.createElement("div");
     card.className = "feed-card";
+
+    // 포스터 이미지 상단 영역 (공연 관련 피드만 표시)
+    if (hasPerformance) {
+        const imgWrap = document.createElement("div");
+        imgWrap.className = "feed-card-image-wrap";
+        const img = document.createElement("img");
+        img.className = "feed-card-image";
+        // performanceImageUrl이 없으면 기본 대체 이미지를 사용
+        const fallback = "/image/default-profile.png";
+        const url = (rawImageUrl && String(rawImageUrl).trim() !== "") ? rawImageUrl : fallback;
+        img.src = url;
+        img.alt = title;
+        imgWrap.appendChild(img);
+        card.appendChild(imgWrap);
+    }
 
     const badge = document.createElement("span");
     badge.className = "feed-badge";
@@ -111,8 +130,6 @@ function createFeedCard(item) {
     card.appendChild(left);
     card.appendChild(right);
 
-    const performanceId = item?.performanceId;
-
     if (performanceId) {
         card.style.cursor = "pointer";
         card.addEventListener("click", () => {
@@ -141,7 +158,7 @@ function buildLabels(item) {
     const type = item?.type ?? "";
 
     if (type === "UPCOMING_WISHED") {
-    const m = item?.notifyBeforeMinutes ?? 30;
+        const m = item?.notifyBeforeMinutes ?? 30;
         return {
             badgeText: "다가오는 공연",
             subText: `내가 찜한 공연 · 시작 ${m}분 전`,
@@ -149,10 +166,17 @@ function buildLabels(item) {
     }
 
     if (type === "FOLLOW_WISHED") {
-    const nick = item?.actorNickname ?? "팔로우";
+        const nick = item?.actorNickname ?? "팔로우";
         return {
             badgeText: "친구 추천",
             subText: `${nick} 님이 찜한 공연`,
+        };
+    }
+
+    if (type === "HOT_PERFORMANCE") {
+        return {
+            badgeText: "추천 공연",
+            subText: "지금 인기 있는 공연",
         };
     }
 
@@ -193,3 +217,4 @@ function formatKoreanDateTime(d) {
     const mi = String(d.getMinutes()).padStart(2, "0");
     return `${mm}.${dd} ${hh}:${mi}`;
 }
+

@@ -121,10 +121,20 @@ $(function () {
                 renderCards(items, append);
 
                 if (!state.last) state.page += 1;
+
+                // 더보기 버튼: 마지막 페이지면 숨김, 아니면 표시
+                var $loadMore = $("#loadMoreBtn");
+                if ($loadMore.length) $loadMore.toggle(!state.last);
             })
             .fail(function (xhr) {
-                console.error("[list] 목록 조회 실패", xhr);
-                alert("목록 조회 실패");
+                const status = xhr.status;
+                const text = xhr.responseText || "";
+                console.error("[list] 목록 조회 실패", "status=" + status, text);
+                if (status === 500) {
+                    alert("목록 조회 실패 (서버 오류). 터미널/서버 로그를 확인하고, data-test-insert.sql 실행 여부와 DB 스키마를 확인하세요.");
+                } else {
+                    alert("목록 조회 실패 (HTTP " + status + ")");
+                }
             })
             .always(function () {
                 state.loading = false;
@@ -134,6 +144,7 @@ $(function () {
     function resetAndLoad() {
         state.page = 0;
         state.last = false;
+        $("#loadMoreBtn").show(); // 탭/검색 바꿀 때 다시 보이게
         fetchList(false);
     }
 
@@ -183,7 +194,7 @@ $(function () {
         window.location.href = `/performances/${id}/reviews/new`;
     });
 
-    // 좌석리뷰
+    // 좌석리뷰 -> 좌석 리뷰 작성 페이지로 이동
     $(document).on("click", ".js-seat-review-btn", function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -191,8 +202,7 @@ $(function () {
         const id = $(this).data("performance-id");
         if (!id) return;
 
-        // 좌석리뷰 작성 URL로 교체
-        alert("좌석리뷰 작성 페이지 URL 연결 필요");
+        window.location.href = `/performances/${id}/reviews/seats/new`;
     });
 
     resetAndLoad();

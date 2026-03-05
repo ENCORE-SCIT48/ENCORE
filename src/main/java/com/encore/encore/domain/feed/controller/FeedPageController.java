@@ -16,11 +16,10 @@ public class FeedPageController {
     public String feedPage(Model model) {
 
         List<Map<String, String>> footerItems = List.of(
-            Map.of("label", "좌석리뷰", "href", "/seats"),
             Map.of("label", "공연리스트", "href", "/performances"),
             Map.of("label", "홈", "href", "/feed"),
-            Map.of("label", "DM", "href", "/directMessage"),
-            Map.of("label", "채팅방", "href", "/chat")
+            Map.of("label", "DM", "href", "/dm/list"),
+            Map.of("label", "채팅방", "href", "/chats")
         );
 
         model.addAttribute("footerItems", footerItems);

@@ -49,6 +49,7 @@ public interface PerformanceScheduleRepository extends JpaRepository<Performance
             ps.startTime as startTime,
             p.performanceId as performanceId,
             p.title as title,
+            p.performanceImageUrl as performanceImageUrl,
             u.userId as actorUserId,
             u.nickname as actorNickname
         from PerformanceSchedule ps
@@ -74,6 +75,7 @@ public interface PerformanceScheduleRepository extends JpaRepository<Performance
         LocalDateTime getStartTime();
         Long getPerformanceId();
         String getTitle();
+        String getPerformanceImageUrl();
         Long getActorUserId();
         String getActorNickname();
     }

@@ -1,49 +1,25 @@
-<div th:fragment="profile">
+<div th:fragment="profile" class="profile-dropdown-wrap profile-dropdown-wrap--sm">
+  <link rel="stylesheet" th:href="@{/css/fragments/profile.css}">
 
-  <style>
-    .profile-link {
-      text-decoration: none;
-      display: block;
-    }
+  <button type="button" class="profile-circle" th:classappend="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()} ? 'profile-circle--has-img'" aria-label="프로필 메뉴" data-profile-toggle>
+    <img th:if="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()}" th:src="${currentProfileImageUrl}" alt="프로필" class="profile-circle-img" />
+  </button>
+  <ul class="profile-dropdown-menu" data-profile-menu>
+    <li sec:authorize="!isAuthenticated()">
+      <a th:href="@{/auth/login}">로그인</a>
+    </li>
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/mypage}">마이페이지</a>
+    </li>
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/profiles/select}">프로필 변경</a>
+    </li>
+    <li sec:authorize="isAuthenticated()">
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit">로그아웃</button>
+      </form>
+    </li>
+  </ul>
 
-    .profile-circle {
-      position: relative;
-      top: 16px;
-      right: 16px;
-      width: 38px;
-      height: 38px;
-      background-color: #e5e5e5;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .profile-circle::before {
-      content: "";
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 11px;
-      height: 11px;
-      background-color: #bdbdbd;
-      border-radius: 50%;
-    }
-
-    .profile-circle::after {
-      content: "";
-      position: absolute;
-      bottom: 6px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 17px;
-      height: 10px;
-      background-color: #bdbdbd;
-      border-radius: 8px 8px 5px 5px;
-    }
-  </style>
-
-  <a th:href="@{/mypage}" class="profile-link">
-    <div class="profile-circle"></div>
-  </a>
-
+  <script th:src="@{/js/fragments/profile.js}" defer></script>
 </div>

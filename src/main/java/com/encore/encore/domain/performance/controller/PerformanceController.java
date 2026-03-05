@@ -1,11 +1,18 @@
 package com.encore.encore.domain.performance.controller;
 
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
 import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
 import com.encore.encore.domain.performance.dto.PerformanceReviewReqDto;
+import com.encore.encore.domain.performance.dto.SeatOptionDto;
+import com.encore.encore.domain.performance.dto.SeatReviewItemDto;
+import com.encore.encore.domain.performance.dto.SeatReviewReqDto;
 import com.encore.encore.domain.performance.service.PerformanceService;
 import com.encore.encore.global.common.CommonResponse;
+import com.encore.encore.global.config.CustomUserDetails;
+import com.encore.encore.global.error.ApiException;
+import com.encore.encore.global.error.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,13 +43,15 @@ public class PerformanceController {
     public CommonResponse<Page<PerformanceListItemDto>> getPerformances(
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) String category,
+        @RequestParam(required = false) Long venueId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "9") int size
     ) {
-        log.info("[Performance] controller list - keyword={}, category={}, page={}, size={}", keyword, category, page, size);
+        log.info("[Performance] controller list - keyword={}, category={}, venueId={}, page={}, size={}",
+            keyword, category, venueId, page, size);
 
         return CommonResponse.ok(
-            performanceService.getPerformances(keyword, category, PageRequest.of(page, size)),
+            performanceService.getPerformances(keyword, category, venueId, PageRequest.of(page, size)),
             "공연 목록 조회 성공"
         );
     }
@@ -121,7 +130,8 @@ public class PerformanceController {
             performanceId,
             userDetails.getUser().getUserId(),
             req.getRating(),
-            req.getContent()
+            req.getContent(),
+            req.getEncorePick()
         );
 
         return CommonResponse.ok(Map.of("reviewId", reviewId), "리뷰 작성 성공");
@@ -169,7 +179,8 @@ public class PerformanceController {
             reviewId,
             userDetails.getUser().getUserId(),
             req.getRating(),
-            req.getContent()
+            req.getContent(),
+            req.getEncorePick()
         );
 
         return CommonResponse.ok(Map.of("reviewId", reviewId), "리뷰 수정 성공");
@@ -195,5 +206,140 @@ public class PerformanceController {
         );
 
         return CommonResponse.ok(Map.of("reviewId", reviewId), "리뷰 삭제 성공");
+    }
+
+    // ─── 좌석 리뷰 (관람객 전용) ─────────────────────────────────────────────────────
+
+    /**
+     * 해당 공연이 열리는 공연장의 좌석 목록 (작성 폼 좌석 선택용)
+     */
+    @GetMapping("/{performanceId}/seats")
+    public CommonResponse<List<SeatOptionDto>> getSeats(
+        @PathVariable Long performanceId
+    ) {
+        log.info("[Performance] controller seats - performanceId={}", performanceId);
+        return CommonResponse.ok(
+            performanceService.getSeatsByPerformanceId(performanceId),
+            "좌석 목록 조회 성공"
+        );
+    }
+
+    /**
+     * 좌석 리뷰 목록 페이징 조회
+     */
+    @GetMapping("/{performanceId}/seat-reviews")
+    public CommonResponse<Page<SeatReviewItemDto>> getSeatReviews(
+        @PathVariable Long performanceId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        log.info("[Performance] controller seat-reviews - performanceId={}, page={}, size={}", performanceId, page, size);
+        return CommonResponse.ok(
+            performanceService.getSeatReviews(performanceId, PageRequest.of(page, size)),
+            "좌석 리뷰 목록 조회 성공"
+        );
+    }
+
+    /**
+     * 좌석 리뷰 평균 별점·개수 요약
+     */
+    @GetMapping("/{performanceId}/seat-reviews/summary")
+    public CommonResponse<Map<String, Object>> getSeatReviewSummary(
+        @PathVariable Long performanceId
+    ) {
+        log.info("[Performance] controller seat-reviews summary - performanceId={}", performanceId);
+        return CommonResponse.ok(
+            performanceService.getSeatReviewSummary(performanceId),
+            "좌석 리뷰 요약 조회 성공"
+        );
+    }
+
+    /**
+     * 좌석 리뷰 작성 (관람객만 가능)
+     */
+    @PostMapping("/{performanceId}/seat-reviews")
+    public CommonResponse<Map<String, Object>> createSeatReview(
+        @PathVariable Long performanceId,
+        @RequestBody SeatReviewReqDto req,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_USER) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "좌석 리뷰는 관람객만 작성할 수 있습니다.");
+        }
+
+        Long reviewId = performanceService.createSeatReview(
+            performanceId,
+            userDetails.getUser().getUserId(),
+            req.getSeatId(),
+            req.getRating(),
+            req.getContent()
+        );
+        return CommonResponse.ok(Map.of("reviewId", reviewId), "좌석 리뷰 작성 성공");
+    }
+
+    /**
+     * 좌석 리뷰 수정 폼용 단건 조회 (작성자 본인만)
+     */
+    @GetMapping("/{performanceId}/seat-reviews/{reviewId}")
+    public CommonResponse<Map<String, Object>> getSeatReviewForEdit(
+        @PathVariable Long performanceId,
+        @PathVariable Long reviewId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        return CommonResponse.ok(
+            performanceService.getSeatReviewForEdit(performanceId, reviewId, userDetails.getUser().getUserId()),
+            "좌석 리뷰 조회 성공"
+        );
+    }
+
+    /**
+     * 좌석 리뷰 수정 (관람객 본인만)
+     */
+    @PatchMapping("/{performanceId}/seat-reviews/{reviewId}")
+    public CommonResponse<Map<String, Object>> updateSeatReview(
+        @PathVariable Long performanceId,
+        @PathVariable Long reviewId,
+        @RequestBody SeatReviewReqDto req,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_USER) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "좌석 리뷰는 관람객만 수정할 수 있습니다.");
+        }
+        performanceService.updateSeatReview(
+            performanceId,
+            reviewId,
+            userDetails.getUser().getUserId(),
+            req.getRating(),
+            req.getContent()
+        );
+        return CommonResponse.ok(Map.of("reviewId", reviewId), "좌석 리뷰 수정 성공");
+    }
+
+    /**
+     * 좌석 리뷰 삭제 (관람객 본인만)
+     */
+    @DeleteMapping("/{performanceId}/seat-reviews/{reviewId}")
+    public CommonResponse<Map<String, Object>> deleteSeatReview(
+        @PathVariable Long performanceId,
+        @PathVariable Long reviewId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_USER) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "좌석 리뷰는 관람객만 삭제할 수 있습니다.");
+        }
+        performanceService.deleteSeatReview(performanceId, reviewId, userDetails.getUser().getUserId());
+        return CommonResponse.ok(Map.of("reviewId", reviewId), "좌석 리뷰 삭제 성공");
     }
 }

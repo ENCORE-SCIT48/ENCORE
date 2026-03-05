@@ -1,42 +1,9 @@
 <footer th:fragment="footer(items)">
-
-    <style>
-        .footer-wrapper {
-          width: 100%;
-          background-color: #333333;
-          /* Sub Color */
-          padding: 20px 0;
-          display: flex;
-          justify-content: center;
-          border-top: 2px solid #E63946;
-          /* Main Color 포인트 */
-        }
-
-        .footer-container {
-          width: 100%;
-          max-width: 1200px;
-          display: flex;
-          justify-content: space-around;
-          align-items: center;
-        }
-
-        .footer-link {
-          text-decoration: none;
-          color: #ffffff;
-          font-size: 14px;
-          font-weight: 500;
-          transition: 0.2s;
-        }
-
-        .footer-link:hover {
-          color: #E63946;
-          /* Main Color */
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
 
     <div class="footer-wrapper">
         <div class="footer-container">
-            <a th:each="item : ${items}" th:href="${item.href}" class="footer-link" th:text="${item.label}">
+            <a th:each="item : ${items != null ? items : {}}" th:href="${item.href}" class="footer-link" th:text="${item.label}">
             </a>
         </div>
     </div>
@@ -54,7 +21,7 @@ footer 사용 예시
       ${ {
           {label:'모집글', href:'/posts'},
           {label:'공연장리스트', href:'/venueList'},
-          {label:'홈', href:'/'},
+          {label:'홈', href:'/feed'},
           {label:'DM', href:'/directMessage'},
           {label:'채팅방', href:'/chat'}
       } }

@@ -31,4 +31,7 @@ public class Review extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
+    /** Encore pick: 이 공연에서 가장 기억에 남는 곡/장면 한 줄 (공연 리뷰만 사용, 좌석 리뷰는 null) */
+    @Column(length = 200)
+    private String encorePick;
 }

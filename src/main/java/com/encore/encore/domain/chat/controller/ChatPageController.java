@@ -200,6 +200,10 @@ public class ChatPageController {
         Model model,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
+        if (userDetails == null) {
+            // 로그인 안 됐으면 로그인 페이지로 리다이렉트
+            return "redirect:/auth/login";
+        }
 
         if (userDetails == null) {
             return "redirect:/auth/login";

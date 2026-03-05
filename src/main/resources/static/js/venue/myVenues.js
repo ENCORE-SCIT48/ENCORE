@@ -34,7 +34,6 @@ async function loadMyVenues() {
         }
 
         const venues = json.data;
-        console.log(`[myVenues] ${venues.length}개 로드 완료`);
 
         if (!venues || venues.length === 0) {
             renderEmpty();

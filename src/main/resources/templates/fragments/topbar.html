@@ -1,0 +1,31 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 고정 상단바: 왼쪽 문구+ENCORE, 오른쪽 프로필 (targetUrl 전달) -->
+<header th:fragment="topbar(targetUrl)" class="encore-topbar">
+  <link rel="stylesheet" th:href="@{/css/fragments/topbar.css}">
+  <link rel="stylesheet" th:href="@{/css/fragments/profile.css}">
+  <a th:href="@{/feed}" class="encore-topbar-brand">
+    무대를 잇다 <span class="encore">ENCORE</span>
+  </a>
+  <div class="encore-topbar-right">
+    <div th:replace="~{fragments/profile :: profile(${targetUrl})}"></div>
+  </div>
+  <script th:src="@{/js/fragments/profile.js}" defer></script>
+</header>
+
+<!-- 고정 상단바 + 공연자용 프로필 (파라미터 없음) -->
+<header th:fragment="topbarPerformer" class="encore-topbar">
+  <link rel="stylesheet" th:href="@{/css/fragments/topbar.css}">
+  <link rel="stylesheet" th:href="@{/css/fragments/profile.css}">
+  <a th:href="@{/}" class="encore-topbar-brand">
+    무대를 잇다 <span class="encore">ENCORE</span>
+  </a>
+  <div class="encore-topbar-right">
+    <div th:replace="~{fragments/performer/profile :: profile}"></div>
+  </div>
+  <script th:src="@{/js/fragments/profile.js}" defer></script>
+</header>
+
+</body>
+</html>

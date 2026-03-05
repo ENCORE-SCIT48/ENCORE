@@ -6,6 +6,7 @@ import com.encore.encore.domain.member.entity.UserProfile;
 import com.encore.encore.domain.member.repository.HostProfileRepository;
 import com.encore.encore.domain.member.repository.PerformerProfileRepository;
 import com.encore.encore.domain.member.repository.UserProfileRepository;
+import com.encore.encore.domain.user.dto.UserAccountUpdateRequestDto;
 import com.encore.encore.domain.user.dto.UserJoinRequestDto;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.user.entity.UserNotification;
@@ -94,4 +95,42 @@ public class UserService {
         }
     }
 
+    /**
+     * 회원정보(닉네임, 비밀번호) 수정.
+     * 비밀번호 변경 시 currentPassword 검증 후 newPassword/newPasswordConfirm 일치 시에만 변경.
+     *
+     * @param userId 로그인한 유저 ID
+     * @param dto    닉네임, 현재 비밀번호(선택), 새 비밀번호(선택), 새 비밀번호 확인
+     */
+    @Transactional
+    public void updateAccount(Long userId, UserAccountUpdateRequestDto dto) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "회원을 찾을 수 없습니다."));
+
+        boolean wantPasswordChange = dto.getNewPassword() != null && !dto.getNewPassword().isBlank();
+
+        if (wantPasswordChange) {
+            if (dto.getCurrentPassword() == null || dto.getCurrentPassword().isBlank()) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "비밀번호 변경 시 현재 비밀번호를 입력해주세요.");
+            }
+            if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPasswordHash())) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
+            }
+            if (!dto.getNewPassword().equals(dto.getNewPasswordConfirm())) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "새 비밀번호가 일치하지 않습니다.");
+            }
+            if (dto.getNewPassword().length() < 8) {
+                throw new ApiException(ErrorCode.INVALID_REQUEST, "비밀번호는 8자 이상이어야 합니다.");
+            }
+            user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
+        }
+
+        if (dto.getNickname() != null && !dto.getNickname().isBlank()) {
+            user.setNickname(dto.getNickname().trim());
+        }
+
+        userRepository.save(user);
+        log.info("[UserService.updateAccount] 완료 - userId={}", userId);
+    }
 }
+

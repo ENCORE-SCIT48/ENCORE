@@ -1,0 +1,51 @@
+/**
+ * ENCORE 테마 맛보기 (PC 메인, 발표용)
+ * 적용해 보고 싶은 페이지에 theme.css 를 link 로 추가하면 됨.
+ * 사용 안 하려면 해당 link 한 줄만 제거하면 됨.
+ */
+
+:root {
+  /* 무대감 살짝 - 딥 레드 + 웜 배경 */
+  --encore-primary: #B91C2E;
+  --encore-primary-hover: #9B2335;
+  --encore-text: #333333;
+  --encore-bg: #FAF9F7;
+  --encore-gold: #B8860B;
+  --encore-max-width: 960px;
+  --encore-font-size-base: 18px;
+}
+
+/* PC 메인: 발표용 가독성 (폰트 살짝 크게) */
+html {
+  font-size: var(--encore-font-size-base);
+}
+
+body {
+  background-color: var(--encore-bg) !important;
+  color: var(--encore-text);
+}
+
+/* 버튼 primary = 딥 레드 */
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--encore-primary) !important;
+  border-color: var(--encore-primary) !important;
+}
+.btn-primary:hover {
+  background-color: var(--encore-primary-hover) !important;
+  border-color: var(--encore-primary-hover) !important;
+}
+
+/* 맛보기: 이 페이지만 PC 넓게 (원하면 다른 페이지에도 적용) */
+.app-wrapper {
+  max-width: var(--encore-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--encore-bg);
+}
+
+@media (max-width: 768px) {
+  html { font-size: 16px; }
+  .app-wrapper { max-width: 100%; }
+}

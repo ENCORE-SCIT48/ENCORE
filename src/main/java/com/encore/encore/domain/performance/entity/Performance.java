@@ -27,9 +27,27 @@ public class Performance extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performer_creator_id")
     private PerformerProfile performerCreator;
+
     private String title;
     private String description;
-    private String recruitStatus;
+
+    /** 공연 대표 이미지(포스터) 경로 */
+    @Column(name = "performance_image_url", length = 512)
+    private String performanceImageUrl;
+
+    /** 공연할 사람 모집 상태 (예: OPEN, CLOSED) */
+    @Enumerated(EnumType.STRING)
+    private PerformanceRecruitStatus recruitStatus;
+
     private Integer capacity;
-    private String status;
+
+    /** 공연 카테고리/장르 (MUSICAL / PLAY / BAND 등) */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private PerformanceCategory category;
+
+    /** 공연 진행 상태 (UPCOMING / ONGOING / ENDED / CANCELLED) */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private PerformanceStatus status;
 }
