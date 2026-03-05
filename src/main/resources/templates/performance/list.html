@@ -42,13 +42,10 @@
             </button>
         </form>
 
-        <!-- 핫한 공연 캐러셀(박스) + 공연등록(공연자만) -->
-        <section class="hot-carousel mb-3">
-            <div class="hot-carousel-inner">
-                <span class="hot-title">핫한 공연들 캐러셀</span>
-            </div>
-
-            <div class="text-end mt-2">
+        <!-- 핫한 공연 캐러셀: 이미지 슬라이드, 자동 넘김, 좌우 버튼, 하단 인디케이터(1/5) -->
+        <section class="hot-carousel-section mb-3">
+            <div class="hot-carousel-header d-flex justify-content-between align-items-center mb-2">
+                <h2 class="hot-carousel-title mb-0">핫한 공연</h2>
                 <a
                     class="btn btn-sm btn-secondary"
                     th:if="${#authorization.expression('hasRole(''PERFORMER'')')}"
@@ -56,6 +53,26 @@
                 >
                     공연등록
                 </a>
+            </div>
+
+            <div class="hot-carousel-wrap">
+                <button type="button" class="hot-carousel-btn hot-carousel-prev" id="hotCarouselPrev" aria-label="이전">‹</button>
+                <button type="button" class="hot-carousel-btn hot-carousel-next" id="hotCarouselNext" aria-label="다음">›</button>
+
+                <div class="hot-carousel-track-wrap">
+                    <div class="hot-carousel-track" id="hotCarouselTrack">
+                        <!-- JS에서 슬라이드 채움. 없을 때 플레이스홀더 -->
+                        <div class="hot-carousel-placeholder" id="hotCarouselPlaceholder">
+                            <span class="text-muted">로딩 중...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hot-carousel-indicator" id="hotCarouselIndicator">
+                    <span class="hot-carousel-current" id="hotCarouselCurrent">1</span>
+                    <span class="hot-carousel-sep">/</span>
+                    <span class="hot-carousel-total" id="hotCarouselTotal">0</span>
+                </div>
             </div>
         </section>
 
@@ -110,6 +127,18 @@
             id="gridWrap"
             th:replace="~{performance/grid :: grid}"
         ></div>
+
+        <!-- 더보기 (마지막 페이지가 아니면 표시) -->
+        <div class="load-more-wrap d-flex justify-content-center mt-4">
+            <button
+                id="loadMoreBtn"
+                class="btn btn-outline-secondary"
+                type="button"
+                style="display:none;"
+            >
+                더보기
+            </button>
+        </div>
     </main>
 
     <div class="bottom-slot"></div>

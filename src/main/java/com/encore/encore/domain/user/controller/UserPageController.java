@@ -57,7 +57,7 @@ public class UserPageController {
      *
      * @return
      */
-    @GetMapping("user/notification")
+    @GetMapping("/user/notification")
     public String notification() {
         return "user-settings/notificationSetting";
     }

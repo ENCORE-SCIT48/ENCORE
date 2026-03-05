@@ -73,4 +73,32 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
           and r.isDeleted = false
         """)
     Object[] getSeatReviewSummary(@Param("performanceId") Long performanceId);
+
+    /**
+     * [피드] 최근 공연 후기(좌석 리뷰 제외) 조회
+     * - seat IS NULL, isDeleted = false
+     * - createdAt DESC
+     */
+    @EntityGraph(attributePaths = {"performance", "user"})
+    Page<Review> findBySeatIsNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    /**
+     * [피드] 최근 좌석 리뷰 조회
+     * - seat IS NOT NULL, isDeleted = false
+     * - createdAt DESC
+     */
+    @EntityGraph(attributePaths = {"performance", "user", "seat"})
+    Page<Review> findBySeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    /**
+     * [피드] 사용자가 이미 공연 후기를 남긴 performanceId 목록 (좌석 리뷰 제외)
+     */
+    @Query("""
+        select distinct r.performance.performanceId
+        from Review r
+        where r.user.userId = :userId
+          and r.seat is null
+          and r.isDeleted = false
+        """)
+    java.util.List<Long> findReviewedPerformanceIdsByUser(@Param("userId") Long userId);
 }

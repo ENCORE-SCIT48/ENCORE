@@ -1,37 +1,229 @@
 /**
  * venue/detail.css
- * 공연장 상세 페이지 전용 스타일 (유저/관람객용, 좌석 리뷰 진입)
- * - 공연장 정보 헤더, 좌석 리뷰 섹션(공연 선택 + 작성 버튼)
+ * 공연장 상세 페이지 (유저/관람객용) — 공연자 대관 폼과 동일한 풍부한 정보 카드, 대관 신청 없음
  */
 
-/* 공연장 정보 상단 영역 */
-.venue-detail-header {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color, #E9ECEF);
+:root {
+    --venue-detail-accent: #E63946;
+    --venue-detail-accent-light: rgba(230, 57, 70, 0.08);
+    --venue-detail-border: #eef0f3;
+    --venue-detail-text: #2d3748;
+    --venue-detail-muted: #5a6478;
+}
+
+.venue-detail-main {
+    padding-bottom: 1.5rem;
+}
+
+/* 이 공연장에서의 경험들 섹션 래핑 */
+.venue-experience-section {
+    margin-top: 0.5rem;
+    padding: 0 1.25rem 1.5rem 1.25rem;
+}
+
+.venue-experience-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0.75rem 0 0.5rem 0;
+    color: var(--venue-detail-text);
+}
+
+.venue-experience-block + .venue-experience-block {
+    margin-top: 1rem;
+}
+
+/* 이 공연장에서 열리는 공연 리스트 */
+.venue-upcoming-section {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--venue-detail-border);
+}
+
+.venue-experience-subtitle {
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--venue-detail-text);
+}
+
+.venue-experience-subtitle i {
+    color: var(--venue-detail-accent);
+}
+
+.venue-upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.venue-upcoming-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0.6rem 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--venue-detail-border);
+    background: #ffffff;
+    text-decoration: none;
+    color: var(--venue-detail-text);
+}
+
+.venue-upcoming-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.venue-upcoming-meta {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--venue-detail-muted);
+}
+
+/* 로딩 */
+.venue-info-wrap {
+    padding: 1rem 1.25rem;
+}
+.loading-block {
+    text-align: center;
+    padding: 2.5rem 0;
+    color: var(--venue-detail-muted);
+}
+.loading-block .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* 공연장 정보 카드 (공연자 대관 폼과 동일한 풍부한 구성) */
+.venue-detail-card {
+    border: 1.5px solid var(--venue-detail-border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.venue-detail-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    background: #f4f5f7;
+}
+
+.venue-detail-image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #f4f5f7 0%, #eef0f3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--venue-detail-muted);
+    font-size: 2.5rem;
+}
+
+.venue-detail-body {
+    padding: 1rem 1.25rem;
+}
+
+.venue-detail-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
 }
 
 .venue-detail-name {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--venue-detail-text);
 }
 
-.venue-detail-meta {
-    color: var(--medium-grey, #6c757d);
+.venue-type-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--venue-detail-accent-light);
+    color: var(--venue-detail-accent);
+}
+
+.venue-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.venue-meta .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--venue-detail-muted);
+}
+
+.venue-meta .meta-row i {
+    color: var(--venue-detail-accent);
     font-size: 0.9rem;
+    width: 16px;
+    flex-shrink: 0;
+}
+
+.venue-meta .meta-row-desc {
+    align-items: flex-start;
+}
+
+.venue-meta .meta-row-desc i {
+    margin-top: 2px;
+}
+
+.venue-divider {
+    border: none;
+    border-top: 1px solid var(--venue-detail-border);
+    margin: 0.75rem 0;
+}
+
+.facilities-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.facility-chip {
+    background: #f4f5f7;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    color: var(--venue-detail-text);
+}
+
+.closing-info {
+    font-size: 0.8rem;
+    color: var(--venue-detail-muted);
+    margin-top: 0.5rem;
+}
+
+.closing-info i {
+    color: var(--venue-detail-accent);
+    margin-right: 4px;
 }
 
 /* 좌석 리뷰 섹션 (공연 선택 + 작성 버튼) */
 .seat-review-section {
     margin-top: 1.5rem;
-    padding: 1rem 0;
-    border-top: 1px solid var(--border-color, #E9ECEF);
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--venue-detail-border);
 }
 
 .seat-review-section h3 {
     font-size: 1.1rem;
     font-weight: 700;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.seat-review-section h3 i {
+    color: var(--venue-detail-accent);
+    margin-right: 4px;
 }
 
 .seat-review-actions {

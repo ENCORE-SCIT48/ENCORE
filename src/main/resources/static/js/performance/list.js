@@ -9,6 +9,14 @@ $(function () {
         last: false
     };
 
+    // ─── 핫 공연 캐러셀 ─────────────────────────────────────────
+    let hotCarousel = {
+        items: [],
+        currentIndex: 0,
+        autoTimer: null,
+        AUTO_INTERVAL_MS: 4000
+    };
+
     function escapeHtml(str) {
         return String(str ?? "")
             .replaceAll("&", "&amp;")
@@ -144,9 +152,82 @@ $(function () {
     function resetAndLoad() {
         state.page = 0;
         state.last = false;
-        $("#loadMoreBtn").show(); // 탭/검색 바꿀 때 다시 보이게
+        $("#loadMoreBtn").hide(); // 응답 결과 보고 나서만 표시
         fetchList(false);
     }
+
+    // 핫 공연 캐러셀: 로드 → 슬라이드 렌더 → 자동 넘김 + 좌우 버튼 + 인디케이터(1/N)
+    function loadHotCarousel() {
+        $.ajax({
+            url: "/api/performances/hot",
+            method: "GET",
+            dataType: "json",
+            xhrFields: { withCredentials: true }
+        }).done(function (res) {
+            var list = res?.data || [];
+            hotCarousel.items = list;
+            var $track = $("#hotCarouselTrack");
+            var $placeholder = $("#hotCarouselPlaceholder");
+            if (!list.length) {
+                $placeholder.show().find("span").text("등록된 핫 공연이 없어요");
+                $("#hotCarouselIndicator").hide();
+                return;
+            }
+            $placeholder.remove();
+            var slidesHtml = list.map(function (p) {
+                var id = p.performanceId;
+                var title = escapeHtml(p.title || "공연");
+                var imgUrl = (p.performanceImageUrl && p.performanceImageUrl.trim()) ? p.performanceImageUrl.trim() : "";
+                var imgTag = imgUrl
+                    ? "<img src=\"" + escapeHtml(imgUrl) + "\" alt=\"" + title + "\" class=\"hot-slide-img\"/>"
+                    : "<div class=\"hot-slide-noimg\"><span>공연</span></div>";
+                return "<a href=\"/performances/" + id + "\" class=\"hot-slide\">" + imgTag + "<span class=\"hot-slide-title\">" + title + "</span></a>";
+            });
+            $track.html(slidesHtml);
+            hotCarousel.currentIndex = 0;
+            updateHotCarouselUI();
+            startHotCarouselAuto();
+            $("#hotCarouselIndicator").show();
+        }).fail(function () {
+            $("#hotCarouselPlaceholder").show().find("span").text("핫 공연을 불러올 수 없어요");
+            $("#hotCarouselIndicator").hide();
+        });
+    }
+
+    function updateHotCarouselUI() {
+        var n = hotCarousel.items.length;
+        var i = hotCarousel.currentIndex;
+        if (n === 0) return;
+        var $track = $("#hotCarouselTrack");
+        $track.css("transform", "translateX(-" + (i * 100) + "%)");
+        $("#hotCarouselCurrent").text(i + 1);
+        $("#hotCarouselTotal").text(n);
+        $("#hotCarouselPrev").toggle(n > 1);
+        $("#hotCarouselNext").toggle(n > 1);
+    }
+
+    function goHotCarousel(delta) {
+        var n = hotCarousel.items.length;
+        if (n <= 1) return;
+        hotCarousel.currentIndex = (hotCarousel.currentIndex + delta + n) % n;
+        updateHotCarouselUI();
+        resetHotCarouselAuto();
+    }
+
+    function startHotCarouselAuto() {
+        if (hotCarousel.autoTimer) clearInterval(hotCarousel.autoTimer);
+        if (hotCarousel.items.length <= 1) return;
+        hotCarousel.autoTimer = setInterval(function () { goHotCarousel(1); }, hotCarousel.AUTO_INTERVAL_MS);
+    }
+
+    function resetHotCarouselAuto() {
+        startHotCarouselAuto();
+    }
+
+    $("#hotCarouselPrev").on("click", function () { goHotCarousel(-1); });
+    $("#hotCarouselNext").on("click", function () { goHotCarousel(1); });
+
+    loadHotCarousel();
 
     // 북마크/본공연 탭에서도 검색 가능하게: 강제 초기화 삭제
     $("#searchBtn").on("click", function () {

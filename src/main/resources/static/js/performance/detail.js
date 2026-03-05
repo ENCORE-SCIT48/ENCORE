@@ -27,6 +27,14 @@ $(function () {
     const reviewCache = new Map(); // reviewId -> review 객체
     let reviewModal = null;        // bootstrap modal instance
 
+    // 좌석 리뷰 탭: 배치도 + 호버 툴팁
+    let seatReviewLoaded = false;
+    let seatReviewFloors = [];
+    let seatReviewBySeat = {};
+    let seatReviewCurrentFloor = 0;
+    const SEAT_SIZE_RATIO = 0.05;
+    const gradeColors = { vip: "#fbbf24", r: "#f87171", s: "#60a5fa", a: "#34d399" };
+
     function escapeHtml(str) {
         return String(str ?? "")
             .replaceAll("&", "&amp;")
@@ -68,6 +76,147 @@ $(function () {
                     loadReviews(true);
                 }
             }
+
+            if (tab === "seatReview" && !seatReviewLoaded) {
+                loadSeatReviewMap();
+            }
+        });
+    }
+
+    function buildSeatReviewFloors(seatList) {
+        const byFloor = {};
+        seatList.forEach(function (s) {
+            if ((s.xPos == null && s.xRatio == null) || (s.yPos == null && s.yRatio == null)) return;
+            const f = s.seatFloor != null ? s.seatFloor : 1;
+            if (!byFloor[f]) byFloor[f] = [];
+            byFloor[f].push({
+                seatId: s.seatId,
+                seatNumber: s.seatNumber || "",
+                seatType: (s.seatType || "a").toLowerCase(),
+                xRatio: s.xRatio != null ? s.xRatio : (s.xPos / 1000),
+                yRatio: s.yRatio != null ? s.yRatio : (s.yPos / 1000)
+            });
+        });
+        return Object.keys(byFloor).sort(function (a, b) { return Number(a) - Number(b); }).map(function (f) {
+            return { name: f + "층", seats: byFloor[f] };
+        });
+    }
+
+    function loadSeatReviewMap() {
+        seatReviewLoaded = true;
+        $.ajax({ url: "/api/performances/" + performanceId + "/seats", method: "GET", dataType: "json" })
+            .done(function (resSeats) {
+                const list = resSeats?.data || [];
+                const withPos = list.filter(function (s) {
+                    return (s.xPos != null && s.yPos != null) || (s.xRatio != null && s.yRatio != null);
+                });
+                if (withPos.length === 0) {
+                    $("#seatReviewMapWrap").addClass("d-none");
+                    $("#seatReviewEmpty").show();
+                    return;
+                }
+                seatReviewFloors = buildSeatReviewFloors(list);
+                $.ajax({ url: "/api/performances/" + performanceId + "/seat-reviews/by-seat", method: "GET", dataType: "json" })
+                    .done(function (resReviews) {
+                        const reviews = resReviews?.data || [];
+                        seatReviewBySeat = {};
+                        reviews.forEach(function (r) {
+                            if (r.seatId == null) return;
+                            if (!seatReviewBySeat[r.seatId]) seatReviewBySeat[r.seatId] = [];
+                            seatReviewBySeat[r.seatId].push(r);
+                        });
+                        initSeatReviewCanvas();
+                        drawSeatReviewCanvas();
+                    });
+            })
+            .fail(function () {
+                $("#seatReviewMapWrap").addClass("d-none");
+                $("#seatReviewEmpty").show();
+            });
+    }
+
+    function initSeatReviewCanvas() {
+        const canvas = document.getElementById("seatReviewCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const wrapper = canvas.parentElement;
+        if (!wrapper) return;
+
+        function resize() {
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+            drawSeatReviewCanvas();
+        }
+        resize();
+        if (typeof ResizeObserver !== "undefined") {
+            new ResizeObserver(resize).observe(wrapper);
+        }
+
+        const $tabs = $("#seatReviewFloorTabs");
+        $tabs.empty();
+        if (seatReviewFloors.length > 1) {
+            seatReviewFloors.forEach(function (f, i) {
+                $tabs.append($("<button type='button' class='floor-btn'></button>").text(f.name).toggleClass("active", i === 0)
+                    .on("click", function () {
+                        seatReviewCurrentFloor = i;
+                        $tabs.find(".floor-btn").removeClass("active").eq(i).addClass("active");
+                        drawSeatReviewCanvas();
+                    }));
+            });
+        }
+
+        const $tip = $("#seatReviewTooltip");
+        canvas.addEventListener("mousemove", function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const w = canvas.width, h = canvas.height;
+            const size = w * SEAT_SIZE_RATIO;
+            const seats = seatReviewFloors[seatReviewCurrentFloor] ? seatReviewFloors[seatReviewCurrentFloor].seats : [];
+            for (let i = seats.length - 1; i >= 0; i--) {
+                const s = seats[i];
+                const sx = s.xRatio * w, sy = s.yRatio * h;
+                if (x >= sx && x <= sx + size && y >= sy && y <= sy + size) {
+                    const arr = seatReviewBySeat[s.seatId];
+                    if (arr && arr.length > 0) {
+                        const r = arr[0];
+                        const text = "★" + (r.rating || "-") + " · " + (r.content || "").substring(0, 80) + (r.content && r.content.length > 80 ? "…" : "");
+                        $tip.html("<span class='tooltip-rating'>★" + (r.rating || "-") + "</span> " + (arr.length > 1 ? "외 " + (arr.length - 1) + "건<br>" : "") + "<span class='tooltip-content'>" + escapeHtml((r.content || "").substring(0, 120)) + (r.content && r.content.length > 120 ? "…" : "") + "</span>").show();
+                        $tip.css({ left: (e.clientX + 15) + "px", top: (e.clientY + 10) + "px" });
+                    }
+                    return;
+                }
+            }
+            $tip.hide();
+        });
+        canvas.addEventListener("mouseleave", function () { $tip.hide(); });
+    }
+
+    function drawSeatReviewCanvas() {
+        const canvas = document.getElementById("seatReviewCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        if (!seatReviewFloors[seatReviewCurrentFloor]) return;
+        const size = w * SEAT_SIZE_RATIO;
+        const seats = seatReviewFloors[seatReviewCurrentFloor].seats;
+        seats.forEach(function (s) {
+            const sx = s.xRatio * w, sy = s.yRatio * h;
+            const hasReview = seatReviewBySeat[s.seatId] && seatReviewBySeat[s.seatId].length > 0;
+            ctx.fillStyle = gradeColors[s.seatType] || gradeColors.a;
+            ctx.strokeStyle = hasReview ? "#2563eb" : "#333";
+            ctx.lineWidth = hasReview ? 2 : 1;
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(sx, sy, size, size, size * 0.2);
+            else ctx.rect(sx, sy, size, size);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#000";
+            ctx.font = "bold " + (size * 0.35) + "px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(s.seatNumber || s.seatId, sx + size / 2, sy + size / 2);
         });
     }
 
@@ -92,6 +241,11 @@ $(function () {
         $("#watchedIcon").attr("src", on ? "/image/watched_on.png" : "/image/watched_off.png");
         $("#watchedBtn").attr("aria-pressed", String(on));
         toggleWriteReviewButton(on);
+        if (on) {
+            $("#chatCta").show();
+        } else {
+            $("#chatCta").hide();
+        }
     }
 
     function setReportedUI(on) {
@@ -168,6 +322,10 @@ $(function () {
             // 리뷰 작성 페이지로 이동
             window.location.href = `/performances/${performanceId}/reviews/new`;
         });
+
+        $("#chatCtaBtn").off("click").on("click", function () {
+            window.location.href = `/performances/${performanceId}/chats`;
+        });
     }
 
     function renderDetail(d) {
@@ -178,6 +336,17 @@ $(function () {
         const venueName = d?.venueName ?? "-";
         const address = d?.address ?? "-";
         $("#metaText").text(`${address} · ${venueName}`);
+
+        // 공연장 상세로 이동 가능한 경우: 메타 텍스트를 클릭 가능하게
+        const venueId = d?.venueId;
+        $("#metaText").off("click").removeClass("clickable");
+        if (venueId) {
+            $("#metaText")
+                .addClass("clickable")
+                .on("click", function () {
+                    window.location.href = `/venues/${venueId}`;
+                });
+        }
 
         // 공연 대표 이미지(포스터): 있으면 표시, 없으면 플레이스홀더
         const imageUrl = d?.performanceImageUrl;
@@ -191,6 +360,26 @@ $(function () {
 
         // 평점은 "summary API"로만 세팅(정렬/페이지에 따라 흔들리지 않게)
         $("#descText").text(escapeHtml(d?.description ?? "공연상세설명"));
+
+        // 연관 공연자/공연장 블록 토글
+        const performerName = d?.performerStageName;
+        if (performerName) {
+            $("#relatedPerformerName").text(escapeHtml(performerName));
+            $("#relatedPerformer").show();
+        } else {
+            $("#relatedPerformer").hide();
+        }
+
+        if (venueId) {
+            $("#relatedVenue").show();
+            $("#relatedVenueBtn")
+                .off("click")
+                .on("click", function () {
+                    window.location.href = `/venues/${venueId}`;
+                });
+        } else {
+            $("#relatedVenue").hide();
+        }
 
         setWishUI(isWished);
         setWatchedUI(isWatched);
@@ -220,6 +409,53 @@ $(function () {
             })
             .fail(function (xhr) {
                 $("#descText").text("상세 조회 실패");
+            });
+    }
+
+    // 공연자 소유 여부에 따라 수정/삭제 버튼 노출
+    function initOwnerActions() {
+        if (!performanceId) return;
+        $.ajax({
+            url: `/api/performances/${performanceId}/ownership`,
+            method: "GET",
+            dataType: "json",
+        })
+            .done(function (res) {
+                const editable = !!res?.data?.editable;
+                if (!editable) return;
+                const $actions = $("#perfOwnerActions");
+                if (!$actions.length) return;
+                $actions.show();
+
+                $("#editPerformanceBtn")
+                    .off("click")
+                    .on("click", function () {
+                        window.location.href = `/performances/${performanceId}/edit`;
+                    });
+
+                $("#deletePerformanceBtn")
+                    .off("click")
+                    .on("click", function () {
+                        if (!confirm("이 공연을 삭제하시겠습니까? 삭제 후에는 되돌릴 수 없습니다.")) {
+                            return;
+                        }
+                        $.ajax({
+                            url: `/api/performances/${performanceId}`,
+                            method: "DELETE",
+                            dataType: "json",
+                        })
+                            .done(function () {
+                                alert("공연이 삭제되었습니다.");
+                                window.location.href = "/performances";
+                            })
+                            .fail(function (xhr) {
+                                console.error("[PerformanceDetail] delete failed", xhr.status, xhr.responseText);
+                                alert("공연 삭제에 실패했습니다. " + (xhr.responseJSON?.message || ""));
+                            });
+                    });
+            })
+            .fail(function () {
+                // 권한 없거나 비로그인 등은 조용히 무시
             });
     }
 
@@ -604,6 +840,7 @@ $(function () {
 
     bindTabs();
     loadDetail();
+    initOwnerActions();
     ensureReportedStatus();
 
     // 탭의 평균 평점은 "전체 평균"으로 고정 표시

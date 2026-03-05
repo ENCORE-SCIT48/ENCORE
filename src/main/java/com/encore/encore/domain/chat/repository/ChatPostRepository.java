@@ -29,7 +29,7 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
      */
     @Query("""
             SELECT DISTINCT new com.encore.encore.domain.chat.dto.ResponseListChatPostDto(
-                p.id, p.title, p.status, p.currentMember, p.maxMember, p.updatedAt
+                p.id, p.title, p.status, p.currentMember, p.maxMember, p.updatedAt, p.postType
             )
             FROM ChatPost p
             JOIN ChatRoom r ON r.chatPost.id = p.id AND r.isDeleted = false

@@ -1,14 +1,15 @@
 package com.encore.encore.domain.chat.dto;
 
 import com.encore.encore.domain.chat.entity.ChatPost;
+import com.encore.encore.domain.chat.entity.ChatPostType;
 import com.encore.encore.domain.chat.entity.ChatRoom;
 import lombok.*;
 
 /**
- * [설명] 채팅 게시글 생성 응답 DTO
+ * 채팅 게시글 생성 완료 시 반환하는 DTO.
  * <p>
- * 클라이언트에게 채팅방 생성 결과를 반환할 때 사용하는 객체입니다.
- * 채팅 게시글 정보와 해당 게시글에 연결된 채팅방 ID를 포함합니다.
+ * 생성된 게시글 ID, 채팅방 ID, 제목·유형·상태 등 클라이언트에서 바로 표시할 수 있는 정보를 담습니다.
+ * </p>
  */
 @Getter
 @Setter
@@ -23,9 +24,12 @@ public class ResponseCreateChatPostDto {
     private Integer currentMember;
     private String status;
     private Long chatRoomId;
+    private String postType;
+    private String postTypeDisplayName;
 
-    // 엔티티 → DTO 변환용 정적 메서드
+    /** 엔티티 → DTO 변환. postType null 시 GENERAL로 표시 */
     public static ResponseCreateChatPostDto from(ChatPost chatPost, ChatRoom chatRoom) {
+        ChatPostType type = chatPost.getPostType() != null ? chatPost.getPostType() : ChatPostType.GENERAL;
         return ResponseCreateChatPostDto.builder()
             .postId(chatPost.getId())
             .title(chatPost.getTitle())
@@ -34,6 +38,8 @@ public class ResponseCreateChatPostDto {
             .currentMember(chatPost.getCurrentMember())
             .status(chatPost.getStatus().name())
             .chatRoomId(chatRoom.getRoomId())
+            .postType(type.name())
+            .postTypeDisplayName(type.getDisplayName())
             .build();
     }
 }

@@ -1,6 +1,7 @@
 package com.encore.encore.domain.performance.controller;
 
 import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.domain.performance.dto.PerformanceCreateRequestDto;
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
 import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
@@ -69,6 +70,80 @@ public class PerformanceController {
             performanceService.getPerformance(performanceId),
             "공연 상세 조회 성공"
         );
+    }
+
+    /**
+     * 공연 등록 (공연자 전용)
+     */
+    @PostMapping
+    public CommonResponse<java.util.Map<String, Object>> createPerformance(
+        @RequestBody PerformanceCreateRequestDto dto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_PERFORMER) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 공연을 등록할 수 있습니다.");
+        }
+
+        Long id = performanceService.createPerformance(dto, userDetails.getUser());
+        return CommonResponse.ok(java.util.Map.of("performanceId", id), "공연 등록 성공");
+    }
+
+    /**
+     * 공연 수정 (공연자 전용, 본인이 생성한 공연만)
+     */
+    @PutMapping("/{performanceId}")
+    public CommonResponse<java.util.Map<String, Object>> updatePerformance(
+        @PathVariable Long performanceId,
+        @RequestBody PerformanceCreateRequestDto dto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_PERFORMER) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 공연을 수정할 수 있습니다.");
+        }
+
+        Long id = performanceService.updatePerformance(performanceId, dto, userDetails.getUser());
+        return CommonResponse.ok(java.util.Map.of("performanceId", id), "공연 수정 성공");
+    }
+
+    /**
+     * 공연 삭제 (논리 삭제, 공연자 전용)
+     */
+    @DeleteMapping("/{performanceId}")
+    public CommonResponse<java.util.Map<String, Object>> deletePerformance(
+        @PathVariable Long performanceId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_PERFORMER) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 공연을 삭제할 수 있습니다.");
+        }
+
+        performanceService.deletePerformance(performanceId, userDetails.getUser());
+        return CommonResponse.ok(java.util.Map.of("performanceId", performanceId), "공연 삭제 성공");
+    }
+
+    /**
+     * 공연 수정/삭제 가능 여부 조회 (공연자 본인인지 확인)
+     */
+    @GetMapping("/{performanceId}/ownership")
+    public CommonResponse<java.util.Map<String, Object>> getOwnership(
+        @PathVariable Long performanceId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        boolean editable = false;
+        if (userDetails != null && userDetails.getUser() != null
+            && userDetails.getActiveMode() == ActiveMode.ROLE_PERFORMER) {
+            editable = performanceService.isEditableByUser(performanceId, userDetails.getUser());
+        }
+        return CommonResponse.ok(java.util.Map.of("editable", editable), "공연 소유 여부 조회 성공");
     }
 
     /**
@@ -237,6 +312,19 @@ public class PerformanceController {
         return CommonResponse.ok(
             performanceService.getSeatReviews(performanceId, PageRequest.of(page, size)),
             "좌석 리뷰 목록 조회 성공"
+        );
+    }
+
+    /**
+     * 좌석 리뷰를 좌석 배치도 호버 툴팁용으로 일괄 조회 (seatId별 그룹 후 툴팁 표시용)
+     */
+    @GetMapping("/{performanceId}/seat-reviews/by-seat")
+    public CommonResponse<List<SeatReviewItemDto>> getSeatReviewsBySeat(
+        @PathVariable Long performanceId
+    ) {
+        return CommonResponse.ok(
+            performanceService.getSeatReviewsForMap(performanceId),
+            "좌석별 리뷰 조회 성공"
         );
     }
 

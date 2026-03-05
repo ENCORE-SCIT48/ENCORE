@@ -2,6 +2,9 @@ package com.encore.encore.domain.performance.service;
 
 import com.encore.encore.domain.community.entity.Review;
 import com.encore.encore.domain.community.repository.ReviewRepository;
+import com.encore.encore.domain.member.entity.PerformerProfile;
+import com.encore.encore.domain.member.repository.PerformerProfileRepository;
+import com.encore.encore.domain.performance.dto.PerformanceCreateRequestDto;
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
 import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
@@ -10,16 +13,20 @@ import com.encore.encore.domain.performance.dto.SeatReviewItemDto;
 import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.entity.PerformanceCategory;
 import com.encore.encore.domain.performance.entity.PerformanceRecruitStatus;
+import com.encore.encore.domain.performance.entity.PerformanceStatus;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
 import com.encore.encore.domain.user.entity.User;
 import com.encore.encore.domain.venue.entity.Seat;
+import com.encore.encore.domain.venue.entity.Venue;
 import com.encore.encore.domain.venue.repository.SeatRepository;
+import com.encore.encore.domain.venue.repository.VenueRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -35,6 +42,8 @@ public class PerformanceService {
     private final PerformanceRepository performanceRepository;
     private final ReviewRepository reviewRepository;
     private final SeatRepository seatRepository;
+    private final PerformerProfileRepository performerProfileRepository;
+    private final VenueRepository venueRepository;
 
     /**
      * 공연 목록 조회 (검색/카테고리/페이징 지원)
@@ -135,6 +144,138 @@ public class PerformanceService {
 
         log.info("[Performance] hot list result - size={}", result.size());
         return result;
+    }
+
+    /**
+     * 공연을 새로 등록합니다.
+     * - 공연자(PerformerProfile)를 creator로 설정합니다.
+     * - 공연장(Venue)을 필수로 연결합니다.
+     * - recruitStatus는 기본적으로 OPEN, status는 UPCOMING으로 설정합니다.
+     */
+    @Transactional
+    public Long createPerformance(PerformanceCreateRequestDto dto, User user) {
+        if (user == null || user.getUserId() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        if (!StringUtils.hasText(dto.getTitle())) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "공연 제목은 필수입니다.");
+        }
+
+        if (dto.getVenueId() == null) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "공연장을 선택해 주세요.");
+        }
+
+        // 공연자 프로필 조회
+        PerformerProfile performer = performerProfileRepository.findByUser(user)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연자 프로필을 찾을 수 없습니다."));
+
+        // 공연장 조회
+        Venue venue = venueRepository.findByVenueIdAndIsDeletedFalse(dto.getVenueId())
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연장을 찾을 수 없습니다. venueId=" + dto.getVenueId()));
+
+        PerformanceCategory categoryEnum = dto.toCategoryEnum();
+
+        Performance performance = Performance.builder()
+            .title(dto.getTitle())
+            .description(dto.getDescription())
+            .performanceImageUrl(dto.getPerformanceImageUrl())
+            .category(categoryEnum)
+            .status(PerformanceStatus.UPCOMING)
+            .recruitStatus(PerformanceRecruitStatus.OPEN)
+            .capacity(dto.getCapacity())
+            .venue(venue)
+            .hostCreator(venue.getHost())
+            .performerCreator(performer)
+            .build();
+
+        Performance saved = performanceRepository.save(performance);
+        log.info("[Performance] created - performanceId={}, title={}", saved.getPerformanceId(), saved.getTitle());
+        return saved.getPerformanceId();
+    }
+
+    /**
+     * 공연 정보를 수정합니다.
+     * - 본인이 creator인 공연자만 수정할 수 있습니다.
+     */
+    @Transactional
+    public Long updatePerformance(Long performanceId, PerformanceCreateRequestDto dto, User user) {
+        if (user == null || user.getUserId() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        Performance performance = performanceRepository.findById(performanceId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
+
+        PerformerProfile creator = performance.getPerformerCreator();
+        if (creator == null || creator.getUser() == null || !creator.getUser().getUserId().equals(user.getUserId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "본인이 생성한 공연만 수정할 수 있습니다.");
+        }
+
+        if (StringUtils.hasText(dto.getTitle())) {
+            performance.setTitle(dto.getTitle());
+        }
+        if (dto.getDescription() != null) {
+            performance.setDescription(dto.getDescription());
+        }
+        if (dto.getPerformanceImageUrl() != null) {
+            performance.setPerformanceImageUrl(dto.getPerformanceImageUrl());
+        }
+        if (dto.getCapacity() != null) {
+            performance.setCapacity(dto.getCapacity());
+        }
+        PerformanceCategory categoryEnum = dto.toCategoryEnum();
+        if (categoryEnum != null) {
+            performance.setCategory(categoryEnum);
+        }
+
+        if (dto.getVenueId() != null && !dto.getVenueId().equals(
+            performance.getVenue() != null ? performance.getVenue().getVenueId() : null)) {
+            Venue venue = venueRepository.findByVenueIdAndIsDeletedFalse(dto.getVenueId())
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연장을 찾을 수 없습니다. venueId=" + dto.getVenueId()));
+            performance.setVenue(venue);
+            performance.setHostCreator(venue.getHost());
+        }
+
+        log.info("[Performance] updated - performanceId={}", performanceId);
+        return performanceId;
+    }
+
+    /**
+     * 공연을 논리 삭제합니다.
+     * - 본인이 생성한 공연자만 삭제 가능.
+     */
+    @Transactional
+    public void deletePerformance(Long performanceId, User user) {
+        if (user == null || user.getUserId() == null) {
+            throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+
+        Performance performance = performanceRepository.findById(performanceId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
+
+        PerformerProfile creator = performance.getPerformerCreator();
+        if (creator == null || creator.getUser() == null || !creator.getUser().getUserId().equals(user.getUserId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "본인이 생성한 공연만 삭제할 수 있습니다.");
+        }
+
+        performance.delete();
+        log.info("[Performance] deleted(soft) - performanceId={}", performanceId);
+    }
+
+    /**
+     * 현재 로그인한 유저가 해당 공연을 수정/삭제할 수 있는지 여부를 반환합니다.
+     */
+    public boolean isEditableByUser(Long performanceId, User user) {
+        if (user == null || user.getUserId() == null) return false;
+        return performanceRepository.findById(performanceId)
+            .map(p -> {
+                PerformerProfile creator = p.getPerformerCreator();
+                return creator != null
+                    && creator.getUser() != null
+                    && creator.getUser().getUserId().equals(user.getUserId());
+            })
+            .orElse(false);
     }
 
     /**
@@ -369,7 +510,28 @@ public class PerformanceService {
         Page<Review> page = reviewRepository
             .findByPerformance_PerformanceIdAndSeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(performanceId, pageable);
 
-        return page.map(r -> new SeatReviewItemDto(
+        return page.map(r -> toSeatReviewItemDto(r));
+    }
+
+    /**
+     * 해당 공연의 좌석 리뷰를 좌석 배치도 호버 툴팁용으로 전부 조회 (최대 500건).
+     * 프론트에서 seatId별로 그룹해 마우스 오버 시 리뷰 내용을 표시할 때 사용.
+     *
+     * @param performanceId 공연 ID
+     * @return 좌석 리뷰 목록 (seatId, rating, content 등 포함)
+     */
+    public List<SeatReviewItemDto> getSeatReviewsForMap(Long performanceId) {
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId);
+        }
+        Page<Review> page = reviewRepository
+            .findByPerformance_PerformanceIdAndSeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(
+                performanceId, PageRequest.of(0, 500));
+        return page.getContent().stream().map(this::toSeatReviewItemDto).toList();
+    }
+
+    private SeatReviewItemDto toSeatReviewItemDto(Review r) {
+        return new SeatReviewItemDto(
             r.getReviewId(),
             r.getUser() != null ? r.getUser().getUserId() : 0L,
             r.getUser() != null ? r.getUser().getNickname() : "-",
@@ -380,7 +542,7 @@ public class PerformanceService {
             r.getSeat() != null ? r.getSeat().getSeatType() : null,
             r.getSeat() != null ? r.getSeat().getSeatFloor() : null,
             r.getCreatedAt()
-        ));
+        );
     }
 
     /**

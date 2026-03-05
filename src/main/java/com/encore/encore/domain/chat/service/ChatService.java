@@ -3,6 +3,7 @@ package com.encore.encore.domain.chat.service;
 import com.encore.encore.domain.chat.dto.*;
 import com.encore.encore.domain.chat.entity.ChatParticipant;
 import com.encore.encore.domain.chat.entity.ChatPost;
+import com.encore.encore.domain.chat.entity.ChatPostType;
 import com.encore.encore.domain.chat.entity.ChatRoom;
 import com.encore.encore.domain.chat.repository.ChatParticipantRepository;
 import com.encore.encore.domain.chat.repository.ChatPostRepository;
@@ -28,6 +29,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * 공연 채팅 게시글·채팅방·참가자 비즈니스 로직을 담당하는 서비스.
+ * <p>
+ * 공연 채팅은 "공연을 본 뒤 이어지는 공간"(후기·택시·뒤풀이 등) 기획에 따라,
+ * 공연별로 개별 모집방(CHAT)과 공연 전체 톡방(PERFORMANCE_ALL)을 관리합니다.
+ * </p>
+ *
+ * @see ChatPostType 채팅 유형 (REVIEW, TAXI_SHARE, AFTER_PARTY, GENERAL)
+ * @see ChatRoom.RoomType CHAT / DM / PERFORMANCE_ALL
+ */
 @Service
 @Slf4j
 @Transactional
@@ -42,28 +53,37 @@ public class ChatService {
 
 
     /**
-     * [설명] 채팅 게시글 생성 및 채팅방 생성
-     *
+     * 공연 소속 채팅 게시글(모집글) 및 해당 채팅방을 생성합니다.
      * <p>
-     * 주어진 DTO를 기반으로 채팅 게시글을 저장하고, 해당 게시글에 대응하는 채팅방을 생성합니다.
-     * 생성 후 작성자를 채팅방 참가자로 등록합니다.
+     * 기획: 공연 채팅은 "공연을 본 뒤 이어지는 공간"으로, 후기·감상(REVIEW), 택시 동승(TAXI_SHARE),
+     * 뒤풀이(AFTER_PARTY), 일반(GENERAL) 등 목적별로 구분합니다. DTO의 postType(문자열)을
+     * 파싱하여 저장하며, null/빈값/잘못된 값은 GENERAL로 처리합니다.
+     * </p>
+     * <p>
+     * 처리 순서: 공연 존재 여부 확인 → ChatPost 저장(postType 포함) → CHAT 타입 ChatRoom 생성
+     * → 작성자를 채팅 참가자(PENDING)로 등록 → 응답 DTO 반환.
      * </p>
      *
-     * @param dto             게시글 생성 요청 데이터 {@link RequestCreateChatPostDto}
-     * @param performanceId   게시글이 속한 공연 ID
-     * @param activeProfileId 작성자 프로필 ID
-     * @param activeMode      작성자 활동 모드({@link ActiveMode})
-     * @return 생성된 게시글 및 채팅방 정보를 담은 {@link ResponseCreateChatPostDto}
-     * @throws ApiException             공연 정보가 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
-     * @throws IllegalArgumentException 작성자 정보가 누락되었을 경우
+     * @param dto             생성 요청 (제목, 내용, 모집인원, postType 등)
+     * @param performanceId   게시글이 속할 공연 ID (path variable과 일치해야 함)
+     * @param activeProfileId 작성자 프로필 ID (현재 로그인 프로필)
+     * @param activeMode      작성자 활동 모드 (USER/PERFORMER/HOST)
+     * @return 생성된 게시글·채팅방 정보 (postId, chatRoomId, postType 표시명 포함)
+     * @throws ApiException 공연이 없으면 NOT_FOUND
      */
     public ResponseCreateChatPostDto createChatPostAndRoom(
         RequestCreateChatPostDto dto, Long performanceId, Long activeProfileId, ActiveMode activeMode) {
-        log.info("채팅 게시글 생성 프로세스 시작 - 제목: {}", dto.getTitle());
+        log.info("채팅 게시글 생성 시작 - performanceId={}, title={}, postType={}",
+            performanceId, dto.getTitle(), dto.getPostType());
 
         Performance performance = performanceRepository.findById(performanceId)
-            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연 정보 없음: " + performanceId)
-            );
+            .orElseThrow(() -> {
+                log.warn("채팅 생성 실패: 공연 없음 - performanceId={}", performanceId);
+                return new ApiException(ErrorCode.NOT_FOUND, "공연 정보 없음: " + performanceId);
+            });
+
+        ChatPostType postType = parsePostType(dto.getPostType());
+        log.debug("채팅 유형 파싱 결과: {} -> {}", dto.getPostType(), postType);
 
         ChatPost.ChatPostBuilder builder = ChatPost.builder()
             .performance(performance)
@@ -72,20 +92,21 @@ public class ChatService {
             .maxMember(dto.getMaxMember())
             .profileId(activeProfileId)
             .profileMode(activeMode)
+            .postType(postType)
             .currentMember(0)
             .status(ChatPost.Status.OPEN);
 
         ChatPost chatPost = builder.build();
         chatPost.addParticipant();
         chatPostRepository.save(chatPost);
-        log.info("게시글 저장 완료 - ID: {}", chatPost.getId());
+        log.info("채팅 게시글 저장 완료 - postId={}, postType={}", chatPost.getId(), postType);
 
         ChatRoom chatRoom = ChatRoom.builder()
             .chatPost(chatPost)
             .roomType(ChatRoom.RoomType.CHAT)
             .build();
         chatRoomRepository.save(chatRoom);
-        log.info("채팅방 생성 완료 - RoomID: {}", chatRoom.getRoomId());
+        log.info("채팅방 생성 완료 - roomId={}, postId={}", chatRoom.getRoomId(), chatPost.getId());
 
         ChatParticipant chatParticipant = ChatParticipant.builder()
             .profileMode(activeMode)
@@ -94,43 +115,63 @@ public class ChatService {
             .participantStatus(ChatParticipant.ParticipantStatus.PENDING)
             .build();
         chatParticipantRepository.save(chatParticipant);
+        log.debug("채팅 작성자 참가자 등록 완료 - profileId={}", activeProfileId);
 
         return ResponseCreateChatPostDto.from(chatPost, chatRoom);
     }
 
     /**
-     * [설명] 특정 게시글 상세 조회
+     * 요청 문자열을 {@link ChatPostType}으로 변환. null/빈값/미지원 값은 GENERAL.
+     */
+    private ChatPostType parsePostType(String postTypeStr) {
+        if (postTypeStr == null || postTypeStr.isBlank()) {
+            return ChatPostType.GENERAL;
+        }
+        try {
+            return ChatPostType.valueOf(postTypeStr.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            log.debug("알 수 없는 postType 무시, GENERAL 사용: {}", postTypeStr);
+            return ChatPostType.GENERAL;
+        }
+    }
+
+    /**
+     * 특정 채팅 게시글 상세 조회. 작성자명, 공연명, 채팅 유형(후기/택시/뒤풀이 등) 포함.
      *
-     * @param id 조회할 게시글 ID
-     * @return 게시글 상세 정보를 담은 {@link ResponseDetailChatPostDto}
-     * @throws ApiException 게시글이 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
+     * @param id            조회할 게시글 ID
+     * @param performanceId 게시글이 속한 공연 ID (공연명 조회용)
+     * @return 상세 DTO (postType, postTypeDisplayName 포함)
+     * @throws ApiException 게시글 없으면 NOT_FOUND
      */
     public ResponseDetailChatPostDto getChatPostDetail(Long id, Long performanceId) {
+        log.info("채팅 게시글 상세 조회 - postId={}, performanceId={}", id, performanceId);
         ChatPost chatPost = chatPostRepository.findById(id)
-            .orElseThrow(
-                () -> new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다.")
-            );
-        String perfermanceTitle = getPerformanceTitle(performanceId);
+            .orElseThrow(() -> {
+                log.warn("채팅 게시글 상세 조회 실패: 글 없음 - postId={}", id);
+                return new ApiException(ErrorCode.NOT_FOUND, "글이 조회되지 않습니다.");
+            });
+        String performanceTitle = getPerformanceTitle(performanceId);
         String writerName = profileService.resolveSenderName(chatPost.getProfileId(), chatPost.getProfileMode());
+        ChatPostType postType = chatPost.getPostType() != null ? chatPost.getPostType() : ChatPostType.GENERAL;
 
-
-        ResponseDetailChatPostDto.ResponseDetailChatPostDtoBuilder builder =
-            ResponseDetailChatPostDto.builder()
-                .id(chatPost.getId())
-                .performanceId(performanceId)
-                .performanceTitle(perfermanceTitle)
-                .title(chatPost.getTitle())
-                .writerName(writerName)
-                .writerId(chatPost.getProfileId())
-                .writerProfileMode(chatPost.getProfileMode().name())
-                .createdAt(chatPost.getCreatedAt())
-                .content(chatPost.getContent())
-                .currentMember(String.valueOf(chatPost.getCurrentMember()))
-                .maxMember(chatPost.getMaxMember())
-                .status(chatPost.getStatus().name());
-
-
-        return builder.build();
+        ResponseDetailChatPostDto dto = ResponseDetailChatPostDto.builder()
+            .id(chatPost.getId())
+            .performanceId(performanceId)
+            .performanceTitle(performanceTitle)
+            .title(chatPost.getTitle())
+            .writerName(writerName)
+            .writerId(chatPost.getProfileId())
+            .writerProfileMode(chatPost.getProfileMode().name())
+            .createdAt(chatPost.getCreatedAt())
+            .content(chatPost.getContent())
+            .currentMember(String.valueOf(chatPost.getCurrentMember()))
+            .maxMember(chatPost.getMaxMember())
+            .status(chatPost.getStatus().name())
+            .postType(postType.name())
+            .postTypeDisplayName(postType.getDisplayName())
+            .build();
+        log.debug("채팅 게시글 상세 조회 완료 - postId={}", id);
+        return dto;
     }
 
 
@@ -214,17 +255,15 @@ public class ChatService {
 
 
     /**
-     * [설명] 특정 공연의 타이틀 조회
+     * 공연 ID로 공연 제목 조회. 채팅 상세/목록에서 공연명 표시 시 사용.
      *
      * @param performanceId 공연 ID
-     * @return 공연 타이틀 문자열
-     * @throws ApiException 공연이 존재하지 않을 경우 {@link ErrorCode#NOT_FOUND}
+     * @return 공연 타이틀
+     * @throws ApiException 공연 없으면 NOT_FOUND
      */
     public String getPerformanceTitle(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
-            .orElseThrow(
-                () -> new ApiException(ErrorCode.NOT_FOUND, "공연이 존재 하지 않습니다.")
-            );
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연이 존재 하지 않습니다."));
         return performance.getTitle();
     }
 
@@ -243,15 +282,12 @@ public class ChatService {
     public void checkChatPostAuthority(ChatPost chatPost, Long activeId, ActiveMode activeMode) {
         Long postAuthorId = chatPost.getProfileId();
         ActiveMode postAuthorMode = chatPost.getProfileMode();
-
         if (!activeId.equals(postAuthorId) || !activeMode.equals(postAuthorMode)) {
-            log.warn("권한 없음 - 로그인 프로필({}/{}) vs 작성자({}/{})",
-                activeMode, activeMode, postAuthorId, postAuthorMode);
+            log.warn("채팅 게시글 권한 없음 - 요청자({}/{}), 작성자({}/{})",
+                activeId, activeMode, postAuthorId, postAuthorMode);
             throw new AccessDeniedException("글 작성자가 아닙니다.");
         }
-
-
-        log.info("권한 확인 완료");
+        log.debug("채팅 게시글 권한 확인 통과 - postId={}", chatPost.getId());
     }
 
     /**
@@ -265,28 +301,31 @@ public class ChatService {
      * @return 페이징 처리된 채팅방 목록 응답 DTO 슬라이스
      */
     public Slice<ResponseListChatPostDto> getChatPostList(Long performanceId, String searchType, String keyword, boolean onlyOpen, Pageable pageable) {
-        log.info("채팅방 목록 비즈니스 로직 시작 - performanceId: {}, keyword: {}", performanceId, keyword);
+        log.info("공연별 채팅방 목록 조회 - performanceId={}, searchType={}, keyword={}, onlyOpen={}",
+            performanceId, searchType, keyword, onlyOpen);
 
         try {
             if (keyword != null && keyword.isBlank()) {
                 keyword = null;
             }
-
-            return chatPostRepository.findChatPostList(performanceId, keyword, searchType, onlyOpen, pageable);
-
+            Slice<ResponseListChatPostDto> slice = chatPostRepository.findChatPostList(performanceId, keyword, searchType, onlyOpen, pageable);
+            log.debug("채팅방 목록 조회 완료 - performanceId={}, size={}", performanceId, slice.getContent().size());
+            return slice;
         } catch (Exception e) {
-            log.error("채팅방 목록 조회 중 데이터베이스 오류 발생 - performanceId: {}, error: {}", performanceId, e.getMessage(), e);
+            log.error("채팅방 목록 조회 실패 - performanceId={}, error={}", performanceId, e.getMessage(), e);
             throw new ApiException(ErrorCode.INTERNAL_ERROR);
         }
     }
 
     /**
-     * [설명] 특정 공연의 전체 채팅 게시글 조회
+     * 특정 공연의 "전체 톡방"(PERFORMANCE_ALL)에 해당하는 ChatPost를 조회.
+     * 공연당 하나만 존재할 수 있으며, 없으면 null.
      *
      * @param performanceId 공연 ID
-     * @return 게시글 객체 {@link ChatPost} 또는 존재하지 않을 경우 null
+     * @return PERFORMANCE_ALL 타입 채팅방의 ChatPost, 없으면 null
      */
     public ChatPost findPerformanceAllChatPost(Long performanceId) {
+        log.debug("공연 전체 톡방 조회 - performanceId={}", performanceId);
         return chatPostRepository.findPerformanceAllPost(performanceId)
             .orElse(null);
     }
@@ -300,18 +339,14 @@ public class ChatService {
      * @return 참여 중인 게시글 리스트 {@link ResponseMyChatPostDto}
      */
     public List<ResponseMyChatPostDto> getChatPostJoinList(Long activeId, ActiveMode activeMode, int limit) {
-
+        log.info("참여 채팅방 목록 조회(limit) - profileId={}, mode={}, limit={}", activeId, activeMode, limit);
         List<ChatPost> chatPostList = chatPostRepository.findTopParticipatingByProfileAndModeNative(activeId, activeMode.name(), limit);
-        List<ResponseMyChatPostDto> participatingChatPostDtoList = new ArrayList<>();
-
+        List<ResponseMyChatPostDto> result = new ArrayList<>();
         for (ChatPost chatPost : chatPostList) {
-            ResponseMyChatPostDto dto = ResponseMyChatPostDto.from(chatPost);
-
-            participatingChatPostDtoList.add(dto);
+            result.add(ResponseMyChatPostDto.from(chatPost));
         }
-
-        return participatingChatPostDtoList;
-
+        log.debug("참여 채팅방 목록 반환 - size={}", result.size());
+        return result;
     }
 
     /**

@@ -1,20 +1,30 @@
 /**
  * performance/seatReviewWrite.js — 좌석 리뷰 작성/수정 페이지
  *
+ * - 좌석에 위치(xPos/yPos)가 있으면 공연장 좌석 배치와 동일하게 캔버스에 표시하고 클릭으로 선택.
+ * - 없으면 기존처럼 드롭다운으로만 선택.
+ *
  * [API]
  * - GET /api/performances/{id} : 공연 정보
- * - GET /api/performances/{id}/seats : 좌석 목록(드롭다운)
+ * - GET /api/performances/{id}/seats : 좌석 목록 (xPos, yPos 또는 xRatio, yRatio 포함 시 배치도 표시)
  * - GET /api/performances/{id}/seat-reviews/{reviewId} : 수정 시 기존 리뷰 데이터
  * - POST /api/performances/{id}/seat-reviews : 작성
  * - PATCH /api/performances/{id}/seat-reviews/{reviewId} : 수정
- *
- * [전제] #performanceId, #reviewId(hidden), #seatId, #stars, #content, #submitBtn, #backBtn
  */
 $(function () {
     "use strict";
 
     const performanceId = $("#performanceId").val();
     const reviewId = Number($("#reviewId").val() || 0);
+
+    const SEAT_SIZE_RATIO = 0.05;
+    const gradeColors = { vip: "#fbbf24", r: "#f87171", s: "#60a5fa", a: "#34d399" };
+
+    let seatList = [];
+    let floors = [];
+    let currentFloorIdx = 0;
+    let selectedSeatId = null;
+    let canvas = null, ctx = null;
 
     /** 공연 제목·부가 정보 표시 */
     function loadPerformanceInfo() {
@@ -28,7 +38,7 @@ $(function () {
             const venueName = d?.venueName ?? "-";
             const address = d?.address ?? "-";
             const statusMap = { MUSICAL: "뮤지컬", PLAY: "연극", BAND: "밴드 공연" };
-            const rawCategory = d?.category ?? d?.status; // 서버 category 우선, 없으면 status 폴백
+            const rawCategory = d?.category ?? d?.status;
             const category = statusMap[rawCategory] ?? (rawCategory ?? "-");
             const year = d?.productionYear ?? "-";
             $("#perfSub").text(`${address} · ${venueName} · ${category} · ${year}`);
@@ -42,18 +52,125 @@ $(function () {
             dataType: "json"
         }).done(function (res) {
             const list = res?.data || [];
+            seatList = list;
+
             const $sel = $("#seatId");
             $sel.find("option:not(:first)").remove();
             list.forEach(function (s) {
                 const label = [s.seatNumber, s.seatType, s.seatFloor != null ? s.seatFloor + "층" : ""].filter(Boolean).join(" · ") || "좌석 " + s.seatId;
                 $sel.append($("<option></option>").attr("value", s.seatId).text(label));
             });
+
+            const withPosition = list.filter(function (s) {
+                return (s.xPos != null && s.yPos != null) || (s.xRatio != null && s.yRatio != null);
+            });
+            if (withPosition.length > 0) {
+                floors = buildFloors(list);
+                $("#seatMapWrap").removeClass("d-none");
+                initSeatCanvas();
+                drawSeats();
+            }
             validate();
         }).fail(function (xhr) {
             if (typeof console !== "undefined" && console.error) {
                 console.error("[SeatReviewWrite] loadSeats failed", xhr);
             }
             alert("좌석 목록을 불러오지 못했습니다.");
+        });
+    }
+
+    function buildFloors(list) {
+        const byFloor = {};
+        list.forEach(function (s) {
+            if ((s.xPos == null && s.xRatio == null) || (s.yPos == null && s.yRatio == null)) return;
+            const f = s.seatFloor != null ? s.seatFloor : 1;
+            if (!byFloor[f]) byFloor[f] = [];
+            byFloor[f].push({
+                seatId: s.seatId,
+                seatNumber: s.seatNumber || "",
+                seatType: (s.seatType || "a").toLowerCase(),
+                xRatio: s.xRatio != null ? s.xRatio : (s.xPos / 1000),
+                yRatio: s.yRatio != null ? s.yRatio : (s.yPos / 1000)
+            });
+        });
+        return Object.keys(byFloor).sort(function (a, b) { return Number(a) - Number(b); }).map(function (f) {
+            return { name: f + "층", seats: byFloor[f] };
+        });
+    }
+
+    function initSeatCanvas() {
+        canvas = document.getElementById("seatCanvas");
+        if (!canvas) return;
+        ctx = canvas.getContext("2d");
+        const wrapper = canvas.parentElement;
+        if (!wrapper) return;
+
+        function resize() {
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+            drawSeats();
+        }
+        resize();
+        if (typeof ResizeObserver !== "undefined") {
+            new ResizeObserver(resize).observe(wrapper);
+        }
+
+        var $container = $("#seatFloorTabs");
+        $container.empty();
+        if (floors.length > 1) {
+            floors.forEach(function (f, i) {
+                $container.append($("<button type='button' class='floor-btn'></button>")
+                    .text(f.name).toggleClass("active", i === currentFloorIdx)
+                    .on("click", function () {
+                        currentFloorIdx = i;
+                        $container.find(".floor-btn").removeClass("active").eq(i).addClass("active");
+                        drawSeats();
+                    });
+            });
+        }
+
+        canvas.addEventListener("click", function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const w = canvas.width, h = canvas.height;
+            const size = w * SEAT_SIZE_RATIO;
+            const seats = floors[currentFloorIdx] ? floors[currentFloorIdx].seats : [];
+            for (var i = seats.length - 1; i >= 0; i--) {
+                var s = seats[i];
+                var sx = s.xRatio * w, sy = s.yRatio * h;
+                if (x >= sx && x <= sx + size && y >= sy && y <= sy + size) {
+                    selectedSeatId = s.seatId;
+                    $("#seatId").val(String(s.seatId));
+                    drawSeats();
+                    validate();
+                    return;
+                }
+            }
+        });
+    }
+
+    function drawSeats() {
+        if (!ctx || !canvas || !floors[currentFloorIdx]) return;
+        var w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        var size = w * SEAT_SIZE_RATIO;
+        var seats = floors[currentFloorIdx].seats;
+        seats.forEach(function (s) {
+            var sx = s.xRatio * w, sy = s.yRatio * h;
+            ctx.fillStyle = gradeColors[s.seatType] || gradeColors.a;
+            ctx.strokeStyle = selectedSeatId === s.seatId ? "#E63946" : "#333";
+            ctx.lineWidth = selectedSeatId === s.seatId ? 2 : 1;
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(sx, sy, size, size, size * 0.2);
+            else ctx.rect(sx, sy, size, size);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#000";
+            ctx.font = "bold " + (size * 0.35) + "px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(s.seatNumber || s.seatId, sx + size / 2, sy + size / 2);
         });
     }
 
@@ -89,7 +206,21 @@ $(function () {
         renderStars(Number($("#selectedRating").val() || 0));
     });
 
-    $("#seatId, #content").on("input change", validate);
+    $("#seatId").on("change", function () {
+        selectedSeatId = $(this).val() ? Number($(this).val()) : null;
+        if (floors.length && canvas) {
+            var sid = selectedSeatId;
+            floors.forEach(function (f, i) {
+                if (f.seats.some(function (s) { return s.seatId === sid; })) {
+                    currentFloorIdx = i;
+                    $("#seatFloorTabs .floor-btn").removeClass("active").eq(i).addClass("active");
+                }
+            });
+            drawSeats();
+        }
+        validate();
+    });
+    $("#content").on("input change", validate);
 
     $("#backBtn").on("click", function () {
         history.back();
@@ -106,7 +237,18 @@ $(function () {
             const d = res?.data || {};
             renderStars(Number(d.rating || 0));
             $("#content").val(d.content || "");
-            $("#seatId").val(d.seatId != null ? String(d.seatId) : "");
+            var sid = d.seatId != null ? String(d.seatId) : "";
+            $("#seatId").val(sid);
+            selectedSeatId = sid ? Number(sid) : null;
+            if (floors.length && selectedSeatId) {
+                floors.forEach(function (f, i) {
+                    if (f.seats.some(function (s) { return s.seatId === selectedSeatId; })) {
+                        currentFloorIdx = i;
+                        $("#seatFloorTabs .floor-btn").removeClass("active").eq(i).addClass("active");
+                    }
+                });
+                drawSeats();
+            }
             validate();
         }).fail(function (xhr) {
             if (typeof console !== "undefined" && console.error) {

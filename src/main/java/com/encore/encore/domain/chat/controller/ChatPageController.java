@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
+/**
+ * 공연 채팅 화면(목록·상세·작성폼 등) 페이지 컨트롤러.
+ * <p>
+ * 공연 본 뒤 이어지는 공간(후기/택시/뒤풀이 등) 기획에 따라,
+ * 목록·상세에서 채팅 유형(postType)이 노출됩니다.
+ * </p>
+ */
 @RequiredArgsConstructor
 @Controller
 @Slf4j
@@ -28,17 +35,13 @@ public class ChatPageController {
     private final ChatService chatService;
 
     /**
-     * 채팅 게시물 작성 페이지 이동
-     *
-     * @param model 작성 performance 저장
-     * @return chatPostForm.html 페이지 이동
+     * 해당 공연 소속 채팅 게시글 작성 폼 페이지. performanceId로 공연명 조회 후 폼에 전달.
      */
     @GetMapping("/performances/{performanceId}/chats/new")
     public String post(
         @PathVariable Long performanceId,
-
         Model model) {
-        log.info("채팅 게시글 작성 폼 진입 - performanceId: {}", performanceId);
+        log.info("채팅 게시글 작성 폼 - performanceId={}", performanceId);
         String performanceTitle = chatService.getPerformanceTitle(performanceId);
         model.addAttribute("performanceTitle", performanceTitle);
         model.addAttribute("performanceId", performanceId);
@@ -46,17 +49,13 @@ public class ChatPageController {
     }
 
     /**
-     * 공연 별 채팅방 목록 화면 진입
-     *
-     * @param performanceId
-     * @param model
-     * @param pageable
-     * @return
+     * 공연별 채팅방 목록 페이지. 전체 톡방 정보 + 개별 모집방 목록(페이징)을 모델에 담아 반환.
+     * chatList 항목에 postType, postTypeDisplayName(후기·감상/택시 동승/뒤풀이/일반) 포함.
      */
     @GetMapping("/performances/{performanceId}/chats")
     public String chatListPage(@PathVariable Long performanceId, Model model,
                                @PageableDefault(size = 10) Pageable pageable) {
-        log.info("채팅 목록 페이지 진입 - performanceId: {}", performanceId);
+        log.info("공연 채팅 목록 페이지 - performanceId={}", performanceId);
 
         ChatPost performanceAllChatPost = chatService.findPerformanceAllChatPost(performanceId);
 
@@ -72,12 +71,11 @@ public class ChatPageController {
 
 
     /**
-     * 채팅방 글 상세사항 조회
+     * 채팅 게시글 상세 페이지. 상세 DTO에 postType/postTypeDisplayName 포함.
      *
-     * @param performanceId 공연장 id
-     * @param id            글의 id
-     * @param model         찾은 글 정보 저장
-     * @return chat/chatPostDetail.html 이동
+     * @param performanceId 공연 ID (path)
+     * @param id            게시글 ID (path)
+     * @return chat/chatPostDetail 뷰
      */
     @GetMapping("/performances/{performanceId}/chat/{id}")
     public String chatPostDetail(
@@ -201,14 +199,8 @@ public class ChatPageController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
-            // 로그인 안 됐으면 로그인 페이지로 리다이렉트
             return "redirect:/auth/login";
         }
-
-        if (userDetails == null) {
-            return "redirect:/auth/login";
-        }
-
         Long activeProfileId = userDetails.getActiveProfileId(); // 현재 프로필 ID
         ActiveMode activeMode = userDetails.getActiveMode();
 

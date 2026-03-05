@@ -51,6 +51,14 @@
 
             <div class="divider"></div>
 
+            <!-- 본 공연 관람 후 채팅 참여 CTA (본 공연 체크 시에만 JS에서 노출) -->
+            <div class="chat-cta" id="chatCta" style="display:none;">
+                <div class="chat-cta-text">
+                    이 공연을 본 관객들과 이야기 나눠볼까요?
+                </div>
+                <button type="button" class="chat-cta-btn" id="chatCtaBtn">공연 채팅 참여</button>
+            </div>
+
             <!-- 탭 -->
             <div class="tab-row">
                 <button type="button" class="tab-btn active" data-tab="desc">공연상세설명</button>
@@ -58,6 +66,7 @@
                 <button type="button" class="tab-btn" data-tab="review">
                     공연후기 <span class="rating" id="ratingText">-</span>
                 </button>
+                <button type="button" class="tab-btn" data-tab="seatReview">좌석 리뷰</button>
             </div>
 
             <!-- 탭 콘텐츠 -->
@@ -92,7 +101,43 @@
                         아직 등록된 후기가 없어요
                     </div>
                 </div>
+
+                <!-- 좌석 리뷰 탭: 배치도 + 마우스 오버 시 해당 좌석 리뷰 툴팁 -->
+                <div id="tab-seatReview" class="tab-content">
+                    <div id="seatReviewMapWrap" class="seat-review-map-wrap">
+                        <div id="seatReviewFloorTabs" class="seat-floor-tabs"></div>
+                        <div class="seat-canvas-wrapper">
+                            <canvas id="seatReviewCanvas"></canvas>
+                        </div>
+                        <p class="seat-review-hint">좌석에 마우스를 올리면 리뷰 내용을 볼 수 있습니다</p>
+                    </div>
+                    <div id="seatReviewEmpty" class="review-empty" style="display:none;">
+                        이 공연의 좌석 배치 정보가 없거나, 좌석 리뷰가 없습니다.
+                    </div>
+                    <div class="seat-review-write-wrap mt-2">
+                        <a id="seatReviewWriteLink" th:href="@{/performances/{id}/reviews/seats/new(id=${performanceId})}" class="btn btn-outline-primary btn-sm">좌석 리뷰 작성</a>
+                    </div>
+                    <div id="seatReviewTooltip" class="seat-review-tooltip" style="display:none;"></div>
+                </div>
             </div>
+
+            <!-- 연관 정보: 이 공연의 아티스트 / 이 공연이 열리는 무대 (데이터 있을 때만 JS에서 노출) -->
+            <section class="related-section">
+                <div class="related-item" id="relatedPerformer" style="display:none;">
+                    <div class="related-label">이 공연의 아티스트</div>
+                    <div class="related-value" id="relatedPerformerName"></div>
+                </div>
+                <div class="related-item" id="relatedVenue" style="display:none;">
+                    <div class="related-label">이 공연이 열리는 무대</div>
+                    <button type="button" class="related-link-btn" id="relatedVenueBtn">공연장 상세보기</button>
+                </div>
+            </section>
+
+            <!-- 공연자 본인만 보는 수정/삭제 액션 (소유 여부는 JS에서 /api/performances/{id}/ownership 로 결정) -->
+            <section class="perf-owner-actions" id="perfOwnerActions" style="display:none;">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="editPerformanceBtn">공연 수정</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deletePerformanceBtn">공연 삭제</button>
+            </section>
         </section>
 
         <!-- performanceId 전달 -->

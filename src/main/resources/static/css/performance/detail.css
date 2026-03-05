@@ -84,6 +84,12 @@ body {
     color: #222;
 }
 
+.meta-text.clickable {
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 .map-pill {
     border: 0;
     background: #222;
@@ -99,6 +105,38 @@ body {
     background: #dcdcdc;
     margin: 14px 0;
     border-radius: 4px;
+}
+
+/* 공연 채팅 CTA */
+.chat-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background: #f3f4ff;
+}
+
+.chat-cta-text {
+    font-size: 13px;
+    color: #333;
+}
+
+.chat-cta-btn {
+    border: 0;
+    background: #222;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.chat-cta-btn:active {
+    transform: scale(0.97);
 }
 
 .tab-row {
@@ -243,6 +281,57 @@ a.tab-btn {
 
 .review-write-btn:active {
     transform: scale(0.98);
+}
+
+/* 연관 정보 섹션: 공연자 / 공연장 */
+.related-section {
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.related-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.related-label {
+    font-size: 13px;
+    color: #666;
+}
+
+.related-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+}
+
+.related-link-btn {
+    border: 0;
+    background: #222;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.related-link-btn:active {
+    transform: scale(0.97);
+}
+
+/* 공연자 전용: 공연 수정/삭제 */
+.perf-owner-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 /* 후기 리스트 */
@@ -487,3 +576,61 @@ a.tab-btn {
   font-size: 15px;
   line-height: 1.7;
 }
+
+/* 좌석 리뷰 탭: 배치도 + 호버 툴팁 */
+.seat-review-map-wrap {
+  margin-bottom: 12px;
+}
+.seat-review-map-wrap .seat-floor-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.seat-review-map-wrap .seat-floor-tabs .floor-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.seat-review-map-wrap .seat-floor-tabs .floor-btn.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+.seat-review-map-wrap .seat-canvas-wrapper {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 280px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.seat-review-map-wrap .seat-canvas-wrapper canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+.seat-review-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #888;
+}
+.seat-review-tooltip {
+  position: fixed;
+  max-width: 280px;
+  padding: 10px 12px;
+  background: #333;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  z-index: 1050;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.seat-review-tooltip .tooltip-rating { color: #ffb300; }
+.seat-review-tooltip .tooltip-content { margin-top: 4px; }

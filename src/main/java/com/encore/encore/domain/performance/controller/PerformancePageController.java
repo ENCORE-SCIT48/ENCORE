@@ -59,6 +59,27 @@ public class PerformancePageController {
     }
 
     /**
+     * 공연 등록 페이지 (공연자 전용)
+     */
+    @GetMapping("/new")
+    public String createPage(
+        jakarta.servlet.http.HttpServletRequest request,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return "redirect:/auth/login";
+        }
+        if (userDetails.getActiveMode() != com.encore.encore.domain.member.entity.ActiveMode.ROLE_PERFORMER) {
+            // 공연자 모드가 아니면 프로필 선택으로 유도
+            return "redirect:/profiles/select";
+        }
+
+        model.addAttribute("targetUrl", request != null ? request.getRequestURI() : "/performances/new");
+        return "performance/new";
+    }
+
+    /**
      * 공연 리뷰 작성 페이지 반환
      */
     @GetMapping("/{performanceId}/reviews/new")

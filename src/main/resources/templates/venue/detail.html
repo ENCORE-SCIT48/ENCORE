@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>공연장 상세</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <link rel="stylesheet" th:href="@{/css/venue/list.css}"/>
     <link rel="stylesheet" th:href="@{/css/venue/detail.css}"/>
 </head>
@@ -12,24 +13,39 @@
 <body>
 <div class="app-wrapper">
     <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
-    <main class="app-main">
+    <main class="app-main venue-detail-main">
         <header class="app-header"></header>
 
-        <div id="venueDetailWrap" class="venue-detail-header">
-            <h1 class="venue-detail-name" id="venueName">공연장명</h1>
-            <p class="venue-detail-meta" id="venueMeta">주소 · 연락처</p>
-            <p class="venue-detail-meta" id="venueDesc"></p>
+        <!-- 공연장 정보 카드 (공연자용 대관 폼과 동일한 풍부한 정보, 대관 신청 없음) -->
+        <div id="venueInfo" class="venue-info-wrap">
+            <div class="loading-block">
+                <div class="spinner-border text-secondary" role="status"></div>
+                <p class="mt-2 text-muted small">공연장 정보를 불러오는 중</p>
+            </div>
         </div>
 
-        <section class="seat-review-section">
-            <h3>좌석 리뷰</h3>
-            <p class="text-muted small">이 공연장에서 관람한 공연을 선택한 뒤, 좌석 리뷰를 작성할 수 있습니다. (관람객만 작성 가능)</p>
-            <div class="seat-review-actions">
-                <select id="performanceSelect" class="form-select form-select-sm">
-                    <option value="">공연 선택</option>
-                </select>
-                <button type="button" class="btn btn-primary btn-sm btn-seat-review" id="btnSeatReviewWrite" disabled>좌석 리뷰 작성</button>
-            </div>
+        <!-- 이 공연장에서의 경험들: 공연 목록 + 좌석 리뷰 섹션 래핑 -->
+        <section class="venue-experience-section">
+            <h2 class="venue-experience-title">이 공연장에서의 경험들</h2>
+
+            <section class="venue-experience-block venue-upcoming-section" id="venueUpcomingSection" style="display:none;">
+                <h3 class="venue-experience-subtitle">
+                    <i class="bi bi-calendar-event"></i>
+                    이 공연장에서 열리는 공연
+                </h3>
+                <div id="venueUpcomingList" class="venue-upcoming-list"></div>
+            </section>
+
+            <section class="venue-experience-block seat-review-section">
+                <h3><i class="bi bi-star"></i> 좌석 리뷰</h3>
+                <p class="text-muted small">이 공연장에서 관람한 공연을 선택한 뒤, 좌석 리뷰를 작성할 수 있습니다. (관람객만 작성 가능)</p>
+                <div class="seat-review-actions">
+                    <select id="performanceSelect" class="form-select form-select-sm">
+                        <option value="">공연 선택</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm btn-seat-review" id="btnSeatReviewWrite" disabled>좌석 리뷰 작성</button>
+                </div>
+            </section>
         </section>
     </main>
     <div th:replace="~{fragments/performer/footer :: footer}"></div>

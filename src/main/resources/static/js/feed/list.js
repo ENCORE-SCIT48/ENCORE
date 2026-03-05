@@ -173,6 +173,29 @@ function buildLabels(item) {
         };
     }
 
+    if (type === "RECENT_REVIEW") {
+        const nick = item?.actorNickname ?? "관객";
+        return {
+            badgeText: "공연 후기",
+            subText: `${nick} 님의 후기`,
+        };
+    }
+
+    if (type === "RECENT_SEAT_REVIEW") {
+        const seat = item?.seatLabel ?? "";
+        return {
+            badgeText: "좌석 리뷰",
+            subText: seat ? `좌석 ${seat}` : "좌석 리뷰",
+        };
+    }
+
+    if (type === "REVIEW_REMINDER") {
+        return {
+            badgeText: "내 활동",
+            subText: "내가 본 공연",
+        };
+    }
+
     if (type === "HOT_PERFORMANCE") {
         return {
             badgeText: "추천 공연",

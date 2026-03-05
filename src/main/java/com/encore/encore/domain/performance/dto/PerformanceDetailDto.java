@@ -4,6 +4,7 @@ import com.encore.encore.domain.performance.entity.Performance;
 import com.encore.encore.domain.performance.entity.PerformanceCategory;
 import com.encore.encore.domain.performance.entity.PerformanceStatus;
 import com.encore.encore.domain.venue.entity.Venue;
+import com.encore.encore.domain.member.entity.PerformerProfile;
 import lombok.Getter;
 
 @Getter
@@ -23,6 +24,13 @@ public class PerformanceDetailDto {
     private final String venueName;
     private final String address;
 
+    /** 공연장 상세 화면으로 이동하기 위한 ID (있을 때만 세팅) */
+    private final Long venueId;
+
+    /** 이 공연을 만든 공연자(퍼포머) 정보 - 있을 때만 세팅 */
+    private final Long performerId;
+    private final String performerStageName;
+
     public PerformanceDetailDto(Performance performance) {
         this.performanceId = performance.getPerformanceId();
         this.title = performance.getTitle();
@@ -35,5 +43,10 @@ public class PerformanceDetailDto {
         Venue venue = performance.getVenue();
         this.venueName = venue != null ? venue.getVenueName() : null;
         this.address = venue != null ? venue.getAddress() : null;
+        this.venueId = venue != null ? venue.getVenueId() : null;
+
+        PerformerProfile performer = performance.getPerformerCreator();
+        this.performerId = performer != null ? performer.getPerformerId() : null;
+        this.performerStageName = performer != null ? performer.getStageName() : null;
     }
 }

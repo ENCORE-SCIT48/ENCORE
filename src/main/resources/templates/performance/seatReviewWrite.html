@@ -22,9 +22,16 @@
             <p class="perf-sub" id="perfSub">공연 정보 · 장르 · 제작연도</p>
         </section>
 
-        <!-- 좌석 선택 -->
-        <section class="content-wrap">
-            <label class="content-label" for="seatId">좌석 선택</label>
+        <!-- 좌석 선택: 배치도가 있으면 캔버스로 선택, 없으면 드롭다운만 -->
+        <section class="content-wrap seat-select-section">
+            <label class="content-label">좌석 선택</label>
+            <div id="seatMapWrap" class="seat-map-wrap d-none">
+                <div id="seatFloorTabs" class="seat-floor-tabs"></div>
+                <div class="seat-canvas-wrapper">
+                    <canvas id="seatCanvas" class="seat-canvas"></canvas>
+                </div>
+                <p class="seat-map-hint">좌석을 클릭하면 선택됩니다</p>
+            </div>
             <select id="seatId" class="form-select content-input">
                 <option value="">좌석을 선택해 주세요</option>
             </select>

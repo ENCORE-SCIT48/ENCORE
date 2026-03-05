@@ -3,6 +3,8 @@
 명세·테스트케이스·코드 기준으로 **필수 개발사항**과 **이미 반영한 수정**을 정리했습니다.  
 **푸시 직전**에는 아래 **📋 푸시 전 실행 체크리스트**를 순서대로 확인하세요.
 
+- **develop 풀 후 기능 점검**(푸터/탑바/프로필/마이페이지 링크 등): → `docs/develop-pull-feature-check.md` 참고.
+
 ---
 
 ## ✅ CSS/JS 외부 파일 (프래그먼트)
@@ -32,6 +34,7 @@
 | ☐ | **푸터** — 공연리스트 / 홈 / DM / 채팅방 이동 (역할별 메뉴: 비로그인·USER·PERFORMER·HOST) |
 | ☐ | **DB 테스트 데이터** — 필요 시 `data-test-insert.sql` 실행 |
 | ☐ | **테스트 로그인** — password123 안 되면 앱 실행 → `/dev/bcrypt-password123` 에서 해시 복사 → `UPDATE users SET password_hash = '...'` 실행 |
+| ☐ | **문서** — 기능 추가·변경 시 필요하면 README·docs/*.md 반영 여부 확인 |
 | ☐ | **푸시** — 위 다 확인 후 커밋 & 푸시 |
 
 **"아직 피드가 없습니다" / "공연 리스트 목록 조회 실패" 나올 때**
@@ -67,7 +70,7 @@
 | **모집** | `/posts/performance`, `/posts/performer`, 공연/공연자 모집글 CRUD | 모집글·신청 |
 | **마이페이지** | `/mypage`, `/userprofile`, `/userprofile/setup`, `/performerprofile/*`, `/hostprofile/*`, `/user/notification`, `/user/block`, `/user/follow`, `/performances/watched`, `/performances/wished` | 관람객·공연자·호스트 |
 | **공연자 전용** | `/mypage/performer/*` (posts, performances, applied-*, recruited-performers, venues, manage) | 공연자 마이페이지 |
-| **채팅/DM** | `/chats`, `/chats/join`, `/chat/{roomId}`, `/dm/list`, `/dm/{roomId}`, 관련 API | 채팅방·DM |
+| **채팅/DM** | `/chats`, `/performances/{id}/chats`, `/chats/join`, `/chat/{roomId}`, `/dm/list`, `/dm/{roomId}`, 관련 API | 공연 채팅(유형: 후기/택시/뒤풀이/일반), DM |
 | **기타** | `/report`, `/api/community/reports`, `/dev/bcrypt-password123` | 신고·개발용 |
 
 ---

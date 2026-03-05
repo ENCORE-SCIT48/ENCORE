@@ -30,5 +30,8 @@ public class ResponseDetailChatPostDto {
     private Integer maxMember;
     private LocalDateTime createdAt;
     private String status;
-
+    /** 채팅 유형 코드 (REVIEW, TAXI_SHARE, AFTER_PARTY, GENERAL) */
+    private String postType;
+    /** 화면 표시용 한글 라벨 */
+    private String postTypeDisplayName;
 }

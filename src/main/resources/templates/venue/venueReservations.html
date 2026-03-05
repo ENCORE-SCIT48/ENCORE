@@ -12,7 +12,7 @@
 <div class="app-wrapper">
 
     <header class="app-header">
-        <a href="javascript:history.back()" class="btn-back">
+        <a th:href="@{/mypage}" class="btn-back" title="마이페이지">
             <i class="bi bi-chevron-left"></i>
         </a>
         <span class="header-title" id="headerTitle">대관 요청 관리</span>
@@ -42,9 +42,10 @@
     </main>
 
     <div class="footer-wrapper">
-        <a th:href="@{/venues}" class="footer-link">공연장</a>
+        <a th:href="@{/venues/my}" class="footer-link">내 공연장</a>
+        <a th:href="@{/venues/reservations/manage}" class="footer-link">대관관리</a>
+        <a th:href="@{/mypage}" class="footer-link">마이페이지</a>
         <a th:href="@{/feed}" class="footer-link">홈</a>
-        <a th:href="@{/dm/list}" class="footer-link">DM</a>
     </div>
 </div>
 
