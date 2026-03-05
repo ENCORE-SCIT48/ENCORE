@@ -159,26 +159,28 @@ public interface ChatPostRepository extends JpaRepository<ChatPost, Long> {
             FROM chat_post p
             JOIN chat_room r ON r.post_id = p.id
             JOIN chat_participant cp ON cp.room_id = r.room_id
+            LEFT JOIN performance pf ON pf.performance_id = p.performance_id
             WHERE cp.profile_id = :profileId
               AND cp.profile_mode = :profileModeName
               AND (:onlyMine = false OR p.profile_id = :profileId)
-              AND (:keyword IS NULL OR
-                   (:searchType = 'title' AND p.title LIKE %:keyword%) OR
-                   (:searchType = 'content' AND p.content LIKE %:keyword%)
+              AND (
+                   :keyword IS NULL OR :keyword = ''
+                   OR (:searchType = 'title' AND p.title LIKE CONCAT('%', :keyword, '%'))
+                   OR (:searchType = 'titleContent' AND (p.title LIKE CONCAT('%', :keyword, '%') OR p.content LIKE CONCAT('%', :keyword, '%')))
+                   OR (:searchType = 'performanceTitle' AND pf.title IS NOT NULL AND pf.title LIKE CONCAT('%', :keyword, '%'))
               )
             ORDER BY p.updated_at DESC
             LIMIT :limit OFFSET :offset
         """, nativeQuery = true)
     List<ChatPost> findJoinedChats(
         @Param("profileId") Long profileId,
-        @Param("profileModeName") String profileModeName, // 여기 이름으로 바꾸기
+        @Param("profileModeName") String profileModeName,
         @Param("keyword") String keyword,
         @Param("searchType") String searchType,
         @Param("onlyMine") boolean onlyMine,
         @Param("limit") int limit,
         @Param("offset") int offset
     );
-
 
     @Query("SELECT cp.title FROM ChatPost cp WHERE cp.id = :id")
     String findTitleById(@Param("id") Long id);
