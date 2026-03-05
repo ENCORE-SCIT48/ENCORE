@@ -40,6 +40,13 @@ public class ChatWebSocketController {
         this.dmService = dmService;
     }
 
+    /**
+     * 채팅 메시지를 실시간으로 전송한다
+     *
+     * @param roomId    전송할 채팅방
+     * @param request   전송하는 내용
+     * @param principal 전송하는 유저
+     */
     @MessageMapping("/chat/{roomId}") // 클라이언트 발송 경로
     public void sendChat(
         @DestinationVariable Long roomId,
@@ -66,6 +73,13 @@ public class ChatWebSocketController {
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, result);
     }
 
+    /**
+     * DM방이 채팅을 실시간으로 전송한다.
+     *
+     * @param roomId    채팅을 전송할 방ID
+     * @param request   전송할 정보
+     * @param principal 전송할 유저의 정보
+     */
     @MessageMapping("/dm/{roomId}")
     public void sendDm(
         @DestinationVariable Long roomId,
@@ -107,7 +121,7 @@ public class ChatWebSocketController {
         log.info("UserDetails Username: {}", userDetails.getUsername());
         log.info("상대방 Email: {}", otherUser.email());
 
-// 나에게 전송 시 principal.getName()을 사용해 보세요.
+        // 나에게 전송 시 principal.getName()을 사용해 보세요.
         messagingTemplate.convertAndSendToUser(
             principal.getName(), "/queue/dm/" + roomId,
             result);
