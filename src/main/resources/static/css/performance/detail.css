@@ -310,6 +310,24 @@ body {
     font-weight: 700;
 }
 
+.review-encore-pick {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    word-break: break-word;
+    cursor: pointer;
+}
+.review-encore-pick:hover {
+    color: #333;
+    text-decoration: underline;
+}
+.modal-encore-pick {
+    cursor: pointer;
+}
+.modal-encore-pick:hover {
+    text-decoration: underline;
+}
+
 .review-content {
     font-size: 16px;
     font-weight: 700;

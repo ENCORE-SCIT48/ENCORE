@@ -200,7 +200,7 @@ public class VenueService {
         venue.delete(); // isDeleted = true
         log.info("2026-02-25, [공연장 논리 삭제 완료], VenueID: {}", venueId);
 
-        // 2. 활성 상태인 좌석들만 논리 삭제
+        // 4. 활성 상태인 좌석들만 논리 삭제
         List<Seat> seats = seatRepository.findAllByVenueAndIsDeletedFalse(venue);
         if (!seats.isEmpty()) {
             seats.forEach(Seat::delete);

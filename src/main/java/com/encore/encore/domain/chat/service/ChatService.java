@@ -400,8 +400,9 @@ public class ChatService {
      */
     public void getChatAlreadJoin(Long roomId, Long activeId, ActiveMode activeMode) {
 
+        // isDeleted 여부 무관하게 조회 → 재입장(소프트삭제 복구) 분기 처리 가능
         ChatParticipant chatParticipant = chatParticipantRepository
-            .findByRoom_RoomIdAndProfileIdAndProfileModeAndIsDeletedFalse(roomId, activeId, activeMode)
+            .findByRoom_RoomIdAndProfileIdAndProfileMode(roomId, activeId, activeMode)
             .orElse(null);
 
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)

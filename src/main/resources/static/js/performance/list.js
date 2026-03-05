@@ -123,8 +123,14 @@ $(function () {
                 if (!state.last) state.page += 1;
             })
             .fail(function (xhr) {
-                console.error("[list] 목록 조회 실패", xhr);
-                alert("목록 조회 실패");
+                const status = xhr.status;
+                const text = xhr.responseText || "";
+                console.error("[list] 목록 조회 실패", "status=" + status, text);
+                if (status === 500) {
+                    alert("목록 조회 실패 (서버 오류). 터미널/서버 로그를 확인하고, data-test-insert.sql 실행 여부와 DB 스키마를 확인하세요.");
+                } else {
+                    alert("목록 조회 실패 (HTTP " + status + ")");
+                }
             })
             .always(function () {
                 state.loading = false;
@@ -183,7 +189,7 @@ $(function () {
         window.location.href = `/performances/${id}/reviews/new`;
     });
 
-    // 좌석리뷰
+    // 좌석리뷰 -> 좌석 리뷰 작성 페이지로 이동
     $(document).on("click", ".js-seat-review-btn", function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -191,8 +197,7 @@ $(function () {
         const id = $(this).data("performance-id");
         if (!id) return;
 
-        // 좌석리뷰 작성 URL로 교체
-        alert("좌석리뷰 작성 페이지 URL 연결 필요");
+        window.location.href = `/performances/${id}/reviews/seats/new`;
     });
 
     resetAndLoad();

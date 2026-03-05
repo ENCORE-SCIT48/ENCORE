@@ -23,7 +23,8 @@ $(function () {
             const venueName = d?.venueName ?? "-";
             const address = d?.address ?? "-";
             const statusMap = { MUSICAL: "뮤지컬", PLAY: "연극", BAND: "밴드 공연" };
-            const category = statusMap[d?.status] ?? (d?.status ?? "-");
+            const rawCategory = d?.category ?? d?.status; // 서버가 category 필드를 주로 사용, 없으면 status로 폴백
+            const category = statusMap[rawCategory] ?? (rawCategory ?? "-");
 
             const year = d?.productionYear ?? "-";
             $("#perfSub").text(`${address} · ${venueName} · ${category} · ${year}`);
@@ -80,6 +81,7 @@ $(function () {
             const d = res?.data || {};
             renderStars(Number(d.rating || 0));
             $("#content").val(d.content || "");
+            $("#encorePick").val(d.encorePick || "");
             validate();
         }).fail(function () {
             alert("리뷰 불러오기 실패");
@@ -89,6 +91,7 @@ $(function () {
     $("#submitBtn").off("click").on("click", function () {
         const rating = Number($("#selectedRating").val() || 0);
         const content = ($("#content").val() || "").trim();
+        const encorePick = ($("#encorePick").val() || "").trim();
         const isEdit = !!reviewId;
 
         $("#submitBtn").prop("disabled", true);
@@ -99,7 +102,7 @@ $(function () {
                 : `/api/performances/${performanceId}/reviews`,
             method: isEdit ? "PATCH" : "POST",
             contentType: "application/json",
-            data: JSON.stringify({ rating, content }),
+            data: JSON.stringify({ rating, content, encorePick: encorePick || null }),
             xhrFields: { withCredentials: true }
         }).done(function () {
             window.location.href = `/performances/${performanceId}?tab=review`;

@@ -5,8 +5,15 @@ import com.encore.encore.domain.community.repository.ReviewRepository;
 import com.encore.encore.domain.performance.dto.PerformanceDetailDto;
 import com.encore.encore.domain.performance.dto.PerformanceListItemDto;
 import com.encore.encore.domain.performance.dto.PerformanceReviewItemDto;
+import com.encore.encore.domain.performance.dto.SeatOptionDto;
+import com.encore.encore.domain.performance.dto.SeatReviewItemDto;
 import com.encore.encore.domain.performance.entity.Performance;
+import com.encore.encore.domain.performance.entity.PerformanceCategory;
+import com.encore.encore.domain.performance.entity.PerformanceRecruitStatus;
 import com.encore.encore.domain.performance.repository.PerformanceRepository;
+import com.encore.encore.domain.user.entity.User;
+import com.encore.encore.domain.venue.entity.Seat;
+import com.encore.encore.domain.venue.repository.SeatRepository;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -17,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,39 +34,58 @@ public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
     private final ReviewRepository reviewRepository;
+    private final SeatRepository seatRepository;
 
     /**
      * 공연 목록 조회 (검색/카테고리/페이징 지원)
+     * venueId가 있으면 해당 공연장에서 열리는 공연만 조회(공연장 상세·좌석 리뷰용).
      *
      * - category가 "전체" 또는 비어 있으면 - 제목 검색만 적용하거나(검색어 있을 때), 전체 조회
      * - category가 특정 값이면 status 필터를 적용하고, 검색어가 있으면 title도 함께 검색
      *
-     * @param keyword 공연 제목 검색어(null/빈값 가능)
-     * @param category 카테고리(전체/밴드/뮤지컬/연극 등, null/빈값 가능)
-     * @param pageable 페이징 정보
+     * @param keyword    공연 제목 검색어(null/빈값 가능)
+     * @param category   카테고리(전체/밴드/뮤지컬/연극 등, null/빈값 가능)
+     * @param venueId    공연장 ID(있으면 해당 공연장 공연만, null이면 무시)
+     * @param pageable   페이징 정보
      * @return 공연 목록 페이지(리스트 DTO)
      */
-    public Page<PerformanceListItemDto> getPerformances(String keyword, String category, Pageable pageable) {
-
+    public Page<PerformanceListItemDto> getPerformances(
+        String keyword,
+        String category,
+        Long venueId,
+        Pageable pageable
+    ) {
         boolean hasKeyword = StringUtils.hasText(keyword);
         boolean hasCategory = StringUtils.hasText(category) && !"전체".equals(category);
 
-        log.info("[Performance] list request - keyword={}, category={}, page={}, size={}",
+        log.info("[Performance] list request - keyword={}, category={}, venueId={}, page={}, size={}",
             keyword,
             category,
+            venueId,
             pageable.getPageNumber(),
             pageable.getPageSize()
         );
 
         Page<Performance> performances;
+        PerformanceCategory categoryEnum = null;
+        if (hasCategory) {
+            try {
+                categoryEnum = PerformanceCategory.valueOf(category.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                log.warn("[Performance] invalid category value - category={}", category, e);
+            }
+        }
 
-        // 경우의 수를 명확히 나눠야 "전체 + 검색" 같은 케이스에서 검색이 무시되는 버그를 막을 수 있음
-        if (hasCategory && hasKeyword) {
+        // 공연장 기준 조회 (공연장 상세에서 좌석 리뷰용)
+        if (venueId != null) {
+            performances =
+                performanceRepository.findByVenue_VenueIdAndIsDeletedFalseOrderByCreatedAtDesc(venueId, pageable);
+        } else if (categoryEnum != null && hasKeyword) {
             // 카테고리 + 검색어
-            performances = performanceRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, category, pageable);
-        } else if (hasCategory) {
+            performances = performanceRepository.findByTitleContainingIgnoreCaseAndCategory(keyword, categoryEnum, pageable);
+        } else if (categoryEnum != null) {
             // 카테고리만
-            performances = performanceRepository.findByStatus(category, pageable);
+            performances = performanceRepository.findByCategory(categoryEnum, pageable);
         } else if (hasKeyword) {
             // 전체 + 검색어
             performances = performanceRepository.findByTitleContainingIgnoreCase(keyword, pageable);
@@ -96,14 +121,14 @@ public class PerformanceService {
     }
 
     /**
-     * 핫한 공연 Top10을 조회. (임시 기준 - OPEN 상태 + createdAt 최신순)
+     * 핫한 공연 Top10을 조회. (임시 기준 - recruitStatus=OPEN + createdAt 최신순)
      * @return 핫한 공연 리스트(리스트 DTO)
      */
     public List<PerformanceListItemDto> getHotPerformances() {
-        log.info("[Performance] hot list request - status=OPEN, limit=10");
+        log.info("[Performance] hot list request - recruitStatus=OPEN, limit=10");
 
         List<PerformanceListItemDto> result = performanceRepository
-            .findTop10ByStatusOrderByCreatedAtDesc("OPEN")
+            .findTop10ByRecruitStatusOrderByCreatedAtDesc(PerformanceRecruitStatus.OPEN)
             .stream()
             .map(PerformanceListItemDto::new)
             .toList();
@@ -161,6 +186,7 @@ public class PerformanceService {
             review.getUser() != null ? review.getUser().getNickname() : "-",
             review.getRating(),
             review.getContent(),
+            review.getEncorePick(),
             review.getCreatedAt()
         ));
     }
@@ -187,7 +213,7 @@ public class PerformanceService {
     }
 
     @Transactional
-    public Long createPerformanceReview(Long performanceId, Long userId, Integer rating, String content) {
+    public Long createPerformanceReview(Long performanceId, Long userId, Integer rating, String content, String encorePick) {
 
         if (rating == null || rating < 1 || rating > 5) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "별점은 1~5점이어야 합니다.");
@@ -196,6 +222,11 @@ public class PerformanceService {
         String c = (content == null) ? "" : content.trim();
         if (c.length() < 5) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "리뷰는 5자 이상 입력해 주세요.");
+        }
+
+        String ep = (encorePick == null || encorePick.isBlank()) ? null : encorePick.trim();
+        if (ep != null && ep.length() > 200) {
+            ep = ep.substring(0, 200);
         }
 
         Performance performance = performanceRepository.findById(performanceId)
@@ -210,6 +241,7 @@ public class PerformanceService {
             .seat(null)
             .rating(rating)
             .content(c)
+            .encorePick(ep)
             .build();
 
         return reviewRepository.save(review).getReviewId();
@@ -234,7 +266,8 @@ public class PerformanceService {
 
         return Map.of(
             "rating", review.getRating(),
-            "content", review.getContent()
+            "content", review.getContent(),
+            "encorePick", review.getEncorePick() != null ? review.getEncorePick() : ""
         );
     }
 
@@ -244,7 +277,8 @@ public class PerformanceService {
         Long reviewId,
         Long userId,
         Integer rating,
-        String content
+        String content,
+        String encorePick
     ) {
         if (rating == null || rating < 1 || rating > 5) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "별점은 1~5점이어야 합니다.");
@@ -253,6 +287,11 @@ public class PerformanceService {
         String c = (content == null) ? "" : content.trim();
         if (c.length() < 5) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "리뷰는 5자 이상 입력해 주세요.");
+        }
+
+        String ep = (encorePick == null || encorePick.isBlank()) ? null : encorePick.trim();
+        if (ep != null && ep.length() > 200) {
+            ep = ep.substring(0, 200);
         }
 
         Review review = reviewRepository.findById(reviewId)
@@ -270,6 +309,7 @@ public class PerformanceService {
 
         review.setRating(rating);
         review.setContent(c);
+        review.setEncorePick(ep);
     }
 
     @Transactional
@@ -289,5 +329,210 @@ public class PerformanceService {
 
         // 논리삭제
         review.delete(); // BaseEntity의 isDeleted=true
+    }
+
+    // ─── 좌석 리뷰 (관람객 전용, Controller에서 ROLE_USER 검증) ─────────────────────
+
+    /**
+     * [설명] 해당 공연이 열리는 공연장의 좌석 목록을 조회한다.
+     * 좌석 리뷰 작성 시 좌석 선택 드롭다운용.
+     *
+     * @param performanceId 공연 ID
+     * @return 좌석 옵션 DTO 목록
+     * @throws ApiException 공연 또는 공연장이 없을 경우 NOT_FOUND
+     */
+    public List<SeatOptionDto> getSeatsByPerformanceId(Long performanceId) {
+        Performance performance = performanceRepository.findById(performanceId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
+
+        if (performance.getVenue() == null) {
+            log.warn("[SeatReview] 공연에 장소가 없음 - performanceId={}", performanceId);
+            return List.of();
+        }
+
+        List<Seat> seats = seatRepository.findAllByVenueAndIsDeletedFalse(performance.getVenue());
+        return seats.stream().map(SeatOptionDto::new).toList();
+    }
+
+    /**
+     * [설명] 특정 공연의 좌석 리뷰 목록을 페이징 조회한다.
+     *
+     * @param performanceId 공연 ID
+     * @param pageable      페이징
+     * @return 좌석 리뷰 페이지 (SeatReviewItemDto)
+     */
+    public Page<SeatReviewItemDto> getSeatReviews(Long performanceId, Pageable pageable) {
+        if (!performanceRepository.existsById(performanceId)) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId);
+        }
+
+        Page<Review> page = reviewRepository
+            .findByPerformance_PerformanceIdAndSeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(performanceId, pageable);
+
+        return page.map(r -> new SeatReviewItemDto(
+            r.getReviewId(),
+            r.getUser() != null ? r.getUser().getUserId() : 0L,
+            r.getUser() != null ? r.getUser().getNickname() : "-",
+            r.getRating(),
+            r.getContent(),
+            r.getSeat() != null ? r.getSeat().getSeatId() : null,
+            r.getSeat() != null ? r.getSeat().getSeatNumber() : null,
+            r.getSeat() != null ? r.getSeat().getSeatType() : null,
+            r.getSeat() != null ? r.getSeat().getSeatFloor() : null,
+            r.getCreatedAt()
+        ));
+    }
+
+    /**
+     * [설명] 해당 공연의 좌석 리뷰 평균 별점·개수 요약을 반환한다.
+     *
+     * @param performanceId 공연 ID
+     * @return "avgRating", "reviewCount" 키의 Map
+     */
+    public Map<String, Object> getSeatReviewSummary(Long performanceId) {
+        Object[] row = reviewRepository.getSeatReviewSummary(performanceId);
+        double avgRating = 0.0;
+        long reviewCount = 0L;
+        if (row != null && row.length >= 2) {
+            avgRating = row[0] != null ? ((Number) row[0]).doubleValue() : 0.0;
+            reviewCount = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+        }
+        return Map.of("avgRating", avgRating, "reviewCount", reviewCount);
+    }
+
+    /**
+     * [설명] 좌석 리뷰를 등록한다. (관람객 전용 — Controller에서 ROLE_USER 검증)
+     * 좌석은 해당 공연의 공연장(venue) 소속이어야 한다.
+     *
+     * @param performanceId 공연 ID
+     * @param userId         작성자 회원 ID (관람객)
+     * @param seatId         좌석 ID
+     * @param rating         별점 1~5
+     * @param content        리뷰 내용 5자 이상
+     * @return 생성된 리뷰 ID
+     */
+    @Transactional
+    public Long createSeatReview(Long performanceId, Long userId, Long seatId, Integer rating, String content) {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "별점은 1~5점이어야 합니다.");
+        }
+        String c = (content == null) ? "" : content.trim();
+        if (c.length() < 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "리뷰는 5자 이상 입력해 주세요.");
+        }
+        if (seatId == null) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "좌석을 선택해 주세요.");
+        }
+
+        Performance performance = performanceRepository.findById(performanceId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
+
+        Seat seat = seatRepository.findById(seatId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "좌석을 찾을 수 없습니다. seatId=" + seatId));
+
+        if (performance.getVenue() == null || !performance.getVenue().getVenueId().equals(seat.getVenue().getVenueId())) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "해당 공연 장소의 좌석만 선택할 수 있습니다.");
+        }
+
+        Review review = Review.builder()
+            .performance(performance)
+            .user(User.builder().userId(userId).build())
+            .seat(seat)
+            .rating(rating)
+            .content(c)
+            .build();
+
+        Long savedId = reviewRepository.save(review).getReviewId();
+        log.info("[SeatReview] 작성 완료 - performanceId={}, seatId={}, reviewId={}", performanceId, seatId, savedId);
+        return savedId;
+    }
+
+    /**
+     * [설명] 좌석 리뷰 수정 폼용 단건 조회. 작성자 본인만 조회 가능.
+     *
+     * @param performanceId 공연 ID
+     * @param reviewId      리뷰 ID
+     * @param userId        요청자 회원 ID
+     * @return rating, content, seatId 포함 Map
+     */
+    public Map<String, Object> getSeatReviewForEdit(Long performanceId, Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다."));
+
+        if (review.getPerformance() == null || !performanceId.equals(review.getPerformance().getPerformanceId())) {
+            throw new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+        }
+        if (review.getSeat() == null) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "공연 리뷰는 이 API 대상이 아닙니다.");
+        }
+        if (review.getUser() == null || !userId.equals(review.getUser().getUserId())) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "수정 권한이 없습니다.");
+        }
+
+        return Map.of(
+            "rating", review.getRating(),
+            "content", review.getContent(),
+            "seatId", review.getSeat().getSeatId()
+        );
+    }
+
+    /**
+     * [설명] 좌석 리뷰를 수정한다. 작성자 본인만 가능.
+     *
+     * @param performanceId 공연 ID
+     * @param reviewId       리뷰 ID
+     * @param userId         요청자 회원 ID
+     * @param rating         별점 1~5
+     * @param content        리뷰 내용 5자 이상
+     */
+    @Transactional
+    public void updateSeatReview(Long performanceId, Long reviewId, Long userId, Integer rating, String content) {
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "별점은 1~5점이어야 합니다.");
+        }
+        String c = (content == null) ? "" : content.trim();
+        if (c.length() < 5) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "리뷰는 5자 이상 입력해 주세요.");
+        }
+
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다. reviewId=" + reviewId));
+
+        if (review.getPerformance() == null || !review.getPerformance().getPerformanceId().equals(performanceId)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "해당 공연의 리뷰가 아닙니다.");
+        }
+        if (review.getSeat() == null) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "공연 리뷰는 이 API 대상이 아닙니다.");
+        }
+        if (review.getUser() == null || !review.getUser().getUserId().equals(userId)) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "수정 권한이 없습니다.");
+        }
+
+        review.setRating(rating);
+        review.setContent(c);
+        log.info("[SeatReview] 수정 완료 - reviewId={}", reviewId);
+    }
+
+    /**
+     * [설명] 좌석 리뷰를 논리 삭제한다. 작성자 본인만 가능.
+     *
+     * @param performanceId 공연 ID
+     * @param reviewId      리뷰 ID
+     * @param userId        요청자 회원 ID
+     */
+    @Transactional
+    public void deleteSeatReview(Long performanceId, Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "리뷰를 찾을 수 없습니다. reviewId=" + reviewId));
+
+        if (review.getPerformance() == null || !review.getPerformance().getPerformanceId().equals(performanceId)) {
+            throw new ApiException(ErrorCode.INVALID_REQUEST, "공연에 속한 리뷰가 아닙니다.");
+        }
+        if (review.getUser() == null || !review.getUser().getUserId().equals(userId)) {
+            throw new ApiException(ErrorCode.FORBIDDEN, "삭제 권한이 없습니다.");
+        }
+
+        review.delete();
+        log.info("[SeatReview] 삭제 완료 - reviewId={}", reviewId);
     }
 }

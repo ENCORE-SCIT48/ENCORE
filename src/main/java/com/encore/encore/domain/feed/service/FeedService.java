@@ -49,9 +49,9 @@ public class FeedService {
      *   추후 HOT 공연/랜덤 공연 기반으로 확장할 수 있다.
      */
     public FeedResponseDto getGuestFeed() {
-        // 임시 구현: OPEN 상태 공연 중 createdAt 최신순 Top10을 HOT 피드로 노출
+        // 삭제되지 않은 공연 중 최신순 Top10을 HOT 피드로 노출 (비로그인/테스트 데이터 대응)
         List<Performance> hotPerformances = performanceRepository
-            .findTop10ByStatusOrderByCreatedAtDesc("OPEN");
+            .findTop10ByIsDeletedFalseOrderByCreatedAtDesc();
 
         List<FeedItemDto> items = new ArrayList<>();
         for (Performance p : hotPerformances) {

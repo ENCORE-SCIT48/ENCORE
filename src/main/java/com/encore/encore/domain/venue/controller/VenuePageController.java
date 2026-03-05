@@ -1,6 +1,9 @@
 package com.encore.encore.domain.venue.controller;
 
+import com.encore.encore.domain.member.entity.ActiveMode;
+import com.encore.encore.global.config.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,10 +15,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/venues")
 public class VenuePageController {
 
+    /**
+     * 공연장 목록 (단일). 프로필에 따라 카드 클릭 동작만 다름.
+     * - 유저(ROLE_USER): 공연장 상세(좌석 리뷰) → /venues/{id}
+     * - 공연자(ROLE_PERFORMER): 대관 신청 → /venues/{id}/reservation
+     */
     @GetMapping
-    public String listPage() {
-        log.info("[VenuePage] list page requested");
+    public String listPage(
+        Model model,
+        jakarta.servlet.http.HttpServletRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        String activeMode = (userDetails != null && userDetails.getActiveMode() != null)
+            ? userDetails.getActiveMode().name()
+            : ActiveMode.ROLE_USER.name();
+        log.info("[VenuePage] list page requested, activeMode={}", activeMode);
+
+        model.addAttribute("targetUrl", request != null ? request.getRequestURI() : "/venues");
+        model.addAttribute("activeMode", activeMode);
         return "venue/list";
+    }
+
+    /**
+     * 기존 공연자용 URL → 동일 목록으로 리다이렉트 (리스트 하나로 통합)
+     */
+    @GetMapping("/performer")
+    public String performerVenueListRedirect() {
+        log.info("[VenuePage] /venues/performer → /venues redirect");
+        return "redirect:/venues";
+    }
+
+    /**
+     * 공연장 상세 페이지 (좌석 리뷰 작성 진입점 포함)
+     *
+     * @param venueId 공연장 ID
+     * @param model   venueId 전달
+     * @return venue/detail 템플릿
+     */
+    @GetMapping("/{venueId}")
+    public String detailPage(
+        @PathVariable Long venueId,
+        Model model,
+        jakarta.servlet.http.HttpServletRequest request
+    ) {
+        log.info("[VenuePage] detail page requested - venueId={}", venueId);
+        model.addAttribute("venueId", venueId);
+        model.addAttribute("targetUrl", request != null ? request.getRequestURI() : ("/venues/" + venueId));
+        return "venue/detail";
     }
 
     // 등록 모드
@@ -62,10 +108,4 @@ public class VenuePageController {
         return "venue/venueReservations";
     }
 
-    // [공연자] 공연장 탐색 목록 — 카드 클릭 시 /{venueId}/reservation 으로 이동
-    @GetMapping("/performer")
-    public String performerVenueListPage() {
-        log.info("[VenuePage] performer venue list page requested");
-        return "venue/performerVenueList";
-    }
 }

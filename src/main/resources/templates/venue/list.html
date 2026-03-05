@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,6 +48,9 @@
     </main>
     <div th:replace="~{fragments/performer/footer :: footer}"></div>
 </div>
+
+<!-- 프로필에 따라 카드 클릭 동작 분기: ROLE_PERFORMER → 대관신청, 그 외 → 공연장 상세(좌석리뷰) -->
+<input type="hidden" id="activeMode" th:value="${activeMode}" />
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/js/venue/list.js}"></script>

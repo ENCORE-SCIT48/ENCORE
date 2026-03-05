@@ -1,6 +1,8 @@
 package com.encore.encore.domain.performance.repository;
 
 import com.encore.encore.domain.performance.entity.Performance;
+import com.encore.encore.domain.performance.entity.PerformanceCategory;
+import com.encore.encore.domain.performance.entity.PerformanceRecruitStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,31 +24,38 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
     Page<Performance> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
     /**
-     * 제목 + 카테고리(status) 검색
+     * 제목 + 카테고리(category=장르) 검색
      *
      * @param title    검색어(공연 제목)
-     * @param status   카테고리
+     * @param category 카테고리(장르)
      * @param pageable 페이징 정보
      * @return 검색된 공연 페이지
      */
-    Page<Performance> findByTitleContainingIgnoreCaseAndStatus(String title, String status, Pageable pageable);
+    Page<Performance> findByTitleContainingIgnoreCaseAndCategory(String title, PerformanceCategory category, Pageable pageable);
 
     /**
-     * 카테고리(status)만으로 조회
+     * 카테고리(category=장르)만으로 조회
      *
-     * @param status   카테고리
+     * @param category 카테고리(장르)
      * @param pageable 페이징 정보
      * @return 카테고리별 공연 페이지
      */
-    Page<Performance> findByStatus(String status, Pageable pageable);
+    Page<Performance> findByCategory(PerformanceCategory category, Pageable pageable);
 
     /**
-     * 핫한 공연 Top10 조회 (임시 기준 - createdAt 최신순)
+     * 핫한 공연 Top10 조회 (임시 기준 - recruitStatus=OPEN + createdAt 최신순)
      *
-     * @param status 대상 상태(예: OPEN)
+     * @param recruitStatus 모집 상태(예: OPEN)
      * @return 최신순 Top10 공연
      */
-    List<Performance> findTop10ByStatusOrderByCreatedAtDesc(String status);
+    List<Performance> findTop10ByRecruitStatusOrderByCreatedAtDesc(PerformanceRecruitStatus recruitStatus);
+
+    /**
+     * 삭제되지 않은 공연 중 최신순 Top 10 (게스트 피드용, status 무관)
+     *
+     * @return 최신순 공연 목록
+     */
+    List<Performance> findTop10ByIsDeletedFalseOrderByCreatedAtDesc();
 
     // 공연 상세 조회: venue를 fetch join 해서 LAZY 문제 방지
     @Query("""
@@ -61,4 +70,16 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
     String findTitleByPerformanceId(Long performanceId);
 
     boolean existsByTitleAndIsDeletedFalse(String title);
+
+    /**
+     * 특정 공연장에서 열리는 공연 목록 (공연장 상세·좌석 리뷰용)
+     *
+     * @param venueId  공연장 ID
+     * @param pageable 페이징
+     * @return 해당 공연장 공연 페이지
+     */
+    Page<Performance> findByVenue_VenueIdAndIsDeletedFalseOrderByCreatedAtDesc(
+        Long venueId,
+        Pageable pageable
+    );
 }

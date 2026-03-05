@@ -103,6 +103,6 @@ public class ProfileController {
                 case ROLE_HOST -> "redirect:/hostprofile/setup";
             };
         }
-        return "redirect:/";
+        return "redirect:/feed";
     }
 }

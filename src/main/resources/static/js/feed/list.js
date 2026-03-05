@@ -16,7 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((items) => renderFeed(items, feedListEl, feedEmptyEl))
     .catch((err) => {
         console.error("[feed] load error:", err);
-        renderFeed([], feedListEl, feedEmptyEl); // 에러여도 빈화면/빈문구는 보여주기
+        renderFeed([], feedListEl, feedEmptyEl);
+        // API 실패 시 사용자에게 안내 (빈 목록과 구분)
+        if (feedEmptyEl) {
+            feedEmptyEl.textContent = "피드를 불러오지 못했습니다. 서버 로그와 DB 설정·테스트 데이터(data-test-insert.sql)를 확인하세요.";
+        }
     });
 });
 

@@ -1,26 +1,27 @@
 /**
- * [Venue List Page Script]
- * - 검색창(부트스트랩 d-flex 폼) + 공연장 리스트 렌더링
+ * [Venue List Page Script] — 공연장 목록 단일 페이지 (프로필별 동작 분기)
  * - API: GET /api/venues?keyword=&page=&size=
  * - 응답: CommonResponse<Page<VenueListItemDto>>
+ * - 카드 클릭: 공연자(ROLE_PERFORMER) → /venues/{id}/reservation (대관 신청), 유저 등 → /venues/{id} (상세, 좌석 리뷰)
+ * - activeMode는 서버에서 #activeMode hidden 값으로 전달
  *
  * [HTML 전제]
- * - input  : #venueSearchInput
- * - list   : #venueList
- * - empty  : #venueEmpty
- * - button : .venue-search-btn  (없어도 동작하도록 optional 처리)
+ * - #venueSearchInput, #venueList, #venueEmpty, #activeMode(optional, 기본 ROLE_USER)
  */
 (() => {
     const $input = document.getElementById("venueSearchInput");
     const $list = document.getElementById("venueList");
     const $empty = document.getElementById("venueEmpty");
     const $searchBtn = document.querySelector(".venue-search-btn");
+    const $activeMode = document.getElementById("activeMode");
 
-    // 필수 DOM이 없으면 종료 (템플릿 누락/ID 오타 방지)
     if (!$input || !$list || !$empty) {
         console.error("[VenueList] Required elements not found. Check IDs: venueSearchInput, venueList, venueEmpty");
         return;
     }
+
+    /** 공연자 프로필이면 대관 신청으로, 아니면 공연장 상세(좌석 리뷰)로 이동 */
+    const isPerformerProfile = ($activeMode && $activeMode.value === "ROLE_PERFORMER");
 
     const DEFAULT_PAGE = 0;
     const DEFAULT_SIZE = Number($input?.dataset?.size || 10);
@@ -88,12 +89,16 @@
 
         $list.insertAdjacentHTML("beforeend", html);
 
-        // 카드 클릭 시 공연자용 대관 신청 페이지로 이동
+        // 카드 클릭: 프로필에 따라 대관 신청(공연자) 또는 공연장 상세(유저)
         document.querySelectorAll(".venue-card").forEach((el) => {
             el.addEventListener("click", () => {
                 const venueId = el.getAttribute("data-id");
                 if (!venueId) return;
-                window.location.href = `/venues/${venueId}/reservation`;
+                if (isPerformerProfile) {
+                    window.location.href = `/venues/${venueId}/reservation`;
+                } else {
+                    window.location.href = `/venues/${venueId}`;
+                }
             });
         });
     }

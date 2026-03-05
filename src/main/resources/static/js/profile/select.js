@@ -36,7 +36,7 @@ function switchProfileMode(mode) {
                 window.location.href = response.url; // 서버가 지정한 경로(setup 또는 메인)로 이동
             } else {
                 // 리다이렉트가 아닐 경우 응답 처리에 따라 메인으로 이동
-                window.location.href = "/";
+                window.location.href = "/feed";
             }
         })
         .catch((error) => {

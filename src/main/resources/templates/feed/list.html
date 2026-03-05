@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -15,7 +15,7 @@
     <main class="app-main">
         <header class="app-header">
             <!-- profile fragment는 파라미터 필수 -->
-            <div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
+            <div th:replace="~{fragments/profile :: profile('/mypage')}"></div>
 
             <h1 class="feed-title">피드</h1>
         </header>

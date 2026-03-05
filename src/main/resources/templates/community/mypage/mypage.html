@@ -20,7 +20,7 @@
       <!-- ===== 상단 ===== -->
       <div class="top-bar">
         <div class="top-left">
-          <a th:href="@{/}" class="back-btn">←</a>
+          <a th:href="@{/feed}" class="back-btn">←</a>
         </div>
         <div class="top-center">
           <div class="page-title">마이페이지</div>
@@ -49,16 +49,29 @@
       <!-- ===== 공통 설정 ===== -->
       <div class="section-title">공통 설정</div>
       <div class="menu-list">
-        <a href="#" class="menu-item">회원정보 수정</a>
-        <a href="#" class="menu-item">프로필 수정</a>
-        <a href="#" class="menu-item">알림 설정</a>
-        <a href="#" class="menu-item">차단 목록 관리</a>
+        <a th:href="@{/userprofile}" class="menu-item">관람객 프로필 보기</a>
+        <a th:href="@{/userprofile/setup}" class="menu-item">관람객 프로필 설정</a>
+        <a th:href="@{/user/notification}" class="menu-item">알림 설정</a>
+        <a th:href="@{/user/block}" class="menu-item">차단 목록 관리</a>
         <form th:action="@{/logout}" method="post" style="margin:0;">
           <button type="submit" class="menu-item logout-btn">
             로그아웃
           </button>
         </form>
         <a href="#" class="menu-item">회원 탈퇴</a>
+      </div>
+
+      <!-- ===== 관람객 전용: 내가 본 공연 / 찜한 공연 ===== -->
+      <div th:if="${profileMode == 'ROLE_USER'}">
+        <div class="section-title">관람객 활동</div>
+        <div class="menu-list">
+          <a th:href="@{/performances/watched}" class="menu-item">
+            내가 본 공연
+          </a>
+          <a th:href="@{/performances/wished}" class="menu-item">
+            내가 찜한 공연
+          </a>
+        </div>
       </div>
 
       <!-- ===== 공연자 전용 ===== -->
@@ -85,6 +98,10 @@
 
           <a th:href="@{/mypage/performer/recruited-performers}" class="menu-item">
             내가 모집한 공연자
+          </a>
+
+          <a th:href="@{/venues/reservations/my}" class="menu-item">
+            내 대관 신청 목록
           </a>
 
           <a th:href="@{/mypage/performer/venues}" class="menu-item">

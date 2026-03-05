@@ -1,61 +1,108 @@
-<div th:fragment="profile(targetUrl)">
+<div th:fragment="profile(targetUrl)" class="profile-dropdown-wrap">
   <style>
-    .profile-link {
-      text-decoration: none;
-      display: block;
-    }
-
+    .profile-dropdown-wrap { position: absolute; top: 16px; right: 16px; z-index: 1000; }
     .profile-circle {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px;
       background-color: #e5e5e5;
       border-radius: 50%;
       cursor: pointer;
+      border: none;
+      padding: 0;
+      display: block;
     }
-
     .profile-circle::before {
       content: "";
       position: absolute;
-      top: 10px;
-      left: 50%;
+      top: 10px; left: 50%;
       transform: translateX(-50%);
-      width: 14px;
-      height: 14px;
+      width: 14px; height: 14px;
       background-color: #bdbdbd;
       border-radius: 50%;
     }
-
     .profile-circle::after {
       content: "";
       position: absolute;
-      bottom: 8px;
-      left: 50%;
+      bottom: 8px; left: 50%;
       transform: translateX(-50%);
-      width: 22px;
-      height: 14px;
+      width: 22px; height: 14px;
       background-color: #bdbdbd;
       border-radius: 10px 10px 6px 6px;
     }
+    .profile-circle--has-img::before,
+    .profile-circle--has-img::after { display: none; }
+    .profile-circle-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+    .profile-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%; right: 0;
+      margin-top: 8px;
+      min-width: 140px;
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 4px 0;
+      list-style: none;
+      margin-bottom: 0;
+    }
+    .profile-dropdown-wrap.is-open .profile-dropdown-menu { display: block; }
+    .profile-dropdown-menu a,
+    .profile-dropdown-menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 16px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      text-decoration: none;
+    }
+    .profile-dropdown-menu a:hover,
+    .profile-dropdown-menu button:hover {
+      background-color: #f8f9fa;
+    }
   </style>
 
-  <a th:href="${targetUrl}" class="profile-link">
-    <div class="profile-circle"></div>
-  </a>
+  <button type="button" class="profile-circle" th:classappend="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()} ? 'profile-circle--has-img'" aria-label="프로필 메뉴" data-profile-toggle>
+    <img th:if="${currentProfileImageUrl != null and !currentProfileImageUrl.isEmpty()}" th:src="${currentProfileImageUrl}" alt="프로필" class="profile-circle-img" />
+  </button>
+  <ul class="profile-dropdown-menu" data-profile-menu>
+    <!-- 비로그인: 로그인 -->
+    <li sec:authorize="!isAuthenticated()">
+      <a th:href="@{/auth/login}">로그인</a>
+    </li>
+    <!-- 로그인: 마이페이지, 로그아웃 -->
+    <li sec:authorize="isAuthenticated()">
+      <a th:href="@{/mypage}">마이페이지</a>
+    </li>
+    <li sec:authorize="isAuthenticated()">
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit">로그아웃</button>
+      </form>
+    </li>
+  </ul>
 
-
+  <script>
+    (function() {
+      var wrap = document.currentScript.parentElement;
+      var toggle = wrap.querySelector('[data-profile-toggle]');
+      var menu = wrap.querySelector('[data-profile-menu]');
+      if (!toggle || !menu) return;
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        wrap.classList.toggle('is-open');
+      });
+      document.addEventListener('click', function() { wrap.classList.remove('is-open'); });
+      menu.addEventListener('click', function(e) { e.stopPropagation(); });
+    })();
+  </script>
 </div>
 
-
-<!--
-
-profile 사용 예시
-
-아래와 같이 마이 페이지로 가는 url 넣기
-
-<div th:replace="~{fragments/profile :: profile('/my-info')}"></div>
-
-
--->
+<!-- 사용 예: <div th:replace="~{fragments/profile :: profile('/mypage')}"></div> -->

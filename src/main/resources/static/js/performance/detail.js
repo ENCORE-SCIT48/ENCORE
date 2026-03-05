@@ -70,9 +70,9 @@ $(function () {
         });
     }
 
-    function statusToCategory(status) {
+    function statusToCategory(categoryOrStatus) {
         const map = { MUSICAL: "뮤지컬", PLAY: "연극", BAND: "밴드 공연" };
-        return map[status] || status || "-";
+        return map[categoryOrStatus] || categoryOrStatus || "-";
     }
 
     function setWishUI(on) {
@@ -161,7 +161,8 @@ $(function () {
     }
 
     function renderDetail(d) {
-        $("#categoryText").text(statusToCategory(d?.status ?? "-"));
+        const rawCategory = d?.category ?? d?.status; // 서버 category 우선, 없으면 구버전 status 폴백
+        $("#categoryText").text(statusToCategory(rawCategory ?? "-"));
         $("#perfTitle").text(escapeHtml(d?.title ?? "공연 제목"));
 
         const venueName = d?.venueName ?? "-";
@@ -292,9 +293,25 @@ $(function () {
         const nickname = r?.nickname ?? "-";
         const createdAt = (r?.createdAt ?? "").replace("T", " ").substring(0, 16);
         const content = r?.content ?? "";
+        const encorePick = (r?.encorePick && String(r.encorePick).trim()) ? String(r.encorePick).trim() : "";
 
         $("#modalStars").text(stars);
         $("#modalMeta").text(`${nickname} · ${createdAt}`);
+        if (encorePick) {
+            $("#modalEncorePick")
+                .text("🎵 Encore pick · " + encorePick)
+                .attr("title", "클릭하면 공연 상단으로 이동")
+                .show()
+                .off("click")
+                .on("click", function () {
+                    reviewModal.hide();
+                    setTimeout(function () {
+                        document.getElementById("performanceHeader")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 300);
+                });
+        } else {
+            $("#modalEncorePick").hide();
+        }
         $("#modalContent").text(content);
 
         if (!reviewModal) {
@@ -303,10 +320,15 @@ $(function () {
         reviewModal.show();
     }
 
+    function scrollToPerformanceHeader() {
+        document.getElementById("performanceHeader")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     function buildReviewCard(r) {
         const nickname = escapeHtml(r?.nickname ?? "-");
         const rating = Number(r?.rating ?? 0);
         const content = escapeHtml(r?.content ?? "");
+        const encorePick = (r?.encorePick && String(r.encorePick).trim()) ? escapeHtml(String(r.encorePick).trim()) : "";
         const createdAt = escapeHtml((r?.createdAt ?? "").replace("T", " ").substring(0, 16));
 
         const reviewId = r?.reviewId;
@@ -348,7 +370,7 @@ $(function () {
                         <span class="review-dot">·</span>
                         <span class="review-date">${createdAt}</span>
                     </div>
-
+                    ${encorePick ? `<div class="review-encore-pick js-encore-pick-scroll" role="button" tabindex="0" title="클릭하면 공연 상단으로 이동">🎵 Encore pick · ${encorePick}</div>` : ""}
                     <div class="review-content">${content}</div>
                 </div>
 
@@ -481,10 +503,23 @@ $(function () {
         loadReviews(false);
     });
 
+    // Encore pick 클릭 -> 공연 상단으로 스크롤
+    $(document).on("click", ".js-encore-pick-scroll", function (e) {
+        e.stopPropagation();
+        scrollToPerformanceHeader();
+    });
+    $(document).on("keydown", ".js-encore-pick-scroll", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToPerformanceHeader();
+        }
+    });
+
     // 리뷰 카드 클릭 -> 상세 모달 오픈
     $(document).on("click", ".review-card", function (e) {
-        // 액션 버튼(수정/삭제/신고) 눌렀으면 모달 열지 않음
-        if ($(e.target).closest(".review-action-btn").length) return;
+        // 액션 버튼(수정/삭제/신고), Encore pick 눌렀으면 모달 열지 않음
+        if ($(e.target).closest(".review-action-btn, .js-encore-pick-scroll").length) return;
 
         const reviewId = $(this).data("review-id");
         if (!reviewId) return;
