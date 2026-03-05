@@ -141,6 +141,17 @@ function updatePost(postId) {
   const title = $('input[name="title"]').val().trim();
   const content = $('textarea[name="content"]').val().trim();
   const capacity = Number($('input[name="capacity"]').val());
+  const recruitArea = $('input[name="recruitArea"]').val().trim();
+
+  const recruitCategory = $('input[name="recruitCategory"]:checked')
+    .map(function () { return this.value; })
+    .get()
+    
+
+  const recruitPart = $('input[name="recruitPart"]:checked')
+    .map(function () { return this.value; })
+    .get()
+    
 
   if (!title || !content) {
     alert('제목과 내용을 입력하세요.');
@@ -159,7 +170,10 @@ function updatePost(postId) {
     data: JSON.stringify({
       title: title,
       content: content,
-      capacity: capacity
+      capacity: capacity,
+      recruitCategory: recruitCategory,
+      recruitPart: recruitPart,
+      recruitArea: recruitArea
     }),
     success: function (res) {
       if (res.success) {

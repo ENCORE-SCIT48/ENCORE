@@ -1,5 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+  // 필터 버튼 토글
+  $("#filterToggleBtn").click(function () {
+    $("#filterArea").slideToggle(200);
+  });
+
   $(document).on("click", ".recruit-btn", function () {
 
     const targetProfileId = Number(this.dataset.profileId);
