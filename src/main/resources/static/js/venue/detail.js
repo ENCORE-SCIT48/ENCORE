@@ -98,17 +98,24 @@
 
     /** 공연이 선택되었을 때만 "좌석 리뷰 작성" 버튼 활성화 */
     function toggleSeatReviewButton() {
+        if (!$btnSeatReview || !$perfSelect) return;
         $btnSeatReview.disabled = !$perfSelect.value;
     }
 
-    $perfSelect.addEventListener("change", toggleSeatReviewButton);
+    if ($perfSelect) {
+      $perfSelect.addEventListener("change", toggleSeatReviewButton);
+    }
 
-    $btnSeatReview.addEventListener("click", function () {
-        const performanceId = $perfSelect.value;
-        if (!performanceId) return;
-        window.location.href = "/performances/" + performanceId + "/reviews/seats/new";
-    });
+    if ($btnSeatReview) {
+      $btnSeatReview.addEventListener("click", function () {
+          const performanceId = $perfSelect.value;
+          if (!performanceId) return;
+          window.location.href = "/performances/" + performanceId + "/reviews/seats/new";
+      });
+    }
 
     loadVenue();
-    loadPerformances();
+    if ($perfSelect) {
+      loadPerformances();
+    }
 })();
