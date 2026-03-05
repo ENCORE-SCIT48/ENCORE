@@ -19,7 +19,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
@@ -44,15 +43,25 @@ public class ChatWebSocketController {
     @MessageMapping("/chat/{roomId}") // 클라이언트 발송 경로
     public void sendChat(
         @DestinationVariable Long roomId,
-        RequestChatMessage request,
-        @AuthenticationPrincipal CustomUserDetails userDetails
+        @Payload RequestChatMessage request,
+        Principal principal
     ) {
+
+        if (principal == null) {
+            log.error("인증된 사용자 정보가 없습니다.");
+            throw new ApiException(ErrorCode.NOT_FOUND, "인증 정보가 없습니다.");
+        }
+
+        Authentication auth = (Authentication) principal;
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+
         Long activeProfileId = userDetails.getActiveProfileId();
         ActiveMode activeMode = userDetails.getActiveMode();
 
         ResponseChatMessage result = chatMessageService.sendMessage(
             roomId, activeProfileId, activeMode, request
         );
+
 
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, result);
     }

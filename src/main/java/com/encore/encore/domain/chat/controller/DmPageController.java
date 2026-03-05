@@ -65,8 +65,8 @@ public class DmPageController {
         model.addAttribute("userDetail", dto);
         model.addAttribute("participantStatus", participantStatus);
         model.addAttribute("roomId", roomId);
-        model.addAttribute("activeProfileId", activeMode);
-        model.addAttribute("activeMode", activeMode);
+        model.addAttribute("activeProfileId", activeProfileId);
+        model.addAttribute("activeMode", activeMode.name());
 
         return "chat/dm/dmRoom";
     }
