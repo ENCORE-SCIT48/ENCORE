@@ -159,10 +159,11 @@ UPDATE performer_profile SET profile_image_url = '/image/test/performer2.jpg' WH
 UPDATE host_profile SET profile_image_url = '/image/test/host1.jpg' WHERE user_id = 3;
 UPDATE venue SET venue_image = '/image/test/venue1.jpg' WHERE venue_id = 1;
 UPDATE venue SET venue_image = '/image/test/venue2.jpg' WHERE venue_id = 2;
+*/
+-- 피드에서 공연 포스터가 보이도록 공연 이미지 URL만 기본 적용 (실제 파일은 static/image/test/ 에 두면 됨)
 UPDATE performance SET performance_image_url = '/image/test/performance1.jpg' WHERE performance_id = 1;
 UPDATE performance SET performance_image_url = '/image/test/performance2.jpg' WHERE performance_id = 2;
 UPDATE performance SET performance_image_url = '/image/test/performance3.jpg' WHERE performance_id = 3;
-*/
 
 -- -----------------------------------------------------------------------------
 -- [비밀번호] password123 로그인 안 되면: 앱 실행 → /dev/bcrypt-password123 에서 해시 복사 후 아래 주석 해제 실행

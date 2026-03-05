@@ -24,6 +24,27 @@ public class FeedService {
     private final UserRelationRepository userRelationRepository;
     private final PerformanceRepository performanceRepository;
 
+    /**
+     * 게스트/빈 피드 공통으로 사용하는 HOT 공연 카드 생성.
+     */
+    private List<FeedItemDto> buildHotPerformances() {
+        List<Performance> hotPerformances = performanceRepository
+            .findTop10ByIsDeletedFalseOrderByCreatedAtDesc();
+
+        List<FeedItemDto> items = new ArrayList<>();
+        for (Performance p : hotPerformances) {
+            items.add(FeedItemDto.builder()
+                .type("HOT_PERFORMANCE")
+                .performanceId(p.getPerformanceId())
+                .title(p.getTitle())
+                .performanceImageUrl(p.getPerformanceImageUrl())
+                .startTime(null)
+                .message("지금 인기 있는 공연이에요")
+                .build());
+        }
+        return items;
+    }
+
     // 시작 30분 전 알림
     private static final int NOTIFY_BEFORE_MINUTES = 30;
 
@@ -37,6 +58,11 @@ public class FeedService {
         result.addAll(buildUpcomingWished(now, loginUserId));
         result.addAll(buildFollowWished(now, loginUserId));
 
+        // 아직 피드가 비어 있으면 HOT 공연으로 채워서 최소한의 볼거리는 제공
+        if (result.isEmpty()) {
+            result.addAll(buildHotPerformances());
+        }
+
         return FeedResponseDto.builder()
             .items(result)
             .build();
@@ -49,23 +75,9 @@ public class FeedService {
      *   추후 HOT 공연/랜덤 공연 기반으로 확장할 수 있다.
      */
     public FeedResponseDto getGuestFeed() {
-        // 삭제되지 않은 공연 중 최신순 Top10을 HOT 피드로 노출 (비로그인/테스트 데이터 대응)
-        List<Performance> hotPerformances = performanceRepository
-            .findTop10ByIsDeletedFalseOrderByCreatedAtDesc();
-
-        List<FeedItemDto> items = new ArrayList<>();
-        for (Performance p : hotPerformances) {
-            items.add(FeedItemDto.builder()
-                .type("HOT_PERFORMANCE")
-                .performanceId(p.getPerformanceId())
-                .title(p.getTitle())
-                .startTime(null) // 게스트용 HOT은 시작시간 없이 제목/카드로만 사용
-                .message("지금 인기 있는 공연이에요")
-                .build());
-        }
-
         return FeedResponseDto.builder()
-            .items(items)
+            // 삭제되지 않은 공연 중 최신순 Top10을 HOT 피드로 노출 (비로그인/테스트 데이터 대응)
+            .items(buildHotPerformances())
             .build();
     }
 
@@ -87,6 +99,7 @@ public class FeedService {
                 .type("UPCOMING_WISHED")
                 .performanceId(ps.getPerformance().getPerformanceId())
                 .title(title)
+                .performanceImageUrl(ps.getPerformance().getPerformanceImageUrl())
                 .startTime(ps.getStartTime())
                 .notifyBeforeMinutes(NOTIFY_BEFORE_MINUTES)
                 .message("공연 시작 " + NOTIFY_BEFORE_MINUTES + "분 전이에요")
@@ -120,6 +133,7 @@ public class FeedService {
                 .type("FOLLOW_WISHED")
                 .performanceId(row.getPerformanceId())
                 .title(row.getTitle())
+                .performanceImageUrl(row.getPerformanceImageUrl())
                 .startTime(row.getStartTime())
                 .actorUserId(row.getActorUserId())
                 .actorNickname(row.getActorNickname())

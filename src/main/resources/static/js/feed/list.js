@@ -7,12 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const userId = params.get("userId") || "8"; // 개발용 기본 8
-
-    const apiUrl = userId ? `/api/feed?userId=${encodeURIComponent(userId)}` : "/api/feed";
-
-    loadFeed(apiUrl)
+    // 로그인 정보는 서버에서 가져오므로 별도 userId 쿼리 파라미터 없이 사용
+    loadFeed("/api/feed")
     .then((items) => renderFeed(items, feedListEl, feedEmptyEl))
     .catch((err) => {
         console.error("[feed] load error:", err);
@@ -124,6 +120,13 @@ function createFeedCard(item) {
         });
     }
 
+    // 피드 API에서 내려준 포스터 URL이 있으면 카드 배경으로 크게 표시
+    const imageUrl = item?.performanceImageUrl;
+    if (imageUrl) {
+        card.classList.add("feed-card--with-image");
+        card.style.backgroundImage = `url(${imageUrl})`;
+    }
+
     if (type === "FOLLOW_WISHED") {
         const actorUserId = item?.actorUserId;
 
@@ -145,7 +148,7 @@ function buildLabels(item) {
     const type = item?.type ?? "";
 
     if (type === "UPCOMING_WISHED") {
-    const m = item?.notifyBeforeMinutes ?? 30;
+        const m = item?.notifyBeforeMinutes ?? 30;
         return {
             badgeText: "다가오는 공연",
             subText: `내가 찜한 공연 · 시작 ${m}분 전`,
@@ -153,10 +156,17 @@ function buildLabels(item) {
     }
 
     if (type === "FOLLOW_WISHED") {
-    const nick = item?.actorNickname ?? "팔로우";
+        const nick = item?.actorNickname ?? "팔로우";
         return {
             badgeText: "친구 추천",
             subText: `${nick} 님이 찜한 공연`,
+        };
+    }
+
+    if (type === "HOT_PERFORMANCE") {
+        return {
+            badgeText: "추천 공연",
+            subText: "지금 인기 있는 공연",
         };
     }
 
@@ -197,3 +207,4 @@ function formatKoreanDateTime(d) {
     const mi = String(d.getMinutes()).padStart(2, "0");
     return `${mm}.${dd} ${hh}:${mi}`;
 }
+

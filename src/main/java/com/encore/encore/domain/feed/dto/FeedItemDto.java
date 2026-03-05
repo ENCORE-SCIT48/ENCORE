@@ -19,6 +19,9 @@ public class FeedItemDto {
     private Long performanceId;
     private String title;
 
+    /** 공연 포스터 URL (피드 카드 배경용) */
+    private String performanceImageUrl;
+
     private LocalDateTime startTime;
 
     // FOLLOW_WISHED일 때만 채움
