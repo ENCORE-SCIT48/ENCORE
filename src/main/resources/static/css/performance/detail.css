@@ -1,20 +1,16 @@
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%;
 }
 
 body {
-    background: #ffffff;
-    display: flex;
-    justify-content: center;
+    background: var(--encore-bg);
 }
 
 .app-wrapper {
     width: 100%;
-    max-width: 430px;
     min-height: 100vh;
-    background: #ffffff;
+    background: var(--encore-bg);
 }
 
 .app-main {
@@ -45,7 +41,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #222;
+    color: var(--encore-text);
     font-size: 14px;
 }
 
@@ -62,7 +58,7 @@ body {
 
 .category-text {
     font-size: 14px;
-    color: #222;
+    color: var(--encore-text);
 }
 
 .perf-title {
@@ -81,7 +77,7 @@ body {
 .meta-text {
     font-size: 18px;
     font-weight: 600;
-    color: #222;
+    color: var(--encore-text);
 }
 
 .meta-text.clickable {
@@ -92,7 +88,7 @@ body {
 
 .map-pill {
     border: 0;
-    background: #222;
+    background: var(--encore-primary);
     color: #fff;
     font-size: 14px;
     padding: 8px 14px;
@@ -121,12 +117,12 @@ body {
 
 .chat-cta-text {
     font-size: 13px;
-    color: #333;
+    color: var(--encore-text);
 }
 
 .chat-cta-btn {
     border: 0;
-    background: #222;
+    background: var(--encore-primary);
     color: #fff;
     font-size: 12px;
     font-weight: 700;
@@ -153,12 +149,12 @@ body {
     font-size: 16px;
     font-weight: 700;
     padding: 10px 0;
-    color: #222;
+    color: var(--encore-text);
     border-bottom: 2px solid transparent;
 }
 
 .tab-btn.active {
-    border-bottom: 2px solid #222;
+    border-bottom: 2px solid var(--encore-primary);
 }
 a.tab-btn {
      display: inline-block;
@@ -167,7 +163,7 @@ a.tab-btn {
      line-height: normal;
 }
 .rating {
-    color: #e53935;
+    color: var(--encore-primary);
     font-weight: 800;
 }
 
@@ -188,7 +184,7 @@ a.tab-btn {
     text-align: center;
     line-height: 1.7;
     font-size: 16px;
-    color: #222;
+    color: var(--encore-text);
     padding: 12px 0 20px 0;
 }
 
@@ -259,18 +255,18 @@ a.tab-btn {
 .review-summary-title {
     font-size: 22px;
     font-weight: 900;
-    color: #222;
+    color: var(--encore-text);
 }
 
 .review-summary-rating {
     font-size: 16px;
     font-weight: 900;
-    color: #e53935;
+    color: var(--encore-primary);
 }
 
 .review-write-btn {
     border: 0;
-    background: #222;
+    background: var(--encore-primary);
     color: #fff;
     font-size: 13px;
     font-weight: 800;
@@ -308,12 +304,12 @@ a.tab-btn {
 .related-value {
     font-size: 14px;
     font-weight: 700;
-    color: #222;
+    color: var(--encore-text);
 }
 
 .related-link-btn {
     border: 0;
-    background: #222;
+    background: var(--encore-primary);
     color: #fff;
     font-size: 12px;
     font-weight: 700;
@@ -385,7 +381,7 @@ a.tab-btn {
 .review-action-btn {
     border: 0;
     background: #dcdcdc;
-    color: #222;
+    color: var(--encore-text);
     font-size: 13px;
     font-weight: 900;
     padding: 8px 12px;
@@ -405,7 +401,7 @@ a.tab-btn {
 .review-meta {
     font-size: 14px;
     font-weight: 800;
-    color: #222;
+    color: var(--encore-text);
     margin-bottom: 10px;
     display: flex;
     align-items: center;
@@ -425,7 +421,7 @@ a.tab-btn {
     cursor: pointer;
 }
 .review-encore-pick:hover {
-    color: #333;
+    color: var(--encore-text);
     text-decoration: underline;
 }
 .modal-encore-pick {
@@ -438,7 +434,7 @@ a.tab-btn {
 .review-content {
     font-size: 16px;
     font-weight: 700;
-    color: #222;
+    color: var(--encore-text);
     line-height: 1.5;
     word-break: break-word;
 
@@ -481,7 +477,7 @@ a.tab-btn {
 
 .review-more-btn {
     border: 0;
-    background: #222;
+    background: var(--encore-primary);
     color: #fff;
     font-size: 14px;
     font-weight: 800;
@@ -535,7 +531,7 @@ a.tab-btn {
 .modal-content-text {
   font-size: 16px;
   font-weight: 700;
-  color: #222;
+  color: var(--encore-text);
   line-height: 1.6;
   white-space: pre-line; /* 줄바꿈 유지 */
   word-break: break-word;

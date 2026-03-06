@@ -2,20 +2,16 @@ html,
 body {
     margin: 0;
     padding: 0;
-    height: 100%;
 }
 
 body {
-    background: #ffffff;
-    display: flex;
-    justify-content: center;
+    background: var(--encore-bg);
 }
 
 .app-wrapper {
     width: 100%;
-    max-width: 430px;
     min-height: 100vh;
-    background: #ffffff;
+    background: var(--encore-bg);
     position: relative;
 }
 

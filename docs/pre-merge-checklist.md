@@ -32,7 +32,7 @@
 | ☐ | **스모크** — 로그인 → 프로필 선택 → 피드 → 공연 상세 → 찜/리뷰 → 채팅/DM |
 | ☐ | **마이페이지** — 내가 본 공연, 찜한 공연, 알림 설정, 차단 목록 링크 동작 |
 | ☐ | **푸터** — 공연리스트 / 홈 / DM / 채팅방 이동 (역할별 메뉴: 비로그인·USER·PERFORMER·HOST) |
-| ☐ | **DB 테스트 데이터** — 필요 시 `data-test-insert.sql` 실행 |
+| ☐ | **DB 테스트 데이터** — 필요 시 `data-test-insert.sql` [추가] 블록 실행, 전체 좌석은 `data-test-insert-seats-full.sql` 선택 실행 |
 | ☐ | **테스트 로그인** — password123 안 되면 앱 실행 → `/dev/bcrypt-password123` 에서 해시 복사 → `UPDATE users SET password_hash = '...'` 실행 |
 | ☐ | **문서** — 기능 추가·변경 시 필요하면 README·docs/*.md 반영 여부 확인 |
 | ☐ | **푸시** — 위 다 확인 후 커밋 & 푸시 |

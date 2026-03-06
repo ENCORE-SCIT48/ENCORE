@@ -25,8 +25,19 @@ src/main/resources/static/image/test/
 | 공연자 프로필 | performer1.jpg, ... | performer_profile.profile_image_url |
 | 호스트 프로필 | host1.jpg, ... | host_profile.profile_image_url |
 | 공연장 대표 이미지 | venue1.jpg, venue2.jpg | venue.venue_image |
+| **공연장 더미(호스트 41~58)** | **아래 `file.upload-dir` 참고** | venue.venue_image |
+| **공연 포스터 더미** | **아래 `file.upload-dir` 참고** | performance.performance_image_url |
 
 이름은 자유롭게 지어도 됩니다. 아래 SQL에서 사용하는 경로와만 맞추면 됩니다.
+
+#### 공연장·공연 더미 이미지 (FileService와 동일 경로: `file.upload-dir`)
+
+`data-test-insert.sql` 호스트/공연장/공연 더미에서 사용하는 경로는 **웹 경로 `/uploads/파일명`** 입니다.  
+실제 파일은 **application.yml의 `file.upload-dir`** (예: `C:/encore/uploads/`)에 두면 됩니다.  
+(WebConfig에서 `/uploads/**` 요청을 해당 폴더로 매핑함.)
+
+- **공연장:** yes24_live_hall.jpg, bluesquare_mastercard_hall.jpg, sac_concert_hall.jpg, sejong_grand_theater.png, lotte_concert_hall.jpg, rolling_hall.jpg, westbridge_livehall.jpg, sangsangmadang_livehall.jpg, nodeul_livehouse.jpg, aram_theater.jpg, seongnam_opera_house.jpg, suwon_sk_atrium.jpg, busan_culture_center.jpg, bexco_auditorium.jpg, daegu_opera_house.jpg, gwangju_art_center.jpg, incheon_art_center.jpg, chuncheon_sangsangmadang.jpg
+- **공연 포스터:** evnne_setngo.jpg, solutions_emergence.jpg, concrete_spark.jpg, togenashi.jpg, yesung_itscomplicated.jpg, baekhyun_reverie.jpg, day6_thepresent.jpg, highlight_rideordie.jpg, leechanwon_changa.jpg, kpop_festival.jpg, sac_11am_nov.jpg, sac_11am_dec.jpg, daniel_harding_orchestra.jpg, richard_jangle_duo.jpg, kbs_orchestra.jpg
 
 ### 3단계: DB에 경로 넣기
 

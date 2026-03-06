@@ -1,14 +1,12 @@
 body {
   margin: 0;
-  background: #ffffff;
+  background: var(--encore-bg);
 }
 
 .app-wrapper {
   width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  background: #ffffff;
   min-height: 100vh;
+  background: #ffffff;
 }
 
 .app-container {
