@@ -10,7 +10,7 @@
 .profile-circle {
   width: 48px;
   height: 48px;
-  background-color: #e5e5e5;
+  background-color: var(--encore-border-light);
   border-radius: 50%;
   cursor: pointer;
   border: none;
@@ -81,10 +81,10 @@
   right: 0;
   margin-top: 8px;
   min-width: 140px;
-  background: #fff;
-  border: 1px solid #dee2e6;
+  background: var(--encore-bg);
+  border: 1px solid var(--encore-border-muted);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--encore-border);
   padding: 4px 0;
   list-style: none;
   margin-bottom: 0;
@@ -105,11 +105,15 @@
   background: none;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: var(--encore-text);
   text-decoration: none;
 }
 
 .profile-dropdown-menu a:hover,
 .profile-dropdown-menu button:hover {
-  background-color: #f8f9fa;
+  background-color: var(--encore-bg-muted);
+}
+
+.profile-dropdown-menu .form-inline-reset {
+  margin: 0;
 }

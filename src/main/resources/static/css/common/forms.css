@@ -1,0 +1,50 @@
+/**
+ * 공통 폼·라벨 스타일 (인라인 스타일 제거용)
+ * theme.css 변수 사용 권장
+ */
+.form-group-encore {
+  margin-bottom: var(--space-md);
+}
+
+.form-label-secondary {
+  font-size: 0.85rem;
+  color: var(--encore-text-muted);
+}
+
+.form-label-secondary + div,
+.form-label-secondary + .form-control {
+  margin-top: var(--space-xs);
+}
+
+.text-capacity-full {
+  color: var(--encore-primary);
+  font-weight: 600;
+}
+
+.text-capacity-available {
+  color: var(--encore-primary);
+}
+
+.text-muted-secondary {
+  color: var(--encore-text-muted);
+}
+
+.empty-state-encore {
+  text-align: center;
+  margin-top: var(--space-xl);
+  color: var(--encore-text-muted);
+}
+
+.form-inline-reset {
+  margin: 0;
+}
+
+/* 스페이서 (인라인 width 대체) */
+.spacer-36 {
+  width: 36px;
+}
+
+.modal-body-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+}

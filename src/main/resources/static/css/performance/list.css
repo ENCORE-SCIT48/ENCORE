@@ -1,230 +1,199 @@
-html,
-body {
-    margin: 0;
-    padding: 0;
+/* 공연 리스트 — 배치·간격 최적화 */
+.top-slot { height: var(--space-sm); }
+.bottom-slot { height: var(--space-sm); }
+
+.app-main .d-flex.mb-3 {
+  margin-bottom: var(--space-section) !important;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 
-body {
-    background: var(--encore-bg);
-}
-
-.app-wrapper {
-    width: 100%;
-    min-height: 100vh;
-    background: var(--encore-bg);
-    position: relative;
-}
-
-.app-header {
-    height: 50px;
-    position: relative;
-}
-
-.top-slot {
-    height: 24px;
-}
-
-.bottom-slot {
-    height: 24px;
-}
-
-.app-main {
-    padding: 16px;
-    box-sizing: border-box;
-}
-
-/* ── 핫 공연 캐러셀: 이미지 슬라이드, 자동 넘김, 좌우 버튼, 하단 1/N 인디케이터 ── */
+/* 핫 공연 캐러셀: 제목·버튼 한 줄 정렬 */
 .hot-carousel-section {
-    position: relative;
+  position: relative;
+  margin-bottom: var(--space-section);
 }
-
+.hot-carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
 .hot-carousel-title {
-    font-size: 1.1rem;
-    font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
 }
-
 .hot-carousel-wrap {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #e8e8e8;
-    min-height: 180px;
+  position: relative;
+  border-radius: var(--encore-radius-lg);
+  overflow: hidden;
+  background: linear-gradient(145deg, var(--encore-img-placeholder-start) 0%, var(--encore-img-placeholder-end) 100%);
+  min-height: 200px;
 }
-
-.hot-carousel-track-wrap {
-    overflow: hidden;
-    width: 100%;
-}
-
+.hot-carousel-track-wrap { overflow: hidden; width: 100%; }
 .hot-carousel-track {
-    display: flex;
-    transition: transform 0.35s ease-out;
-    width: 100%;
+  display: flex;
+  transition: transform 0.35s ease-out;
+  width: 100%;
 }
-
 .hot-carousel-placeholder {
-    width: 100%;
-    min-height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    font-size: 0.9rem;
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--encore-text-muted);
 }
-
 .hot-slide {
-    flex: 0 0 100%;
-    width: 100%;
-    display: block;
-    position: relative;
-    text-decoration: none;
-    color: inherit;
+  flex: 0 0 100%;
+  width: 100%;
+  display: block;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
 }
-
 .hot-slide-img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    display: block;
-    background: #d0d0d0;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  background: var(--encore-img-placeholder-end);
 }
-
 .hot-slide-noimg {
-    width: 100%;
-    height: 180px;
-    background: linear-gradient(135deg, #dcdcdc 0%, #e8e8e8 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(145deg, var(--encore-img-placeholder-start) 0%, var(--encore-img-placeholder-end) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--encore-text-muted);
 }
-
-.hot-slide-noimg span {
-    font-size: 1rem;
-    color: #888;
-}
-
 .hot-slide-title {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 10px 12px;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-    color: #fff;
-    font-size: 0.9rem;
-    font-weight: 700;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
 }
-
 .hot-carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    color: #333;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--encore-bg);
+  box-shadow: 0 2px 12px var(--encore-border);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--encore-text);
 }
-
-.hot-carousel-btn:hover {
-    background: #fff;
-}
-
-.hot-carousel-prev { left: 8px; }
-.hot-carousel-next { right: 8px; }
-
+.hot-carousel-prev { left: 12px; }
+.hot-carousel-next { right: 12px; }
 .hot-carousel-indicator {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.5);
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 12px;
-    z-index: 2;
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  z-index: 2;
 }
 
-.hot-carousel-sep {
-    margin: 0 2px;
-    opacity: 0.8;
-}
-
+/* 탭: 검색/캐러셀과 리스트 사이 구간 */
 .category-tabs {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-section);
+  border-bottom: 1px solid var(--encore-border);
+  scrollbar-width: thin;
 }
-
 .tab-btn {
-    border: 0;
-    background: transparent;
-    padding: 6px 2px;
-    font-weight: 600;
-    white-space: nowrap;
-    opacity: 0.85;
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  opacity: 0.8;
+  color: var(--encore-text);
+  cursor: pointer;
 }
-
 .tab-btn.active {
-    opacity: 1;
-    border-bottom: 2px solid #111;
+  opacity: 1;
+  color: var(--encore-primary);
+  border-bottom: 2px solid var(--encore-primary);
+  margin-bottom: -1px;
 }
 
+/* 공연 카드 — 이미지 항상 표시 (theme에서 .perf-card 이미지 영역) */
 .perf-card {
-    width: 100%;
-    background: #dcdcdc;
-    border-radius: 8px;
-    aspect-ratio: 3 / 4;
-    overflow: hidden;
+  width: 100%;
+  border-radius: var(--encore-radius);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: linear-gradient(145deg, var(--encore-img-placeholder-start) 0%, var(--encore-img-placeholder-end) 100%);
+}
+.perf-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#performanceGrid .col-4 {
+  padding: 0;
+}
+#performanceGrid a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+#performanceGrid .mt-2.small {
+  margin-top: var(--space-sm) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600;
+  color: var(--encore-text);
+  padding: 0 2px;
 }
 
 .review-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 8px;
+  margin-top: var(--space-sm);
+  display: flex;
+  gap: var(--space-sm);
 }
-
 .review-btn {
-    flex: 1;
-    height: 34px;
-    border-radius: 8px;
-    border: 1px solid #d0d0d0;
-    background: #f2f2f2;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 0 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
+  flex: 1;
+  min-height: 38px;
+  border-radius: var(--encore-radius);
+  border: 1px solid var(--encore-border);
+  background: var(--encore-bg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 var(--space-sm);
 }
 
-.review-btn:active {
-    background: #e6e6e6;
-    transform: translateY(1px);
-}
-
-.perf-card__img {
-     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+.load-more-wrap {
+  margin-top: var(--space-section);
+  padding-bottom: var(--space-md);
 }

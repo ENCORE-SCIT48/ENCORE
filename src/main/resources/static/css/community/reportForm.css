@@ -1,11 +1,8 @@
- :root {
-     --main-red: #e63946;
-     --sub-dark: #333333;
- }
+/* theme 변수 사용 */
 .app-header {
-    background-color: #fff;
-    border-bottom: 1px solid #eee;
-    padding: 10px 15px;
+  background: var(--encore-bg);
+  border-bottom: 1px solid var(--encore-border);
+  padding: var(--space-sm) var(--space-md);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -39,25 +36,26 @@
     padding: 8px;
     cursor: pointer;
     font-size: 1.1rem;
-    color: #333;
+  color: var(--encore-text);
 }
- body {
-     color: var(--sub-dark);
-     margin: 0;
-     padding: 0;
-     display: flex;
-     justify-content: center;
- }
 
- /* 웹앱 사이즈 고정 컨테이너 */
- .webapp-container {
-     width: 100%;
-     max-width: 430px;
-     min-height: 100vh;
-     background-color: white;
-     display: flex;
-     flex-direction: column;
- }
+body {
+  color: var(--encore-text);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.webapp-container {
+  width: 100%;
+  max-width: min(480px, var(--encore-max-width));
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-footer-bottom);
+}
 
  /* 시맨틱 헤더 */
  .header {
@@ -73,7 +71,7 @@
 
  .back-btn {
      text-decoration: none;
-     color: var(--sub-dark);
+     color: var(--encore-text);
      font-size: 1.2rem;
      margin-right: 15px;
      cursor: pointer;
@@ -86,8 +84,8 @@
  }
 
  .btn-primary {
-     background-color: var(--main-red) !important;
-     border-color: var(--main-red) !important;
+     background-color: var(--encore-primary) !important;
+     border-color: var(--encore-primary) !important;
  }
 
  textarea {

@@ -120,6 +120,11 @@ public class UserProfileController {
             log.warn("[UserProfileController] 입력 검증 실패 - User: {}, ErrorCount: {}",
                 userDetails.getUsername(), bindingResult.getErrorCount());
 
+            // 폼 재표시 시 이미지 미리보기를 위해 기존 프로필 이미지 URL 설정
+            UserProfileResponseDto current = userProfileService.getUserProfile(userDetails.getUsername());
+            if (current != null && current.getProfileImageUrl() != null) {
+                dto.setProfileImageUrl(current.getProfileImageUrl());
+            }
             model.addAttribute("profile", dto);
             // 폼 재랜더링 시 필요한 옵션 리스트 다시 바인딩
             model.addAttribute("genreOptions", List.of("발라드", "댄스", "힙합/랩", "R&B/Soul", "인디음악", "락/메탈", "재즈", "클래식", "EDM", "뮤지컬", "트로트", "국악"));

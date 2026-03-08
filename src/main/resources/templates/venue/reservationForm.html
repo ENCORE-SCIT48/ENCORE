@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>대관 신청</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/theme.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <link rel="stylesheet" th:href="@{/css/venue/reservationForm.css}"/>
 </head>
@@ -21,17 +22,17 @@
 
     <main class="app-main">
         <!-- Thymeleaf → venueId 전달 -->
-        <div id="pageConfig" th:data-venue-id="${venueId}" style="display:none;"></div>
+        <div id="pageConfig" class="d-none" th:data-venue-id="${venueId}"></div>
 
         <!-- ── 공연장 정보 섹션 ── -->
         <div id="venueInfo" class="venue-info-wrap">
             <div class="loading-block">
-                <div class="spinner-border text-danger" role="status" style="width:1.5rem;height:1.5rem;"></div>
+                <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
             </div>
         </div>
 
         <!-- ── 날짜 선택 ── -->
-        <div class="section-block" id="dateSection" style="display:none;">
+        <div class="section-block d-none" id="dateSection">
             <div class="section-title"><i class="bi bi-calendar3"></i> 날짜 선택</div>
             <div class="date-scroll-wrap">
                 <div id="dateList" class="date-list"></div>
@@ -39,14 +40,14 @@
         </div>
 
         <!-- ── 시간대 슬롯 ── -->
-        <div class="section-block" id="slotSection" style="display:none;">
+        <div class="section-block d-none" id="slotSection">
             <div class="section-title"><i class="bi bi-clock"></i> 시간대 선택</div>
             <p class="slot-guide">시작 슬롯을 먼저, 이후 종료 슬롯을 선택하세요.</p>
             <div id="slotGrid" class="slot-grid"></div>
         </div>
 
         <!-- ── 선택 요약 ── -->
-        <div class="section-block summary-block" id="summarySection" style="display:none;">
+        <div class="section-block summary-block d-none" id="summarySection">
             <div class="section-title"><i class="bi bi-receipt"></i> 예약 요약</div>
             <div class="summary-row"><span class="summary-label">날짜</span><span id="sumDate" class="summary-val">-</span></div>
             <div class="summary-row"><span class="summary-label">시간</span><span id="sumTime" class="summary-val">-</span></div>
@@ -55,7 +56,7 @@
         </div>
 
         <!-- ── 메시지 ── -->
-        <div class="section-block" id="msgSection" style="display:none;">
+        <div class="section-block d-none" id="msgSection">
             <div class="section-title"><i class="bi bi-chat-text"></i> 신청 메시지 <span class="optional">(선택)</span></div>
             <textarea id="msgInput" class="msg-textarea" placeholder="공연 목적, 인원 등 간단히 적어주세요. (최대 1000자)" maxlength="1000" rows="4"></textarea>
             <div class="char-count"><span id="charCount">0</span>/1000</div>
@@ -63,7 +64,7 @@
     </main>
 
     <!-- ── 하단 고정 버튼 ── -->
-    <div class="bottom-bar" id="bottomBar" style="display:none;">
+    <div class="bottom-bar d-none" id="bottomBar">
         <div class="fee-preview">
             <span class="fee-label">예상 대관료</span>
             <span class="fee-amount" id="feePreview">선택 없음</span>

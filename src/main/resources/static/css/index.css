@@ -1,0 +1,16 @@
+/* index 전용 — theme 변수 사용 */
+body {
+  background: var(--encore-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-page);
+}
+
+body .card {
+  border-radius: var(--encore-radius-lg);
+  box-shadow: 0 4px 24px var(--encore-border);
+  padding: var(--space-xl);
+  max-width: min(560px, 100%);
+}

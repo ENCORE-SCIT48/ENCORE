@@ -1,45 +1,48 @@
-/* src/main/resources/static/css/auth/login.css */
-
+/* 로그인 — theme 변수·간격 통일 */
 body {
-    background-color: var(--encore-bg);
+  background: var(--encore-bg);
 }
 
 .login-container {
-    max-width: 400px;
-    margin-top: 100px;
+  max-width: 400px;
+  margin: var(--space-xl) auto var(--space-footer-bottom);
+  padding: 0 var(--space-page);
 }
 
-/* 메인 컬러 포인트 */
-.btn-primary {
-    background-color: var(--encore-primary) !important;
-    border-color: var(--encore-primary) !important;
-}
-
-.btn-primary:hover {
-    background-color: var(--encore-primary-hover) !important;
-    border-color: var(--encore-primary-hover) !important;
+.login-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-sm);
+  color: var(--encore-text);
 }
 
 .form-control:focus {
-    border-color: #e63946 !important;
-    box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.25) !important;
+  border-color: var(--encore-primary);
+  box-shadow: 0 0 0 0.2rem var(--encore-primary-light);
 }
 
-/* 링크 스타일 */
 .signup-link {
-    color: var(--encore-primary);
-    text-decoration: none;
-    font-weight: bold;
+  color: var(--encore-primary);
+  text-decoration: none;
+  font-weight: 600;
 }
-
 .signup-link:hover {
-    text-decoration: underline;
+  color: var(--encore-primary-hover);
+  text-decoration: underline;
 }
 
 .text-muted-small {
-    color: #6c757d;
-    font-size: 0.875rem;
+  color: var(--encore-text-muted);
+  font-size: 0.875rem;
 }
+
 .alert:empty {
-    display: none;
+  display: none;
+}
+
+.link-encore-primary {
+  color: var(--encore-primary);
+}
+.link-encore-primary:hover {
+  color: var(--encore-primary-hover);
 }

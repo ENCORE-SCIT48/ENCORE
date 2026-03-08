@@ -21,9 +21,9 @@
     <div class="top-slot"></div>
 
     <main class="app-main">
-        <!-- 검색창(부트스트랩 navbar에서 form만 가져옴) -->
+        <!-- 검색: 입력 넓게, 버튼 오른쪽 고정 (theme UX) -->
         <form
-            class="d-flex mb-3"
+            class="d-flex performance-search-form mb-3"
             role="search"
             onsubmit="return false;"
         >
@@ -31,28 +31,28 @@
                 id="keyword"
                 class="form-control me-2"
                 type="search"
-                placeholder="Search"
-                aria-label="Search"
+                placeholder="공연명으로 검색"
+                aria-label="공연 검색"
             >
             <button
                 id="searchBtn"
                 class="btn btn-secondary"
                 type="button"
             >
-                Search
+                검색
             </button>
         </form>
 
-        <!-- 핫한 공연 캐러셀: 이미지 슬라이드, 자동 넘김, 좌우 버튼, 하단 인디케이터(1/5) -->
+        <!-- 핫한 공연 캐러셀 -->
         <section class="hot-carousel-section mb-3">
             <div class="hot-carousel-header d-flex justify-content-between align-items-center mb-2">
                 <h2 class="hot-carousel-title mb-0">핫한 공연</h2>
                 <a
-                    class="btn btn-sm btn-secondary"
+                    class="btn btn-sm btn-primary"
                     th:if="${#authorization.expression('hasRole(''PERFORMER'')')}"
                     th:href="@{/performances/new}"
                 >
-                    공연등록
+                    공연 등록
                 </a>
             </div>
 

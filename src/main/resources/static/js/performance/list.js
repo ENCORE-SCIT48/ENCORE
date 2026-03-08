@@ -35,7 +35,8 @@ $(function () {
 
             const title = p.title ?? "공연";
 
-            const imageUrl = escapeHtml(p.performanceImageUrl || "");
+            const rawUrl = p.performanceImageUrl && String(p.performanceImageUrl).trim() !== "" ? p.performanceImageUrl : "/image/no-image.png";
+            const imageUrl = escapeHtml(rawUrl);
 
             const reviewButtons = (state.filter === "VIEWED")
                 ? `
@@ -62,7 +63,8 @@ $(function () {
                 <div class="col-4">
                     <a class="d-block text-decoration-none" href="/performances/${id}">
                         <div class="perf-card">
-                        <img src="${imageUrl}" alt="${escapeHtml(title)}" class="perf-card__img"></div>
+                            <img src="${imageUrl}" alt="${escapeHtml(title)}" class="perf-card__img" onerror="this.src='/image/no-image.png'">
+                        </div>
                         <div class="mt-2 small text-dark text-truncate">${escapeHtml(title)}</div>
                     </a>
                     ${reviewButtons}

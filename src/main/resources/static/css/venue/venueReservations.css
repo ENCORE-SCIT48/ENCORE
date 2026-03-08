@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
 :root {
-    --primary-red: #E63946;
+    --primary-red: var(--encore-primary);
     --primary-red-dark: #c82d3a;
     --primary-red-light: rgba(230, 57, 70, 0.08);
     --dark-grey: #1a1a2e;
@@ -232,7 +232,7 @@ body {
     position: fixed; bottom: 0;
     left: 50%; transform: translateX(-50%);
     width: 100%; max-width: var(--max-width-mobile);
-    background: #333;
+    background: var(--encore-footer-bg);
     border-top: 2px solid var(--primary-red);
     display: flex; justify-content: space-around;
     padding: 12px 0; z-index: 1000;

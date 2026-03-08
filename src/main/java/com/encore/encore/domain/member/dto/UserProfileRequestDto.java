@@ -31,4 +31,7 @@ public class UserProfileRequestDto {
 
     @NotEmpty(message = "선호 공연 형태를 최소 하나 이상 선택해주세요.")
     private List<String> preferredPerformanceTypes;
+
+    /** 폼 재표시 시 기존 프로필 이미지 URL (바인딩/검증용 아님) */
+    private String profileImageUrl;
 }

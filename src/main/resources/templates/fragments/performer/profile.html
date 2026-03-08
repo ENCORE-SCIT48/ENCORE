@@ -15,7 +15,7 @@
       <a th:href="@{/profiles/select}">프로필 변경</a>
     </li>
     <li sec:authorize="isAuthenticated()">
-      <form th:action="@{/logout}" method="post" style="margin:0;">
+      <form th:action="@{/logout}" method="post" class="form-inline-reset">
         <button type="submit">로그아웃</button>
       </form>
     </li>

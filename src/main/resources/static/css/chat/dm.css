@@ -4,7 +4,7 @@
 #accepted-dm-container {
     padding: 10px;
     background-color: #fafafa;
-    border: 1px solid #ddd;
+    border: 1px solid var(--encore-border-muted);
     border-radius: 6px;
     max-height: 400px;
     overflow-y: auto;
@@ -14,7 +14,7 @@
     display: flex;
     align-items: center;
     padding: 8px 10px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--encore-border-light);
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
 }

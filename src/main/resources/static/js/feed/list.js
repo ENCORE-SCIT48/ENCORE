@@ -78,20 +78,18 @@ function createFeedCard(item) {
     const card = document.createElement("div");
     card.className = "feed-card";
 
-    // 포스터 이미지 상단 영역 (공연 관련 피드만 표시)
-    if (hasPerformance) {
-        const imgWrap = document.createElement("div");
-        imgWrap.className = "feed-card-image-wrap";
-        const img = document.createElement("img");
-        img.className = "feed-card-image";
-        // performanceImageUrl이 없으면 기본 대체 이미지를 사용
-        const fallback = "/image/default-profile.png";
-        const url = (rawImageUrl && String(rawImageUrl).trim() !== "") ? rawImageUrl : fallback;
-        img.src = url;
-        img.alt = title;
-        imgWrap.appendChild(img);
-        card.appendChild(imgWrap);
-    }
+    // 포스터 이미지 상단 영역 — 리스트는 항상 사진 나오게
+    const imgWrap = document.createElement("div");
+    imgWrap.className = "feed-card-image-wrap";
+    const img = document.createElement("img");
+    img.className = "feed-card-image";
+    const fallback = "/image/no-image.png";
+    const url = (hasPerformance && rawImageUrl && String(rawImageUrl).trim() !== "") ? rawImageUrl : fallback;
+    img.src = url;
+    img.alt = title;
+    img.onerror = function () { this.src = fallback; };
+    imgWrap.appendChild(img);
+    card.appendChild(imgWrap);
 
     const badge = document.createElement("span");
     badge.className = "feed-badge";

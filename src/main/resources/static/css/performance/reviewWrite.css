@@ -1,7 +1,7 @@
 .review-write-page {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 18px 40px;
+  max-width: min(480px, var(--encore-max-width));
+  margin: 0 auto;
+  padding: 0 var(--space-page) var(--space-footer-bottom);
 }
 
 .review-header {
@@ -19,7 +19,7 @@
     font-size: 28px;
     line-height: 1;
     cursor: pointer;
-    color: #111;
+    color: var(--encore-text);
 }
 
 .header-title {
@@ -75,7 +75,7 @@
     line-height: 1;
     padding: 0;
     cursor: pointer;
-    color: #111;
+    color: var(--encore-text);
 }
 
 .star.is-on {
@@ -150,7 +150,7 @@
 }
 .seat-floor-tabs .floor-btn {
     padding: 6px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--encore-border-muted);
     border-radius: 8px;
     background: #fff;
     font-size: 13px;
@@ -159,13 +159,13 @@
 .seat-floor-tabs .floor-btn.active {
     background: #111;
     color: #fff;
-    border-color: #111;
+    border-color: var(--encore-text);
 }
 .seat-canvas-wrapper {
     width: 100%;
     aspect-ratio: 1;
     max-height: 280px;
-    background: #f5f5f5;
+    background: var(--encore-bg-subtle);
     border-radius: 12px;
     overflow: hidden;
 }
@@ -181,7 +181,7 @@
     color: #888;
 }
 .seat-select-section .form-select {
-    border: 1px solid #ddd;
+    border: 1px solid var(--encore-border-muted);
     border-radius: 10px;
     padding: 10px 14px;
     font-size: 15px;

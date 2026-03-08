@@ -1,10 +1,11 @@
 .container {
-    max-width: 430px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  max-width: min(480px, var(--encore-max-width));
+  margin: 0 auto;
+  padding: 0 var(--space-page);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-footer-bottom);
 }
 
 .back-btn {
@@ -22,13 +23,13 @@
     font-weight: 600;
     border-bottom: 3px solid transparent;
     cursor: pointer;
-    color: #333;
+    color: var(--encore-text);
     transition: border-color 0.3s;
 }
 
 .tab-btn.active {
-    border-color: #E63946;
-    color: #E63946;
+  border-color: var(--encore-primary);
+  color: var(--encore-primary);
 }
 
 .recommend-section {
@@ -50,9 +51,9 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    border: 1px solid #eee;
-    padding: 15px 10px;
-    border-radius: 8px;
+    border: 1px solid var(--encore-border);
+    padding: var(--space-md) var(--space-sm);
+    border-radius: var(--encore-radius);
     cursor: pointer;
     min-height: 160px;
     width: 100%;
@@ -162,7 +163,7 @@
     transform: translateX(-50%);
     font-weight: 700;
     font-size: 1.1rem;
-    color: #333;
+    color: var(--encore-text);
 }
 
 .btn-icon {

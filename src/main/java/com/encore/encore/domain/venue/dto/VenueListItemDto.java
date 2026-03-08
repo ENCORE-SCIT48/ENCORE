@@ -18,6 +18,7 @@ public class VenueListItemDto {
     private final String closeTime;
     private final Integer rentalFee;
     private final Integer bookingUnit;
+    private final String imageUrl;
 
     public VenueListItemDto(Venue venue) {
         this.venueId     = venue.getVenueId();
@@ -29,5 +30,6 @@ public class VenueListItemDto {
         this.closeTime   = venue.getCloseTime();
         this.rentalFee   = venue.getRentalFee();
         this.bookingUnit = venue.getBookingUnit();
+        this.imageUrl   = venue.getVenueImage();
     }
 }

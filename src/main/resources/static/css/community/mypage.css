@@ -6,11 +6,11 @@ body {
 .app-wrapper {
   width: 100%;
   min-height: 100vh;
-  background: #ffffff;
+  background: var(--encore-bg);
 }
 
 .app-container {
-  padding: 20px 16px 100px 16px;
+  padding: 0 var(--space-page) var(--space-footer-bottom);
 }
 
 /* ===== 상단 ===== */
@@ -18,7 +18,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-section);
 }
 
 .top-left,
@@ -40,28 +40,28 @@ body {
 .back-btn {
   font-size: 20px;
   text-decoration: none;
-  color: #333333;
+  color: var(--encore-text);
 }
 
 .page-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333333;
+  color: var(--encore-text);
 }
 
 /* ===== 프로필 ===== */
 .profile-section {
   text-align: center;
-  margin-top: 20px;
-  margin-bottom: 40px;
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 .profile-image {
   width: 100px;
   height: 100px;
-  background: #e5e5e5;
+  background: var(--encore-border);
   border-radius: 50%;
-  margin: 0 auto 16px auto;
+  margin: 0 auto var(--space-md);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -75,27 +75,27 @@ body {
 }
 
 .nickname {
-  font-size: 18px;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 10px;
-  color: #333333;
+  margin-bottom: var(--space-sm);
+  color: var(--encore-text);
 }
 
 .follow-info {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  font-size: 13px;
-  color: #666;
+  gap: var(--space-xl);
+  font-size: 0.85rem;
+  color: var(--encore-text-muted);
 }
 
 /* ===== 섹션 제목 ===== */
 .section-title {
-  margin-top: 30px;
-  margin-bottom: 12px;
-  font-size: 13px;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #E63946;
+  color: var(--encore-primary);
 }
 
 /* ===== 메뉴 ===== */
@@ -106,27 +106,27 @@ body {
 }
 
 .menu-item {
-  background: #f8f8f8;
+  background: var(--encore-bg-muted);
   padding: 14px;
   text-align: center;
   border-radius: 10px;
   font-size: 14px;
   text-decoration: none;
-  color: #333;
-  border: 1px solid #eee;
+  color: var(--encore-text);
+  border: 1px solid var(--encore-border-light);
   transition: 0.2s;
 }
 
 .menu-item:hover {
-  border-color: #E63946;
-  box-shadow: 0 4px 16px rgba(230, 57, 70, 0.1);
-  color: #E63946;
+  border-color: var(--encore-primary);
+  box-shadow: 0 4px 16px var(--encore-primary-light);
+  color: var(--encore-primary);
 }
 
 .logout-btn {
   width: 100%;
-  background: #f8f8f8;
-  border: 1px solid #eee;
+  background: var(--encore-bg-muted);
+  border: 1px solid var(--encore-border-light);
   cursor: pointer;
 }
 

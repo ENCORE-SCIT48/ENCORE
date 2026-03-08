@@ -1,21 +1,23 @@
 .perf-form-wrapper {
-    padding: 16px;
+  padding: var(--space-md) var(--space-page);
+  padding-bottom: var(--space-footer-bottom);
 }
 
 .perf-form-title {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 12px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: var(--space-sm);
+  color: var(--encore-text);
 }
 
 .perf-form-group + .perf-form-group {
-    margin-top: 12px;
+  margin-top: var(--space-sm);
 }
 
 .perf-form-actions {
-    margin-top: 20px;
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+  margin-top: var(--space-md);
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
 }
 

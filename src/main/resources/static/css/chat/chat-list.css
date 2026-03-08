@@ -1,4 +1,4 @@
-/* chat.css - Litera 빨강계열 + 서브 다크그레이(#333333) 기준 */
+/* chat.css - theme 변수 기준 */
 
 /* 섹션 제목 스타일 */
 .section-label {
@@ -7,7 +7,7 @@
   margin: 1.5rem 0 0.5rem 0;
   padding-left: 0.3rem;
   border-left: 4px solid #dc3545; /* 부트스트랩 기본 빨강 (danger) */
-  color: #333333; /* 서브 다크그레이 */
+  color: var(--encore-text);
 }
 
 /* 참여중 채팅방 + 핫한 채팅방 목록 컨테이너 기본 여백 */
@@ -20,7 +20,7 @@
 
 /* 개별 채팅방 아이템 박스 스타일 */
 .chat-item {
-  background-color: #f8f9fa; /* 연한 회색 배경 */
+  background-color: var(--encore-bg-muted);
   border-radius: 6px;
   padding: 0.8rem 1rem;
   cursor: pointer;
@@ -39,7 +39,7 @@
 .chat-title {
   font-weight: 700;
   font-size: 1rem;
-  color: #333333; /* 서브 다크그레이 */
+  color: var(--encore-text);
   margin-bottom: 0.3rem;
   white-space: nowrap;
   overflow: hidden;
@@ -154,7 +154,7 @@
     background: none;
     border: none;
     font-size: 1.2rem;
-    color: var(--sub-dark);
+    color: var(--encore-text);
     cursor: pointer;
     padding: 5px;
     display: flex;
@@ -230,7 +230,7 @@
 .chat-message.other .message-wrapper {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
-    color: #333;
+    color: var(--encore-text);
     border-top-left-radius: 2px; /* 말풍선 꼬리 느낌 */
 }
 
@@ -238,7 +238,7 @@
 .chat-message.mine .message-wrapper {
     background-color: #ffeded; /* Litera 빨강 계열의 아주 연한 버전 */
     border: 1px solid #ffcccc;
-    color: #333;
+    color: var(--encore-text);
     border-top-right-radius: 2px;
 }
 

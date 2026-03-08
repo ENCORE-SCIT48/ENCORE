@@ -4,16 +4,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
 :root {
-    --primary-red: #E63946;
-    --primary-red-dark: #c82d3a;
-    --primary-red-light: rgba(230, 57, 70, 0.08);
-    --dark-grey: #1a1a2e;
-    --mid-grey: #6c757d;
-    --border-color: #eef0f3;
-    --bg-white: #FFFFFF;
-    --bg-light-grey: #fff;
-    --text-muted: #b0b8c4;
-    --text-body: #2d3748;
+    --primary-red: var(--encore-primary);
+    --primary-red-dark: var(--encore-primary-hover);
+    --primary-red-light: var(--encore-primary-light);
+    --dark-grey: var(--encore-text);
+    --mid-grey: var(--encore-text-muted);
+    --border-color: var(--encore-border);
+    --bg-white: #fff;
+    --bg-light-grey: var(--encore-bg);
+    --text-muted: var(--encore-text-muted);
+    --text-body: var(--encore-text);
 
     --vip-color: #d97706;
     --r-color: #E63946;
@@ -21,7 +21,7 @@
     --a-color: #059669;
 
     --max-width-mobile: 430px;
-    --max-width-pc: 1100px;
+    --max-width-pc: var(--encore-max-width);
     --header-height: 60px;
     --bottom-btn-area: 110px;
 
@@ -50,7 +50,7 @@ body {
     width: 100%;
     max-width: var(--max-width-mobile);
     min-height: 100vh;
-    background: var(--bg-white);
+    background: #fff;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -58,8 +58,8 @@ body {
 
 .app-header {
     height: var(--header-height);
-    background: var(--bg-white);
-    border-bottom: 1px solid var(--border-color) !important;
+    background: #fff;
+    border-bottom: 1px solid var(--encore-border) !important;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -70,19 +70,25 @@ body {
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: -0.3px;
-    color: var(--dark-grey);
+    color: var(--encore-text);
 }
 
 .btn-back {
-    width: 36px; height: 36px;
-    border: none; background: var(--bg-light-grey);
+    min-width: var(--touch-min, 44px);
+    min-height: var(--touch-min, 44px);
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: var(--bg-light-grey);
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: background var(--transition);
-    color: var(--dark-grey);
+    color: var(--encore-text);
 }
-.btn-back:hover { background: var(--border-color); }
+.btn-back:hover { background: var(--encore-border); }
 
 .app-main {
     padding: 0 20px var(--bottom-btn-area);
@@ -98,31 +104,31 @@ body {
 }
 .step {
     width: 28px; height: 28px; border-radius: 50%;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--encore-border);
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 800; color: var(--text-muted);
     transition: all 0.3s ease;
-    background: var(--bg-white);
+    background: #fff;
 }
 .step.active {
-    background: var(--primary-red);
-    border-color: var(--primary-red);
+    background: var(--encore-primary);
+    border-color: var(--encore-primary);
     color: #fff;
     box-shadow: 0 4px 12px rgba(230, 57, 70, 0.35);
     transform: scale(1.08);
 }
 .step.done {
     background: var(--primary-red-light);
-    border-color: var(--primary-red);
-    color: var(--primary-red);
+    border-color: var(--encore-primary);
+    color: var(--encore-primary);
 }
 .step-line {
     flex: 1; max-width: 50px; height: 2px;
-    background: var(--border-color);
+    background: var(--encore-border);
     border-radius: 2px;
     transition: background 0.3s ease;
 }
-.step-line.done { background: var(--primary-red); }
+.step-line.done { background: var(--encore-primary); }
 
 /* ==========================================================================
    [4] PHOTO UPLOAD
@@ -138,8 +144,8 @@ body {
     background: #fff;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    border-top: 1px solid var(--encore-border);
+    border-bottom: 1px solid var(--encore-border);
     position: relative;
     transition: background var(--transition);
 }
@@ -164,7 +170,7 @@ body {
 }
 .upload-badge i {
     display: flex !important; align-items: center; justify-content: center;
-    color: white !important; background: var(--primary-red) !important;
+    color: white !important; background: var(--encore-primary) !important;
     width: 42px; height: 42px; border-radius: 50%;
     border: 2px solid #fff !important;
     box-shadow: 0 4px 14px rgba(230, 57, 70, 0.4);
@@ -180,7 +186,7 @@ body {
     gap: 10px;
     font-size: 0.9rem;
     font-weight: 800;
-    color: var(--dark-grey);
+    color: var(--encore-text);
     margin: 32px 0 16px;
     letter-spacing: -0.2px;
 }
@@ -188,7 +194,7 @@ body {
     content: '';
     display: block;
     width: 4px; height: 18px;
-    background: var(--primary-red);
+    background: var(--encore-primary);
     border-radius: 2px;
     flex-shrink: 0;
 }
@@ -199,7 +205,7 @@ body {
 .form-floating > .form-control,
 .form-floating > .form-select {
     border-radius: var(--radius-md);
-    border: 1.5px solid var(--border-color);
+    border: 1.5px solid var(--encore-border);
     height: 56px;
     background: var(--bg-light-grey);
     font-size: 0.92rem;
@@ -208,9 +214,9 @@ body {
 }
 .form-floating > .form-control:focus,
 .form-floating > .form-select:focus {
-    border-color: var(--primary-red);
+    border-color: var(--encore-primary);
     box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
-    background: var(--bg-white);
+    background: #fff;
     outline: none;
 }
 .form-floating > label {
@@ -222,15 +228,15 @@ body {
 /* 일반 input */
 .form-control {
     border-radius: var(--radius-md);
-    border: 1.5px solid var(--border-color);
+    border: 1.5px solid var(--encore-border);
     background: var(--bg-light-grey);
     font-size: 0.92rem;
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 .form-control:focus {
-    border-color: var(--primary-red);
+    border-color: var(--encore-primary);
     box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
-    background: var(--bg-white);
+    background: #fff;
     outline: none;
 }
 
@@ -240,7 +246,7 @@ body {
 .btn-search {
     height: 48px; padding: 0 18px;
     border-radius: var(--radius-md);
-    background: var(--dark-grey); color: #fff;
+    background: var(--encore-text); color: #fff;
     border: none; font-weight: 700; font-size: 0.85rem;
     white-space: nowrap;
     transition: background var(--transition);
@@ -267,16 +273,16 @@ textarea.form-control {
     gap: 8px;
     font-size: 0.88rem; font-weight: 600;
     cursor: pointer;
-    border: 1.5px solid var(--border-color);
+    border: 1.5px solid var(--encore-border);
     transition: all var(--transition);
     user-select: none;
 }
-.check-item:hover { border-color: var(--primary-red); background: var(--primary-red-light); }
-.check-item input[type="checkbox"] { accent-color: var(--primary-red); width: 16px; height: 16px; }
+.check-item:hover { border-color: var(--encore-primary); background: var(--primary-red-light); }
+.check-item input[type="checkbox"] { accent-color: var(--encore-primary); width: 16px; height: 16px; }
 .check-item:has(input:checked) {
-    border-color: var(--primary-red);
+    border-color: var(--encore-primary);
     background: var(--primary-red-light);
-    color: var(--primary-red);
+    color: var(--encore-primary);
 }
 
 /* ==========================================================================
@@ -288,16 +294,16 @@ textarea.form-control {
 }
 .floor-btn {
     padding: 8px 18px; border-radius: 20px;
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white); font-weight: 700;
+    border: 1.5px solid var(--encore-border);
+    background: #fff; font-weight: 700;
     font-size: 0.8rem; white-space: nowrap;
     transition: all var(--transition); cursor: pointer;
     color: var(--text-body);
 }
-.floor-btn:hover { border-color: var(--primary-red); color: var(--primary-red); }
+.floor-btn:hover { border-color: var(--encore-primary); color: var(--encore-primary); }
 .floor-btn.active {
-    background: var(--primary-red) !important;
-    border-color: var(--primary-red) !important;
+    background: var(--encore-primary) !important;
+    border-color: var(--encore-primary) !important;
     color: #fff !important;
     box-shadow: 0 3px 10px rgba(230, 57, 70, 0.3);
 }
@@ -306,24 +312,24 @@ textarea.form-control {
 .mode-btn {
     flex: 1; height: 42px;
     border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white); font-weight: 700;
+    border: 1.5px solid var(--encore-border);
+    background: #fff; font-weight: 700;
     font-size: 0.8rem;
     transition: all var(--transition); cursor: pointer;
     color: var(--text-body);
 }
-.mode-btn:hover { border-color: var(--dark-grey); }
+.mode-btn:hover { border-color: var(--encore-text); }
 .mode-btn.active {
-    background: var(--dark-grey) !important;
-    border-color: var(--dark-grey) !important;
+    background: var(--encore-text) !important;
+    border-color: var(--encore-text) !important;
     color: #fff !important;
 }
 
 /* 등급 버튼 */
 .seat-type-btn {
     padding: 8px 16px; border-radius: 20px;
-    border: 1.5px solid var(--border-color);
-    background: var(--bg-white); font-weight: 700;
+    border: 1.5px solid var(--encore-border);
+    background: #fff; font-weight: 700;
     font-size: 0.78rem; white-space: nowrap;
     transition: all var(--transition); cursor: pointer;
 }
@@ -343,7 +349,7 @@ textarea.form-control {
     margin: 0 auto;
     border-radius: var(--radius-lg) !important;
     overflow: hidden; position: relative;
-    border: 1.5px solid var(--border-color) !important;
+    border: 1.5px solid var(--encore-border) !important;
     background: #f8fafc !important;
     box-shadow: var(--shadow-sm);
 }
@@ -359,7 +365,7 @@ textarea.form-control {
 .input-group .input-group-text {
     border-radius: var(--radius-md) !important;
     background: var(--bg-light-grey);
-    border: 1.5px solid var(--border-color);
+    border: 1.5px solid var(--encore-border);
     font-weight: 600; font-size: 0.85rem;
     color: var(--text-body);
 }
@@ -376,7 +382,7 @@ textarea.form-control {
 .stat-box {
     display: flex; flex-direction: column; align-items: center;
     gap: 4px; padding: 12px 6px;
-    background: var(--bg-white);
+    background: #fff;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
 }
@@ -388,7 +394,7 @@ textarea.form-control {
 #countA { color: var(--a-color); }
 .stat-box[style*="span 2"] {
     grid-column: span 2;
-    background: var(--dark-grey);
+    background: var(--encore-text);
     border-radius: var(--radius-md);
 }
 .stat-box[style*="span 2"] .label { color: rgba(255,255,255,0.6); }
@@ -401,7 +407,7 @@ textarea.form-control {
 #tempDateList .badge-date {
     display: flex; align-items: center; gap: 6px;
     background: var(--bg-light-grey);
-    border: 1.5px solid var(--border-color);
+    border: 1.5px solid var(--encore-border);
     border-radius: 20px;
     padding: 6px 12px;
     font-size: 0.82rem; font-weight: 600;
@@ -409,13 +415,13 @@ textarea.form-control {
 }
 #tempDateList .badge-date .remove-btn {
     width: 18px; height: 18px;
-    background: var(--border-color);
+    background: var(--encore-border);
     border: none; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; font-size: 0.7rem; color: var(--mid-grey);
     transition: all var(--transition);
 }
-#tempDateList .badge-date .remove-btn:hover { background: var(--primary-red); color: #fff; }
+#tempDateList .badge-date .remove-btn:hover { background: var(--encore-primary); color: #fff; }
 
 /* ==========================================================================
    [9] BOTTOM FIXED BUTTON
@@ -428,21 +434,25 @@ textarea.form-control {
     background: rgba(255,255,255,0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--encore-border);
     z-index: 1001;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 .btn-primary-red {
-    background: var(--primary-red);
-    color: #fff; width: 100%;
-    border: none; padding: 16px;
+    background: var(--encore-primary);
+    color: #fff;
+    width: 100%;
+    border: none;
+    min-height: var(--btn-height, 48px);
+    padding: 14px 20px;
     border-radius: var(--radius-md);
-    font-weight: 800; font-size: 1rem;
+    font-weight: 800;
+    font-size: 1rem;
     letter-spacing: -0.2px;
     transition: all var(--transition);
-    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.35);
+    box-shadow: 0 6px 20px var(--encore-primary-glow);
     cursor: pointer;
 }
 .btn-primary-red:hover {
@@ -503,7 +513,7 @@ textarea.form-control {
         max-width: none !important;
         margin: 40px -60px 0 !important;
         background: var(--bg-light-grey);
-        border-top: 1px solid var(--border-color);
+        border-top: 1px solid var(--encore-border);
         border-radius: 0 0 24px 24px;
         padding: 28px 60px;
         display: flex;
@@ -536,8 +546,8 @@ textarea.form-control {
     transition: all var(--transition);
 }
 .btn-delete:hover {
-    border-color: var(--primary-red);
-    color: var(--primary-red);
+    border-color: var(--encore-primary);
+    color: var(--encore-primary);
     background: var(--primary-red-light);
 }
 @media (min-width: 768px) {

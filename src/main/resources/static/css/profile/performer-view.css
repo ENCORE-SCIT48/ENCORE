@@ -1,147 +1,128 @@
-/* [1] 공통 변수 (다른 파일들과 통일) */
-:root {
-    --primary-red: #E63946;    /* Red 색상 통일 */
-    --dark-grey: #333333;
-    --border-color: #E9ECEF;
-    --bg-white: #FFFFFF;
-    --soft-bg: #F8F9FA;
-}
-
-/* [2] 전체 레이아웃 (Mobile First) */
+/* 공연자 프로필 보기 — theme 변수·간격 통일 */
 body {
-    background-color: var(--soft-bg);
-    margin: 0;
-    padding: 0;
-    font-family: 'Pretendard', sans-serif;
+  background: var(--encore-bg);
 }
 
 .view-container {
-    width: 100%;
-    max-width: 430px; /* 모바일 기본 규격 통일 */
-    margin: 0 auto;
-    padding: 30px 20px;
-    box-sizing: border-box;
-    background-color: var(--bg-white);
-    min-height: 100vh;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-page);
+  box-sizing: border-box;
+  background: #fff;
+  min-height: 60vh;
+  border-radius: var(--encore-radius-lg);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
 }
 
-/* [3] 프로필 상단 (이미지 및 타이틀) */
 .view-image-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--space-lg);
 }
 
 .view-image-wrapper {
-    width: 150px;
-    height: 150px;
-    margin-bottom: 20px;
+  width: 150px;
+  height: 150px;
+  margin-bottom: var(--space-md);
 }
 
 .view-image-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .stage-name {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--dark-grey);
-    margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--encore-text);
+  margin-bottom: var(--space-sm);
 }
 
-/* [4] 본문 내용 (항목별 그룹) */
 .view-group {
-    margin-bottom: 30px;
+  margin-bottom: var(--space-lg);
 }
 
 .view-group label {
-    display: block;
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: var(--dark-grey);
-    margin-bottom: 15px;
-    padding-left: 10px;
-    border-left: 4px solid var(--primary-red); /* 포인트 컬러 적용 */
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--encore-text);
+  margin-bottom: var(--space-md);
+  padding-left: var(--space-sm);
+  border-left: 4px solid var(--encore-primary);
 }
 
-.tag-list, .intro-box {
-    background: #fdfdfd;
-    padding: 18px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
+.tag-list,
+.intro-box {
+  background: var(--encore-bg);
+  padding: var(--space-md);
+  border-radius: var(--encore-radius);
+  border: 1px solid var(--encore-border);
 }
 
 .view-tag {
-    background-color: #fff1f1;
-    color: var(--primary-red);
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
+  background: var(--encore-primary-light);
+  color: var(--encore-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--encore-radius);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-/* [5] 하단 액션 버튼 */
 .view-actions {
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  margin-top: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .btn-edit {
-    background-color: var(--primary-red) !important;
-    color: white !important;
-    text-align: center;
-    padding: 16px;
-    font-weight: 700;
-    border-radius: 14px;
-    text-decoration: none;
-    transition: transform 0.2s;
+  background: var(--encore-primary) !important;
+  color: #fff !important;
+  text-align: center;
+  padding: var(--space-md);
+  font-weight: 700;
+  border-radius: var(--encore-radius);
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-edit:hover {
+  background: var(--encore-primary-hover) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px var(--encore-primary-glow);
 }
 
-/* ==========================================================================
-   [PC 규격 통일] 768px 이상일 때 venueForm과 동일한 레이아웃 적용
-   ========================================================================== */
 @media (min-width: 768px) {
-    body {
-        background-color: #f0f2f5;
-        display: flex;
-        justify-content: center;
-        padding: 40px 0;
-    }
-
-    .view-container {
-        max-width: 900px !important; /* PC 너비 확장 */
-        min-height: auto;
-        border-radius: 24px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        padding: 60px !important;
-
-        /* PC에서 정보를 2열로 시원하게 배치 */
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        column-gap: 40px;
-    }
-
-    /* 이미지 섹션과 버튼은 중앙/하단 전체 너비 사용 */
-    .view-image-section, .view-actions, .view-title, .view-subtitle {
-        grid-column: span 2;
-    }
-
-    /* 소개글(Textarea 대응 박스)도 가로를 넓게 쓰는게 좋음 */
-    .view-group:has(.intro-box) {
-        grid-column: span 2;
-    }
+  body {
+    padding: var(--space-xl) 0;
+  }
+  .view-container {
+    max-width: min(900px, var(--encore-max-width));
+    min-height: auto;
+    padding: var(--space-xl);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-xl);
+  }
+  .view-image-section,
+  .view-actions,
+  .view-title,
+  .view-subtitle {
+    grid-column: span 2;
+  }
+  .view-group:has(.intro-box) {
+    grid-column: span 2;
+  }
 }
 
 @media (min-width: 1200px) {
-    .view-container {
-        max-width: 1000px !important;
-    }
+  .view-container {
+    max-width: min(1000px, var(--encore-max-width));
+  }
 }

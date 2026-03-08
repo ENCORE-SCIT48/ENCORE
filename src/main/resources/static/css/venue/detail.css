@@ -4,11 +4,11 @@
  */
 
 :root {
-    --venue-detail-accent: #E63946;
-    --venue-detail-accent-light: rgba(230, 57, 70, 0.08);
-    --venue-detail-border: #eef0f3;
-    --venue-detail-text: #2d3748;
-    --venue-detail-muted: #5a6478;
+  --venue-detail-accent: var(--encore-primary);
+  --venue-detail-accent-light: var(--encore-primary-light);
+  --venue-detail-border: var(--encore-border);
+  --venue-detail-text: var(--encore-text);
+  --venue-detail-muted: var(--encore-text-muted);
 }
 
 .venue-detail-main {
@@ -64,7 +64,7 @@
     padding: 0.6rem 0.75rem;
     border-radius: 12px;
     border: 1px solid var(--venue-detail-border);
-    background: #ffffff;
+    background: var(--encore-bg);
     text-decoration: none;
     color: var(--venue-detail-text);
 }

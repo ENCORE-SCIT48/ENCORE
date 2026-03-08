@@ -8,56 +8,8 @@
 
   <!-- Bootswatch Litera -->
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    body {
-      margin: 0;
-      background: #ffffff;
-    }
-
-    .app-wrapper {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      background: #ffffff;
-      min-height: 100vh;
-    }
-
-    .app-container {
-      padding: 20px 16px;
-    }
-
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-
-    .back-btn {
-      font-size: 20px;
-      text-decoration: none;
-      color: #333333;
-    }
-
-    .page-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333333;
-    }
-
-    .content-area {
-      margin-top: 10px;
-      min-height: 300px;
-      font-size: 14px;
-      color: #333;
-    }
-
-    .divider {
-      margin: 20px 0;
-      border-top: 1px solid #eee;
-    }
-  </style>
+  <link rel="stylesheet" th:href="@{/css/theme.css}" />
+  <link rel="stylesheet" th:href="@{/css/community/app-encore.css}">
 </head>
 
 <body>
@@ -86,7 +38,7 @@
 
         <!-- 게시글 반복 -->
         <div th:each="item : ${posts}"
-          style="border:1px solid #eee; padding:14px; border-radius:12px; margin-bottom:18px;">
+          class="card-inner card-inner-lg">
 
           <!-- 공연 제목 -->
           <div style="font-weight:600; font-size:15px; margin-bottom:10px;">
@@ -139,7 +91,7 @@
               </div>
 
               <!-- REJECTED -->
-              <div th:if="${applicant.status == 'REJECTED'}" style="color:#E63946; font-weight:600;">
+              <div th:if="${applicant.status == 'REJECTED'}" class="text-encore-primary" style="font-weight:600;">
                 거절됨
               </div>
 

@@ -7,105 +7,10 @@
   <title>공연자 모집글 수정</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/theme.css}" />
+  <link rel="stylesheet" th:href="@{/css/community/app-encore.css}">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script th:src="@{/js/community/performerPost.js}"></script>
-
-  <style>
-    body {
-      margin: 0;
-      background: #ffffff;
-    }
-
-    .app-wrapper {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      background: #ffffff;
-    }
-
-    .app-container {
-      padding: 20px 16px;
-    }
-
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .back-btn {
-      font-size: 20px;
-      text-decoration: none;
-      color: #333333;
-    }
-
-    .page-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333333;
-    }
-
-    .post-title-input {
-      font-size: 18px;
-      font-weight: 600;
-      width: 100%;
-      border: none;
-      outline: none;
-      padding: 10px 0;
-      color: #333333;
-    }
-
-    .divider {
-      margin: 20px 0;
-      border-top: 1px solid #eee;
-    }
-
-    .post-content-textarea {
-      font-size: 14px;
-      line-height: 1.8;
-      width: 100%;
-      border: none;
-      outline: none;
-      resize: none;
-      min-height: 300px;
-      color: #333333;
-    }
-
-    .btn-group {
-      margin-top: 30px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .btn-group button,
-    .btn-group a {
-      width: 100px;
-      font-size: 13px;
-      margin-bottom: 40px;
-    }
-
-    .btn-primary {
-      background-color: #E63946;
-      border-color: #E63946;
-    }
-
-    .btn-primary:hover {
-      background-color: #c92f3a;
-      border-color: #c92f3a;
-    }
-
-    .btn-outline-secondary {
-      color: #333333;
-      border-color: #ccc;
-    }
-
-    .btn-outline-secondary:hover {
-      background-color: #f5f5f5;
-    }
-  </style>
-
 </head>
 
 <body>
@@ -140,7 +45,7 @@
 
         <!-- 모집 장르 -->
         <div style="margin-bottom:10px;">
-          <label style="color:#666;">모집 장르</label><br>
+          <label class="label-small">모집 장르</label><br>
 
           <label th:each="genre : ${T(java.util.List).of('BUSKING','BAND','DANCE','CLASSIC','GUKACK','MASIC')}" 
                 style="margin-right:10px;">
@@ -155,7 +60,7 @@
 
         <!-- 모집 파트 -->
         <div style="margin-bottom:10px;">
-          <label style="color:#666;">모집 포지션</label><br>
+          <label class="label-small">모집 포지션</label><br>
 
           <label th:each="part : ${T(java.util.List).of('VOCAL','GUITAR','DRUM','BASS','KEYBOARD','DANCER','EXTRA')}"
             style="margin-right:10px;">
@@ -170,7 +75,7 @@
 
         <!-- 모집 지역 -->
         <div>
-          <label style="color:#666;">모집 지역</label>
+          <label class="label-small">모집 지역</label>
           <input type="text" name="recruitArea" class="form-control" th:value="${post.recruitArea}">
         </div>
 
@@ -181,7 +86,7 @@
 
       <!-- 정원 -->
       <div style="margin-bottom:15px;">
-        <label style="font-size:13px; color:#666;">모집 정원</label>
+        <label class="label-small d-block">모집 정원</label>
         <input type="number" name="capacity" min="1" class="form-control" th:value="${post.capacity}" required>
       </div>
 

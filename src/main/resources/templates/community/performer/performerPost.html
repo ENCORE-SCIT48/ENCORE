@@ -7,163 +7,11 @@
   <title>공연자 모집글</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/litera/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/theme.css}" />
+  <link rel="stylesheet" th:href="@{/css/common/forms.css}">
+  <link rel="stylesheet" th:href="@{/css/community/app-encore.css}">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script th:src="@{/js/community/performerPost.js}"></script>
-
-  <style>
-    body {
-      margin: 0;
-      background: #ffffff;
-    }
-
-    .app-wrapper {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      background: #ffffff;
-    }
-
-    .app-container {
-      padding: 20px 16px;
-    }
-
-    .top-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .page-title {
-      font-size: 20px;
-      font-weight: 600;
-      text-align: center;
-      color: #333333;
-    }
-
-    .tab-buttons {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .tab-buttons button {
-      flex: 1;
-      padding: 10px 0;
-      border-radius: 24px;
-      border: 1px solid #E63946;
-      background: #fff;
-      font-size: 14px;
-      color: #E63946;
-    }
-
-    .tab-buttons .active {
-      background: #E63946;
-      color: #fff;
-    }
-
-    .search-form {
-      margin-bottom: 16px;
-    }
-
-    .search-input {
-      height: 40px;
-      font-size: 14px;
-    }
-
-    .btn-primary {
-      background-color: #E63946;
-      border-color: #E63946;
-    }
-
-    .btn-primary:hover {
-      background-color: #c92f3a;
-      border-color: #c92f3a;
-    }
-
-    .post-card {
-      border: 1px solid #eee;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-      cursor: pointer;
-    }
-
-    .post-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #333333;
-    }
-
-    .post-content {
-      font-size: 13px;
-      margin-top: 6px;
-      color: #666;
-    }
-
-    .post-meta {
-      font-size: 12px;
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
-      color: #333333;
-    }
-
-    .write-btn {
-      text-align: right;
-      margin: 10px 0 35px 0;
-    }
-
-    .write-btn a {
-      font-size: 14px;
-      color: #E63946;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .write-btn a:hover {
-      text-decoration: underline;
-    }
-
-    .pagination .page-link {
-      color: #E63946;
-    }
-
-    .pagination .active .page-link {
-      background-color: #E63946;
-      border-color: #E63946;
-    }
-
-    /* ===== 페이징 개선 ===== */
-    .pagination {
-      gap: 6px;
-    }
-
-    .pagination .page-item .page-link {
-      border-radius: 8px;
-      border: 1px solid #E63946;
-      color: #E63946;
-      font-weight: 600;
-      font-size: 13px;
-      padding: 6px 12px;
-    }
-
-    .pagination .page-item .page-link:hover {
-      background-color: #E63946;
-      color: #fff;
-    }
-
-    .pagination .page-item.active .page-link {
-      background-color: #E63946;
-      border-color: #E63946;
-      color: #fff;
-    }
-
-    .pagination .page-item.disabled .page-link {
-      opacity: 0.4;
-    }
-  </style>
-
 </head>
 
 <body>
@@ -198,17 +46,17 @@
         <div class="post-content" th:text="${post.content}"></div>
 
         <!-- 모집 인원 + 마감 표시 -->
-        <div style="margin-top:6px; font-size:12px;">
+        <div class="small mt-1">
 
           <!-- 정원 있는 경우 -->
           <span th:if="${post.capacity != null}">
 
             <!-- 마감 여부 판단 -->
-            <span th:if="${post.approvedCount >= post.capacity}" style="color:#E63946; font-weight:600;">
+            <span th:if="${post.approvedCount >= post.capacity}" class="text-capacity-full">
               모집 마감
             </span>
 
-            <span th:if="${post.approvedCount < post.capacity}" style="color:#E63946;">
+            <span th:if="${post.approvedCount < post.capacity}" class="text-capacity-available">
               모집 인원
               <span th:text="${post.approvedCount}"></span>
               /
@@ -218,7 +66,7 @@
           </span>
 
           <!-- 정원 제한 없음 -->
-          <span th:if="${post.capacity == null}" style="color:#666;">
+          <span th:if="${post.capacity == null}" class="text-muted-secondary">
             모집 인원 제한 없음
           </span>
 
@@ -231,7 +79,7 @@
 
       </div>
 
-      <div th:if="${#lists.isEmpty(posts)}" style="text-align:center; margin-top:30px; color:#999; font-size:14px;">
+      <div th:if="${#lists.isEmpty(posts)}" class="empty-state-encore small">
         등록된 게시글이 없습니다.
       </div>
 

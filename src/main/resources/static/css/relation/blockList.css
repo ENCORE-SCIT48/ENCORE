@@ -9,26 +9,26 @@ body {
 }
 
 .app-container {
-    width: 100%;
-    max-width: 430px;
-    min-height: 100vh;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+  width: 100%;
+  max-width: min(480px, var(--encore-max-width));
+  min-height: 100vh;
+  background: var(--encore-bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: var(--space-footer-bottom);
 }
 
-/* 2. 상단 고정 영역 */
 header.sticky-top {
-    position: sticky;
-    top: 0;
-    background-color: white;
-    z-index: 1000;
-    border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background: var(--encore-bg);
+  z-index: 1000;
+  border-bottom: 1px solid var(--encore-border);
 }
 
 .header-title-bar {
-    padding: 10px 15px;
+  padding: var(--space-sm) var(--space-md);
     display: flex;
     align-items: center;
     height: 56px;
@@ -39,7 +39,7 @@ header.sticky-top {
     border: none;
     padding: 6px 10px; /* 기존 8px 12px → 6px 10px */
     cursor: pointer;
-    color: #333;
+    color: var(--encore-text);
     font-size: 1.1rem;
     display: flex;
     align-items: center;
@@ -48,7 +48,7 @@ header.sticky-top {
 
 .header-title {
     font-weight: 700;
-    color: #333;
+    color: var(--encore-text);
     margin: 0;
     font-size: 1.1rem;
     margin-left: 5px;
@@ -71,7 +71,7 @@ header.sticky-top {
 
 .nav-pills .nav-link {
     width: 100%;
-    color: #888;
+    color: var(--encore-text-muted);
     border-radius: 0;
     padding: 14px 0;
     font-size: 0.95rem;
@@ -90,9 +90,9 @@ header.sticky-top {
 
 .nav-pills .nav-link.active {
     background-color: transparent !important;
-    color: #E63946 !important;
+    color: var(--encore-primary) !important;
     /* [해결] 선의 색상만 바꿈으로써 아래 컨텐츠 밀림 방지 */
-    border-bottom: 3px solid #E63946 !important;
+    border-bottom: 3px solid var(--encore-primary) !important;
 }
 
 /* 4. 리스트 컨텐츠 영역 (중복 제거 및 높이 고정) */
@@ -106,15 +106,15 @@ header.sticky-top {
 
 /* 5. 차단 항목 카드 */
 .block-card {
-    background: #ffffff;
-    border: 1px solid #f2f2f2;
+background: var(--encore-bg);
+  border: 1px solid var(--encore-border-light);
     border-radius: 12px;
     margin-bottom: 12px;
     padding: 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 2px 6px var(--encore-border);
 }
 
 .category-tag {
@@ -122,10 +122,10 @@ header.sticky-top {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: #333;
+    color: var(--encore-text);
     width: 70px;
     min-width: 70px;
-    border-right: 2px solid #E63946;
+    border-right: 2px solid var(--encore-primary);
     margin-right: 15px;
     font-size: 0.85rem;
     height: 20px;
@@ -134,7 +134,7 @@ header.sticky-top {
 .content-text {
     flex-grow: 1;
     font-weight: 500;
-    color: #444;
+    color: var(--encore-text);
     font-size: 0.9rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -144,8 +144,8 @@ header.sticky-top {
 
 /* 6. 차단 해제 버튼 */
 .btn-unblock {
-    border: 1px solid #333;
-    color: #333;
+    border: 1px solid var(--encore-text);
+    color: var(--encore-text);
     background: white;
     padding: 6px 14px;
     font-size: 0.8rem;
@@ -156,13 +156,13 @@ header.sticky-top {
 }
 
 .btn-unblock:hover {
-    background: #333;
+    background: var(--encore-footer-bg);
     color: #fff;
 }
 
 .empty-state {
     text-align: center;
     padding: 100px 0;
-    color: #bbb;
+    color: var(--encore-border-subtle);
     font-size: 0.9rem;
 }

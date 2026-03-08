@@ -4,7 +4,7 @@
   <!-- 비로그인(게스트) -->
   <th:block th:if="${#authentication == null or #authentication.principal == null
                     or !(#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))}">
-    <div class="footer-wrapper">
+    <div class="footer-fixed">
       <a th:href="@{/performances}" class="footer-link">공연리스트</a>
       <a th:href="@{/venues}"      class="footer-link">공연장</a>
       <a th:href="@{/feed}"        class="footer-link">피드</a>
@@ -16,7 +16,7 @@
   <th:block th:if="${#authentication != null and #authentication.principal != null
                     and (#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))
                     and #authentication.principal.activeMode.name() == 'ROLE_USER'}">
-    <div class="footer-wrapper">
+    <div class="footer-fixed">
       <a th:href="@{/performances}" class="footer-link">공연리스트</a>
       <a th:href="@{/venues}"       class="footer-link">공연장</a>
       <a th:href="@{/feed}"         class="footer-link">피드</a>
@@ -29,7 +29,7 @@
   <th:block th:if="${#authentication != null and #authentication.principal != null
                     and (#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))
                     and #authentication.principal.activeMode.name() == 'ROLE_PERFORMER'}">
-    <div class="footer-wrapper">
+    <div class="footer-fixed">
       <a th:href="@{/posts/performance}" class="footer-link">모집글</a>
       <a th:href="@{/venues/performer}"  class="footer-link">공연장</a>
       <a th:href="@{/feed}"               class="footer-link">홈</a>
@@ -42,7 +42,7 @@
   <th:block th:if="${#authentication != null and #authentication.principal != null
                     and (#authentication.principal instanceof T(com.encore.encore.global.config.CustomUserDetails))
                     and #authentication.principal.activeMode.name() == 'ROLE_HOST'}">
-    <div class="footer-wrapper">
+    <div class="footer-fixed">
       <a th:href="@{/venues/my}"                  class="footer-link">내 공연장</a>
       <a th:href="@{/venues/reservations/manage}" class="footer-link">대관관리</a>
       <a th:href="@{/feed}"                       class="footer-link">홈</a>

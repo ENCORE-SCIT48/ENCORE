@@ -1,15 +1,13 @@
-:root {
-    --main-red: #E63946;
-    --dark-grey: #333333;
-}
+/* theme 변수 사용: --encore-primary, --encore-text */
 
 .app-container {
-    max-width: 430px;
-    margin: 0 auto;
-    background: #ffffff;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  max-width: min(480px, var(--encore-max-width));
+  margin: 0 auto;
+  background: var(--encore-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-footer-bottom);
 }
 
 /* 수정된 헤더 스타일 */
@@ -20,9 +18,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
-      border-bottom: 1px solid #eee;
-      background: #fff;
+      padding: 0 var(--space-page);
+border-bottom: 1px solid var(--encore-border);
+  background: #fff;
       z-index: 10;
 }
 
@@ -55,7 +53,7 @@
 
 .user-name-text {
     font-weight: 700;
-    color: var(--dark-grey);
+    color: var(--encore-text);
     font-size: 1.1rem;
     white-space: nowrap;
     overflow: hidden;
@@ -69,7 +67,7 @@
     background: none;
     border: none;
     padding: 8px;
-    color: var(--dark-grey);
+    color: var(--encore-text);
     cursor: pointer;
     line-height: 1;
 }
@@ -86,7 +84,7 @@
 .profile-avatar {
     width: 90px;
     height: 90px;
-    background-color: #dddddd;
+    background-color: var(--encore-border-muted);
     border-radius: 50%;
 }
 
@@ -108,7 +106,7 @@
 }
 
 .follow-btn {
-    background-color: var(--main-red);
+    background-color: var(--encore-primary);
     border: none;
 }
 
@@ -118,17 +116,17 @@
 
 .dm-btn {
     border: 1px solid var(--dark-grey);
-    color: var(--dark-grey);
+    color: var(--encore-text);
 }
 
 .section-title {
     font-weight: 600;
     margin-bottom: 10px;
-    color: var(--dark-grey);
+    color: var(--encore-text);
 }
 
 .card-box {
-    background: #f8f9fa;
+    background: var(--encore-bg-muted);
     border-radius: 8px;
     padding: 15px;
     min-height: 120px;
@@ -136,7 +134,7 @@
 }
 
 .recent-activities-box {
-    background: #f8f9fa;
+    background: var(--encore-bg-muted);
     border-radius: 8px;
     padding: 12px;
     /* min-height 제거 */
@@ -210,13 +208,13 @@
 .btn-following:focus,
 .btn-following:active {
     background: transparent; /* 배경 유지 */
-    color: #ccc;          /* 글자색 유지 */
+    color: var(--encore-border-subtle);          /* 글자색 유지 */
 }
 
 
 .btn-unfollowed:hover,
 .btn-unfollowed:focus,
 .btn-unfollowed:active {
-    background: #ccc; /* 배경 유지 */
+    background: var(--encore-border-subtle); /* 배경 유지 */
     color: #fff;          /* 글자색 유지 */
 }

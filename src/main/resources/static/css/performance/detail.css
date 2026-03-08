@@ -14,15 +14,16 @@ body {
 }
 
 .app-main {
-    min-height: 100vh;
+  min-height: 100vh;
+  padding: 0 var(--space-page) var(--space-footer-bottom);
 }
 
 .poster-area {
-    position: relative;
-    width: 100%;
-    height: 360px;
-    background: #dcdcdc;
-    overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 360px;
+  background: linear-gradient(145deg, var(--encore-img-placeholder-start) 0%, var(--encore-img-placeholder-end) 100%);
+  overflow: hidden;
 }
 
 .poster-image {
@@ -46,7 +47,7 @@ body {
 }
 
 .detail-body {
-    padding: 16px;
+  padding: var(--space-md) var(--space-page);
 }
 
 .top-row {
@@ -98,7 +99,7 @@ body {
 
 .divider {
     height: 6px;
-    background: #dcdcdc;
+    background: var(--encore-border-muted);
     margin: 14px 0;
     border-radius: 4px;
 }
@@ -112,7 +113,7 @@ body {
     padding: 10px 12px;
     margin-bottom: 10px;
     border-radius: 12px;
-    background: #f3f4ff;
+    background: var(--encore-bg-muted);
 }
 
 .chat-cta-text {
@@ -201,7 +202,7 @@ a.tab-btn {
 
 .placeholder-sub {
     font-size: 13px;
-    color: #666;
+    color: var(--encore-text-muted);
 }
 
 .wish-btn,
@@ -283,7 +284,7 @@ a.tab-btn {
 .related-section {
     margin-top: 24px;
     padding-top: 14px;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--encore-border-light);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -298,7 +299,7 @@ a.tab-btn {
 
 .related-label {
     font-size: 13px;
-    color: #666;
+    color: var(--encore-text-muted);
 }
 
 .related-value {
@@ -339,7 +340,7 @@ a.tab-btn {
 }
 
 .review-card {
-    background: #efefef;
+    background: var(--encore-bg-subtle);
     border-radius: 22px;
     padding: 16px 16px;
     display: flex;
@@ -380,7 +381,7 @@ a.tab-btn {
 
 .review-action-btn {
     border: 0;
-    background: #dcdcdc;
+    background: var(--encore-border-muted);
     color: var(--encore-text);
     font-size: 13px;
     font-weight: 900;
@@ -395,7 +396,7 @@ a.tab-btn {
 }
 
 .review-action-btn.danger {
-    color: #b3261e;
+    color: var(--encore-primary);
 }
 
 .review-meta {
@@ -409,13 +410,13 @@ a.tab-btn {
 }
 
 .review-dot {
-    color: #999;
+    color: var(--encore-text-muted);
     font-weight: 700;
 }
 
 .review-encore-pick {
     font-size: 13px;
-    color: #555;
+    color: var(--encore-text-muted);
     margin-bottom: 6px;
     word-break: break-word;
     cursor: pointer;
@@ -456,7 +457,7 @@ a.tab-btn {
 .review-thumb {
     width: 78px;
     height: 78px;
-    background: #6f6f6f;
+    background: var(--encore-text-muted);
     border-radius: 18px;
 }
 
@@ -466,7 +467,7 @@ a.tab-btn {
     padding: 26px 0 30px 0;
     font-size: 14px;
     font-weight: 700;
-    color: #777;
+    color: var(--encore-text-muted);
 }
 
 .review-more-wrap {
@@ -525,7 +526,7 @@ a.tab-btn {
 .modal-meta {
   font-size: 13px;
   font-weight: 800;
-  color: #444;
+  color: var(--encore-text);
 }
 
 .modal-content-text {
@@ -585,22 +586,22 @@ a.tab-btn {
 }
 .seat-review-map-wrap .seat-floor-tabs .floor-btn {
   padding: 6px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--encore-border-muted);
   border-radius: 8px;
-  background: #fff;
+  background: var(--encore-bg);
   font-size: 13px;
   cursor: pointer;
 }
 .seat-review-map-wrap .seat-floor-tabs .floor-btn.active {
-  background: #111;
+  background: var(--encore-footer-bg);
   color: #fff;
-  border-color: #111;
+  border-color: var(--encore-footer-bg);
 }
 .seat-review-map-wrap .seat-canvas-wrapper {
   width: 100%;
   aspect-ratio: 1;
   max-height: 280px;
-  background: #f5f5f5;
+  background: var(--encore-bg-subtle);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -613,13 +614,13 @@ a.tab-btn {
 .seat-review-hint {
   margin: 6px 0 0;
   font-size: 12px;
-  color: #888;
+  color: var(--encore-text-muted);
 }
 .seat-review-tooltip {
   position: fixed;
   max-width: 280px;
   padding: 10px 12px;
-  background: #333;
+  background: var(--encore-footer-bg);
   color: #fff;
   border-radius: 10px;
   font-size: 13px;
@@ -628,5 +629,5 @@ a.tab-btn {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-.seat-review-tooltip .tooltip-rating { color: #ffb300; }
+.seat-review-tooltip .tooltip-rating { color: var(--encore-gold); }
 .seat-review-tooltip .tooltip-content { margin-top: 4px; }

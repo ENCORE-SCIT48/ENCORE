@@ -1,21 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
 :root {
-    --primary-red: #E63946;
-    --primary-red-dark: #c82d3a;
-    --primary-red-light: rgba(230, 57, 70, 0.08);
-    --dark-grey: #1a1a2e;
-    --border-color: #eef0f3;
-    --bg-white: #FFFFFF;
-    --text-muted: #b0b8c4;
-    --text-body: #2d3748;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-    --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
-    --transition: 0.2s ease;
-    --max-width-mobile: 430px;
-    --header-height: 60px;
+  --primary-red: var(--encore-primary);
+  --primary-red-dark: var(--encore-primary-hover);
+  --primary-red-light: var(--encore-primary-light);
+  --dark-grey: var(--encore-text);
+  --border-color: var(--encore-border);
+  --bg-white: #fff;
+  --text-muted: var(--encore-text-muted);
+  --text-body: var(--encore-text);
+  --radius-md: var(--encore-radius);
+  --radius-lg: var(--encore-radius-lg);
+  --max-width-mobile: 430px;
+  --header-height: 60px;
+  --transition: 0.2s ease;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

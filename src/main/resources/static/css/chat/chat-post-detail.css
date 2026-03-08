@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--encore-border-light);
     position: sticky;
     top: 0;
     background: #fff;
@@ -28,7 +28,7 @@
     margin: 0;
     font-weight: 700;
     font-size: 1.25rem;
-    color: #333333;
+    color: var(--encore-text);
 
     white-space: nowrap;
     overflow: hidden;
@@ -60,14 +60,14 @@
 .post-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #333333;
+    color: var(--encore-text);
     margin: 0;
 }
 
 /* 작성자, 날짜, 인원 정보 */
 .post-meta {
     font-size: 0.85rem;
-    color: #333333;
+    color: var(--encore-text);
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -92,7 +92,7 @@
 .member-count {
     margin-left: auto;
     font-weight: 700;
-    color: #e63946; /* Main Red */
+    color: var(--encore-primary); /* Main Red */
 }
 
 /* 수정 / 삭제 버튼 그룹 */
@@ -113,15 +113,15 @@
 }
 
 .btn-action:hover {
-    color: #e63946;
+    color: var(--encore-primary);
 }
 
 /* 게시글 본문 */
 .post-content {
     white-space: pre-wrap;
     font-size: 1rem;
-    color: #333333;
-    background: #f8f9fa;
+    color: var(--encore-text);
+    background: var(--encore-bg-muted);
     padding: 1rem;
     border-radius: 6px;
     min-height: 150px;
@@ -129,7 +129,7 @@
 
 /* 채팅방 참가하기 버튼 */
 .btn-join {
-    background-color: #e63946;
+    background-color: var(--encore-primary);
     border: none;
     color: white;
     font-size: 1rem;
@@ -157,5 +157,5 @@
 }
 
 .btn-report:hover {
-    color: #e63946;
+    color: var(--encore-primary);
 }

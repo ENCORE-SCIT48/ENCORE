@@ -66,6 +66,7 @@
         }
         $empty.classList.add("d-none");
 
+        const defaultImg = "/image/no-image.png";
         const html = items
             .map((v) => {
                 const id = v.venueId;
@@ -73,14 +74,20 @@
                 const addr = escapeHtml(v.address);
                 const type = venueTypeLabel(v.venueType);
                 const seats = v.totalSeats;
+                const imgUrl = (v.imageUrl && String(v.imageUrl).trim() !== "") ? escapeHtml(v.imageUrl) : defaultImg;
 
                 return `
                     <div class="venue-card" data-id="${id}">
-                        <h3 class="venue-title">${name}</h3>
-                        <p class="venue-sub">${addr}</p>
-                        <div class="venue-meta">
-                            <span class="badge text-bg-dark">${escapeHtml(type)}</span>
-                            ${seats != null ? `<span class="badge text-bg-secondary">총 ${escapeHtml(seats)}석</span>` : ""}
+                        <div class="venue-card-img-wrap">
+                            <img src="${imgUrl}" alt="${name}" onerror="this.src='${defaultImg}'">
+                        </div>
+                        <div class="venue-card-body">
+                            <h3 class="venue-title">${name}</h3>
+                            <p class="venue-sub">${addr}</p>
+                            <div class="venue-meta">
+                                <span class="badge text-bg-dark">${escapeHtml(type)}</span>
+                                ${seats != null ? `<span class="badge text-bg-secondary">총 ${escapeHtml(seats)}석</span>` : ""}
+                            </div>
                         </div>
                     </div>
                 `;
