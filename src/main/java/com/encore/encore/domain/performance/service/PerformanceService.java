@@ -20,6 +20,7 @@ import com.encore.encore.domain.venue.entity.Seat;
 import com.encore.encore.domain.venue.entity.Venue;
 import com.encore.encore.domain.venue.repository.SeatRepository;
 import com.encore.encore.domain.venue.repository.VenueRepository;
+import com.encore.encore.global.common.service.FileService;
 import com.encore.encore.global.error.ApiException;
 import com.encore.encore.global.error.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -30,6 +31,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,7 @@ public class PerformanceService {
     private final SeatRepository seatRepository;
     private final PerformerProfileRepository performerProfileRepository;
     private final VenueRepository venueRepository;
+    private final FileService fileService;
 
     /**
      * 공연 목록 조회 (검색/카테고리/페이징 지원)
@@ -153,7 +156,7 @@ public class PerformanceService {
      * - recruitStatus는 기본적으로 OPEN, status는 UPCOMING으로 설정합니다.
      */
     @Transactional
-    public Long createPerformance(PerformanceCreateRequestDto dto, User user) {
+    public Long createPerformance(PerformanceCreateRequestDto dto, MultipartFile imageFile, User user) {
         if (user == null || user.getUserId() == null) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
         }
@@ -165,6 +168,10 @@ public class PerformanceService {
         if (dto.getVenueId() == null) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "공연장을 선택해 주세요.");
         }
+
+        // 포스터 이미지: 파일 업로드 우선, 없으면 DTO URL (공연장과 동일 방식)
+        String imagePath = (imageFile != null && !imageFile.isEmpty())
+            ? fileService.saveFile(imageFile) : dto.getPerformanceImageUrl();
 
         // 공연자 프로필 조회
         PerformerProfile performer = performerProfileRepository.findByUser(user)
@@ -179,7 +186,7 @@ public class PerformanceService {
         Performance performance = Performance.builder()
             .title(dto.getTitle())
             .description(dto.getDescription())
-            .performanceImageUrl(dto.getPerformanceImageUrl())
+            .performanceImageUrl(imagePath)
             .category(categoryEnum)
             .status(PerformanceStatus.UPCOMING)
             .recruitStatus(PerformanceRecruitStatus.OPEN)
@@ -199,7 +206,7 @@ public class PerformanceService {
      * - 본인이 creator인 공연자만 수정할 수 있습니다.
      */
     @Transactional
-    public Long updatePerformance(Long performanceId, PerformanceCreateRequestDto dto, User user) {
+    public Long updatePerformance(Long performanceId, PerformanceCreateRequestDto dto, MultipartFile imageFile, User user) {
         if (user == null || user.getUserId() == null) {
             throw new ApiException(ErrorCode.UNAUTHORIZED, "로그인이 필요합니다.");
         }
@@ -212,14 +219,21 @@ public class PerformanceService {
             throw new ApiException(ErrorCode.FORBIDDEN, "본인이 생성한 공연만 수정할 수 있습니다.");
         }
 
+        // 포스터 이미지: 새 파일 있으면 기존 삭제 후 저장 (공연장과 동일)
+        if (imageFile != null && !imageFile.isEmpty()) {
+            if (performance.getPerformanceImageUrl() != null) {
+                fileService.deletePhysicalFile(performance.getPerformanceImageUrl());
+            }
+            performance.setPerformanceImageUrl(fileService.saveFile(imageFile));
+        } else if (dto.getPerformanceImageUrl() != null) {
+            performance.setPerformanceImageUrl(dto.getPerformanceImageUrl());
+        }
+
         if (StringUtils.hasText(dto.getTitle())) {
             performance.setTitle(dto.getTitle());
         }
         if (dto.getDescription() != null) {
             performance.setDescription(dto.getDescription());
-        }
-        if (dto.getPerformanceImageUrl() != null) {
-            performance.setPerformanceImageUrl(dto.getPerformanceImageUrl());
         }
         if (dto.getCapacity() != null) {
             performance.setCapacity(dto.getCapacity());

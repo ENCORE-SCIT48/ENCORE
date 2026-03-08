@@ -20,7 +20,7 @@ public class PerformanceCreateRequestDto {
     /** 공연 설명 */
     private String description;
 
-    /** 공연 대표 이미지(포스터) URL - 파일 업로드 연동은 추후 확장 */
+    /** 공연 대표 이미지(포스터) 경로. 등록/수정 시 performanceImage 파트로 파일 업로드 시 이 값은 무시됨. */
     private String performanceImageUrl;
 
     /** 장르 카테고리 (MUSICAL / PLAY / BAND) */

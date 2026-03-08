@@ -52,7 +52,7 @@ body {
     width: 150px;
     height: 150px;
     margin: 0 auto 30px;
-    overflow: visible !important; /* 카메라 아이콘 노출을 위해 필수 */
+    overflow: visible !important;
 }
 
 .profile-img {
@@ -63,7 +63,6 @@ body {
   border: 2px solid var(--encore-border);
   display: block;
 }
-
 .upload-badge {
   position: absolute;
   bottom: -6px;

@@ -43,18 +43,24 @@ $(function () {
         const venueId = $venueSelect.val();
         const category = $("#category").val();
         const capacityRaw = $("#capacity").val();
-        const performanceImageUrl = $("#performanceImageUrl").val().trim();
         const description = $("#description").val();
 
-        const payload = {
+        return {
             title: title || null,
             description: description || null,
-            performanceImageUrl: performanceImageUrl || null,
+            performanceImageUrl: null,
             category: category || null,
             capacity: capacityRaw ? Number(capacityRaw) : null,
             venueId: venueId ? Number(venueId) : null,
         };
-        return payload;
+    }
+
+    function buildFormData() {
+        const fd = new FormData();
+        fd.append("performanceData", new Blob([JSON.stringify(buildPayload())], { type: "application/json" }));
+        const img = document.getElementById("performanceImage").files[0];
+        if (img) fd.append("performanceImage", img);
+        return fd;
     }
 
     function loadPerformanceForEdit() {
@@ -69,7 +75,6 @@ $(function () {
                 if (!d) return;
                 $("#title").val(d.title || "");
                 $("#description").val(d.description || "");
-                $("#performanceImageUrl").val(d.performanceImageUrl || "");
                 $("#capacity").val(d.capacity != null ? d.capacity : "");
                 if (d.category) {
                     $("#category").val(d.category);
@@ -77,12 +82,37 @@ $(function () {
                 if (d.venueId) {
                     $venueSelect.val(String(d.venueId));
                 }
+                if (d.performanceImageUrl) {
+                    $("#performanceImagePreviewImg").attr("src", d.performanceImageUrl);
+                    $("#performanceImagePreview").show();
+                    $("#performanceImageLabel").text("현재 이미지 (새 파일 선택 시 교체)");
+                }
             })
             .fail(function (xhr) {
                 console.error("[PerformanceNew] load performance failed", xhr.status, xhr.responseText);
                 alert("공연 정보를 불러오지 못했습니다.");
             });
     }
+
+    $("#performanceImage").on("change", function () {
+        const file = this.files[0];
+        const $preview = $("#performanceImagePreview");
+        const $img = $("#performanceImagePreviewImg");
+        const $label = $("#performanceImageLabel");
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $img.attr("src", e.target.result);
+                $preview.show();
+                $label.text(file.name);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            $img.attr("src", "");
+            $preview.hide();
+            $label.text("클릭하여 이미지 선택 (선택 사항)");
+        }
+    });
 
     $form.on("submit", function () {
         const data = buildPayload();
@@ -100,9 +130,10 @@ $(function () {
         $.ajax({
             url: isEdit ? `/api/performances/${performanceId}` : "/api/performances",
             method: isEdit ? "PUT" : "POST",
-            contentType: "application/json",
+            contentType: false,
+            processData: false,
             dataType: "json",
-            data: JSON.stringify(data),
+            data: buildFormData(),
         })
             .done(function (res) {
                 const id = res?.data?.performanceId || performanceId;

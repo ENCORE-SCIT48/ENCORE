@@ -18,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -73,11 +75,12 @@ public class PerformanceController {
     }
 
     /**
-     * 공연 등록 (공연자 전용)
+     * 공연 등록 (공연자 전용). 공연장과 동일하게 multipart로 포스터 이미지 업로드.
      */
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CommonResponse<java.util.Map<String, Object>> createPerformance(
-        @RequestBody PerformanceCreateRequestDto dto,
+        @RequestPart("performanceData") PerformanceCreateRequestDto dto,
+        @RequestPart(value = "performanceImage", required = false) MultipartFile imageFile,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null || userDetails.getUser() == null) {
@@ -87,17 +90,18 @@ public class PerformanceController {
             throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 공연을 등록할 수 있습니다.");
         }
 
-        Long id = performanceService.createPerformance(dto, userDetails.getUser());
+        Long id = performanceService.createPerformance(dto, imageFile, userDetails.getUser());
         return CommonResponse.ok(java.util.Map.of("performanceId", id), "공연 등록 성공");
     }
 
     /**
-     * 공연 수정 (공연자 전용, 본인이 생성한 공연만)
+     * 공연 수정 (공연자 전용, 본인이 생성한 공연만). 공연장과 동일하게 multipart로 포스터 이미지 업로드.
      */
-    @PutMapping("/{performanceId}")
+    @PutMapping(value = "/{performanceId}", consumes = { MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE })
     public CommonResponse<java.util.Map<String, Object>> updatePerformance(
         @PathVariable Long performanceId,
-        @RequestBody PerformanceCreateRequestDto dto,
+        @RequestPart("performanceData") PerformanceCreateRequestDto dto,
+        @RequestPart(value = "performanceImage", required = false) MultipartFile imageFile,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null || userDetails.getUser() == null) {
@@ -107,7 +111,7 @@ public class PerformanceController {
             throw new ApiException(ErrorCode.FORBIDDEN, "공연자 모드에서만 공연을 수정할 수 있습니다.");
         }
 
-        Long id = performanceService.updatePerformance(performanceId, dto, userDetails.getUser());
+        Long id = performanceService.updatePerformance(performanceId, dto, imageFile, userDetails.getUser());
         return CommonResponse.ok(java.util.Map.of("performanceId", id), "공연 수정 성공");
     }
 

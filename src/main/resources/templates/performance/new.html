@@ -50,9 +50,13 @@
                 </div>
 
                 <div class="perf-form-group">
-                    <label for="performanceImageUrl" class="form-label">포스터 이미지 URL</label>
-                    <input id="performanceImageUrl" name="performanceImageUrl" type="url" class="form-control" placeholder="https:// 예시">
-                    <div class="form-text">파일 업로드 대신 URL로만 받습니다. (추후 확장 가능)</div>
+                    <label class="form-label">포스터 이미지</label>
+                    <div class="profile-upload-wrap" onclick="document.getElementById('performanceImage').click();" style="cursor:pointer; border:1px dashed #ccc; border-radius:8px; padding:1rem; text-align:center;">
+                        <span id="performanceImageLabel">클릭하여 이미지 선택 (선택 사항)</span>
+                        <input type="file" id="performanceImage" name="performanceImage" accept="image/*" hidden>
+                    </div>
+                    <div id="performanceImagePreview" class="mt-2" style="display:none;"><img id="performanceImagePreviewImg" src="" alt="미리보기" style="max-width:200px; max-height:200px; object-fit:contain;"></div>
+                    <div class="form-text">공연장과 동일하게 파일 업로드로 등록합니다.</div>
                 </div>
 
                 <div class="perf-form-group">

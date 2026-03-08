@@ -49,16 +49,15 @@ body {
     width: 150px;
     height: 150px;
     margin: 0 auto 30px;
-    /* 구현 주석: 요소가 flex 컨테이너 안에 있을 때 크기 줄어듦 방지 */
     flex-shrink: 0;
     overflow: visible !important;
 }
 
 .profile-img {
-    width: 150px; /* 고정 크기 명시 */
-    height: 150px; /* 고정 크기 명시 */
-    object-fit: cover; /* 비율 유지하며 채움 */
-    border-radius: 50%; /* 완벽한 원형 유지 */
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
     border: 2px solid var(--encore-border);
     display: block;
     background-color: var(--encore-border-light);

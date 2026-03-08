@@ -52,7 +52,6 @@ body {
   border: 2px solid var(--encore-border);
   display: block;
 }
-
 .upload-badge {
   position: absolute;
   bottom: -6px;
