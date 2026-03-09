@@ -15,7 +15,7 @@
     >
 </head>
 <body>
-<div class="app-wrapper">
+<div class="app-wrapper" th:attr="data-list-mode=${listMode != null ? listMode : ''}">
     <div th:replace="~{fragments/topbar :: topbar(${targetUrl})}"></div>
     <div class="top-slot"></div>
 
@@ -48,7 +48,7 @@
                 <h2 class="hot-carousel-title mb-0">핫한 공연</h2>
                 <a
                     class="btn btn-sm btn-secondary"
-                    th:if="${#authorization.expression('hasRole(''PERFORMER'')')}"
+                    th:if="${activeMode != null && activeMode.name() == 'ROLE_PERFORMER'}"
                     th:href="@{/performances/new}"
                 >
                     공연등록

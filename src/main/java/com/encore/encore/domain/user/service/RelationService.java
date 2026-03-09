@@ -621,7 +621,7 @@ public class RelationService {
         // 1️⃣ 공통 공연 3개 이상인 유저 ID 조회
         List<Long> candidateUserIds =
             userRecommendationRepository
-                .findUserIdsWithCommonPerformance(userId, 3L);
+                .findUserIdsWithCommonPerformance(userId, 1L);
 
         // 조건에 만족하는 유저가 없을 시 빈 리스트 return
         if (candidateUserIds.isEmpty()) {

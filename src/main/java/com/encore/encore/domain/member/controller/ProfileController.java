@@ -7,6 +7,7 @@ import com.encore.encore.domain.member.service.PerformerProfileService;
 import com.encore.encore.domain.member.service.ProfileService;
 import com.encore.encore.domain.member.service.UserProfileService;
 import com.encore.encore.global.config.CustomUserDetails;
+import com.encore.encore.global.error.ApiException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +42,8 @@ public class ProfileController {
                              Model model) {
         if (userDetails == null) return "redirect:/auth/login";
         model.addAttribute("userProfile", userProfileService.getUserProfile(userDetails.getUsername()));
-        model.addAttribute("performerProfile", performerProfileService.getPerformerProfile(userDetails.getUser()));
-        model.addAttribute("hostProfile", hostProfileService.getHostProfile(userDetails.getUser()));
+        model.addAttribute("performerProfile", performerProfileService.getPerformerProfileOrNull(userDetails.getUser()));
+        model.addAttribute("hostProfile", hostProfileService.getHostProfileOrNull(userDetails.getUser()));
         return "profile/select";
     }
 
@@ -64,8 +65,13 @@ public class ProfileController {
             log.warn("[Mode Switch] 로그인 정보 없음.");
             return "redirect:/auth/login";
         }
-        // 1. 데이터 조회
-        Long profileId = profileService.findProfileIdByMode(mode, userDetails.getUser());
+        Long profileId;
+        try {
+            profileId = profileService.findProfileIdByMode(mode, userDetails.getUser());
+        } catch (ApiException e) {
+            log.warn("[Mode Switch] 프로필 없음 - mode={}", mode, e);
+            return "redirect:/profiles/select?error=no_profile";
+        }
         boolean isInitialized = profileService.checkIfInitialized(mode, profileId);
 
         log.debug("[Mode Switch] Profile search result - ID: {}, Initialized: {}", profileId, isInitialized);

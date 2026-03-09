@@ -4,8 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
     profileItems.forEach((item) => {
         item.addEventListener("click", () => {
             const selectedMode = item.getAttribute("data-mode");
-            if (selectedMode) {
+            const hasProfile = item.hasAttribute("data-has-profile");
+            if (selectedMode && hasProfile) {
                 switchProfileMode(selectedMode);
+            } else if (selectedMode && !hasProfile) {
+                alert("해당 역할의 프로필을 먼저 등록해 주세요.");
             }
         });
     });

@@ -1,5 +1,6 @@
 package com.encore.encore.domain.performance.controller;
 
+import com.encore.encore.domain.member.entity.ActiveMode;
 import com.encore.encore.global.config.CustomUserDetails;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,76 @@ public class PerformancePageController {
      * 공연 목록 페이지 반환
      * - fragments/profile :: profile(targetUrl) 프래그먼트에서 targetUrl 파라미터를 요구하므로
      *   현재 요청 URI를 모델에 담아 내려준다.
+     * - activeMode: 공연 등록 버튼 노출용(ROLE_PERFORMER일 때만), listMode: 북마크/본공연 탭 초기값
      * @return 공연 목록 화면 템플릿 경로
      */
     @GetMapping
-    public String listPage(HttpServletRequest request, Model model) { // 파라미터 추가
+    public String listPage(
+        HttpServletRequest request,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
         log.info("[PerformancePage] list page requested");
 
-        // 현재 페이지(/performances)로 돌아오기 위한 targetUrl 전달
         model.addAttribute("targetUrl", request.getRequestURI());
+        ActiveMode activeMode = (userDetails != null && userDetails.getUser() != null)
+            ? userDetails.getActiveMode()
+            : null;
+        model.addAttribute("activeMode", activeMode);
+        model.addAttribute("listMode", "");
 
         return "performance/list";
+    }
+
+    /** 본 공연 목록 페이지 (마이페이지 → 내가 본 공연) */
+    @GetMapping("/watched")
+    public String watchedPage(
+        HttpServletRequest request,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return "redirect:/auth/login";
+        }
+        model.addAttribute("targetUrl", request.getRequestURI());
+        model.addAttribute("activeMode", userDetails.getActiveMode());
+        model.addAttribute("listMode", "VIEWED");
+        return "performance/list";
+    }
+
+    /** 찜한 공연 목록 페이지 (마이페이지 → 내가 찜한 공연) */
+    @GetMapping("/wished")
+    public String wishedPage(
+        HttpServletRequest request,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return "redirect:/auth/login";
+        }
+        model.addAttribute("targetUrl", request.getRequestURI());
+        model.addAttribute("activeMode", userDetails.getActiveMode());
+        model.addAttribute("listMode", "BOOKMARK");
+        return "performance/list";
+    }
+
+    /** 공연 수정 페이지 (공연자 본인만 — API에서 검증) */
+    @GetMapping("/{performanceId}/edit")
+    public String editPage(
+        @PathVariable Long performanceId,
+        HttpServletRequest request,
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null || userDetails.getUser() == null) {
+            return "redirect:/auth/login";
+        }
+        if (userDetails.getActiveMode() != ActiveMode.ROLE_PERFORMER) {
+            return "redirect:/profiles/select";
+        }
+        model.addAttribute("targetUrl", request != null ? request.getRequestURI() : "/performances");
+        model.addAttribute("performanceId", performanceId);
+        return "performance/new";
     }
 
     /**

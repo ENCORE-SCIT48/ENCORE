@@ -1,10 +1,11 @@
 $(function () {
+    const listMode = ($(".app-wrapper").data("list-mode") || "").toUpperCase();
     const state = {
         page: 0,
         size: 9,
         keyword: "",
         category: "",
-        filter: "",     // BOOKMARK / VIEWED
+        filter: listMode === "VIEWED" ? "VIEWED" : (listMode === "BOOKMARK" ? "BOOKMARK" : ""),
         loading: false,
         last: false
     };
@@ -241,6 +242,17 @@ $(function () {
     $("#keyword").on("keydown", function (e) {
         if (e.key === "Enter") $("#searchBtn").click();
     });
+
+    function setActiveTabByFilter() {
+        $(".tab-btn").removeClass("active");
+        const target = state.filter
+            ? $(".tab-btn[data-filter='" + state.filter + "']")
+            : $(".tab-btn[data-category='" + (state.category || "") + "']");
+        if (target.length) target.addClass("active");
+        else $(".tab-btn[data-category='']").addClass("active");
+    }
+
+    setActiveTabByFilter();
 
     $(document).on("click", ".tab-btn", function () {
         $(".tab-btn").removeClass("active");

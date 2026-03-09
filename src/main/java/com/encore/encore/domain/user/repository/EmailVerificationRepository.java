@@ -2,8 +2,6 @@ package com.encore.encore.domain.user.repository;
 
 import com.encore.encore.domain.user.entity.EmailVerification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -13,10 +11,6 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
     // 이메일로 기존 인증 정보가 있는지 확인 (필요 시 기존 데이터 삭제 후 재발급용)
     void deleteByEmail(String email);
 
-    @Query("SELECT ev FROM EmailVerification ev " +
-        "WHERE ev.email = :email " +
-        "AND ev.verified = true " +
-        "AND ev.isDeleted = false " +
-        "ORDER BY ev.createdAt DESC LIMIT 1")
-    Optional<EmailVerification> findValidVerification(@Param("email") String email);
+    /** 이메일 인증 완료된 최신 1건 (JPQL LIMIT 비표준 대신 derived query 사용) */
+    Optional<EmailVerification> findFirstByEmailAndVerifiedTrueAndIsDeletedFalseOrderByCreatedAtDesc(String email);
 }

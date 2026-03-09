@@ -21,8 +21,11 @@
             <header class="header">
                 <h1>프로필 선택</h1>
             </header>
+            <p th:if="${param.error != null && param.error[0] == 'no_profile'}" class="text-warning mb-2">
+                선택한 역할에 해당하는 프로필이 없습니다. 먼저 해당 프로필을 등록해 주세요.
+            </p>
             <main class="profile-group">
-                <div class="profile-item" data-mode="ROLE_USER">
+                <div class="profile-item" data-mode="ROLE_USER" data-has-profile="true">
                     <div class="profile-circle">
                         <img th:src="${userProfile?.profileImageUrl} ?: '/image/default-profile.png'"
                                  class="profile-img">
@@ -33,7 +36,7 @@
                     </div>
                 </div>
 
-                <div class="profile-item" data-mode="ROLE_PERFORMER">
+                <div class="profile-item" th:if="${performerProfile != null}" data-mode="ROLE_PERFORMER" data-has-profile="true">
                     <div class="profile-circle">
                         <img th:src="${performerProfile?.profileImageUrl} ?: '/image/default-profile.png'"
                                  class="profile-img">
@@ -43,8 +46,17 @@
                         나의 무대를 등록하고<br />팬들과 직접 소통하세요.
                     </div>
                 </div>
+                <div class="profile-item" th:if="${performerProfile == null}" data-mode="ROLE_PERFORMER">
+                    <div class="profile-circle">
+                        <img src="/image/default-profile.png" class="profile-img">
+                    </div>
+                    <div class="profile-name">공연자</div>
+                    <div class="profile-desc">
+                        프로필을 등록하면 공연을 등록할 수 있어요.
+                    </div>
+                </div>
 
-                <div class="profile-item" data-mode="ROLE_HOST">
+                <div class="profile-item" th:if="${hostProfile != null}" data-mode="ROLE_HOST" data-has-profile="true">
                     <div class="profile-circle">
                         <img th:src="${hostProfile?.profileImageUrl} ?: '/image/default-profile.png'"
                                  class="profile-img">
@@ -52,6 +64,15 @@
                     <div class="profile-name">주최자</div>
                     <div class="profile-desc">
                         다양한 공연을 기획하고<br />관리하세요.
+                    </div>
+                </div>
+                <div class="profile-item" th:if="${hostProfile == null}" data-mode="ROLE_HOST">
+                    <div class="profile-circle">
+                        <img src="/image/default-profile.png" class="profile-img">
+                    </div>
+                    <div class="profile-name">주최자</div>
+                    <div class="profile-desc">
+                        프로필을 등록하면 공연장 대관을 할 수 있어요.
                     </div>
                 </div>
             </main>

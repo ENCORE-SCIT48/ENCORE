@@ -22,6 +22,15 @@ public class PerformerProfileService {
     private final FileService fileService;
 
     /**
+     * [퍼포머 프로필 조회] 없으면 null 반환 (프로필 선택 페이지 등에서 사용)
+     */
+    public PerformerProfileRequestDto getPerformerProfileOrNull(User user) {
+        return performerProfileRepository.findByUser(user)
+            .map(PerformerProfileRequestDto::from)
+            .orElse(null);
+    }
+
+    /**
      * [퍼포머 프로필 조회]
      * 현재 로그인한 유저의 정보를 기반으로 퍼포머 프로필 엔티티를 찾아 응답 DTO로 변환하여 반환합니다.
      * @param user 현재 인증된 유저 객체 (UserDetails에서 추출한 User 엔티티)

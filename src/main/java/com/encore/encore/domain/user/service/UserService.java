@@ -58,8 +58,8 @@ public class UserService {
             throw new ApiException(ErrorCode.INVALID_REQUEST,"비밀번호가 일치하지 않습니다.");
         }
 
-        // 3.가장 최근에 성공한 인증 기록이 있는지 확인합니다
-        emailVerificationRepository.findValidVerification(email).orElseThrow(() -> {
+        // 3. 가장 최근에 성공한 인증 기록이 있는지 확인합니다 (derived query 사용)
+        emailVerificationRepository.findFirstByEmailAndVerifiedTrueAndIsDeletedFalseOrderByCreatedAtDesc(email).orElseThrow(() -> {
             log.warn("[UserService.join] 이메일 미인증 - Email: {}", email); // 실패 원인을 명확히 기록
             return new ApiException(ErrorCode.INVALID_REQUEST, "이메일 인증이 필요합니다.");
         });

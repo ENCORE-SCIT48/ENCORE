@@ -24,6 +24,15 @@ public class HostProfileService {
     private final FileService fileService;
 
     /**
+     * [설명] 특정 유저의 호스트 프로필 정보를 조회. 없으면 null 반환 (프로필 선택 페이지 등에서 사용)
+     */
+    public HostProfileResponseDto getHostProfileOrNull(User user) {
+        return hostProfileRepository.findByUser(user)
+            .map(HostProfileResponseDto::from)
+            .orElse(null);
+    }
+
+    /**
      * [설명] 특정 유저의 호스트 프로필 정보를 조회하여 반환합니다.
      * @param user 조회 대상 유저 엔티티
      * @return 호스트 프로필 정보 응답 DTO
