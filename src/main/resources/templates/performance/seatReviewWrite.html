@@ -13,7 +13,7 @@
     <main class="app-main review-write-page">
 
         <header class="review-header">
-            <button type="button" class="back-btn" id="backBtn" aria-label="뒤로가기">←</button>
+            <a th:href="@{/performances/{id}(id=${performanceId})}" href="#" class="back-btn" id="backBtn" role="button" aria-label="뒤로가기">←</a>
             <h1 class="header-title">좌석 리뷰</h1>
         </header>
 

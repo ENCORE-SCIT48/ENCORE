@@ -23,8 +23,16 @@
     /** 공연자 프로필이면 대관 신청으로, 아니면 공연장 상세(좌석 리뷰)로 이동 */
     const isPerformerProfile = ($activeMode && $activeMode.value === "ROLE_PERFORMER");
 
-    const DEFAULT_PAGE = 0;
     const DEFAULT_SIZE = Number($input?.dataset?.size || 10);
+
+    // 페이징/무한스크롤 상태
+    const state = {
+        page: 0,
+        size: DEFAULT_SIZE,
+        keyword: "",
+        loading: false,
+        last: false,
+    };
 
     let debounceTimer = null;
 
@@ -57,11 +65,15 @@
      * [렌더링] 카드 리스트 출력
      * - VenueListItemDto: venueId, venueName, address, venueType, totalSeats
      */
-    function render(items) {
-        $list.innerHTML = "";
+    function render(items, append) {
+        if (!append) {
+            $list.innerHTML = "";
+        }
 
         if (!items || items.length === 0) {
-            $empty.classList.remove("d-none");
+            if (!append) {
+                $empty.classList.remove("d-none");
+            }
             return;
         }
         $empty.classList.add("d-none");
@@ -88,19 +100,6 @@
             .join("");
 
         $list.insertAdjacentHTML("beforeend", html);
-
-        // 카드 클릭: 프로필에 따라 대관 신청(공연자) 또는 공연장 상세(유저)
-        document.querySelectorAll(".venue-card").forEach((el) => {
-            el.addEventListener("click", () => {
-                const venueId = el.getAttribute("data-id");
-                if (!venueId) return;
-                if (isPerformerProfile) {
-                    window.location.href = `/venues/${venueId}/reservation`;
-                } else {
-                    window.location.href = `/venues/${venueId}`;
-                }
-            });
-        });
     }
 
     /**
@@ -108,12 +107,16 @@
      * - CommonResponse<Page<VenueListItemDto>>
      * - body.data.content 가 리스트
      */
-    async function fetchVenues({ keyword = "", page = DEFAULT_PAGE, size = DEFAULT_SIZE }) {
-        const params = new URLSearchParams();
-        params.set("page", String(page));
-        params.set("size", String(size));
+    async function fetchVenues({ append = false } = {}) {
+        if (state.loading || state.last) return;
 
-        const trimmed = (keyword || "").trim();
+        state.loading = true;
+
+        const params = new URLSearchParams();
+        params.set("page", String(state.page));
+        params.set("size", String(state.size));
+
+        const trimmed = (state.keyword || "").trim();
         if (trimmed.length > 0) {
             params.set("keyword", trimmed);
         }
@@ -128,7 +131,7 @@
 
             if (!res.ok) {
                 console.error("[VenueList] fetch failed", res.status);
-                render([]);
+                render([], append);
                 return;
             }
 
@@ -137,12 +140,27 @@
             // body.data = Page 객체, body.data.content = 리스트
             const pageObj = body?.data;
             const items = pageObj?.content || [];
+            const last = !!pageObj?.last;
 
-            render(items);
+            render(items, append);
+
+            state.last = last;
+            if (!state.last) {
+                state.page += 1;
+            }
         } catch (e) {
             console.error("[VenueList] fetch error", e);
-            render([]);
+            render([], append);
+        } finally {
+            state.loading = false;
         }
+    }
+
+    /** 검색 조건 변경 시 0페이지부터 다시 로드 */
+    function resetAndLoad() {
+        state.page = 0;
+        state.last = false;
+        fetchVenues({ append: false });
     }
 
     /**
@@ -151,11 +169,10 @@
      * - 검색은 항상 0페이지부터
      */
     function onSearchDebounced() {
-        const keyword = ($input.value || "").trim();
-
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            fetchVenues({ keyword, page: 0, size: DEFAULT_SIZE });
+            state.keyword = ($input.value || "").trim();
+            resetAndLoad();
         }, 250);
     }
 
@@ -164,9 +181,9 @@
      * - 버튼 클릭/엔터 등 즉시 실행용
      */
     function onSearchImmediate() {
-        const keyword = ($input.value || "").trim();
         clearTimeout(debounceTimer); // [추가] 버튼/엔터는 즉시 실행하니까 대기 타이머 제거
-        fetchVenues({ keyword, page: 0, size: DEFAULT_SIZE });
+        state.keyword = ($input.value || "").trim();
+        resetAndLoad();
     }
 
     // 입력 시 디바운스 검색
@@ -184,5 +201,37 @@
     $searchBtn?.addEventListener("click", onSearchImmediate);
 
     // 첫 진입 - 전체 목록 0페이지 호출
-    fetchVenues({ keyword: "", page: 0, size: DEFAULT_SIZE });
+    resetAndLoad();
+
+    // 카드 클릭: 프로필에 따라 대관 신청(공연자) 또는 공연장 상세(유저)
+    $list.addEventListener("click", (e) => {
+        const el = e.target.closest(".venue-card");
+        if (!el) return;
+        const venueId = el.getAttribute("data-id");
+        if (!venueId) return;
+        if (isPerformerProfile) {
+            window.location.href = `/venues/${venueId}/reservation`;
+        } else {
+            window.location.href = `/venues/${venueId}`;
+        }
+    });
+
+    // 무한 스크롤: 하단 근처 도달 시 자동으로 다음 페이지 로드
+    function handleScrollForInfinite() {
+        if (state.loading || state.last) return;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        const docHeight = Math.max(
+            document.body.scrollHeight,
+            document.documentElement.scrollHeight,
+            document.body.offsetHeight,
+            document.documentElement.offsetHeight
+        );
+
+        if (docHeight - (scrollTop + windowHeight) < 200) {
+            fetchVenues({ append: true });
+        }
+    }
+
+    window.addEventListener("scroll", handleScrollForInfinite);
 })();

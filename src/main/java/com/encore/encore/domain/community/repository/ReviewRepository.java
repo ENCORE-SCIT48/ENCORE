@@ -76,19 +76,19 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     /**
      * [피드] 최근 공연 후기(좌석 리뷰 제외) 조회
-     * - seat IS NULL, isDeleted = false
+     * - seat IS NULL, 리뷰/공연 모두 isDeleted = false
      * - createdAt DESC
      */
     @EntityGraph(attributePaths = {"performance", "user"})
-    Page<Review> findBySeatIsNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+    Page<Review> findBySeatIsNullAndIsDeletedFalseAndPerformance_IsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
 
     /**
      * [피드] 최근 좌석 리뷰 조회
-     * - seat IS NOT NULL, isDeleted = false
+     * - seat IS NOT NULL, 리뷰/공연 모두 isDeleted = false
      * - createdAt DESC
      */
     @EntityGraph(attributePaths = {"performance", "user", "seat"})
-    Page<Review> findBySeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+    Page<Review> findBySeatIsNotNullAndIsDeletedFalseAndPerformance_IsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
 
     /**
      * [피드] 사용자가 이미 공연 후기를 남긴 performanceId 목록 (좌석 리뷰 제외)

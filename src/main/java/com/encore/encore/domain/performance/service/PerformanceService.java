@@ -85,22 +85,18 @@ public class PerformanceService {
             }
         }
 
-        // 공연장 기준 조회 (공연장 상세에서 좌석 리뷰용)
+        // 공연장 기준 조회 (공연장 상세에서 좌석 리뷰용) — is_deleted=false
         if (venueId != null) {
             performances =
                 performanceRepository.findByVenue_VenueIdAndIsDeletedFalseOrderByCreatedAtDesc(venueId, pageable);
         } else if (categoryEnum != null && hasKeyword) {
-            // 카테고리 + 검색어
-            performances = performanceRepository.findByTitleContainingIgnoreCaseAndCategory(keyword, categoryEnum, pageable);
+            performances = performanceRepository.findByTitleContainingIgnoreCaseAndCategoryAndIsDeletedFalse(keyword, categoryEnum, pageable);
         } else if (categoryEnum != null) {
-            // 카테고리만
-            performances = performanceRepository.findByCategory(categoryEnum, pageable);
+            performances = performanceRepository.findByCategoryAndIsDeletedFalse(categoryEnum, pageable);
         } else if (hasKeyword) {
-            // 전체 + 검색어
-            performances = performanceRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+            performances = performanceRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalse(keyword, pageable);
         } else {
-            // 전체
-            performances = performanceRepository.findAll(pageable);
+            performances = performanceRepository.findByIsDeletedFalse(pageable);
         }
 
         log.info("[Performance] list result - totalElements={}, totalPages={}",
@@ -137,7 +133,7 @@ public class PerformanceService {
         log.info("[Performance] hot list request - recruitStatus=OPEN, limit=10");
 
         List<PerformanceListItemDto> result = performanceRepository
-            .findTop10ByRecruitStatusOrderByCreatedAtDesc(PerformanceRecruitStatus.OPEN)
+            .findTop10ByRecruitStatusAndIsDeletedFalseOrderByCreatedAtDesc(PerformanceRecruitStatus.OPEN)
             .stream()
             .map(PerformanceListItemDto::new)
             .toList();
@@ -483,7 +479,8 @@ public class PerformanceService {
      * @throws ApiException 공연 또는 공연장이 없을 경우 NOT_FOUND
      */
     public List<SeatOptionDto> getSeatsByPerformanceId(Long performanceId) {
-        Performance performance = performanceRepository.findById(performanceId)
+        // venue를 fetch join으로 함께 로드해 좌석 조회 시 NPE·Lazy 로딩 이슈 방지
+        Performance performance = performanceRepository.findDetailById(performanceId)
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
 
         if (performance.getVenue() == null) {

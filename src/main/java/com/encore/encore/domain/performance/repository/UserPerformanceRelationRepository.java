@@ -50,6 +50,7 @@ public interface UserPerformanceRelationRepository extends JpaRepository<UserPer
         where upr.user.userId = :userId
           and upr.status = :status
           and upr.isDeleted = false
+          and upr.performance.isDeleted = false
           and (
                 :keyword is null
                 or :keyword = ''
@@ -75,6 +76,7 @@ public interface UserPerformanceRelationRepository extends JpaRepository<UserPer
         where upr.user.userId = :userId
           and upr.status = :status
           and upr.isDeleted = false
+          and upr.performance.isDeleted = false
           and (
                 :keyword is null
                 or :keyword = ''

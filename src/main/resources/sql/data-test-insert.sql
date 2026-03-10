@@ -142,6 +142,9 @@ INSERT INTO user_relation (actor_id, actor_profile_mode, relation_type, target_t
 -- 1. src/main/resources/static/image/test/ 폴더에 아래 파일명으로 이미지 넣기
 -- 2. 아래 UPDATE 블록 주석 해제 후 실행
 --
+-- ※ 공연/공연장을 /uploads/xxx 로 넣은 경우: file.upload-dir 폴더에 해당 파일이
+--    있어야 함. 없으면 NoResourceFoundException 발생. 목록은 docs/test-images-guide.md 참고.
+--
 -- 사용 파일명:
 --   user_profile      → profile1.jpg ~ profile4.jpg (user_id 1~4)
 --   performer_profile → performer1.jpg(user_id=2), performer2.jpg(user_id=1)

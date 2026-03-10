@@ -15,40 +15,29 @@ import java.util.Optional;
 public interface PerformanceRepository extends JpaRepository<Performance, Long> {
 
     /**
-     * 제목 검색 (카테고리 전체일 때 사용)
-     *
-     * @param title    검색어(공연 제목)
-     * @param pageable 페이징 정보
-     * @return 검색된 공연 페이지
+     * 제목 검색 (카테고리 전체일 때 사용) - 삭제되지 않은 공연만
      */
-    Page<Performance> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    Page<Performance> findByTitleContainingIgnoreCaseAndIsDeletedFalse(String title, Pageable pageable);
 
     /**
-     * 제목 + 카테고리(category=장르) 검색
-     *
-     * @param title    검색어(공연 제목)
-     * @param category 카테고리(장르)
-     * @param pageable 페이징 정보
-     * @return 검색된 공연 페이지
+     * 제목 + 카테고리(category=장르) 검색 - 삭제되지 않은 공연만
      */
-    Page<Performance> findByTitleContainingIgnoreCaseAndCategory(String title, PerformanceCategory category, Pageable pageable);
+    Page<Performance> findByTitleContainingIgnoreCaseAndCategoryAndIsDeletedFalse(String title, PerformanceCategory category, Pageable pageable);
 
     /**
-     * 카테고리(category=장르)만으로 조회
-     *
-     * @param category 카테고리(장르)
-     * @param pageable 페이징 정보
-     * @return 카테고리별 공연 페이지
+     * 카테고리(category=장르)만으로 조회 - 삭제되지 않은 공연만
      */
-    Page<Performance> findByCategory(PerformanceCategory category, Pageable pageable);
+    Page<Performance> findByCategoryAndIsDeletedFalse(PerformanceCategory category, Pageable pageable);
 
     /**
-     * 핫한 공연 Top10 조회 (임시 기준 - recruitStatus=OPEN + createdAt 최신순)
-     *
-     * @param recruitStatus 모집 상태(예: OPEN)
-     * @return 최신순 Top10 공연
+     * 삭제되지 않은 공연 전체 페이징 조회 (리스트 전체)
      */
-    List<Performance> findTop10ByRecruitStatusOrderByCreatedAtDesc(PerformanceRecruitStatus recruitStatus);
+    Page<Performance> findByIsDeletedFalse(Pageable pageable);
+
+    /**
+     * 핫한 공연 Top10 조회 (recruitStatus=OPEN, isDeleted=false, createdAt 최신순)
+     */
+    List<Performance> findTop10ByRecruitStatusAndIsDeletedFalseOrderByCreatedAtDesc(PerformanceRecruitStatus recruitStatus);
 
     /**
      * 삭제되지 않은 공연 중 최신순 Top 10 (게스트 피드용, status 무관)

@@ -232,3 +232,9 @@ body {
     object-fit: cover;
     display: block;
 }
+
+/* 이미지 로드 실패 시 플레이스홀더 (onerror로 적용) */
+.perf-card__img--error {
+    background: #e0e0e0;
+    min-height: 120px;
+}

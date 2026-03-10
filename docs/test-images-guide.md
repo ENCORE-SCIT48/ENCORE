@@ -86,3 +86,66 @@ file:
 
 둘 다 **DB에는 “실제 이미지”가 아니라 “경로 문자열”만** 넣으면 되고,  
 실제 파일은 위 둘 중 한 곳에 두면 됩니다.
+
+---
+
+## ⚠️ /uploads/ 사용 시: NoResourceFoundException 방지
+
+INSERT/UPDATE에서 **경로를 `/uploads/파일명`** 으로 넣었다면,  
+**반드시 해당 파일이 `file.upload-dir` 폴더에 존재**해야 합니다.  
+파일이 없으면 브라우저가 `/uploads/xxx.jpg` 요청 시  
+`NoResourceFoundException: No static resource xxx.jpg` 가 발생합니다.
+
+### 해야 할 일
+
+1. `application.yaml`의 `file.upload-dir` 확인 (예: `C:/encore/uploads/`).
+2. 해당 폴더가 없으면 생성.
+3. 아래 목록의 **파일명과 동일한 이름**으로 이미지 파일을 그 폴더에 넣기.
+
+### 추가 데이터(호스트 41~58, 공연장 18곳, 공연 15개)에서 쓰는 /uploads/ 파일 목록
+
+**공연장(venue.venue_image) — 18개**
+
+| 파일명 |
+|--------|
+| yes24_live_hall.jpg |
+| bluesquare_mastercard_hall.jpg |
+| sac_concert_hall.jpg |
+| sejong_grand_theater.png |
+| lotte_concert_hall.jpg |
+| rolling_hall.jpg |
+| westbridge_livehall.jpg |
+| sangsangmadang_livehall.jpg |
+| nodeul_livehouse.jpg |
+| aram_theater.jpg |
+| seongnam_opera_house.jpg |
+| suwon_sk_atrium.jpg |
+| busan_culture_center.jpg |
+| bexco_auditorium.jpg |
+| daegu_opera_house.jpg |
+| gwangju_art_center.jpg |
+| incheon_art_center.jpg |
+| chuncheon_sangsangmadang.jpg |
+
+**공연(performance.performance_image_url) — 15개**
+
+| 파일명 |
+|--------|
+| evnne_setngo.jpg |
+| solutions_emergence.jpg |
+| concrete_spark.jpg |
+| togenashi.jpg |
+| yesung_itscomplicated.jpg |
+| baekhyun_reverie.jpg |
+| day6_thepresent.jpg |
+| highlight_rideordie.jpg |
+| leechanwon_changa.jpg |
+| kpop_festival.jpg |
+| sac_11am_nov.jpg |
+| sac_11am_dec.jpg |
+| daniel_harding_orchestra.jpg |
+| richard_jangle_duo.jpg |
+| kbs_orchestra.jpg |
+
+위 파일들을 `file.upload-dir`(예: `C:/encore/uploads/`)에 두면  
+공연 목록·상세, 공연장 이미지가 정상적으로 표시됩니다.

@@ -14,8 +14,12 @@
 $(function () {
     "use strict";
 
-    const performanceId = $("#performanceId").val();
+    const performanceId = String($("#performanceId").val() || "").trim();
     const reviewId = Number($("#reviewId").val() || 0);
+    if (!performanceId) {
+        console.error("[SeatReviewWrite] performanceId missing");
+        return;
+    }
 
     const SEAT_SIZE_RATIO = 0.05;
     const gradeColors = { vip: "#fbbf24", r: "#f87171", s: "#60a5fa", a: "#34d399" };
@@ -26,22 +30,27 @@ $(function () {
     let selectedSeatId = null;
     let canvas = null, ctx = null;
 
-    /** 공연 제목·부가 정보 표시 */
+    /** 공연 제목·부가 정보 표시 (해당 공연 API에서 가져옴) */
     function loadPerformanceInfo() {
         $.ajax({
             url: `/api/performances/${performanceId}`,
             method: "GET",
             dataType: "json"
         }).done(function (res) {
-            const d = res?.data || {};
-            $("#perfTitle").text(d?.title ?? "공연제목");
-            const venueName = d?.venueName ?? "-";
-            const address = d?.address ?? "-";
+            const d = res?.data || res || {};
+            const title = d.title != null ? String(d.title) : "";
+            $("#perfTitle").text(title || "공연제목");
+
+            const venueName = d.venueName != null ? String(d.venueName) : "-";
+            const address = d.address != null ? String(d.address) : "-";
             const statusMap = { MUSICAL: "뮤지컬", PLAY: "연극", BAND: "밴드 공연" };
-            const rawCategory = d?.category ?? d?.status;
-            const category = statusMap[rawCategory] ?? (rawCategory ?? "-");
-            const year = d?.productionYear ?? "-";
-            $("#perfSub").text(`${address} · ${venueName} · ${category} · ${year}`);
+            const rawCategory = d.category != null ? d.category : (d.status != null ? d.status : "");
+            const category = statusMap[rawCategory] || (rawCategory ? String(rawCategory) : "-");
+            const year = d.productionYear != null ? String(d.productionYear) : (d.createdAt ? (new Date(d.createdAt).getFullYear()) : "-");
+            $("#perfSub").text([address, venueName, category, year].join(" · "));
+        }).fail(function () {
+            $("#perfTitle").text("공연제목");
+            $("#perfSub").text("공연 정보를 불러오지 못했습니다.");
         });
     }
 
@@ -56,9 +65,15 @@ $(function () {
 
             const $sel = $("#seatId");
             $sel.find("option:not(:first)").remove();
+            if (list.length === 0) {
+                $sel.after("<p class=\"text-muted small mt-2\" id=\"seatEmptyMsg\">이 공연의 공연장에 등록된 좌석이 없어 좌석 리뷰를 작성할 수 없습니다.</p>");
+                $("#submitBtn").prop("disabled", true);
+                validate();
+                return;
+            }
             list.forEach(function (s) {
                 const label = [s.seatNumber, s.seatType, s.seatFloor != null ? s.seatFloor + "층" : ""].filter(Boolean).join(" · ") || "좌석 " + s.seatId;
-                $sel.append($("<option></option>").attr("value", s.seatId).text(label));
+                $sel.append($("<option></option>").attr("value", String(s.seatId)).text(label));
             });
 
             const withPosition = list.filter(function (s) {
@@ -68,7 +83,13 @@ $(function () {
                 floors = buildFloors(list);
                 $("#seatMapWrap").removeClass("d-none");
                 initSeatCanvas();
-                drawSeats();
+                setTimeout(function () {
+                    if (ctx && canvas && canvas.parentElement) {
+                        canvas.width = canvas.parentElement.clientWidth;
+                        canvas.height = canvas.parentElement.clientHeight;
+                        drawSeats();
+                    }
+                }, 50);
             }
             validate();
         }).fail(function (xhr) {
@@ -193,7 +214,9 @@ $(function () {
         $("#submitBtn").prop("disabled", !(seatId && rating > 0 && content.length >= 5));
     }
 
-    $("#stars").on("click", ".star", function () {
+    $("#stars").on("click", ".star", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
         renderStars(Number($(this).data("value")));
     });
     $("#stars").on("mouseenter", ".star", function () {
@@ -222,8 +245,13 @@ $(function () {
     });
     $("#content").on("input change", validate);
 
-    $("#backBtn").on("click", function () {
-        history.back();
+    $("#backBtn").on("click", function (e) {
+        e.preventDefault();
+        if (window.history.length > 1) {
+            history.back();
+        } else {
+            window.location.href = "/performances/" + performanceId + "?tab=seatReview";
+        }
     });
 
     function loadReviewIfEditMode() {

@@ -7,6 +7,8 @@ import com.encore.encore.domain.venue.entity.Venue;
 import com.encore.encore.domain.member.entity.PerformerProfile;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 public class PerformanceDetailDto {
 
@@ -31,6 +33,11 @@ public class PerformanceDetailDto {
     private final Long performerId;
     private final String performerStageName;
 
+    /** 등록일 (좌석 리뷰 작성 등에서 "공연 정보" 표시용) */
+    private final LocalDateTime createdAt;
+    /** 제작/등록 연도 (createdAt 기준, 표시용) */
+    private final Integer productionYear;
+
     public PerformanceDetailDto(Performance performance) {
         this.performanceId = performance.getPerformanceId();
         this.title = performance.getTitle();
@@ -48,5 +55,9 @@ public class PerformanceDetailDto {
         PerformerProfile performer = performance.getPerformerCreator();
         this.performerId = performer != null ? performer.getPerformerId() : null;
         this.performerStageName = performer != null ? performer.getStageName() : null;
+
+        LocalDateTime created = performance.getCreatedAt();
+        this.createdAt = created;
+        this.productionYear = created != null ? created.getYear() : null;
     }
 }

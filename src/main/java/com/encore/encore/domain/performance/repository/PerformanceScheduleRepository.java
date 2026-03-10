@@ -26,6 +26,7 @@ public interface PerformanceScheduleRepository extends JpaRepository<Performance
         where upr.user.userId = :userId
           and upr.status = :status
           and upr.isDeleted = false
+          and p.isDeleted = false
           and ps.isDeleted = false
           and ps.startTime >= :now
           and ps.startTime <= :to
@@ -60,6 +61,7 @@ public interface PerformanceScheduleRepository extends JpaRepository<Performance
         where u.userId in :followedUserIds
           and upr.status = :status
           and upr.isDeleted = false
+          and p.isDeleted = false
           and ps.isDeleted = false
           and ps.startTime >= :now
         order by ps.startTime asc

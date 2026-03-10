@@ -27,6 +27,11 @@ $(function () {
             .replaceAll("'", "&#039;");
     }
 
+    /** img src에 쓸 URL만 따옴표 이스케이프 (전체 escapeHtml 시 & 등으로 URL 깨짐 방지) */
+    function safeAttrUrl(url) {
+        return String(url ?? "").replace(/"/g, "&quot;");
+    }
+
     function renderCards(items, append) {
         if (!append) $("#performanceGrid").empty();
 
@@ -36,7 +41,7 @@ $(function () {
 
             const title = p.title ?? "공연";
 
-            const imageUrl = escapeHtml(p.performanceImageUrl || "");
+            const imageUrl = safeAttrUrl((p.performanceImageUrl || "").trim());
 
             const reviewButtons = (state.filter === "VIEWED")
                 ? `
@@ -63,7 +68,7 @@ $(function () {
                 <div class="col-4">
                     <a class="d-block text-decoration-none" href="/performances/${id}">
                         <div class="perf-card">
-                        <img src="${imageUrl}" alt="${escapeHtml(title)}" class="perf-card__img"></div>
+                        <img src="${imageUrl || ""}" alt="${escapeHtml(title)}" class="perf-card__img" data-fallback="/image/default-profile.png" onerror="this.onerror=null;this.src=this.dataset.fallback||'';this.classList.add('perf-card__img--error');"></div>
                         <div class="mt-2 small text-dark text-truncate">${escapeHtml(title)}</div>
                     </a>
                     ${reviewButtons}
@@ -181,9 +186,9 @@ $(function () {
             var slidesHtml = list.map(function (p) {
                 var id = p.performanceId;
                 var title = escapeHtml(p.title || "공연");
-                var imgUrl = (p.performanceImageUrl && p.performanceImageUrl.trim()) ? p.performanceImageUrl.trim() : "";
-                var imgTag = imgUrl
-                    ? "<img src=\"" + escapeHtml(imgUrl) + "\" alt=\"" + title + "\" class=\"hot-slide-img\"/>"
+                var rawUrl = (p.performanceImageUrl && p.performanceImageUrl.trim()) ? p.performanceImageUrl.trim() : "";
+                var imgTag = rawUrl
+                    ? "<img src=\"" + safeAttrUrl(rawUrl) + "\" alt=\"" + title + "\" class=\"hot-slide-img\" onerror=\"this.onerror=null;this.src='/image/default-profile.png';this.classList.add('hot-slide-img--error');\"/>"
                     : "<div class=\"hot-slide-noimg\"><span>공연</span></div>";
                 return "<a href=\"/performances/" + id + "\" class=\"hot-slide\">" + imgTag + "<span class=\"hot-slide-title\">" + title + "</span></a>";
             });
@@ -302,4 +307,20 @@ $(function () {
     });
 
     resetAndLoad();
+
+    // ─── 무한 스크롤: 화면 하단 근처에서 자동으로 다음 페이지 로드 ────────────────
+    function handleScrollForInfinite() {
+        if (state.loading || state.last) return;
+
+        const scrollTop = $(window).scrollTop();
+        const windowHeight = $(window).height();
+        const docHeight = $(document).height();
+
+        // 남은 거리가 200px 이하이면 다음 페이지 로드
+        if (docHeight - (scrollTop + windowHeight) < 200) {
+            fetchList(true);
+        }
+    }
+
+    $(window).on("scroll", handleScrollForInfinite);
 });

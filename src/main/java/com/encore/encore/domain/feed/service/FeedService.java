@@ -102,7 +102,7 @@ public class FeedService {
      */
     private List<FeedItemDto> buildRecentPerformanceReviews() {
         var page = reviewRepository
-            .findBySeatIsNullAndIsDeletedFalseOrderByCreatedAtDesc(PageRequest.of(0, 5));
+            .findBySeatIsNullAndIsDeletedFalseAndPerformance_IsDeletedFalseOrderByCreatedAtDesc(PageRequest.of(0, 5));
 
         List<FeedItemDto> items = new ArrayList<>();
         for (Review r : page.getContent()) {
@@ -136,7 +136,7 @@ public class FeedService {
      */
     private List<FeedItemDto> buildRecentSeatReviews() {
         var page = reviewRepository
-            .findBySeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(PageRequest.of(0, 5));
+            .findBySeatIsNotNullAndIsDeletedFalseAndPerformance_IsDeletedFalseOrderByCreatedAtDesc(PageRequest.of(0, 5));
 
         List<FeedItemDto> items = new ArrayList<>();
         for (Review r : page.getContent()) {

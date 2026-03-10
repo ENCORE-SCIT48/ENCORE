@@ -236,7 +236,7 @@ const venueManager = (() => {
         },
         prevStep: () => {
             if (currentStep > 1) { currentStep--; updateUI(); }
-            else { if (confirm("작성 중인 내용이 저장되지 않습니다. 목록으로 돌아갈까요?")) location.href = '/venues'; }
+            else { if (confirm("작성 중인 내용이 저장되지 않습니다. 내 공연장 목록으로 돌아갈까요?")) location.href = '/venues/my'; }
         },
 
         // ── 등록 / 수정 제출 ───────────────────────────────────────────────
@@ -258,7 +258,7 @@ const venueManager = (() => {
                         credentials: 'include',
                     }
                 );
-                if (res.ok) { alert(`공연장이 성공적으로 ${action}되었습니다!`); location.href = '/venues'; }
+                if (res.ok) { alert(`공연장이 성공적으로 ${action}되었습니다!`); location.href = '/venues/my'; }
                 else await handleApiError(res, action);
             } catch (e) {
                 console.error(`[VenueForm] ${action} 오류:`, e);
@@ -282,7 +282,7 @@ const venueManager = (() => {
                     method: 'DELETE',
                     credentials: 'include',
                 });
-                if (res.ok) { alert("공연장이 삭제되었습니다."); location.href = '/venues'; }
+                if (res.ok) { alert("공연장이 삭제되었습니다."); location.href = '/venues/my'; }
                 else await handleApiError(res, '삭제');
             } catch (e) {
                 console.error('[VenueForm] 삭제 오류:', e);

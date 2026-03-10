@@ -84,11 +84,12 @@ function createFeedCard(item) {
         imgWrap.className = "feed-card-image-wrap";
         const img = document.createElement("img");
         img.className = "feed-card-image";
-        // performanceImageUrl이 없으면 기본 대체 이미지를 사용
+        // performanceImageUrl이 없으면 기본 대체 이미지를 사용. 로드 실패 시에도 fallback
         const fallback = "/image/default-profile.png";
         const url = (rawImageUrl && String(rawImageUrl).trim() !== "") ? rawImageUrl : fallback;
         img.src = url;
         img.alt = title;
+        img.onerror = function () { this.onerror = null; this.src = fallback; };
         imgWrap.appendChild(img);
         card.appendChild(imgWrap);
     }

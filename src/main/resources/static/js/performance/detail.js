@@ -348,8 +348,12 @@ $(function () {
                 });
         }
 
-        // 공연 대표 이미지(포스터): 있으면 표시, 없으면 플레이스홀더
-        const imageUrl = d?.performanceImageUrl;
+        // 공연 대표 이미지(포스터): 있으면 표시, 없으면 플레이스홀더. 로드 실패 시에도 플레이스홀더
+        const imageUrl = (d?.performanceImageUrl || "").trim();
+        $("#posterImage").off("error").on("error", function () {
+            $(this).hide().attr("src", "");
+            $("#posterPlaceholder").show();
+        });
         if (imageUrl) {
             $("#posterImage").attr("src", imageUrl).show();
             $("#posterPlaceholder").hide();
