@@ -114,6 +114,10 @@
                     <div id="seatReviewEmpty" class="review-empty" style="display:none;">
                         이 공연의 좌석 배치 정보가 없거나, 좌석 리뷰가 없습니다.
                     </div>
+                    <div id="seatReviewListWrap" class="seat-review-list-wrap mt-3" style="display:none;">
+                        <h4 class="h6 mb-2">저장된 좌석 리뷰</h4>
+                        <ul id="seatReviewList" class="list-group list-group-flush"></ul>
+                    </div>
                     <div class="seat-review-write-wrap mt-2">
                         <a id="seatReviewWriteLink" th:href="@{/performances/{id}/reviews/seats/new(id=${performanceId})}" class="btn btn-outline-primary btn-sm">좌석 리뷰 작성</a>
                     </div>

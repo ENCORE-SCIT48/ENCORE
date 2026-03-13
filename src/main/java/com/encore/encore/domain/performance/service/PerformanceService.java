@@ -484,11 +484,14 @@ public class PerformanceService {
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
 
         if (performance.getVenue() == null) {
-            log.warn("[SeatReview] 공연에 장소가 없음 - performanceId={}", performanceId);
+            log.warn("[SeatReview] 공연에 장소가 없음 - performanceId={}, venue_id=null", performanceId);
             return List.of();
         }
 
-        List<Seat> seats = seatRepository.findAllByVenueAndIsDeletedFalse(performance.getVenue());
+        Long venueId = performance.getVenue().getVenueId();
+        // venue_id로 직접 조회 (엔티티 참조 이슈 방지)
+        List<Seat> seats = seatRepository.findAllByVenue_VenueIdAndIsDeletedFalse(venueId);
+        log.info("[SeatReview] 좌석 조회 - performanceId={}, venueId={}, seatCount={}", performanceId, venueId, seats.size());
         return seats.stream().map(SeatOptionDto::new).toList();
     }
 
@@ -528,6 +531,10 @@ public class PerformanceService {
     }
 
     private SeatReviewItemDto toSeatReviewItemDto(Review r) {
+        Long venueId = null;
+        if (r.getSeat() != null && r.getSeat().getVenue() != null) {
+            venueId = r.getSeat().getVenue().getVenueId();
+        }
         return new SeatReviewItemDto(
             r.getReviewId(),
             r.getUser() != null ? r.getUser().getUserId() : 0L,
@@ -538,6 +545,7 @@ public class PerformanceService {
             r.getSeat() != null ? r.getSeat().getSeatNumber() : null,
             r.getSeat() != null ? r.getSeat().getSeatType() : null,
             r.getSeat() != null ? r.getSeat().getSeatFloor() : null,
+            venueId,
             r.getCreatedAt()
         );
     }
@@ -583,7 +591,8 @@ public class PerformanceService {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "좌석을 선택해 주세요.");
         }
 
-        Performance performance = performanceRepository.findById(performanceId)
+        // venue까지 fetch 해서 공연장·좌석 소속 검증 시 Lazy 로딩 방지
+        Performance performance = performanceRepository.findDetailById(performanceId)
             .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "공연을 찾을 수 없습니다. performanceId=" + performanceId));
 
         Seat seat = seatRepository.findById(seatId)

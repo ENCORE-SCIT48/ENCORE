@@ -21,6 +21,11 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findAllByVenueAndIsDeletedFalse(Venue venue);
 
     /**
+     * [설명] venue_id로 삭제되지 않은 좌석만 조회 (엔티티 참조 없이 ID만으로 조회)
+     */
+    List<Seat> findAllByVenue_VenueIdAndIsDeletedFalse(Long venueId);
+
+    /**
      * [설명] 특정 공연장의 모든 좌석 정보를 물리 삭제합니다.
      * [주의] 예약 데이터(Reservation)가 존재할 경우 외래키 제약조건 위반이 발생할 수 있습니다.
      */

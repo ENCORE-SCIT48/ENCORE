@@ -46,11 +46,12 @@ public interface PerformanceRepository extends JpaRepository<Performance, Long> 
      */
     List<Performance> findTop10ByIsDeletedFalseOrderByCreatedAtDesc();
 
-    // 공연 상세 조회: venue를 fetch join 해서 LAZY 문제 방지
+    // 공연 상세 조회: venue를 fetch join 해서 LAZY 문제 방지 (삭제되지 않은 공연만)
     @Query("""
         select p from Performance p
         left join fetch p.venue v
         where p.performanceId = :performanceId
+          and p.isDeleted = false
         """)
     Optional<Performance> findDetailById(@Param("performanceId") Long performanceId);
 

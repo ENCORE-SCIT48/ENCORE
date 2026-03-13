@@ -14,12 +14,20 @@
 $(function () {
     "use strict";
 
-    const performanceId = String($("#performanceId").val() || "").trim();
+    // 공연 ID: hidden input 우선, 없으면 URL 경로에서 추출 (/performances/9/reviews/seats/new)
+    let performanceId = String($("#performanceId").val() || "").trim();
+    if (!performanceId) {
+        var match = window.location.pathname.match(/\/performances\/(\d+)\//);
+        if (match) performanceId = match[1];
+    }
     const reviewId = Number($("#reviewId").val() || 0);
     if (!performanceId) {
-        console.error("[SeatReviewWrite] performanceId missing");
+        console.error("[SeatReviewWrite] performanceId missing and could not parse from URL:", window.location.pathname);
+        $("#perfTitle").text("공연 정보를 불러올 수 없습니다.");
         return;
     }
+    // hidden에 넣어두면 뒤로가기 등에서 사용 가능
+    $("#performanceId").val(performanceId);
 
     const SEAT_SIZE_RATIO = 0.05;
     const gradeColors = { vip: "#fbbf24", r: "#f87171", s: "#60a5fa", a: "#34d399" };
@@ -35,7 +43,8 @@ $(function () {
         $.ajax({
             url: `/api/performances/${performanceId}`,
             method: "GET",
-            dataType: "json"
+            dataType: "json",
+            xhrFields: { withCredentials: true }
         }).done(function (res) {
             const d = res?.data || res || {};
             const title = d.title != null ? String(d.title) : "";
@@ -58,22 +67,29 @@ $(function () {
         $.ajax({
             url: `/api/performances/${performanceId}/seats`,
             method: "GET",
-            dataType: "json"
+            dataType: "json",
+            xhrFields: { withCredentials: true }
         }).done(function (res) {
-            const list = res?.data || [];
+            const raw = res?.data != null ? res.data : res;
+            const list = Array.isArray(raw) ? raw : [];
             seatList = list;
 
             const $sel = $("#seatId");
+            $sel.prop("disabled", false);
             $sel.find("option:not(:first)").remove();
             if (list.length === 0) {
-                $sel.after("<p class=\"text-muted small mt-2\" id=\"seatEmptyMsg\">이 공연의 공연장에 등록된 좌석이 없어 좌석 리뷰를 작성할 수 없습니다.</p>");
+                $sel.after("<p class=\"text-muted small mt-2\" id=\"seatEmptyMsg\">이 공연에 공연장 정보가 없거나 등록된 좌석이 없어 저장은 불가합니다. 별점과 리뷰 내용은 입력할 수 있습니다.</p>");
                 $("#submitBtn").prop("disabled", true);
+                ensureStarsClickable();
                 validate();
                 return;
             }
+            $sel.find("option:first").text("좌석을 선택해 주세요 " + list.length + "개");
+            $("#seatSelectHint").show();
             list.forEach(function (s) {
-                const label = [s.seatNumber, s.seatType, s.seatFloor != null ? s.seatFloor + "층" : ""].filter(Boolean).join(" · ") || "좌석 " + s.seatId;
-                $sel.append($("<option></option>").attr("value", String(s.seatId)).text(label));
+                const id = s.seatId != null ? s.seatId : "";
+                const label = [s.seatNumber, s.seatType, s.seatFloor != null ? s.seatFloor + "층" : ""].filter(Boolean).join(" · ") || "좌석 " + id;
+                $sel.append($("<option></option>").attr("value", String(id)).text(label));
             });
 
             const withPosition = list.filter(function (s) {
@@ -91,13 +107,22 @@ $(function () {
                     }
                 }, 50);
             }
+            ensureStarsClickable();
             validate();
         }).fail(function (xhr) {
             if (typeof console !== "undefined" && console.error) {
-                console.error("[SeatReviewWrite] loadSeats failed", xhr);
+                console.error("[SeatReviewWrite] loadSeats failed", xhr?.status, xhr?.responseJSON);
             }
-            alert("좌석 목록을 불러오지 못했습니다.");
+            $("#seatEmptyMsg").remove();
+            $("#seatId").after("<p class=\"text-danger small mt-2\" id=\"seatEmptyMsg\">좌석 목록을 불러오지 못했습니다. 별점과 리뷰 내용은 입력할 수 있습니다.</p>");
+            $("#submitBtn").prop("disabled", true);
+            ensureStarsClickable();
         });
+    }
+
+    /** 좌석이 없어도 별점은 항상 눌러서 선택 가능하도록 보장 */
+    function ensureStarsClickable() {
+        $("#stars .star").prop("disabled", false).css({ "pointer-events": "auto", "cursor": "pointer" });
     }
 
     function buildFloors(list) {
@@ -146,7 +171,7 @@ $(function () {
                         currentFloorIdx = i;
                         $container.find(".floor-btn").removeClass("active").eq(i).addClass("active");
                         drawSeats();
-                    });
+                    }));
             });
         }
 
@@ -214,10 +239,12 @@ $(function () {
         $("#submitBtn").prop("disabled", !(seatId && rating > 0 && content.length >= 5));
     }
 
-    $("#stars").on("click", ".star", function (e) {
+    // 별점: 위임으로 클릭 처리 (document에서 캡처해 #stars .star 클릭 확실히 처리)
+    $(document).on("click", "#stars .star", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        renderStars(Number($(this).data("value")));
+        var val = $(this).data("value");
+        if (val != null) renderStars(Number(val));
     });
     $("#stars").on("mouseenter", ".star", function () {
         const value = Number($(this).data("value"));
@@ -321,6 +348,7 @@ $(function () {
     });
 
     renderStars(0);
+    ensureStarsClickable();
     loadPerformanceInfo();
     loadSeats();
     loadReviewIfEditMode();

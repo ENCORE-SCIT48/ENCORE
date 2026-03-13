@@ -104,35 +104,95 @@ $(function () {
 
     function loadSeatReviewMap() {
         seatReviewLoaded = true;
-        $.ajax({ url: "/api/performances/" + performanceId + "/seats", method: "GET", dataType: "json" })
+        $("#seatReviewListWrap").hide().find("#seatReviewList").empty();
+
+        $.ajax({
+            url: "/api/performances/" + performanceId + "/seats",
+            method: "GET",
+            dataType: "json",
+            xhrFields: { withCredentials: true }
+        })
             .done(function (resSeats) {
-                const list = resSeats?.data || [];
+                const list = Array.isArray(resSeats?.data) ? resSeats.data : (Array.isArray(resSeats) ? resSeats : []);
                 const withPos = list.filter(function (s) {
                     return (s.xPos != null && s.yPos != null) || (s.xRatio != null && s.yRatio != null);
                 });
+
+                function applySeatReviews(reviews) {
+                    seatReviewBySeat = {};
+                    (reviews || []).forEach(function (r) {
+                        var sid = r.seatId != null ? r.seatId : null;
+                        if (sid == null) return;
+                        if (!seatReviewBySeat[sid]) seatReviewBySeat[sid] = [];
+                        seatReviewBySeat[sid].push(r);
+                    });
+                }
+
+                function loadBySeatThen(onSuccess) {
+                    $.ajax({
+                        url: "/api/performances/" + performanceId + "/seat-reviews/by-seat",
+                        method: "GET",
+                        dataType: "json",
+                        xhrFields: { withCredentials: true }
+                    })
+                        .done(function (resReviews) {
+                            const raw = resReviews?.data != null ? resReviews.data : resReviews;
+                            const reviews = Array.isArray(raw) ? raw : [];
+                            applySeatReviews(reviews);
+                            if (onSuccess) onSuccess(reviews);
+                        })
+                        .fail(function () {
+                            applySeatReviews([]);
+                            if (onSuccess) onSuccess([]);
+                        });
+                }
+
                 if (withPos.length === 0) {
                     $("#seatReviewMapWrap").addClass("d-none");
-                    $("#seatReviewEmpty").show();
+                    loadBySeatThen(function (reviews) {
+                        if (reviews.length > 0) {
+                            renderSeatReviewList(reviews);
+                            $("#seatReviewListWrap").show();
+                            $("#seatReviewEmpty").hide();
+                        } else {
+                            $("#seatReviewListWrap").hide();
+                            $("#seatReviewEmpty").show();
+                        }
+                    });
                     return;
                 }
+
+                $("#seatReviewEmpty").hide();
+                $("#seatReviewListWrap").hide();
                 seatReviewFloors = buildSeatReviewFloors(list);
-                $.ajax({ url: "/api/performances/" + performanceId + "/seat-reviews/by-seat", method: "GET", dataType: "json" })
-                    .done(function (resReviews) {
-                        const reviews = resReviews?.data || [];
-                        seatReviewBySeat = {};
-                        reviews.forEach(function (r) {
-                            if (r.seatId == null) return;
-                            if (!seatReviewBySeat[r.seatId]) seatReviewBySeat[r.seatId] = [];
-                            seatReviewBySeat[r.seatId].push(r);
-                        });
-                        initSeatReviewCanvas();
-                        drawSeatReviewCanvas();
-                    });
+                loadBySeatThen(function () {
+                    initSeatReviewCanvas();
+                    drawSeatReviewCanvas();
+                });
             })
             .fail(function () {
                 $("#seatReviewMapWrap").addClass("d-none");
+                $("#seatReviewListWrap").hide();
                 $("#seatReviewEmpty").show();
             });
+    }
+
+    function renderSeatReviewList(reviews) {
+        const $ul = $("#seatReviewList");
+        $ul.empty();
+        (reviews || []).forEach(function (r) {
+            const seatLabel = [r.seatNumber, r.seatType, r.seatFloor != null ? r.seatFloor + "층" : ""].filter(Boolean).join(" · ") || "좌석";
+            const content = (r.content || "").substring(0, 200) + ((r.content || "").length > 200 ? "…" : "");
+            const dateStr = r.createdAt ? (typeof r.createdAt === "string" ? r.createdAt.substring(0, 10) : "") : "";
+            var $li = $("<li class='list-group-item'></li>");
+            var $row = $("<div class='d-flex justify-content-between align-items-start'></div>");
+            $row.append($("<span class='fw-medium'>" + escapeHtml(seatLabel) + "</span>"));
+            $row.append($("<span class='text-muted small'>★ " + (r.rating || "-") + "</span>"));
+            $li.append($row);
+            $li.append($("<p class='mb-0 mt-1 small text-secondary'>" + escapeHtml(content) + "</p>"));
+            $li.append($("<span class='small text-muted'>" + escapeHtml(r.nickname || "-") + (dateStr ? " · " + dateStr : "") + "</span>"));
+            $ul.append($li);
+        });
     }
 
     function initSeatReviewCanvas() {
@@ -842,7 +902,24 @@ $(function () {
         });
     });
 
-    bindTabs();
+        bindTabs();
+
+        // 상세 → 좌석 리뷰 작성: 항상 현재 페이지의 performanceId로 이동 (진입 경로 보정)
+        $("#seatReviewWriteLink").on("click", function (e) {
+            var pid = $("#performanceId").val();
+            if (pid) {
+                e.preventDefault();
+                window.location.href = "/performances/" + pid + "/reviews/seats/new";
+            }
+        });
+
+        // URL에 ?tab=seatReview 있으면 해당 탭으로 복원 (좌석 리뷰 작성 후 돌아올 때)
+        var tabParam = new URLSearchParams(window.location.search).get("tab");
+        if (tabParam && ["desc", "review", "seatReview", "chat"].indexOf(tabParam) !== -1) {
+            var $tabBtn = $(".tab-btn[data-tab='" + tabParam + "']");
+            if ($tabBtn.length) $tabBtn.trigger("click");
+        }
+
     loadDetail();
     initOwnerActions();
     ensureReportedStatus();

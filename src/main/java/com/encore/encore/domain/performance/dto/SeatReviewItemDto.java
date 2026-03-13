@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
  * @param seatNumber 좌석 번호 (예: A-1)
  * @param seatType   좌석 등급 (vip, r, s, a 등)
  * @param seatFloor  층
+ * @param venueId    공연장 ID (좌석 소속 공연장 — 배치도·링크 등에 사용)
  * @param createdAt  작성 일시
  */
 @Getter
@@ -30,6 +31,7 @@ public class SeatReviewItemDto {
     private final String seatNumber;
     private final String seatType;
     private final Integer seatFloor;
+    private final Long venueId;
     private final LocalDateTime createdAt;
 
     public SeatReviewItemDto(
@@ -42,6 +44,7 @@ public class SeatReviewItemDto {
         String seatNumber,
         String seatType,
         Integer seatFloor,
+        Long venueId,
         LocalDateTime createdAt
     ) {
         this.reviewId = reviewId;
@@ -53,6 +56,7 @@ public class SeatReviewItemDto {
         this.seatNumber = (seatNumber == null || seatNumber.isBlank()) ? "-" : seatNumber;
         this.seatType = (seatType == null || seatType.isBlank()) ? "-" : seatType;
         this.seatFloor = seatFloor;
+        this.venueId = venueId;
         this.createdAt = createdAt;
     }
 }

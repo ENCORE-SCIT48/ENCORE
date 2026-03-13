@@ -18,11 +18,13 @@
 
 ## 2. 푸터 진입점 (현재)
 
-| 역할 | 메뉴 | 이동 경로 |
+| 역할 | 메뉴 |
+ㅌ 이동 경로 |
 |------|------|-----------|
 | **게스트** | 공연리스트, 공연장, 피드, 로그인 | /performances, /venues, /feed, /auth/login |
 | **유저** | 공연리스트, 공연장, 피드, DM, 채팅 | /performances, /venues, /feed, /dm/list, /chats |
-| **공연자** | 모집글, 공연장, 홈, DM, 채팅 | /posts/performance, /venues, /, /dm/list, /chats |
+| **공연자** | 모집글, 공연장, 홈, DM, 채팅 | /posts/perf
+ormance, /venues, /, /dm/list, /chats |
 | **호스트** | 내 공연장, 대관관리, 홈, DM, 채팅 | /venues/my, /venues/reservations/manage, /, /dm/list, /chats |
 
 ---

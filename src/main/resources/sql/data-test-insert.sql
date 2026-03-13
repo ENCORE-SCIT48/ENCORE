@@ -69,6 +69,8 @@ INSERT INTO seat (venue_id, seat_floor, x_pos, y_pos, seat_number, seat_type, cr
 -- 7. 공연 (performance)
 --   category = 장르(MUSICAL/PLAY/BAND), status = 진행상태(UPCOMING/ENDED 등)
 --   performance_image_url = 공연 포스터/대표 이미지 (NULL 가능, 이미지 넣을 때 UPDATE 사용)
+--   ★ venue_id 필수: 없으면 좌석 리뷰 페이지에서 좌석을 불러올 수 없어 페이지가 동작하지 않음.
+--      기존에 venue_id NULL인 공연이 있으면 sql/data-fix-performance-venue.sql 실행 권장.
 -- -----------------------------------------------------------------------------
 INSERT INTO performance (venue_id, host_creator_id, performer_creator_id, title, description, performance_image_url, recruit_status, capacity, category, status, created_at, updated_at, is_deleted) VALUES
 (1, 1, 1, '테스트 뮤지컬 - 첫공연', '테스트용 뮤지컬 공연입니다.', NULL, 'CLOSED', 80, 'MUSICAL', 'ENDED', NOW(), NOW(), 0),

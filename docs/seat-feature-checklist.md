@@ -119,7 +119,13 @@ GROUP BY venue_id;
    ```sql
    SELECT performance_id, title, venue_id FROM performance WHERE is_deleted = 0;
    ```
-   `venue_id` 가 NULL이면 해당 공연은 좌석 기능 불가. 공연 등록/수정 시 venue를 지정해야 함.
+   `venue_id` 가 NULL이면 해당 공연은 **좌석 리뷰 페이지가 아예 동작하지 않습니다** (좌석 정보를 불러올 수 없음).
+
+   **한 번에 고치기:** `venue_id` 가 NULL인 공연에, 좌석이 있는 공연장을 자동으로 넣는 스크립트 실행:
+   ```text
+   sql/data-fix-performance-venue.sql
+   ```
+   (실행 전에 `data-test-insert.sql` 등으로 venue·seat 데이터가 있어야 함. 실행 후 해당 공연으로 좌석 리뷰 페이지 접속 시 좌석이 뜸.)
 
 2. **해당 공연장에 좌석이 있는지 확인**
    ```sql
@@ -143,3 +149,66 @@ GROUP BY venue_id;
    - `data-test-insert-seats-full.sql` (18곳에 대한 좌석 INSERT)
 
 위 순서로 넣으면, 해당 18곳 공연장을 쓰는 공연에서는 좌석이 정상적으로 표시됩니다.
+
+---
+
+## 6. 전체 검증 (리포지토리 ~ CSS) — "아예 안 먹을 때"
+
+아래를 순서대로 확인하면, 수정 사항이 반영되었는지·환경 문제인지 구분할 수 있습니다.
+
+### 6-1. 백엔드
+
+| 구분 | 확인 내용 |
+|------|-----------|
+| **ReviewRepository** | 좌석 리뷰 조회 메서드에 `EntityGraph(attributePaths = {"user", "seat", "seat.venue"})` 로 seat.venue까지 fetch 되어 있는지 |
+| **PerformanceRepository** | `findDetailById(performanceId)` 가 venue를 left join fetch 하는지 (좌석/공연 상세 조회 시 NPE 방지) |
+| **PerformanceService** | `getSeatsByPerformanceId` 는 `findDetailById` 사용, `createSeatReview` 도 `findDetailById` 로 공연 로드하는지 |
+| **SeatReviewItemDto** | `venueId` 필드가 있고, `toSeatReviewItemDto` 에서 `r.getSeat().getVenue().getVenueId()` 로 채우는지 |
+| **CORS** | `SecurityConfig` 의 `CorsConfiguration` 에 **PATCH** 메서드가 포함되어 있는지 (좌석 리뷰 수정 시 PATCH 사용) |
+
+### 6-2. API 경로·응답
+
+- `GET /api/performances/{id}/seats` → `CommonResponse<List<SeatOptionDto>>` (data에 배열)
+- `GET /api/performances/{id}/seat-reviews/by-seat` → `CommonResponse<List<SeatReviewItemDto>>` (data에 배열, 각 항목에 seatId·venueId 포함)
+- `POST /api/performances/{id}/seat-reviews` → Body: `{ seatId, rating, content }`, 로그인·관람객(ROLE_USER)만 가능
+- `PATCH /api/performances/{id}/seat-reviews/{reviewId}` → Body: `{ rating, content }` (seatId는 수정 시 변경 불가)
+
+### 6-3. 프론트 (공연 상세 — 좌석 리뷰 탭)
+
+- **detail.js**  
+  - `loadSeatReviewMap()` 에서 `/seats`, `/seat-reviews/by-seat` 호출 시 **xhrFields: { withCredentials: true }** 사용하는지  
+  - 응답은 `res?.data` 가 배열인지 확인 후 사용 (`Array.isArray(res?.data) ? res.data : []`)  
+  - 좌석 로드 성공 시 `#seatReviewEmpty` 를 **hide** 하는지  
+  - by-seat 실패 시에도 배치도만 그리도록 **initSeatReviewCanvas(); drawSeatReviewCanvas();** 호출하는지  
+
+### 6-4. 프론트 (좌석 리뷰 작성/수정)
+
+- **seatReviewWrite.js**  
+  - `performanceId` 는 hidden `#performanceId` 우선, 없으면 URL `/performances/(\d+)/` 에서 추출  
+  - 모든 API 호출에 **xhrFields: { withCredentials: true }**  
+  - 제출 시 `JSON.stringify({ seatId: Number(seatId), rating, content })`  
+- **seatReviewWrite.html**  
+  - `th:value="${performanceId}"`, `th:value="${reviewId}"` 로 hidden 전달  
+- **PerformancePageController**  
+  - `GET /performances/{id}/reviews/seats/new` → `performance/seatReviewWrite`, model에 `performanceId`, `reviewId=0`  
+  - `GET /performances/{id}/reviews/seats/{reviewId}/edit` → 동일 템플릿, `reviewId` 전달  
+
+### 6-5. CSS
+
+- **reviewWrite.css** (좌석 리뷰 작성 페이지)  
+  - `.back-btn` 이 `z-index: 2`, 클릭 가능 영역 확보  
+  - `.star` 버튼 클릭/호버 시 `.is-on`, 색상 변경  
+  - `.seat-map-wrap`, `.seat-floor-tabs`, `.seat-canvas-wrapper` 로 배치도 영역 구성  
+- **detail.css** (공연 상세 좌석 리뷰 탭)  
+  - `.seat-review-map-wrap`, `.seat-review-tooltip` 등으로 배치도·툴팁 스타일 정의  
+
+### 6-6. 브라우저에서 "안 먹을 때" 확인
+
+1. **F12 → Network**  
+   - `GET /api/performances/{id}/seats` → Status 200, 응답 body 의 `data` 가 배열인지  
+   - `GET /api/performances/{id}/seat-reviews/by-seat` → Status 200, `data` 배열  
+   - 작성/수정 시 `POST`/`PATCH` 가 **CORS preflight(OPTIONS)** 다음에 실제 요청이 가는지, 403/404가 아닌지  
+2. **Console**  
+   - `[SeatReviewWrite] loadSeats failed` 등 에러 로그 여부  
+3. **DB**  
+   - 위 2번·5번의 SQL로 해당 공연의 `venue_id`, 해당 venue의 seat 개수·x_pos/y_pos 확인  

@@ -48,12 +48,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     /**
      * [설명] 특정 공연의 좌석 리뷰만 조회 (seat IS NOT NULL, 삭제 제외, 최신순)
+     * seat.venue까지 fetch 해서 DTO에 venueId 채우기 위해 사용.
      *
      * @param performanceId 공연 ID
      * @param pageable      페이징
      * @return 좌석 리뷰 페이지
      */
-    @EntityGraph(attributePaths = {"user", "seat"})
+    @EntityGraph(attributePaths = {"user", "seat", "seat.venue"})
     Page<Review> findByPerformance_PerformanceIdAndSeatIsNotNullAndIsDeletedFalseOrderByCreatedAtDesc(
         Long performanceId,
         Pageable pageable
